@@ -10,7 +10,7 @@ import AuthBase from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
@@ -23,8 +23,8 @@ defineProps<{
     <AuthBase
         title="Log in to your account"
         description="Enter your email and password below to log in"
+        page-title="Log in"
     >
-        <Head title="Log in" />
 
         <div
             v-if="status"

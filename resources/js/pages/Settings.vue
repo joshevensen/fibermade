@@ -24,18 +24,9 @@ import {
 import { Input } from '@/components/lib/input';
 import { Label } from '@/components/lib/label';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { edit } from '@/routes/profile';
-import { type BreadcrumbItem } from '@/types';
-import { Form, Head, usePage } from '@inertiajs/vue3';
+import { Form, usePage } from '@inertiajs/vue3';
 import { Monitor, Moon, Sun } from 'lucide-vue-next';
 import { useTemplateRef } from 'vue';
-
-const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Settings',
-        href: edit().url,
-    },
-];
 
 const page = usePage();
 const user = page.props.auth.user;
@@ -52,8 +43,7 @@ const passwordInput = useTemplateRef('passwordInput');
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Settings" />
+    <AppLayout page-title="Settings">
 
         <div class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-4">
             <!-- Profile Information Card -->

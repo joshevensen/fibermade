@@ -8,15 +8,17 @@ import {
     CardTitle,
 } from '@/components/lib/card';
 import { home } from '@/routes';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
 
 defineProps<{
     title?: string;
     description?: string;
+    pageTitle?: string;
 }>();
 </script>
 
 <template>
+    <Head v-if="pageTitle" :title="pageTitle" />
     <div
         class="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10"
     >

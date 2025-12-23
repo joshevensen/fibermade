@@ -6,6 +6,7 @@ import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
+import ConfirmationService from 'primevue/confirmationservice';
 import 'primeicons/primeicons.css';
 import { initializeTheme } from './composables/useAppearance';
 
@@ -26,6 +27,7 @@ createInertiaApp({
                     preset: Aura,
                 },
             })
+            .use(ConfirmationService)
             .mount(el);
     },
     progress: {

@@ -200,15 +200,6 @@ Create PrimeVue wrapper components in `resources/js/components/ui/` directory. U
 - ✅ Components styled with Tailwind
 - ✅ TypeScript types defined for all components
 
-### Testing Checklist
-- [ ] All components can be imported correctly
-- [ ] Components render without errors
-- [ ] Components follow Button component patterns
-- [ ] Styling matches design expectations
-- [ ] TypeScript types are correct (no type errors)
-- [ ] Icon component works correctly
-- [ ] Icon component can be used with other components
-
 ---
 
 ## Phase 4: Migrate from Reka to PrimeVue
@@ -339,16 +330,6 @@ Create PrimeVue wrapper components in `resources/js/components/ui/` directory. U
 - ✅ All functionality works as expected
 
 ### Testing Checklist
-- [ ] All pages render without errors
-- [ ] All forms submit correctly
-- [ ] All dialogs open/close properly
-- [ ] All dropdown menus work
-- [ ] Sidebar collapses/expands correctly
-- [ ] Icons display correctly
-- [ ] Dark mode works
-- [ ] Responsive design works
-- [ ] No console errors
-- [ ] All tests pass
 - [ ] Build succeeds
 - [ ] Code is formatted and linted
 
@@ -394,16 +375,6 @@ Create PrimeVue wrapper components in `resources/js/components/ui/` directory. U
 - ✅ Wrapper utilities/composables created (if needed)
 - ✅ Documentation for usage patterns
 - ✅ Tooltips and toasts integrated into application
-
-### Testing Checklist
-- [ ] Tooltip directive works on various elements
-- [ ] Tooltips display correctly
-- [ ] Tooltips work with dark mode
-- [ ] Toast service can be called from anywhere
-- [ ] All toast types work: success, error, info, warn
-- [ ] Toasts display correctly
-- [ ] Toasts work with dark mode
-- [ ] Wrapper utilities work as expected
 
 ---
 
@@ -471,22 +442,6 @@ Create PrimeVue wrapper components in `resources/js/components/ui/` directory. U
 - ✅ Components properly exported via index.ts files
 - ✅ TypeScript types defined
 - ✅ Documentation for usage patterns
-
-### Testing Checklist
-- [ ] Form component can be imported: `import { Form } from '@/components/ui/form'`
-- [ ] FormField component can be imported: `import { FormField } from '@/components/ui/form-field'`
-- [ ] Form renders without errors
-- [ ] FormField renders without errors
-- [ ] Zod resolver works correctly
-- [ ] Validation triggers on blur
-- [ ] Validation triggers on submit
-- [ ] Validation does not trigger on value update
-- [ ] Form state management works correctly
-- [ ] Error messages display correctly
-- [ ] Form submission works correctly
-- [ ] TypeScript types are correct (no type errors)
-- [ ] Works with PrimeVue form components (InputText, Password, etc.)
-- [ ] Works with custom/non-PrimeVue components
 
 ---
 

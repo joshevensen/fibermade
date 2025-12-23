@@ -8,15 +8,15 @@ import { Spinner } from '@/components/lib/spinner';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { Form, Head } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
 </script>
 
 <template>
     <AuthBase
         title="Create an account"
         description="Enter your details below to create your account"
+        page-title="Register"
     >
-        <Head title="Register" />
 
         <Form
             v-bind="store.form()"

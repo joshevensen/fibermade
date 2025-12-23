@@ -12,20 +12,24 @@ import { SidebarInset, SidebarProvider } from '@/components/lib/sidebar';
 import { SidebarTrigger } from '@/components/lib/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
-import { Link } from '@inertiajs/vue3';
+import { Link, Head } from '@inertiajs/vue3';
+import ConfirmPopup from 'primevue/confirmpopup';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
+    pageTitle?: string;
 }
 
 withDefaults(defineProps<Props>(), {
     breadcrumbs: () => [],
+    pageTitle: undefined,
 });
 
 const isOpen = usePage().props.sidebarOpen;
 </script>
 
 <template>
+    <Head v-if="pageTitle" :title="pageTitle" />
     <SidebarProvider :default-open="isOpen">
         <AppSidebar />
         <SidebarInset class="overflow-x-hidden">
@@ -70,5 +74,6 @@ const isOpen = usePage().props.sidebarOpen;
             </header>
             <slot />
         </SidebarInset>
+        <ConfirmPopup />
     </SidebarProvider>
 </template>

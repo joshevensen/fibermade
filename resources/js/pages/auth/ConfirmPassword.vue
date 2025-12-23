@@ -6,15 +6,15 @@ import { Label } from '@/components/lib/label';
 import { Spinner } from '@/components/lib/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { store } from '@/routes/password/confirm';
-import { Form, Head } from '@inertiajs/vue3';
+import { Form } from '@inertiajs/vue3';
 </script>
 
 <template>
     <AuthLayout
         title="Confirm your password"
         description="This is a secure area of the application. Please confirm your password before continuing."
+        page-title="Confirm password"
     >
-        <Head title="Confirm password" />
 
         <Form
             v-bind="store.form()"

@@ -38,6 +38,50 @@ All components follow this pattern:
 
 See [`UiButton.vue`](./UiButton.vue) for a complete example of a PrimeVue wrapper component.
 
+### Example: UiTabs Component
+
+The `UiTabs` component uses a simplified API with a `tabs` prop to define tab headers. It supports two variants:
+
+**Default variant (with content panels):**
+```vue
+<script setup lang="ts">
+import UiTabs from '@/components/ui/UiTabs.vue';
+import UiTabPanel from '@/components/ui/UiTabPanel.vue';
+
+const tabs = [
+    { value: '0', label: 'Tab 1', icon: 'pi pi-home' },
+    { value: '1', label: 'Tab 2', disabled: true },
+    { value: '2', label: 'Tab 3' },
+];
+</script>
+
+<template>
+    <UiTabs :tabs="tabs" value="0">
+        <UiTabPanel value="0">Content 1</UiTabPanel>
+        <UiTabPanel value="1">Content 2</UiTabPanel>
+        <UiTabPanel value="2">Content 3</UiTabPanel>
+    </UiTabs>
+</template>
+```
+
+**Menu variant (navigation menu without panels):**
+```vue
+<script setup lang="ts">
+import UiTabs from '@/components/ui/UiTabs.vue';
+import { dashboard } from '@/routes';
+
+const tabs = [
+    { value: '/dashboard', label: 'Dashboard', icon: 'pi pi-home', href: dashboard() },
+    { value: '/transactions', label: 'Transactions', icon: 'pi pi-credit-card', href: '/transactions' },
+    { value: '/products', label: 'Products', icon: 'pi pi-box', href: '/products' },
+];
+</script>
+
+<template>
+    <UiTabs variant="menu" :tabs="tabs" value="/dashboard" />
+</template>
+```
+
 ### Usage
 
 Import components directly:
@@ -56,7 +100,53 @@ import UiButton from '@/components/ui/UiButton.vue';
 
 ### Available Components
 
-- **UiButton** (`UiButton.vue`) - PrimeVue Button wrapper with variants, sizes, and custom styling support
+#### Form Components
+- **UiCheckbox** (`UiCheckbox.vue`) - PrimeVue Checkbox wrapper
+- **UiDatePicker** (`UiDatePicker.vue`) - PrimeVue DatePicker wrapper
+- **UiEditor** (`UiEditor.vue`) - PrimeVue Editor wrapper (rich text editor)
+- **UiInputGroup** (`UiInputGroup.vue`) - PrimeVue InputGroup wrapper
+- **UiInputNumber** (`UiInputNumber.vue`) - PrimeVue InputNumber wrapper
+- **UiInputText** (`UiInputText.vue`) - PrimeVue InputText wrapper
+- **UiMultiSelect** (`UiMultiSelect.vue`) - PrimeVue MultiSelect wrapper
+- **UiPassword** (`UiPassword.vue`) - PrimeVue Password wrapper
+- **UiRadioButton** (`UiRadioButton.vue`) - PrimeVue RadioButton wrapper
+- **UiSelect** (`UiSelect.vue`) - PrimeVue Select wrapper
+- **UiSelectButton** (`UiSelectButton.vue`) - PrimeVue SelectButton wrapper
+- **UiTextarea** (`UiTextarea.vue`) - PrimeVue Textarea wrapper
+- **UiToggleSwitch** (`UiToggleSwitch.vue`) - PrimeVue ToggleSwitch wrapper
+
+#### Data Display Components
+- **UiCard** (`UiCard.vue`) - PrimeVue Card wrapper
+- **UiDataTable** (`UiDataTable.vue`) - PrimeVue DataTable wrapper
+- **UiDataView** (`UiDataView.vue`) - PrimeVue DataView wrapper
+- **UiDivider** (`UiDivider.vue`) - PrimeVue Divider wrapper
+- **UiPanel** (`UiPanel.vue`) - PrimeVue Panel wrapper
+- **UiTabs** (`UiTabs.vue`) - PrimeVue Tabs wrapper (simplified API with `tabs` prop)
+- **UiTabPanel** (`UiTabPanel.vue`) - PrimeVue TabPanel wrapper (used with UiTabs)
+
+#### Overlay Components
+- **UiConfirmPopup** (`UiConfirmPopup.vue`) - PrimeVue ConfirmPopup wrapper
+- **UiDialog** (`UiDialog.vue`) - PrimeVue Dialog wrapper
+- **UiDrawer** (`UiDrawer.vue`) - PrimeVue Drawer wrapper
+
+#### Navigation Components
+- **UiBreadcrumb** (`UiBreadcrumb.vue`) - PrimeVue Breadcrumb wrapper
+- **UiMenu** (`UiMenu.vue`) - PrimeVue Menu wrapper
+
+#### File Upload
+- **UiFileUpload** (`UiFileUpload.vue`) - PrimeVue FileUpload wrapper
+
+#### Feedback Components
+- **UiMessage** (`UiMessage.vue`) - PrimeVue Message wrapper
+
+#### Display Components
+- **UiAvatar** (`UiAvatar.vue`) - PrimeVue Avatar wrapper
+- **UiChip** (`UiChip.vue`) - PrimeVue Chip wrapper
+- **UiProgressSpinner** (`UiProgressSpinner.vue`) - PrimeVue ProgressSpinner wrapper
+- **UiTag** (`UiTag.vue`) - PrimeVue Tag wrapper
+
+#### Icon Component
+- **UiIcon** (`UiIcon.vue`) - PrimeIcons wrapper component (special case - wraps CSS classes)
 
 ## Guidelines for Creating New Components
 
