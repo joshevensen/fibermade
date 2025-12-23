@@ -7,9 +7,9 @@ import {
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
-import { SidebarTrigger } from '@/components/ui/sidebar';
+} from '@/components/lib/breadcrumb';
+import { SidebarInset, SidebarProvider } from '@/components/lib/sidebar';
+import { SidebarTrigger } from '@/components/lib/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import { Link } from '@inertiajs/vue3';

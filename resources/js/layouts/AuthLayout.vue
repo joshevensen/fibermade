@@ -6,7 +6,7 @@ import {
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
+} from '@/components/lib/card';
 import { home } from '@/routes';
 import { Link } from '@inertiajs/vue3';
 

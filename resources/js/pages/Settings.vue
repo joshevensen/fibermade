@@ -3,14 +3,14 @@ import ProfileController from '@/actions/App/Http/Controllers/ProfileController'
 import PasswordController from '@/actions/App/Http/Controllers/PasswordController';
 import { useAppearance } from '@/composables/useAppearance';
 import InputError from '@/components/InputError.vue';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/lib/button';
 import {
     Card,
     CardContent,
     CardDescription,
     CardHeader,
     CardTitle,
-} from '@/components/ui/card';
+} from '@/components/lib/card';
 import {
     Dialog,
     DialogClose,
@@ -20,9 +20,9 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from '@/components/lib/dialog';
+import { Input } from '@/components/lib/input';
+import { Label } from '@/components/lib/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { edit } from '@/routes/profile';
 import { type BreadcrumbItem } from '@/types';
