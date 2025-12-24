@@ -148,6 +148,112 @@ import UiButton from '@/components/ui/UiButton.vue';
 #### Icon Component
 - **UiIcon** (`UiIcon.vue`) - PrimeIcons wrapper component (special case - wraps CSS classes)
 
+## Tooltips
+
+PrimeVue Tooltip is implemented as a directive, not a component. The directive is registered globally in `resources/js/app.ts`.
+
+### Usage
+
+Use the `v-tooltip` directive directly on any element:
+
+```vue
+<template>
+  <!-- Basic tooltip -->
+  <button v-tooltip="'Tooltip text'">Hover me</button>
+  
+  <!-- Tooltip with position -->
+  <button v-tooltip.top="'Top tooltip'">Top</button>
+  <button v-tooltip.bottom="'Bottom tooltip'">Bottom</button>
+  <button v-tooltip.left="'Left tooltip'">Left</button>
+  <button v-tooltip.right="'Right tooltip'">Right</button>
+  
+  <!-- Conditional tooltip -->
+  <button v-tooltip="shouldShow ? 'Tooltip text' : null">Conditional</button>
+</template>
+```
+
+### Migration from reka-ui Tooltip
+
+The old reka-ui Tooltip component pattern:
+```vue
+<Tooltip>
+  <TooltipTrigger as-child>
+    <button>Hover me</button>
+  </TooltipTrigger>
+  <TooltipContent>Tooltip text</TooltipContent>
+</Tooltip>
+```
+
+Should be replaced with:
+```vue
+<button v-tooltip="'Tooltip text'">Hover me</button>
+```
+
+## Toast Notifications
+
+PrimeVue Toast is implemented using a service and composable pattern. The Toast component is added to `AppLayout.vue` and the `useToast` composable provides helper functions.
+
+### Usage
+
+Import and use the `useToast` composable:
+
+```vue
+<script setup lang="ts">
+import { useToast } from '@/composables/useToast';
+
+const { showSuccess, showError, showInfo, showWarn } = useToast();
+
+function handleSuccess() {
+  showSuccess('Operation completed successfully');
+}
+
+function handleError() {
+  showError('Something went wrong', 'Error');
+}
+
+function handleInfo() {
+  showInfo('Here is some information');
+}
+
+function handleWarning() {
+  showWarn('Please be careful');
+}
+</script>
+```
+
+### Toast Helper Functions
+
+The `useToast` composable provides four helper functions:
+
+- `showSuccess(message: string, summary?: string)` - Shows a success toast (3 second duration)
+- `showError(message: string, summary?: string)` - Shows an error toast (5 second duration)
+- `showInfo(message: string, summary?: string)` - Shows an info toast (3 second duration)
+- `showWarn(message: string, summary?: string)` - Shows a warning toast (4 second duration)
+
+All functions accept an optional `summary` parameter. If not provided, default summaries are used ('Success', 'Error', 'Information', 'Warning').
+
+### Advanced Usage
+
+For more control, you can access the toast instance directly:
+
+```vue
+<script setup lang="ts">
+import { useToast } from '@/composables/useToast';
+
+const { toast } = useToast();
+
+function showCustomToast() {
+  toast.add({
+    severity: 'info',
+    summary: 'Custom Summary',
+    detail: 'Custom message',
+    life: 5000,
+    sticky: false,
+  });
+}
+</script>
+```
+
 ## Guidelines for Creating New Components
 
 When creating new PrimeVue wrapper components:

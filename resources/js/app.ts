@@ -7,6 +7,8 @@ import { createApp, h } from 'vue';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 import 'primeicons/primeicons.css';
 import { initializeTheme } from './composables/useAppearance';
 
@@ -28,6 +30,8 @@ createInertiaApp({
                 },
             })
             .use(ConfirmationService)
+            .use(ToastService)
+            .directive('tooltip', Tooltip)
             .mount(el);
     },
     progress: {
