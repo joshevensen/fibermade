@@ -104,6 +104,8 @@ import UiButton from '@/components/ui/UiButton.vue';
 - **UiCheckbox** (`UiCheckbox.vue`) - PrimeVue Checkbox wrapper
 - **UiDatePicker** (`UiDatePicker.vue`) - PrimeVue DatePicker wrapper
 - **UiEditor** (`UiEditor.vue`) - PrimeVue Editor wrapper (rich text editor)
+- **UiForm** (`UiForm.vue`) - PrimeVue Form wrapper for client-side validation
+- **UiFormField** (`UiFormField.vue`) - PrimeVue FormField wrapper for flexible field binding
 - **UiInputGroup** (`UiInputGroup.vue`) - PrimeVue InputGroup wrapper
 - **UiInputNumber** (`UiInputNumber.vue`) - PrimeVue InputNumber wrapper
 - **UiInputText** (`UiInputText.vue`) - PrimeVue InputText wrapper
@@ -253,6 +255,220 @@ function showCustomToast() {
 }
 </script>
 ```
+
+## Forms
+
+PrimeVue Forms provides client-side validation using Zod schemas. When using Inertia.js, you can combine PrimeVue Forms for **client-side validation** with Inertia Forms for **server-side submission** (hybrid approach).
+
+### Hybrid Approach
+
+- **PrimeVue Forms**: Handles client-side validation (immediate feedback, better UX)
+- **Inertia Forms**: Handles server-side submission (server validation, CSRF tokens, etc.)
+- Both validation errors can be displayed (client-side via UiMessage, server-side via InputError)
+
+### Usage
+
+**Basic form with client-side validation and Inertia submission:**
+
+```vue
+<script setup lang="ts">
+import { useForm } from '@inertiajs/vue3';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiInputText from '@/components/ui/UiInputText.vue';
+import UiMessage from '@/components/ui/UiMessage.vue';
+import InputError from '@/components/InputError.vue';
+import { zodResolver } from '@/lib/zodResolver';
+import { z } from 'zod';
+
+// Zod schema for client-side validation
+const schema = z.object({
+  name: z.string().min(1, { message: 'Name is required.' }),
+  email: z.string().email({ message: 'Invalid email address.' }),
+});
+
+const resolver = zodResolver(schema);
+
+const initialValues = {
+  name: '',
+  email: '',
+};
+
+// Inertia form for server-side submission
+const form = useForm({
+  name: '',
+  email: '',
+});
+
+// Handle PrimeVue Form submission (client-side validation)
+function onClientSubmit({ valid, values }) {
+  if (valid) {
+    // Update Inertia form with validated values
+    form.name = values.name;
+    form.email = values.email;
+    // Submit to server via Inertia
+    form.post('/users');
+  }
+}
+</script>
+
+<template>
+  <UiForm
+    :initialValues="initialValues"
+    :resolver="resolver"
+    @submit="onClientSubmit"
+    class="flex flex-col gap-4"
+  >
+    <UiFormField v-slot="$field" name="name" class="flex flex-col gap-1">
+      <UiInputText
+        type="text"
+        placeholder="Name"
+        v-bind="$field.props"
+      />
+      <!-- Client-side validation error -->
+      <UiMessage
+        v-if="$field?.invalid"
+        severity="error"
+        size="small"
+        variant="simple"
+      >
+        {{ $field.error?.message }}
+      </UiMessage>
+      <!-- Server-side validation error (from Inertia) -->
+      <InputError :message="form.errors.name" />
+    </UiFormField>
+    
+    <UiFormField v-slot="$field" name="email" class="flex flex-col gap-1">
+      <UiInputText
+        type="email"
+        placeholder="Email"
+        v-bind="$field.props"
+      />
+      <!-- Client-side validation error -->
+      <UiMessage
+        v-if="$field?.invalid"
+        severity="error"
+        size="small"
+        variant="simple"
+      >
+        {{ $field.error?.message }}
+      </UiMessage>
+      <!-- Server-side validation error (from Inertia) -->
+      <InputError :message="form.errors.email" />
+    </UiFormField>
+
+    <button type="submit" :disabled="form.processing">
+      {{ form.processing ? 'Submitting...' : 'Submit' }}
+    </button>
+  </UiForm>
+</template>
+```
+
+**Using PrimeVue components directly (without FormField wrapper):**
+
+PrimeVue components support the `name` prop directly when inside a PrimeVue Form:
+
+```vue
+<script setup lang="ts">
+import UiForm from '@/components/ui/UiForm.vue';
+import UiInputText from '@/components/ui/UiInputText.vue';
+import UiMessage from '@/components/ui/UiMessage.vue';
+import { zodResolver } from '@/lib/zodResolver';
+import { z } from 'zod';
+
+const schema = z.object({
+  username: z.string().min(1, { message: 'Username is required.' }),
+});
+
+const resolver = zodResolver(schema);
+const initialValues = { username: '' };
+
+function onSubmit({ valid, values }) {
+  if (valid) {
+    // Handle submission
+  }
+}
+</script>
+
+<template>
+  <UiForm
+    v-slot="$form"
+    :initialValues="initialValues"
+    :resolver="resolver"
+    @submit="onSubmit"
+    class="flex flex-col gap-4"
+  >
+    <div class="flex flex-col gap-1">
+      <UiInputText name="username" placeholder="Username" />
+      <UiMessage
+        v-if="$form.username?.invalid"
+        severity="error"
+        size="small"
+        variant="simple"
+      >
+        {{ $form.username.error?.message }}
+      </UiMessage>
+    </div>
+  </UiForm>
+</template>
+```
+
+### Validation Triggers
+
+UiForm supports flexible validation triggers (defaults shown):
+
+- `validateOnBlur: true` - Validate when field loses focus
+- `validateOnSubmit: true` - Validate on form submission
+- `validateOnValueUpdate: false` - Don't validate on every keystroke
+- `validateOnMount: false` - Don't validate on component mount
+
+These can be overridden at the form level or per field:
+
+```vue
+<!-- Form-level validation triggers -->
+<UiForm
+  :validateOnBlur="true"
+  :validateOnSubmit="true"
+  :validateOnValueUpdate="false"
+  :validateOnMount="false"
+  ...
+>
+
+<!-- Field-level override -->
+<UiFormField
+  name="email"
+  :validateOnValueUpdate="true"
+  ...
+>
+```
+
+### Individual Field Resolvers
+
+Each field can have its own resolver:
+
+```vue
+<script setup lang="ts">
+import { zodResolver } from '@/lib/zodResolver';
+import { z } from 'zod';
+
+const emailResolver = zodResolver(z.string().email({ message: 'Invalid email.' }));
+</script>
+
+<template>
+  <UiFormField
+    name="email"
+    :resolver="emailResolver"
+    ...
+  >
+    ...
+  </UiFormField>
+</template>
+```
+
+### Available Components
+
+- **UiForm** (`UiForm.vue`) - PrimeVue Form wrapper for client-side validation
+- **UiFormField** (`UiFormField.vue`) - PrimeVue FormField wrapper for flexible field binding
 
 ## Guidelines for Creating New Components
 

@@ -298,27 +298,6 @@ Create PrimeVue wrapper components in `resources/js/components/ui/` directory. U
 - Verify no build errors
 - Test SSR build if applicable: `npm run build:ssr`
 
-#### 4.11 Testing
-- Run test suite: `php artisan test`
-- Fix any broken tests due to component changes
-- Manually test all pages:
-  - [ ] Settings page (forms, dialogs)
-  - [ ] Dashboard page
-  - [ ] Welcome page
-  - [ ] Login page
-  - [ ] Register page
-  - [ ] Forgot password page
-  - [ ] Confirm password page
-  - [ ] Reset password page
-- Test functionality:
-  - [ ] Form submissions work
-  - [ ] Dialog modals open/close
-  - [ ] Dropdown menus work
-  - [ ] Sidebar functionality
-  - [ ] Navigation works
-  - [ ] Dark mode works
-  - [ ] Responsive behavior
-
 ### Deliverables
 - ✅ All reka-ui components replaced with PrimeVue
 - ✅ All Lucide icons replaced with PrimeIcons

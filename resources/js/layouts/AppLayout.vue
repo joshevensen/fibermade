@@ -10,8 +10,6 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-    breadcrumbs: () => [],
-    pageTitle: undefined,
 });
 </script>
 
