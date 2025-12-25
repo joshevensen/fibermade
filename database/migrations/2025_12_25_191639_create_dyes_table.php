@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('integrations', function (Blueprint $table) {
+        Schema::create('dyes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('type');
-            $table->text('credentials'); // encrypted JSON
-            $table->json('settings')->nullable();
-            $table->boolean('active')->default(true);
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
+            $table->string('name');
+            $table->text('notes')->nullable();
+            $table->boolean('does_bleed')->default(false);
+            $table->boolean('do_like')->default(false);
             $table->softDeletes();
             $table->timestamps();
 
-            $table->index('type');
-            $table->index('active');
+            $table->index('does_bleed');
+            $table->index('do_like');
         });
     }
 
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('integrations');
+        Schema::dropIfExists('dyes');
     }
 };

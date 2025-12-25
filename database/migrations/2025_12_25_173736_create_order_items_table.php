@@ -17,9 +17,14 @@ return new class extends Migration
             $table->foreignId('colorway_id')->constrained()->cascadeOnDelete();
             $table->foreignId('base_id')->constrained()->cascadeOnDelete();
             $table->integer('quantity');
-            $table->decimal('price', 10, 2)->nullable();
-            $table->foreignId('inventory_id')->nullable()->constrained()->nullOnDelete();
+            $table->decimal('unit_price', 10, 2)->nullable();
+            $table->decimal('line_total', 10, 2)->nullable();
+            $table->softDeletes();
             $table->timestamps();
+
+            $table->index('colorway_id');
+            $table->index('base_id');
+            $table->index(['colorway_id', 'base_id']);
         });
     }
 

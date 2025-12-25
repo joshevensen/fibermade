@@ -13,14 +13,27 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->enum('type', ['wholesale', 'retail', 'show']);
+            $table->string('type');
             $table->string('status');
             $table->foreignId('account_id')->nullable()->constrained()->nullOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('shopify_order_id')->nullable();
             $table->date('order_date');
+            $table->decimal('subtotal_amount', 10, 2)->nullable();
+            $table->decimal('shipping_amount', 10, 2)->nullable();
+            $table->decimal('discount_amount', 10, 2)->nullable();
+            $table->decimal('tax_amount', 10, 2)->nullable();
+            $table->decimal('total_amount', 10, 2)->nullable();
             $table->text('notes')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->softDeletes();
             $table->timestamps();
+
+            $table->index('type');
+            $table->index('status');
+            $table->index('order_date');
+            $table->index('shopify_order_id');
         });
     }
 

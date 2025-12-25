@@ -11,22 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('colorways', function (Blueprint $table) {
+        Schema::create('media', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->string('slug');
-            $table->text('description')->nullable();
-            $table->string('status')->default('active');
-            $table->string('shopify_product_id')->nullable();
+            $table->string('mediable_type');
+            $table->unsignedBigInteger('mediable_id');
+            $table->string('file_path');
+            $table->string('file_name');
+            $table->string('mime_type')->nullable();
+            $table->unsignedBigInteger('size')->nullable();
+            $table->boolean('is_primary')->default(false);
+            $table->json('metadata')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
 
-            $table->unique(['account_id', 'slug']);
-            $table->index('status');
-            $table->index('shopify_product_id');
+            $table->index(['mediable_type', 'mediable_id']);
         });
     }
 
@@ -35,6 +35,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('colorways');
+        Schema::dropIfExists('media');
     }
 };

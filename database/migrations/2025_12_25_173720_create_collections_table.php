@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['account_id', 'slug']);

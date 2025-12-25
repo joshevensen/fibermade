@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('integration_id')->constrained()->cascadeOnDelete();
             $table->string('loggable_type');
             $table->unsignedBigInteger('loggable_id');
-            $table->enum('status', ['success', 'error', 'warning']);
+            $table->string('status');
             $table->text('message');
             $table->json('metadata')->nullable();
             $table->timestamp('synced_at')->nullable();

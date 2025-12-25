@@ -17,10 +17,25 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
-            $table->enum('status', ['active', 'retired'])->default('active');
+            $table->string('status')->default('active');
+            $table->string('weight')->nullable();
+            $table->text('descriptor')->nullable();
+            $table->integer('size')->nullable();
+            $table->decimal('cost', 10, 2)->nullable();
+            $table->decimal('retail_price', 10, 2)->nullable();
+            $table->decimal('wool_percent', 5, 2)->nullable();
+            $table->decimal('nylon_percent', 5, 2)->nullable();
+            $table->decimal('alpaca_percent', 5, 2)->nullable();
+            $table->decimal('yak_percent', 5, 2)->nullable();
+            $table->decimal('camel_percent', 5, 2)->nullable();
+            $table->decimal('cotton_percent', 5, 2)->nullable();
+            $table->decimal('bamboo_percent', 5, 2)->nullable();
+            $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['account_id', 'slug']);
+            $table->index('status');
+            $table->index('weight');
         });
     }
 

@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('inventories', function (Blueprint $table) {
+        Schema::create('colorway_dye', function (Blueprint $table) {
             $table->id();
             $table->foreignId('colorway_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('base_id')->constrained()->cascadeOnDelete();
-            $table->integer('quantity')->default(0);
-            $table->string('shopify_variant_id')->nullable();
+            $table->foreignId('dye_id')->constrained()->cascadeOnDelete();
+            $table->integer('dry_weight')->nullable();
+            $table->integer('concentration')->nullable();
+            $table->integer('wet_amount')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
 
-            $table->unique(['colorway_id', 'base_id']);
+            $table->unique(['colorway_id', 'dye_id']);
         });
     }
 
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('inventories');
+        Schema::dropIfExists('colorway_dye');
     }
 };

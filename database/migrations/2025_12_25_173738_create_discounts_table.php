@@ -13,21 +13,22 @@ return new class extends Migration
     {
         Schema::create('discounts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->enum('type', [
-                'order_threshold_free_shipping',
-                'quantity_per_skein',
-                'percentage',
-                'manual_free_shipping',
-                'time_boxed',
-            ]);
+            $table->string('type');
+            $table->string('code');
             $table->json('parameters');
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
-            $table->boolean('active')->default(true);
+            $table->boolean('is_active')->default(true);
             $table->string('shopify_discount_id')->nullable();
+            $table->softDeletes();
             $table->timestamps();
+
+            $table->unique(['account_id', 'code']);
+            $table->index('type');
+            $table->index('is_active');
+            $table->index(['starts_at', 'ends_at']);
         });
     }
 
