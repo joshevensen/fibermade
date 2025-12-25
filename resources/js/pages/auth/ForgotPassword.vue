@@ -1,18 +1,47 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
+import { watch } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiInputText from '@/components/ui/UiInputText.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/lib/button';
-import { Input } from '@/components/lib/input';
-import { Label } from '@/components/lib/label';
-import { Spinner } from '@/components/lib/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
-import { Form } from '@inertiajs/vue3';
+import { useToast } from '@/composables/useToast';
 
-defineProps<{
+const props = defineProps<{
     status?: string;
 }>();
+
+const { showSuccess } = useToast();
+
+// Show status message as toast when it changes
+watch(
+    () => props.status,
+    (status) => {
+        if (status) showSuccess(status);
+    },
+    { immediate: true },
+);
+
+// Inertia form for server submission
+const form = useForm({
+    email: '',
+});
+
+// Handle PrimeVue Form submission (client-side validation)
+function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
+    if (valid) {
+        Object.assign(form, values);
+        form.submit(email(), {
+            onSuccess: () => {
+                showSuccess('We have emailed your password reset link!');
+            },
+        });
+    }
+}
 </script>
 
 <template>
@@ -21,45 +50,36 @@ defineProps<{
         description="Enter your email to receive a password reset link"
         page-title="Forgot password"
     >
-
-        <div
-            v-if="status"
-            class="mb-4 text-center text-sm font-medium text-green-600"
-        >
-            {{ status }}
-        </div>
-
-        <div class="space-y-6">
-            <Form v-bind="email.form()" v-slot="{ errors, processing }">
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input
-                        id="email"
+        <UiForm :initialValues="{ email: '' }" @submit="onSubmit">
+            <UiFormField
+                name="email"
+                label="Email address"
+                :serverError="form.errors.email"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiInputText
+                        v-bind="fieldProps"
+                        :id="id"
                         type="email"
-                        name="email"
                         autocomplete="off"
                         autofocus
                         placeholder="email@example.com"
                     />
-                    <InputError :message="errors.email" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <div class="my-6 flex items-center justify-start">
-                    <Button
-                        class="w-full"
-                        :disabled="processing"
-                        data-test="email-password-reset-link-button"
-                    >
-                        <Spinner v-if="processing" />
-                        Email password reset link
-                    </Button>
-                </div>
-            </Form>
+            <UiButton
+                type="submit"
+                :loading="form.processing"
+                data-test="email-password-reset-link-button"
+            >
+                Email password reset link
+            </UiButton>
+        </UiForm>
 
-            <div class="space-x-1 text-center text-sm text-muted-foreground">
-                <span>Or, return to</span>
-                <TextLink :href="login()">log in</TextLink>
-            </div>
-        </div>
+        <template #footer>
+            <span>Or, return to</span>
+            <TextLink :href="login()">log in</TextLink>
+        </template>
     </AuthLayout>
 </template>

@@ -1,20 +1,50 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
-import { Button } from '@/components/lib/button';
-import { Input } from '@/components/lib/input';
-import { Label } from '@/components/lib/label';
-import { Spinner } from '@/components/lib/spinner';
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiInputText from '@/components/ui/UiInputText.vue';
+import UiPassword from '@/components/ui/UiPassword.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { update } from '@/routes/password';
-import { Form } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { useToast } from '@/composables/useToast';
 
 const props = defineProps<{
     token: string;
     email: string;
 }>();
 
+const { showSuccess } = useToast();
 const inputEmail = ref(props.email);
+
+// Inertia form for server submission
+const form = useForm({
+    email: props.email,
+    password: '',
+    password_confirmation: '',
+    token: props.token,
+});
+
+// Handle PrimeVue Form submission (client-side validation)
+function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
+    if (valid) {
+        // Apply transform: merge token and email
+        const transformedData = {
+            ...values,
+            token: props.token,
+            email: props.email,
+        };
+        Object.assign(form, transformedData);
+        form.submit(update(), {
+            onSuccess: () => {
+                form.reset('password');
+                form.reset('password_confirmation');
+                showSuccess('Your password has been reset successfully.');
+            },
+        });
+    }
+}
 </script>
 
 <template>
@@ -24,66 +54,65 @@ const inputEmail = ref(props.email);
         page-title="Reset password"
     >
 
-        <Form
-            v-bind="update.form()"
-            :transform="(data) => ({ ...data, token, email })"
-            :reset-on-success="['password', 'password_confirmation']"
-            v-slot="{ errors, processing }"
+        <UiForm
+            :initialValues="{ email: props.email, password: '', password_confirmation: '' }"
+            @submit="onSubmit"
         >
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="email">Email</Label>
-                    <Input
-                        id="email"
+            <UiFormField
+                name="email"
+                label="Email"
+                :serverError="form.errors.email"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiInputText
+                        v-bind="fieldProps"
+                        :id="id"
                         type="email"
-                        name="email"
                         autocomplete="email"
                         v-model="inputEmail"
-                        class="mt-1 block w-full"
                         readonly
                     />
-                    <InputError :message="errors.email" class="mt-2" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        name="password"
+            <UiFormField
+                name="password"
+                label="Password"
+                :serverError="form.errors.password"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiPassword
+                        v-bind="fieldProps"
+                        :id="id"
                         autocomplete="new-password"
-                        class="mt-1 block w-full"
                         autofocus
                         placeholder="Password"
                     />
-                    <InputError :message="errors.password" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">
-                        Confirm Password
-                    </Label>
-                    <Input
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
+            <UiFormField
+                name="password_confirmation"
+                label="Confirm Password"
+                :serverError="form.errors.password_confirmation"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiPassword
+                        v-bind="fieldProps"
+                        :id="id"
                         autocomplete="new-password"
-                        class="mt-1 block w-full"
                         placeholder="Confirm password"
                     />
-                    <InputError :message="errors.password_confirmation" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <Button
-                    type="submit"
-                    class="mt-4 w-full"
-                    :disabled="processing"
-                    data-test="reset-password-button"
-                >
-                    <Spinner v-if="processing" />
-                    Reset password
-                </Button>
-            </div>
-        </Form>
+            <UiButton
+                type="submit"
+                :loading="form.processing"
+                data-test="reset-password-button"
+            >
+                Reset password
+            </UiButton>
+        </UiForm>
     </AuthLayout>
 </template>

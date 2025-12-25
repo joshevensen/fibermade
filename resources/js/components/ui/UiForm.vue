@@ -3,7 +3,7 @@ import { Form as PrimeForm } from '@primevue/forms';
 
 interface Props {
     initialValues?: Record<string, any>;
-    resolver: (params: { values: Record<string, any> }) => {
+    resolver?: (params: { values: Record<string, any> }) => {
         values?: Record<string, any>;
         errors?: Record<string, Array<{ message: string; type?: string }>>;
     };
@@ -44,6 +44,7 @@ const emit = defineEmits<{
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
+        class="space-y-6"
         @submit="emit('submit', $event)"
     >
         <slot />

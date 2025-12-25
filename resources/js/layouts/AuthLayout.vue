@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/lib/card';
+import UiCard from '@/components/ui/UiCard.vue';
 import { home } from '@/routes';
 import { Link, Head } from '@inertiajs/vue3';
 
@@ -36,17 +30,28 @@ defineProps<{
             </Link>
 
             <div class="flex flex-col gap-6">
-                <Card class="rounded-xl">
-                    <CardHeader class="px-10 pt-8 pb-0 text-center">
-                        <CardTitle class="text-xl">{{ title }}</CardTitle>
-                        <CardDescription>
+                <UiCard class="rounded-xl">
+                    <template #title>
+                        <div class="px-10 pt-8 pb-0 text-center">
+                            <h2 class="text-xl">{{ title }}</h2>
+                        </div>
+                    </template>
+                    <template #subtitle>
+                        <div class="px-10 pb-0 text-center">
                             {{ description }}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent class="px-10 py-8">
-                        <slot />
-                    </CardContent>
-                </Card>
+                        </div>
+                    </template>
+                    <template #content>
+                        <div class="px-10 py-8">
+                            <slot />
+                        </div>
+                    </template>
+                    <template #footer>
+                        <div v-if="$slots.footer" class="px-10 pb-8 text-center text-sm text-muted-foreground">
+                            <slot name="footer" />
+                        </div>
+                    </template>
+                </UiCard>
             </div>
         </div>
     </div>

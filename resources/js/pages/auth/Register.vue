@@ -1,14 +1,39 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
+import { useForm } from '@inertiajs/vue3';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiInputText from '@/components/ui/UiInputText.vue';
+import UiPassword from '@/components/ui/UiPassword.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/lib/button';
-import { Input } from '@/components/lib/input';
-import { Label } from '@/components/lib/label';
-import { Spinner } from '@/components/lib/spinner';
 import AuthBase from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { Form } from '@inertiajs/vue3';
+import { useToast } from '@/composables/useToast';
+
+const { showSuccess } = useToast();
+
+// Inertia form for server submission
+const form = useForm({
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+});
+
+// Handle PrimeVue Form submission (client-side validation)
+function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
+    if (valid) {
+        Object.assign(form, values);
+        form.submit(store(), {
+            onSuccess: () => {
+                form.reset('password');
+                form.reset('password_confirmation');
+                showSuccess('Your account has been created successfully.');
+            },
+        });
+    }
+}
 </script>
 
 <template>
@@ -18,91 +43,93 @@ import { Form } from '@inertiajs/vue3';
         page-title="Register"
     >
 
-        <Form
-            v-bind="store.form()"
-            :reset-on-success="['password', 'password_confirmation']"
-            v-slot="{ errors, processing }"
-            class="flex flex-col gap-6"
+        <UiForm
+            :initialValues="{ name: '', email: '', password: '', password_confirmation: '' }"
+            @submit="onSubmit"
         >
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="name">Name</Label>
-                    <Input
-                        id="name"
+            <UiFormField
+                name="name"
+                label="Name"
+                :serverError="form.errors.name"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiInputText
+                        v-bind="fieldProps"
+                        :id="id"
                         type="text"
                         required
                         autofocus
-                        :tabindex="1"
                         autocomplete="name"
-                        name="name"
                         placeholder="Full name"
                     />
-                    <InputError :message="errors.name" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input
-                        id="email"
+            <UiFormField
+                name="email"
+                label="Email address"
+                :serverError="form.errors.email"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiInputText
+                        v-bind="fieldProps"
+                        :id="id"
                         type="email"
                         required
-                        :tabindex="2"
                         autocomplete="email"
-                        name="email"
                         placeholder="email@example.com"
                     />
-                    <InputError :message="errors.email" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
+            <UiFormField
+                name="password"
+                label="Password"
+                :serverError="form.errors.password"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiPassword
+                        v-bind="fieldProps"
+                        :id="id"
                         required
-                        :tabindex="3"
                         autocomplete="new-password"
-                        name="password"
                         placeholder="Password"
                     />
-                    <InputError :message="errors.password" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">Confirm password</Label>
-                    <Input
-                        id="password_confirmation"
-                        type="password"
+            <UiFormField
+                name="password_confirmation"
+                label="Confirm password"
+                :serverError="form.errors.password_confirmation"
+            >
+                <template #default="{ props: fieldProps, id }">
+                    <UiPassword
+                        v-bind="fieldProps"
+                        :id="id"
                         required
-                        :tabindex="4"
                         autocomplete="new-password"
-                        name="password_confirmation"
                         placeholder="Confirm password"
                     />
-                    <InputError :message="errors.password_confirmation" />
-                </div>
+                </template>
+            </UiFormField>
 
-                <Button
-                    type="submit"
-                    class="mt-2 w-full"
-                    tabindex="5"
-                    :disabled="processing"
-                    data-test="register-user-button"
-                >
-                    <Spinner v-if="processing" />
-                    Create account
-                </Button>
-            </div>
+            <UiButton
+                type="submit"
+                :loading="form.processing"
+                data-test="register-user-button"
+            >
+                Create account
+            </UiButton>
+        </UiForm>
 
-            <div class="text-center text-sm text-muted-foreground">
-                Already have an account?
-                <TextLink
-                    :href="login()"
-                    class="underline underline-offset-4"
-                    :tabindex="6"
-                    >Log in</TextLink
-                >
-            </div>
-        </Form>
+        <template #footer>
+            Already have an account?
+            <TextLink
+                :href="login()"
+                class="underline underline-offset-4"
+                >Log in</TextLink
+            >
+        </template>
     </AuthBase>
 </template>
