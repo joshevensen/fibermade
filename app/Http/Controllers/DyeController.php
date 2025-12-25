@@ -34,16 +34,6 @@ class DyeController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Dye $dye)
-    {
-        return Inertia::render('dyes/DyeShowPage', [
-            'dye' => $dye,
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Dye $dye)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 
 interface ContactFieldConfig {
@@ -88,11 +88,32 @@ function handleSubmit(event: {
         >
             <div
                 class="relative left-1/2 -z-10 aspect-1155/678 w-144.5 max-w-none -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-30 sm:left-[calc(50%-40rem)] sm:w-288.75 dark:opacity-20"
-                style="clip-path: polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)"
+                style="
+                    clip-path: polygon(
+                        74.1% 44.1%,
+                        100% 61.6%,
+                        97.5% 26.9%,
+                        85.5% 0.1%,
+                        80.7% 2%,
+                        72.5% 32.5%,
+                        60.2% 62.4%,
+                        52.4% 68.1%,
+                        47.5% 58.3%,
+                        45.2% 34.5%,
+                        27.5% 76.7%,
+                        0.1% 64.9%,
+                        17.9% 100%,
+                        27.6% 76.8%,
+                        76.1% 97.7%,
+                        74.1% 44.1%
+                    );
+                "
             ></div>
         </div>
         <div class="mx-auto max-w-2xl text-center">
-            <h2 class="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl dark:text-white">
+            <h2
+                class="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl dark:text-white"
+            >
                 {{ title }}
             </h2>
             <p class="mt-2 text-lg/8 text-gray-600 dark:text-gray-400">
@@ -100,15 +121,9 @@ function handleSubmit(event: {
             </p>
         </div>
         <div class="mx-auto mt-16 max-w-xl sm:mt-20">
-            <UiForm
-                :initialValues="{}"
-                @submit="handleSubmit"
-            >
+            <UiForm :initialValues="{}" @submit="handleSubmit">
                 <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                    <template
-                        v-for="field in fields"
-                        :key="field.name"
-                    >
+                    <template v-for="field in fields" :key="field.name">
                         <!-- Phone field with country selector -->
                         <div
                             v-if="field.component === 'phone'"
@@ -124,13 +139,22 @@ function handleSubmit(event: {
                                 {{ field.label }}
                             </label>
                             <div class="mt-2.5">
-                                <div class="flex rounded-md outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600 dark:bg-white/5 dark:outline-white/10 dark:has-[input:focus-within]:outline-indigo-500">
-                                    <div class="grid shrink-0 grid-cols-1 focus-within:relative">
+                                <div
+                                    class="flex rounded-md outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600 dark:bg-white/5 dark:outline-white/10 dark:has-[input:focus-within]:outline-indigo-500"
+                                >
+                                    <div
+                                        class="grid shrink-0 grid-cols-1 focus-within:relative"
+                                    >
                                         <UiFormField
                                             name="country"
                                             :label="undefined"
                                         >
-                                            <template #default="{ props: fieldProps, id }">
+                                            <template
+                                                #default="{
+                                                    props: fieldProps,
+                                                    id,
+                                                }"
+                                            >
                                                 <select
                                                     v-bind="fieldProps"
                                                     :id="id"
@@ -213,13 +237,19 @@ function handleSubmit(event: {
                         class="flex gap-x-4 sm:col-span-2"
                     >
                         <div class="flex h-6 items-center">
-                            <div class="group relative inline-flex w-8 shrink-0 rounded-full bg-gray-200 p-px inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2 dark:bg-white/5 dark:inset-ring-white/10 dark:outline-indigo-500 dark:has-checked:bg-indigo-500">
-                                <span class="size-4 rounded-full shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-3.5"></span>
+                            <div
+                                class="group relative inline-flex w-8 shrink-0 rounded-full bg-gray-200 p-px inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2 dark:bg-white/5 dark:inset-ring-white/10 dark:outline-indigo-500 dark:has-checked:bg-indigo-500"
+                            >
+                                <span
+                                    class="size-4 rounded-full shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-3.5"
+                                ></span>
                                 <UiFormField
                                     name="agree-to-policies"
                                     :label="undefined"
                                 >
-                                    <template #default="{ props: fieldProps, id }">
+                                    <template
+                                        #default="{ props: fieldProps, id }"
+                                    >
                                         <input
                                             v-bind="fieldProps"
                                             :id="id"
@@ -239,7 +269,8 @@ function handleSubmit(event: {
                             <UiLink
                                 :href="privacyPolicyLink"
                                 class="font-semibold whitespace-nowrap text-indigo-600 dark:text-indigo-400"
-                            >privacy policy</UiLink>.
+                                >privacy policy</UiLink
+                            >.
                         </label>
                     </div>
                 </div>
@@ -258,9 +289,11 @@ function handleSubmit(event: {
     <!-- WithTestimonial variant -->
     <div
         v-else
-        class="mx-auto max-w-xl lg:max-w-4xl px-6 py-24 sm:py-32 lg:px-8"
+        class="mx-auto max-w-xl px-6 py-24 sm:py-32 lg:max-w-4xl lg:px-8"
     >
-        <h2 class="text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl dark:text-white">
+        <h2
+            class="text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl dark:text-white"
+        >
             {{ title }}
         </h2>
         <p class="mt-2 text-lg/8 text-gray-600 dark:text-gray-400">
@@ -268,35 +301,35 @@ function handleSubmit(event: {
         </p>
         <div class="mt-16 flex flex-col gap-16 sm:gap-y-20 lg:flex-row">
             <div class="lg:flex-auto">
-                <UiForm
-                    :initialValues="{}"
-                    @submit="handleSubmit"
-                >
-                    <div class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-                        <template
-                            v-for="field in fields"
-                            :key="field.name"
-                        >
+                <UiForm :initialValues="{}" @submit="handleSubmit">
+                    <div
+                        class="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2"
+                    >
+                        <template v-for="field in fields" :key="field.name">
                             <!-- Textarea fields -->
                             <div
                                 v-if="field.component === 'textarea'"
                                 :class="[
                                     'sm:col-span-2',
-                                    field.colSpan === '1' ? 'sm:col-span-1' : '',
+                                    field.colSpan === '1'
+                                        ? 'sm:col-span-1'
+                                        : '',
                                 ]"
                             >
                                 <UiFormField
                                     :name="field.name"
                                     :label="field.label"
                                 >
-                                    <template #default="{ props: fieldProps, id }">
+                                    <template
+                                        #default="{ props: fieldProps, id }"
+                                    >
                                         <textarea
                                             v-bind="fieldProps"
                                             :id="id"
                                             rows="4"
                                             :placeholder="field.placeholder"
                                             :required="field.required"
-                                            class="backdrop-blur-sm block w-full rounded-md px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                                            class="block w-full rounded-md px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 backdrop-blur-sm placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
                                         />
                                     </template>
                                 </UiFormField>
@@ -306,14 +339,18 @@ function handleSubmit(event: {
                             <div
                                 v-else
                                 :class="[
-                                    field.colSpan === '2' ? 'sm:col-span-2' : '',
+                                    field.colSpan === '2'
+                                        ? 'sm:col-span-2'
+                                        : '',
                                 ]"
                             >
                                 <UiFormField
                                     :name="field.name"
                                     :label="field.label"
                                 >
-                                    <template #default="{ props: fieldProps, id }">
+                                    <template
+                                        #default="{ props: fieldProps, id }"
+                                    >
                                         <input
                                             v-bind="fieldProps"
                                             :id="id"
@@ -321,7 +358,7 @@ function handleSubmit(event: {
                                             :placeholder="field.placeholder"
                                             :required="field.required"
                                             :autocomplete="field.autocomplete"
-                                            class="backdrop-blur-sm block w-full rounded-md px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
+                                            class="block w-full rounded-md px-3.5 py-2 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 backdrop-blur-sm placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500"
                                         />
                                     </template>
                                 </UiFormField>
@@ -344,14 +381,12 @@ function handleSubmit(event: {
                         <UiLink
                             :href="privacyPolicyLink"
                             class="font-semibold whitespace-nowrap text-indigo-600 dark:text-indigo-400"
-                        >privacy policy</UiLink>.
+                            >privacy policy</UiLink
+                        >.
                     </p>
                 </UiForm>
             </div>
-            <div
-                v-if="testimonial"
-                class="lg:mt-6 lg:w-80 lg:flex-none"
-            >
+            <div v-if="testimonial" class="lg:mt-6 lg:w-80 lg:flex-none">
                 <img
                     class="h-12 w-auto dark:hidden"
                     :src="testimonial.logoUrlLight"
@@ -363,7 +398,9 @@ function handleSubmit(event: {
                     alt=""
                 />
                 <figure class="mt-10">
-                    <blockquote class="text-lg/8 font-semibold text-gray-900 dark:text-white">
+                    <blockquote
+                        class="text-lg/8 font-semibold text-gray-900 dark:text-white"
+                    >
                         <p>"{{ testimonial.quote }}"</p>
                     </blockquote>
                     <figcaption class="mt-10 flex gap-x-6">
@@ -373,10 +410,14 @@ function handleSubmit(event: {
                             class="size-12 flex-none rounded-full bg-gray-50 dark:bg-gray-800"
                         />
                         <div>
-                            <div class="text-base font-semibold text-gray-900 dark:text-white">
+                            <div
+                                class="text-base font-semibold text-gray-900 dark:text-white"
+                            >
                                 {{ testimonial.authorName }}
                             </div>
-                            <div class="text-sm/6 text-gray-600 dark:text-gray-400">
+                            <div
+                                class="text-sm/6 text-gray-600 dark:text-gray-400"
+                            >
                                 {{ testimonial.authorRole }}
                             </div>
                         </div>
@@ -386,4 +427,3 @@ function handleSubmit(event: {
         </div>
     </div>
 </template>
-

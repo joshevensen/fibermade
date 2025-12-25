@@ -34,16 +34,6 @@ class DiscountController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Discount $discount)
-    {
-        return Inertia::render('discounts/DiscountShowPage', [
-            'discount' => $discount,
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Discount $discount)

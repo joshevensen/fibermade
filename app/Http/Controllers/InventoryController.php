@@ -34,14 +34,6 @@ class InventoryController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Inventory $inventory)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Inventory $inventory)

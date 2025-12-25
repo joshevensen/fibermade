@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { store } from '@/routes/password/confirm';
-import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const { form, onSubmit } = useFormSubmission({
     route: store,

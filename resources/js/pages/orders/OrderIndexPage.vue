@@ -7,4 +7,3 @@ import AppLayout from '@/layouts/AppLayout.vue';
         <h1>Orders</h1>
     </AppLayout>
 </template>
-

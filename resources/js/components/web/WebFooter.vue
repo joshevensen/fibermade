@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Component } from 'vue';
 import UiLink from '@/components/ui/UiLink.vue';
+import type { Component } from 'vue';
 
 interface NavigationLink {
     name: string;
@@ -84,17 +84,19 @@ const props = withDefaults(defineProps<Props>(), {
             >
                 <div class="md:grid md:grid-cols-2 md:gap-8">
                     <template
-                        v-for="(section, index) in navigationSections.slice(0, 2)"
+                        v-for="(section, index) in navigationSections.slice(
+                            0,
+                            2,
+                        )"
                         :key="section.title"
                     >
                         <div :class="{ 'mt-10 md:mt-0': index === 1 }">
-                            <h3 class="text-sm/6 font-semibold text-gray-900 dark:text-white">
+                            <h3
+                                class="text-sm/6 font-semibold text-gray-900 dark:text-white"
+                            >
                                 {{ section.title }}
                             </h3>
-                            <ul
-                                role="list"
-                                class="mt-6 space-y-4"
-                            >
+                            <ul role="list" class="mt-6 space-y-4">
                                 <li
                                     v-for="link in section.links"
                                     :key="link.name"
@@ -112,17 +114,19 @@ const props = withDefaults(defineProps<Props>(), {
                 </div>
                 <div class="md:grid md:grid-cols-2 md:gap-8">
                     <template
-                        v-for="(section, index) in navigationSections.slice(2, 4)"
+                        v-for="(section, index) in navigationSections.slice(
+                            2,
+                            4,
+                        )"
                         :key="section.title"
                     >
                         <div :class="{ 'mt-10 md:mt-0': index === 1 }">
-                            <h3 class="text-sm/6 font-semibold text-gray-900 dark:text-white">
+                            <h3
+                                class="text-sm/6 font-semibold text-gray-900 dark:text-white"
+                            >
                                 {{ section.title }}
                             </h3>
-                            <ul
-                                role="list"
-                                class="mt-6 space-y-4"
-                            >
+                            <ul role="list" class="mt-6 space-y-4">
                                 <li
                                     v-for="link in section.links"
                                     :key="link.name"
@@ -140,9 +144,12 @@ const props = withDefaults(defineProps<Props>(), {
                 </div>
             </div>
         </div>
-        <div class="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24 dark:border-white/10">
+        <div
+            class="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24 dark:border-white/10"
+        >
             <p class="text-sm/6 text-gray-600 dark:text-gray-400">
-                &copy; {{ new Date().getFullYear() }} {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
+                &copy; {{ new Date().getFullYear() }}
+                {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
             </p>
         </div>
     </footer>
@@ -174,16 +181,12 @@ const props = withDefaults(defineProps<Props>(), {
                 class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
             >
                 <span class="sr-only">{{ item.name }}</span>
-                <component
-                    :is="item.icon"
-                    class="size-6"
-                    aria-hidden="true"
-                />
+                <component :is="item.icon" class="size-6" aria-hidden="true" />
             </UiLink>
         </div>
         <p class="mt-10 text-center text-sm/6 text-gray-600 dark:text-gray-400">
-            &copy; {{ new Date().getFullYear() }} {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
+            &copy; {{ new Date().getFullYear() }}
+            {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
         </p>
     </footer>
 </template>
-

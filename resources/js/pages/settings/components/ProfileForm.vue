@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import ProfileController from '@/actions/App/Http/Controllers/ProfileController';
+import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 
 interface Props {
@@ -65,4 +65,3 @@ const { form, onSubmit } = useFormSubmission({
         </template>
     </UiCard>
 </template>
-

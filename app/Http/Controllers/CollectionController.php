@@ -34,16 +34,6 @@ class CollectionController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Collection $collection)
-    {
-        return Inertia::render('collections/CollectionShowPage', [
-            'collection' => $collection,
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Collection $collection)

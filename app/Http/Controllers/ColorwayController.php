@@ -34,16 +34,6 @@ class ColorwayController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Colorway $colorway)
-    {
-        return Inertia::render('colorways/ColorwayShowPage', [
-            'colorway' => $colorway,
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Colorway $colorway)

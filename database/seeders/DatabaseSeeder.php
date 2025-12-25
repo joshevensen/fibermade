@@ -2,9 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +12,46 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->truncateTables();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            UserSeeder::class,
+            AccountSeeder::class,
+            TagSeeder::class,
+
+            BaseSeeder::class,
+            CollectionSeeder::class,
+            ColorwaySeeder::class,
+            DiscountSeeder::class,
+            DyeSeeder::class,
+            IntegrationLogSeeder::class,
+            IntegrationSeeder::class,
+            InventorySeeder::class,
+            MediaSeeder::class,
+            OrderItemSeeder::class,
+            OrderSeeder::class,
         ]);
+    }
+
+    /**
+     * Truncate all tables except migrations.
+     */
+    protected function truncateTables(): void
+    {
+        $tables = DB::select("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+
+        $tableNames = array_filter(
+            array_map(fn ($table) => $table->tablename, $tables),
+            fn ($tableName) => $tableName !== 'migrations'
+        );
+
+        if (empty($tableNames)) {
+            return;
+        }
+
+        $quotedTableNames = array_map(fn ($name) => "\"{$name}\"", $tableNames);
+        $tableList = implode(', ', $quotedTableNames);
+
+        DB::statement("TRUNCATE TABLE {$tableList} RESTART IDENTITY CASCADE");
     }
 }

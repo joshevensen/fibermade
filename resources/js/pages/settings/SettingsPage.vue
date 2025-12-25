@@ -20,4 +20,3 @@ const user = page.props.auth.user;
         </div>
     </AppLayout>
 </template>
-

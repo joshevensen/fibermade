@@ -9,8 +9,7 @@ interface Props {
     pageTitle?: string;
 }
 
-withDefaults(defineProps<Props>(), {
-});
+withDefaults(defineProps<Props>(), {});
 </script>
 
 <template>

@@ -1,13 +1,12 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { update } from '@/routes/password';
-import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const props = defineProps<{
     token: string;
@@ -38,9 +37,12 @@ const { form, onSubmit } = useFormSubmission({
         description="Please enter your new password below"
         page-title="Reset password"
     >
-
         <UiForm
-            :initialValues="{ email: props.email, password: '', password_confirmation: '' }"
+            :initialValues="{
+                email: props.email,
+                password: '',
+                password_confirmation: '',
+            }"
             @submit="onSubmit"
         >
             <UiFormField

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { watch } from 'vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 import UiLink from '@/components/ui/UiLink.vue';
+import { useFormSubmission } from '@/composables/useFormSubmission';
+import { useToast } from '@/composables/useToast';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
-import { useToast } from '@/composables/useToast';
-import { useFormSubmission } from '@/composables/useFormSubmission';
+import { watch } from 'vue';
 
 const props = defineProps<{
     status?: string;

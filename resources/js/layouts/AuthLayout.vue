@@ -2,7 +2,7 @@
 import AppLogo from '@/components/AppLogo.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import { home } from '@/routes';
-import { Link, Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
 defineProps<{
     title?: string;
@@ -47,7 +47,10 @@ defineProps<{
                         </div>
                     </template>
                     <template #footer>
-                        <div v-if="$slots.footer" class="px-10 pb-8 text-center text-sm text-muted-foreground">
+                        <div
+                            v-if="$slots.footer"
+                            class="px-10 pb-8 text-center text-sm text-muted-foreground"
+                        >
                             <slot name="footer" />
                         </div>
                     </template>

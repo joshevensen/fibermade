@@ -8,7 +8,8 @@ export async function focusPasswordInput(
     }
 
     await nextTick();
-    const input = passwordRef.value.$el.querySelector('input') as HTMLInputElement;
+    const input = passwordRef.value.$el.querySelector(
+        'input',
+    ) as HTMLInputElement;
     input?.focus();
 }
-

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useAppearance } from '@/composables/useAppearance';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
+import { useAppearance } from '@/composables/useAppearance';
 
 const { appearance, updateAppearance } = useAppearance();
 
@@ -27,4 +27,3 @@ const appearanceOptions = [
         </template>
     </UiCard>
 </template>
-

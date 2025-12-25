@@ -1,13 +1,13 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 import UiLink from '@/components/ui/UiLink.vue';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -28,9 +28,13 @@ const { form, onSubmit } = useFormSubmission({
         description="Enter your details below to create your account"
         page-title="Register"
     >
-
         <UiForm
-            :initialValues="{ name: '', email: '', password: '', password_confirmation: '' }"
+            :initialValues="{
+                name: '',
+                email: '',
+                password: '',
+                password_confirmation: '',
+            }"
             @submit="onSubmit"
         >
             <UiFormFieldInput
@@ -83,9 +87,7 @@ const { form, onSubmit } = useFormSubmission({
 
         <template #footer>
             Already have an account?
-            <UiLink
-                :href="login()"
-                class="underline underline-offset-4"
+            <UiLink :href="login()" class="underline underline-offset-4"
                 >Log in</UiLink
             >
         </template>

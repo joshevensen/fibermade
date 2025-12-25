@@ -29,4 +29,23 @@ class Account extends Model
 {
     /** @use HasFactory<\Database\Factories\AccountFactory> */
     use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'type',
+        'status',
+        'name',
+        'email',
+        'phone',
+        'address_line_1',
+        'address_line_2',
+        'city',
+        'state',
+        'zip',
+        'country',
+    ];
 }

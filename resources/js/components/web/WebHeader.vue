@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import UiLink from '@/components/ui/UiLink.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
+import UiLink from '@/components/ui/UiLink.vue';
+import { ref } from 'vue';
 
 interface NavigationLink {
     name: string;
@@ -35,10 +35,7 @@ const mobileMenuOpen = ref(false);
             aria-label="Global"
         >
             <div class="flex items-center gap-x-12">
-                <UiLink
-                    href="#"
-                    class="-m-1.5 p-1.5"
-                >
+                <UiLink href="#" class="-m-1.5 p-1.5">
                     <span class="sr-only">{{ companyName }}</span>
                     <img
                         v-if="logoUrlLight"
@@ -71,10 +68,7 @@ const mobileMenuOpen = ref(false);
                     @click="mobileMenuOpen = true"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <i
-                        class="pi pi-bars size-6"
-                        aria-hidden="true"
-                    ></i>
+                    <i class="pi pi-bars size-6" aria-hidden="true"></i>
                 </button>
             </div>
             <div class="hidden lg:flex lg:items-center lg:gap-x-4">
@@ -103,10 +97,7 @@ const mobileMenuOpen = ref(false);
             aria-label="Global"
         >
             <div class="flex lg:flex-1">
-                <UiLink
-                    href="#"
-                    class="-m-1.5 p-1.5"
-                >
+                <UiLink href="#" class="-m-1.5 p-1.5">
                     <span class="sr-only">{{ companyName }}</span>
                     <img
                         v-if="logoUrlLight"
@@ -155,10 +146,7 @@ const mobileMenuOpen = ref(false);
                     @click="mobileMenuOpen = true"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <i
-                        class="pi pi-bars size-6"
-                        aria-hidden="true"
-                    ></i>
+                    <i class="pi pi-bars size-6" aria-hidden="true"></i>
                 </button>
             </div>
         </nav>
@@ -171,20 +159,21 @@ const mobileMenuOpen = ref(false);
             position="right"
             :show-header="false"
             class="lg:hidden"
-            @update:visible="(value: boolean) => mobileMenuOpen = value"
+            @update:visible="(value: boolean) => (mobileMenuOpen = value)"
         >
-            <div class="flex h-full flex-col bg-white dark:bg-gray-900 sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-gray-100/10">
+            <div
+                class="flex h-full flex-col bg-white sm:ring-1 sm:ring-gray-900/10 dark:bg-gray-900 dark:sm:ring-gray-100/10"
+            >
                 <!-- Header with logo and close button -->
                 <div
                     :class="[
                         'flex items-center gap-x-6 p-6',
-                        variant === 'centered' && signupLink ? 'justify-between' : 'justify-between',
+                        variant === 'centered' && signupLink
+                            ? 'justify-between'
+                            : 'justify-between',
                     ]"
                 >
-                    <UiLink
-                        href="#"
-                        class="-m-1.5 p-1.5"
-                    >
+                    <UiLink href="#" class="-m-1.5 p-1.5">
                         <span class="sr-only">{{ companyName }}</span>
                         <img
                             v-if="logoUrlLight"
@@ -222,7 +211,9 @@ const mobileMenuOpen = ref(false);
                 </div>
                 <!-- Navigation and auth links -->
                 <div class="flex-1 overflow-y-auto px-6 pb-6">
-                    <div class="-my-6 divide-y divide-gray-500/10 dark:divide-white/10">
+                    <div
+                        class="-my-6 divide-y divide-gray-500/10 dark:divide-white/10"
+                    >
                         <div class="space-y-2 py-6">
                             <UiLink
                                 v-for="item in navigation"
@@ -258,4 +249,3 @@ const mobileMenuOpen = ref(false);
         </UiDialog>
     </header>
 </template>
-

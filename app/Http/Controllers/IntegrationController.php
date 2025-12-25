@@ -33,14 +33,6 @@ class IntegrationController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Integration $integration)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Integration $integration)

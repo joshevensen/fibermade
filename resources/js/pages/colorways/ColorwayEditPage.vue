@@ -7,4 +7,3 @@ import AppLayout from '@/layouts/AppLayout.vue';
         <h1>Edit Colorway</h1>
     </AppLayout>
 </template>
-

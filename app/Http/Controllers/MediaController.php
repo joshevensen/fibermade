@@ -33,14 +33,6 @@ class MediaController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Media $media)
-    {
-        //
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Media $media)

@@ -17,13 +17,21 @@ export function useFormSubmission(options: FormSubmissionOptions) {
     const { showSuccess } = useToast();
     const form = useForm(options.initialValues);
 
-    function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
+    function onSubmit({
+        valid,
+        values,
+    }: {
+        valid: boolean;
+        values: Record<string, any>;
+    }): void {
         if (!valid) {
             return;
         }
 
         // Apply transform if provided
-        const dataToSubmit = options.transform ? options.transform(values) : values;
+        const dataToSubmit = options.transform
+            ? options.transform(values)
+            : values;
 
         // Assign values to form
         Object.assign(form, dataToSubmit);
@@ -84,4 +92,3 @@ export function useFormSubmission(options: FormSubmissionOptions) {
         onSubmit,
     };
 }
-

@@ -45,25 +45,34 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
     <!-- WithImageTiles variant -->
-    <div
-        v-if="variant === 'withImageTiles'"
-        class="relative isolate"
-    >
+    <div v-if="variant === 'withImageTiles'" class="relative isolate">
         <div class="overflow-hidden">
-            <div class="mx-auto max-w-7xl px-6 pt-36 pb-32 sm:pt-60 lg:px-8 lg:pt-32">
-                <div class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
-                    <div class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl">
+            <div
+                class="mx-auto max-w-7xl px-6 pt-36 pb-32 sm:pt-60 lg:px-8 lg:pt-32"
+            >
+                <div
+                    class="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center"
+                >
+                    <div
+                        class="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl"
+                    >
                         <div
                             v-if="announcement"
                             class="hidden sm:mb-8 sm:flex sm:justify-start"
                         >
-                            <div class="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:text-gray-400 dark:ring-white/10 dark:hover:ring-white/20">
+                            <div
+                                class="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:text-gray-400 dark:ring-white/10 dark:hover:ring-white/20"
+                            >
                                 {{ announcement.text }}
                                 <UiLink
                                     :href="announcement.link"
                                     class="font-semibold text-indigo-600 dark:text-indigo-400"
                                 >
-                                    <span class="absolute inset-0" aria-hidden="true"></span>Read more
+                                    <span
+                                        class="absolute inset-0"
+                                        aria-hidden="true"
+                                    ></span
+                                    >Read more
                                     <i
                                         class="pi pi-chevron-right ml-1"
                                         aria-hidden="true"
@@ -71,7 +80,9 @@ const props = withDefaults(defineProps<Props>(), {
                                 </UiLink>
                             </div>
                         </div>
-                        <h1 class="text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-7xl dark:text-white">
+                        <h1
+                            class="text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-7xl dark:text-white"
+                        >
                             {{ title }}
                         </h1>
                         <p
@@ -105,24 +116,32 @@ const props = withDefaults(defineProps<Props>(), {
                         v-if="imageTiles && imageTiles.length >= 5"
                         class="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0"
                     >
-                        <div class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-0 xl:pt-80">
+                        <div
+                            class="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-0 xl:pt-80"
+                        >
                             <div class="relative">
                                 <img
                                     :src="imageTiles[0].url"
                                     :alt="imageTiles[0].alt || ''"
                                     class="aspect-2/3 w-full rounded-xl bg-gray-900/5 object-cover shadow-lg dark:bg-gray-700/5"
                                 />
-                                <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"></div>
+                                <div
+                                    class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"
+                                ></div>
                             </div>
                         </div>
-                        <div class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36">
+                        <div
+                            class="mr-auto w-44 flex-none space-y-8 sm:mr-0 sm:pt-52 lg:pt-36"
+                        >
                             <div class="relative">
                                 <img
                                     :src="imageTiles[1].url"
                                     :alt="imageTiles[1].alt || ''"
                                     class="aspect-2/3 w-full rounded-xl bg-gray-900/5 object-cover shadow-lg dark:bg-gray-700/5"
                                 />
-                                <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"></div>
+                                <div
+                                    class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"
+                                ></div>
                             </div>
                             <div class="relative">
                                 <img
@@ -130,7 +149,9 @@ const props = withDefaults(defineProps<Props>(), {
                                     :alt="imageTiles[2].alt || ''"
                                     class="aspect-2/3 w-full rounded-xl bg-gray-900/5 object-cover shadow-lg dark:bg-gray-700/5"
                                 />
-                                <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"></div>
+                                <div
+                                    class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"
+                                ></div>
                             </div>
                         </div>
                         <div class="w-44 flex-none space-y-8 pt-32 sm:pt-0">
@@ -140,7 +161,9 @@ const props = withDefaults(defineProps<Props>(), {
                                     :alt="imageTiles[3].alt || ''"
                                     class="aspect-2/3 w-full rounded-xl bg-gray-900/5 object-cover shadow-lg dark:bg-gray-700/5"
                                 />
-                                <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"></div>
+                                <div
+                                    class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"
+                                ></div>
                             </div>
                             <div class="relative">
                                 <img
@@ -148,7 +171,9 @@ const props = withDefaults(defineProps<Props>(), {
                                     :alt="imageTiles[4].alt || ''"
                                     class="aspect-2/3 w-full rounded-xl bg-gray-900/5 object-cover shadow-lg dark:bg-gray-700/5"
                                 />
-                                <div class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"></div>
+                                <div
+                                    class="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-gray-900/10 ring-inset dark:ring-white/10"
+                                ></div>
                             </div>
                         </div>
                     </div>
@@ -167,19 +192,24 @@ const props = withDefaults(defineProps<Props>(), {
                 v-if="announcement"
                 class="hidden sm:mb-8 sm:flex sm:justify-center"
             >
-                <div class="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:text-gray-400 dark:ring-white/10 dark:hover:ring-white/20">
+                <div
+                    class="relative rounded-full px-3 py-1 text-sm/6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:text-gray-400 dark:ring-white/10 dark:hover:ring-white/20"
+                >
                     {{ announcement.text }}
                     <UiLink
                         :href="announcement.link"
                         class="font-semibold text-indigo-600 dark:text-indigo-400"
                     >
-                        <span class="absolute inset-0" aria-hidden="true"></span>Read more
+                        <span class="absolute inset-0" aria-hidden="true"></span
+                        >Read more
                         <span aria-hidden="true">&rarr;</span>
                     </UiLink>
                 </div>
             </div>
             <div class="text-center">
-                <h1 class="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-7xl dark:text-white">
+                <h1
+                    class="text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-7xl dark:text-white"
+                >
                     {{ title }}
                 </h1>
                 <p
@@ -213,10 +243,7 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- Page variant -->
-    <div
-        v-else-if="variant === 'page'"
-        class="px-6 py-24 sm:py-32 lg:px-8"
-    >
+    <div v-else-if="variant === 'page'" class="px-6 py-24 sm:py-32 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <p
                 v-if="subtitle"
@@ -224,7 +251,9 @@ const props = withDefaults(defineProps<Props>(), {
             >
                 {{ subtitle }}
             </p>
-            <h2 class="mt-2 text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl dark:text-white">
+            <h2
+                class="mt-2 text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl dark:text-white"
+            >
                 {{ title }}
             </h2>
             <p
@@ -254,19 +283,20 @@ const props = withDefaults(defineProps<Props>(), {
                 :src="logoUrlDark"
                 alt="Your Company"
             />
-            <div
-                v-if="badge"
-                class="mt-24 sm:mt-32 lg:mt-16"
-            >
+            <div v-if="badge" class="mt-24 sm:mt-32 lg:mt-16">
                 <UiLink
                     v-if="badge.link"
                     :href="badge.link"
                     class="inline-flex space-x-6"
                 >
-                    <span class="rounded-full bg-indigo-50 px-3 py-1 text-sm/6 font-semibold text-indigo-600 ring-1 ring-indigo-600/20 ring-inset dark:bg-indigo-500/10 dark:text-indigo-400 dark:ring-indigo-500/25">
+                    <span
+                        class="rounded-full bg-indigo-50 px-3 py-1 text-sm/6 font-semibold text-indigo-600 ring-1 ring-indigo-600/20 ring-inset dark:bg-indigo-500/10 dark:text-indigo-400 dark:ring-indigo-500/25"
+                    >
                         {{ badge.label }}
                     </span>
-                    <span class="inline-flex items-center space-x-2 text-sm/6 font-medium text-gray-600 dark:text-gray-300">
+                    <span
+                        class="inline-flex items-center space-x-2 text-sm/6 font-medium text-gray-600 dark:text-gray-300"
+                    >
                         <span>{{ badge.text }}</span>
                         <i
                             class="pi pi-chevron-right size-5 text-gray-400 dark:text-gray-500"
@@ -275,7 +305,9 @@ const props = withDefaults(defineProps<Props>(), {
                     </span>
                 </UiLink>
             </div>
-            <h1 class="mt-10 text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-7xl dark:text-white">
+            <h1
+                class="mt-10 text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-7xl dark:text-white"
+            >
                 {{ title }}
             </h1>
             <p
@@ -326,4 +358,3 @@ const props = withDefaults(defineProps<Props>(), {
         </div>
     </div>
 </template>
-

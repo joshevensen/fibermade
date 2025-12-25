@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { watch } from 'vue';
-import UiForm from '@/components/ui/UiForm.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
-import UiPassword from '@/components/ui/UiPassword.vue';
-import UiCheckbox from '@/components/ui/UiCheckbox.vue';
 import UiButton from '@/components/ui/UiButton.vue';
+import UiCheckbox from '@/components/ui/UiCheckbox.vue';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiLink from '@/components/ui/UiLink.vue';
+import UiPassword from '@/components/ui/UiPassword.vue';
+import { useFormSubmission } from '@/composables/useFormSubmission';
+import { useToast } from '@/composables/useToast';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { useToast } from '@/composables/useToast';
-import { useFormSubmission } from '@/composables/useFormSubmission';
+import { watch } from 'vue';
 
 const props = defineProps<{
     status?: string;
@@ -95,11 +95,7 @@ const { form, onSubmit } = useFormSubmission({
             <UiFormField name="remember">
                 <template #default="{ props: fieldProps, id }">
                     <div class="flex items-center space-x-3">
-                        <UiCheckbox
-                            v-bind="fieldProps"
-                            :id="id"
-                            binary
-                        />
+                        <UiCheckbox v-bind="fieldProps" :id="id" binary />
                         <label :for="id">Remember me</label>
                     </div>
                 </template>

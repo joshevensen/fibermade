@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Integration;
+namespace App\Enums;
 
 enum IntegrationLogStatus: string
 {

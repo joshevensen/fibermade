@@ -39,16 +39,22 @@ const props = withDefaults(defineProps<Props>(), {
                         {{ description }}
                     </p>
                 </div>
-                <dl class="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
+                <dl
+                    class="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4"
+                >
                     <div
                         v-for="stat in stats"
                         :key="stat.id"
                         class="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5"
                     >
-                        <dt class="text-sm/6 font-semibold text-gray-600 dark:text-gray-300">
+                        <dt
+                            class="text-sm/6 font-semibold text-gray-600 dark:text-gray-300"
+                        >
                             {{ stat.name }}
                         </dt>
-                        <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                        <dd
+                            class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                        >
                             {{ stat.value }}
                         </dd>
                     </div>
@@ -68,7 +74,9 @@ const props = withDefaults(defineProps<Props>(), {
                     <dt class="text-base/7 text-gray-600 dark:text-gray-400">
                         {{ stat.name }}
                     </dt>
-                    <dd class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white">
+                    <dd
+                        class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white"
+                    >
                         {{ stat.value }}
                     </dd>
                 </div>
@@ -76,4 +84,3 @@ const props = withDefaults(defineProps<Props>(), {
         </div>
     </div>
 </template>
-

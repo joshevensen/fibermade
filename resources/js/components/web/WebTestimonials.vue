@@ -25,20 +25,27 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
     <!-- Grid variant -->
-    <div
-        v-if="variant === 'grid'"
-        class="py-24 sm:py-32"
-    >
+    <div v-if="variant === 'grid'" class="py-24 sm:py-32">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto flow-root max-w-2xl sm:mt-20 lg:mx-0 lg:max-w-none">
-                <div class="-mt-8 sm:-mx-4 sm:columns-2 sm:text-[0] lg:columns-3">
+            <div
+                class="mx-auto flow-root max-w-2xl sm:mt-20 lg:mx-0 lg:max-w-none"
+            >
+                <div
+                    class="-mt-8 sm:-mx-4 sm:columns-2 sm:text-[0] lg:columns-3"
+                >
                     <div
                         v-for="testimonial in testimonials"
-                        :key="testimonial.author.handle || testimonial.author.name"
+                        :key="
+                            testimonial.author.handle || testimonial.author.name
+                        "
                         class="pt-8 sm:inline-block sm:w-full sm:px-4"
                     >
-                        <figure class="rounded-2xl bg-gray-50 p-8 text-sm/6 dark:bg-white/2.5">
-                            <blockquote class="text-gray-900 dark:text-gray-100">
+                        <figure
+                            class="rounded-2xl bg-gray-50 p-8 text-sm/6 dark:bg-white/2.5"
+                        >
+                            <blockquote
+                                class="text-gray-900 dark:text-gray-100"
+                            >
                                 <p>{{ `"${testimonial.body}"` }}</p>
                             </blockquote>
                             <figcaption class="mt-6 flex items-center gap-x-4">
@@ -48,7 +55,9 @@ const props = withDefaults(defineProps<Props>(), {
                                     alt=""
                                 />
                                 <div>
-                                    <div class="font-semibold text-gray-900 dark:text-white">
+                                    <div
+                                        class="font-semibold text-gray-900 dark:text-white"
+                                    >
                                         {{ testimonial.author.name }}
                                     </div>
                                     <div
@@ -84,11 +93,10 @@ const props = withDefaults(defineProps<Props>(), {
                 :src="logoUrlDark"
                 alt=""
             />
-            <figure
-                v-if="testimonials.length > 0"
-                class="mt-10"
-            >
-                <blockquote class="text-center text-xl/8 font-semibold text-gray-900 sm:text-2xl/9 dark:text-white">
+            <figure v-if="testimonials.length > 0" class="mt-10">
+                <blockquote
+                    class="text-center text-xl/8 font-semibold text-gray-900 sm:text-2xl/9 dark:text-white"
+                >
                     <p>"{{ testimonials[0].body }}"</p>
                 </blockquote>
                 <figcaption class="mt-10">
@@ -97,8 +105,12 @@ const props = withDefaults(defineProps<Props>(), {
                         :src="testimonials[0].author.imageUrl"
                         alt=""
                     />
-                    <div class="mt-4 flex items-center justify-center space-x-3 text-base">
-                        <div class="font-semibold text-gray-900 dark:text-white">
+                    <div
+                        class="mt-4 flex items-center justify-center space-x-3 text-base"
+                    >
+                        <div
+                            class="font-semibold text-gray-900 dark:text-white"
+                        >
                             {{ testimonials[0].author.name }}
                         </div>
                         <svg
@@ -108,11 +120,7 @@ const props = withDefaults(defineProps<Props>(), {
                             aria-hidden="true"
                             class="fill-gray-900 dark:fill-white"
                         >
-                            <circle
-                                cx="1"
-                                cy="1"
-                                r="1"
-                            />
+                            <circle cx="1" cy="1" r="1" />
                         </svg>
                         <div
                             v-if="testimonials[0].author.role"
@@ -127,12 +135,11 @@ const props = withDefaults(defineProps<Props>(), {
     </section>
 
     <!-- TwoColumn variant -->
-    <section
-        v-else
-        class="py-24 sm:py-32"
-    >
+    <section v-else class="py-24 sm:py-32">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
-            <div class="mx-auto grid max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none lg:grid-cols-2">
+            <div
+                class="mx-auto grid max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none lg:grid-cols-2"
+            >
                 <template
                     v-for="(testimonial, index) in testimonials.slice(0, 2)"
                     :key="testimonial.author.name"
@@ -140,7 +147,9 @@ const props = withDefaults(defineProps<Props>(), {
                     <div
                         :class="[
                             'flex flex-col pb-10 sm:pb-16 lg:pr-8 lg:pb-0 xl:pr-20',
-                            index === 1 ? 'border-t border-gray-900/10 pt-10 sm:pt-16 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 xl:pl-20 dark:border-white/10' : '',
+                            index === 1
+                                ? 'border-t border-gray-900/10 pt-10 sm:pt-16 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 xl:pl-20 dark:border-white/10'
+                                : '',
                         ]"
                     >
                         <img
@@ -155,8 +164,12 @@ const props = withDefaults(defineProps<Props>(), {
                             :src="logoUrlDark"
                             alt=""
                         />
-                        <figure class="mt-10 flex flex-auto flex-col justify-between">
-                            <blockquote class="text-lg/8 text-gray-900 dark:text-gray-100">
+                        <figure
+                            class="mt-10 flex flex-auto flex-col justify-between"
+                        >
+                            <blockquote
+                                class="text-lg/8 text-gray-900 dark:text-gray-100"
+                            >
                                 <p>"{{ testimonial.body }}"</p>
                             </blockquote>
                             <figcaption class="mt-10 flex items-center gap-x-6">
@@ -166,7 +179,9 @@ const props = withDefaults(defineProps<Props>(), {
                                     alt=""
                                 />
                                 <div class="text-base">
-                                    <div class="font-semibold text-gray-900 dark:text-white">
+                                    <div
+                                        class="font-semibold text-gray-900 dark:text-white"
+                                    >
                                         {{ testimonial.author.name }}
                                     </div>
                                     <div
@@ -184,4 +199,3 @@ const props = withDefaults(defineProps<Props>(), {
         </div>
     </section>
 </template>
-

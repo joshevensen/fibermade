@@ -34,16 +34,6 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     */
-    public function show(Order $order)
-    {
-        return Inertia::render('orders/OrderShowPage', [
-            'order' => $order,
-        ]);
-    }
-
-    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Order $order)

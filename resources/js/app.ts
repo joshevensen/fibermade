@@ -1,15 +1,15 @@
 import '../css/app.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import type { DefineComponent } from 'vue';
-import { createApp, h } from 'vue';
-import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import 'primeicons/primeicons.css';
+import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-import 'primeicons/primeicons.css';
+import type { DefineComponent } from 'vue';
+import { createApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

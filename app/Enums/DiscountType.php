@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Discount;
+namespace App\Enums;
 
 enum DiscountType: string
 {

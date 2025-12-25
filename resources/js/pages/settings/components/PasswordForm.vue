@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import PasswordController from '@/actions/App/Http/Controllers/PasswordController';
+import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const { form, onSubmit } = useFormSubmission({
@@ -15,7 +15,11 @@ const { form, onSubmit } = useFormSubmission({
     },
     successMessage: 'Password updated successfully.',
     preserveScroll: true,
-    resetFieldsOnError: ['password', 'password_confirmation', 'current_password'],
+    resetFieldsOnError: [
+        'password',
+        'password_confirmation',
+        'current_password',
+    ],
 });
 </script>
 
@@ -27,7 +31,11 @@ const { form, onSubmit } = useFormSubmission({
         </template>
         <template #content>
             <UiForm
-                :initialValues="{ current_password: '', password: '', password_confirmation: '' }"
+                :initialValues="{
+                    current_password: '',
+                    password: '',
+                    password_confirmation: '',
+                }"
                 @submit="onSubmit"
             >
                 <UiFormFieldPassword
@@ -65,4 +73,3 @@ const { form, onSubmit } = useFormSubmission({
         </template>
     </UiCard>
 </template>
-

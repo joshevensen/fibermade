@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 
 interface Props {
     variant?: 'justified' | 'stacked';
@@ -63,10 +63,7 @@ function handleSubmit(event: {
                 {{ title }}
             </h2>
             <div class="w-full max-w-md lg:col-span-5 lg:pt-2">
-                <UiForm
-                    :initialValues="{ email: '' }"
-                    @submit="handleSubmit"
-                >
+                <UiForm :initialValues="{ email: '' }" @submit="handleSubmit">
                     <div class="flex gap-x-4">
                         <label for="email" class="sr-only">Email address</label>
                         <UiFormFieldInput
@@ -94,26 +91,21 @@ function handleSubmit(event: {
                     <a
                         :href="privacyPolicy.link"
                         class="font-semibold whitespace-nowrap text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    >privacy policy</a>.
+                        >privacy policy</a
+                    >.
                 </p>
             </div>
         </div>
 
         <!-- Stacked variant: vertical layout -->
-        <div
-            v-else
-            class="mx-auto max-w-7xl px-6 lg:px-8"
-        >
+        <div v-else class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2
                 class="max-w-2xl text-3xl font-semibold tracking-tight text-balance text-gray-900 sm:text-4xl dark:text-white"
             >
                 {{ title }}
             </h2>
             <div class="mt-10 max-w-md">
-                <UiForm
-                    :initialValues="{ email: '' }"
-                    @submit="handleSubmit"
-                >
+                <UiForm :initialValues="{ email: '' }" @submit="handleSubmit">
                     <div class="flex gap-x-4">
                         <label for="email" class="sr-only">Email address</label>
                         <UiFormFieldInput
@@ -141,10 +133,10 @@ function handleSubmit(event: {
                     <a
                         :href="privacyPolicy.link"
                         class="font-semibold whitespace-nowrap text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-                    >privacy policy</a>.
+                        >privacy policy</a
+                    >.
                 </p>
             </div>
         </div>
     </div>
 </template>
-

@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/ProfileController';
+import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiPassword from '@/components/ui/UiPassword.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { focusPasswordInput } from '@/utils/focusPasswordInput';
+import { ref, useTemplateRef } from 'vue';
 
 const passwordInput = useTemplateRef<{ $el: HTMLElement }>('passwordInput');
 const dialogVisible = ref(false);
@@ -41,7 +41,9 @@ function openDialog(): void {
 <template>
     <UiCard>
         <template #title>Delete Account</template>
-        <template #subtitle>Delete your account and all of its resources</template>
+        <template #subtitle
+            >Delete your account and all of its resources</template
+        >
         <template #content>
             <div
                 class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
@@ -71,12 +73,9 @@ function openDialog(): void {
         header="Are you sure you want to delete your account?"
         :closable="true"
         :close-on-escape="true"
-        @update:visible="(value: boolean) => dialogVisible = value"
+        @update:visible="(value: boolean) => (dialogVisible = value)"
     >
-        <UiForm
-            :initialValues="{ password: '' }"
-            @submit="onSubmit"
-        >
+        <UiForm :initialValues="{ password: '' }" @submit="onSubmit">
             <p class="mb-6 text-neutral-600 dark:text-neutral-400">
                 Once your account is deleted, all of its resources and data will
                 also be permanently deleted. Please enter your password to
@@ -98,7 +97,7 @@ function openDialog(): void {
                 </template>
             </UiFormField>
 
-            <div class="mt-6 flex gap-2 justify-end">
+            <div class="mt-6 flex justify-end gap-2">
                 <UiButton
                     variant="secondary"
                     type="button"
@@ -119,4 +118,3 @@ function openDialog(): void {
         </UiForm>
     </UiDialog>
 </template>
-
