@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Order;
+use Inertia\Inertia;
 
 class OrderController extends Controller
 {
@@ -13,7 +14,7 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('orders/OrderIndexPage');
     }
 
     /**
@@ -21,7 +22,7 @@ class OrderController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('orders/OrderCreatePage');
     }
 
     /**
@@ -29,7 +30,7 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -37,7 +38,9 @@ class OrderController extends Controller
      */
     public function show(Order $order)
     {
-        //
+        return Inertia::render('orders/OrderShowPage', [
+            'order' => $order,
+        ]);
     }
 
     /**
@@ -45,7 +48,9 @@ class OrderController extends Controller
      */
     public function edit(Order $order)
     {
-        //
+        return Inertia::render('orders/OrderEditPage', [
+            'order' => $order,
+        ]);
     }
 
     /**
@@ -53,7 +58,7 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -61,6 +66,6 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        //
+        // TODO: Implement later
     }
 }

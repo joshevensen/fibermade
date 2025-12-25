@@ -12,3 +12,10 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 require __DIR__.'/settings.php';
+require __DIR__.'/colorways.php';
+require __DIR__.'/bases.php';
+require __DIR__.'/dyes.php';
+require __DIR__.'/collections.php';
+require __DIR__.'/discounts.php';
+require __DIR__.'/inventory.php';
+require __DIR__.'/orders.php';

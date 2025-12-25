@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreDiscountRequest;
 use App\Http\Requests\UpdateDiscountRequest;
 use App\Models\Discount;
+use Inertia\Inertia;
 
 class DiscountController extends Controller
 {
@@ -13,7 +14,7 @@ class DiscountController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('discounts/DiscountIndexPage');
     }
 
     /**
@@ -21,7 +22,7 @@ class DiscountController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('discounts/DiscountCreatePage');
     }
 
     /**
@@ -29,7 +30,7 @@ class DiscountController extends Controller
      */
     public function store(StoreDiscountRequest $request)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -37,7 +38,9 @@ class DiscountController extends Controller
      */
     public function show(Discount $discount)
     {
-        //
+        return Inertia::render('discounts/DiscountShowPage', [
+            'discount' => $discount,
+        ]);
     }
 
     /**
@@ -45,7 +48,9 @@ class DiscountController extends Controller
      */
     public function edit(Discount $discount)
     {
-        //
+        return Inertia::render('discounts/DiscountEditPage', [
+            'discount' => $discount,
+        ]);
     }
 
     /**
@@ -53,7 +58,7 @@ class DiscountController extends Controller
      */
     public function update(UpdateDiscountRequest $request, Discount $discount)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -61,6 +66,6 @@ class DiscountController extends Controller
      */
     public function destroy(Discount $discount)
     {
-        //
+        // TODO: Implement later
     }
 }

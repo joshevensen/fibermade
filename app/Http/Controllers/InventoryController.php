@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreInventoryRequest;
 use App\Http\Requests\UpdateInventoryRequest;
 use App\Models\Inventory;
+use Inertia\Inertia;
 
 class InventoryController extends Controller
 {
@@ -13,7 +14,7 @@ class InventoryController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('inventory/InventoryPage');
     }
 
     /**

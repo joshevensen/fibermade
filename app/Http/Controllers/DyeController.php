@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreDyeRequest;
 use App\Http\Requests\UpdateDyeRequest;
 use App\Models\Dye;
+use Inertia\Inertia;
 
 class DyeController extends Controller
 {
@@ -13,7 +14,7 @@ class DyeController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('dyes/DyeIndexPage');
     }
 
     /**
@@ -21,7 +22,7 @@ class DyeController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('dyes/DyeCreatePage');
     }
 
     /**
@@ -29,7 +30,7 @@ class DyeController extends Controller
      */
     public function store(StoreDyeRequest $request)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -37,7 +38,9 @@ class DyeController extends Controller
      */
     public function show(Dye $dye)
     {
-        //
+        return Inertia::render('dyes/DyeShowPage', [
+            'dye' => $dye,
+        ]);
     }
 
     /**
@@ -45,7 +48,9 @@ class DyeController extends Controller
      */
     public function edit(Dye $dye)
     {
-        //
+        return Inertia::render('dyes/DyeEditPage', [
+            'dye' => $dye,
+        ]);
     }
 
     /**
@@ -53,7 +58,7 @@ class DyeController extends Controller
      */
     public function update(UpdateDyeRequest $request, Dye $dye)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -61,6 +66,6 @@ class DyeController extends Controller
      */
     public function destroy(Dye $dye)
     {
-        //
+        // TODO: Implement later
     }
 }

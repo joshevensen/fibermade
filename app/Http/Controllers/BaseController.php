@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreBaseRequest;
 use App\Http\Requests\UpdateBaseRequest;
 use App\Models\Base;
+use Inertia\Inertia;
 
 class BaseController extends Controller
 {
@@ -13,7 +14,7 @@ class BaseController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('bases/BaseIndexPage');
     }
 
     /**
@@ -21,7 +22,7 @@ class BaseController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('bases/BaseCreatePage');
     }
 
     /**
@@ -29,7 +30,7 @@ class BaseController extends Controller
      */
     public function store(StoreBaseRequest $request)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -37,7 +38,9 @@ class BaseController extends Controller
      */
     public function show(Base $base)
     {
-        //
+        return Inertia::render('bases/BaseShowPage', [
+            'base' => $base,
+        ]);
     }
 
     /**
@@ -45,7 +48,9 @@ class BaseController extends Controller
      */
     public function edit(Base $base)
     {
-        //
+        return Inertia::render('bases/BaseEditPage', [
+            'base' => $base,
+        ]);
     }
 
     /**
@@ -53,7 +58,7 @@ class BaseController extends Controller
      */
     public function update(UpdateBaseRequest $request, Base $base)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -61,6 +66,6 @@ class BaseController extends Controller
      */
     public function destroy(Base $base)
     {
-        //
+        // TODO: Implement later
     }
 }

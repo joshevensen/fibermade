@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreColorwayRequest;
 use App\Http\Requests\UpdateColorwayRequest;
 use App\Models\Colorway;
+use Inertia\Inertia;
 
 class ColorwayController extends Controller
 {
@@ -13,7 +14,7 @@ class ColorwayController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('colorways/ColorwayIndexPage');
     }
 
     /**
@@ -21,7 +22,7 @@ class ColorwayController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('colorways/ColorwayCreatePage');
     }
 
     /**
@@ -29,7 +30,7 @@ class ColorwayController extends Controller
      */
     public function store(StoreColorwayRequest $request)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -37,7 +38,9 @@ class ColorwayController extends Controller
      */
     public function show(Colorway $colorway)
     {
-        //
+        return Inertia::render('colorways/ColorwayShowPage', [
+            'colorway' => $colorway,
+        ]);
     }
 
     /**
@@ -45,7 +48,9 @@ class ColorwayController extends Controller
      */
     public function edit(Colorway $colorway)
     {
-        //
+        return Inertia::render('colorways/ColorwayEditPage', [
+            'colorway' => $colorway,
+        ]);
     }
 
     /**
@@ -53,7 +58,7 @@ class ColorwayController extends Controller
      */
     public function update(UpdateColorwayRequest $request, Colorway $colorway)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -61,6 +66,6 @@ class ColorwayController extends Controller
      */
     public function destroy(Colorway $colorway)
     {
-        //
+        // TODO: Implement later
     }
 }

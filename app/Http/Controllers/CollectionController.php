@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionRequest;
 use App\Models\Collection;
+use Inertia\Inertia;
 
 class CollectionController extends Controller
 {
@@ -13,7 +14,7 @@ class CollectionController extends Controller
      */
     public function index()
     {
-        //
+        return Inertia::render('collections/CollectionIndexPage');
     }
 
     /**
@@ -21,7 +22,7 @@ class CollectionController extends Controller
      */
     public function create()
     {
-        //
+        return Inertia::render('collections/CollectionCreatePage');
     }
 
     /**
@@ -29,7 +30,7 @@ class CollectionController extends Controller
      */
     public function store(StoreCollectionRequest $request)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -37,7 +38,9 @@ class CollectionController extends Controller
      */
     public function show(Collection $collection)
     {
-        //
+        return Inertia::render('collections/CollectionShowPage', [
+            'collection' => $collection,
+        ]);
     }
 
     /**
@@ -45,7 +48,9 @@ class CollectionController extends Controller
      */
     public function edit(Collection $collection)
     {
-        //
+        return Inertia::render('collections/CollectionEditPage', [
+            'collection' => $collection,
+        ]);
     }
 
     /**
@@ -53,7 +58,7 @@ class CollectionController extends Controller
      */
     public function update(UpdateCollectionRequest $request, Collection $collection)
     {
-        //
+        // TODO: Implement later
     }
 
     /**
@@ -61,6 +66,6 @@ class CollectionController extends Controller
      */
     public function destroy(Collection $collection)
     {
-        //
+        // TODO: Implement later
     }
 }
