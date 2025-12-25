@@ -1,39 +1,25 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
-import UiPassword from '@/components/ui/UiPassword.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
-import { useToast } from '@/composables/useToast';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 
-const { showSuccess } = useToast();
-
-// Inertia form for server submission
-const form = useForm({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
+const { form, onSubmit } = useFormSubmission({
+    route: store,
+    initialValues: {
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+    },
+    successMessage: 'Your account has been created successfully.',
+    resetFieldsOnSuccess: ['password', 'password_confirmation'],
 });
-
-// Handle PrimeVue Form submission (client-side validation)
-function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
-    if (valid) {
-        Object.assign(form, values);
-        form.submit(store(), {
-            onSuccess: () => {
-                form.reset('password');
-                form.reset('password_confirmation');
-                showSuccess('Your account has been created successfully.');
-            },
-        });
-    }
-}
 </script>
 
 <template>
@@ -47,72 +33,44 @@ function onSubmit({ valid, values }: { valid: boolean; values: Record<string, an
             :initialValues="{ name: '', email: '', password: '', password_confirmation: '' }"
             @submit="onSubmit"
         >
-            <UiFormField
+            <UiFormFieldInput
                 name="name"
                 label="Name"
                 :serverError="form.errors.name"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiInputText
-                        v-bind="fieldProps"
-                        :id="id"
-                        type="text"
-                        required
-                        autofocus
-                        autocomplete="name"
-                        placeholder="Full name"
-                    />
-                </template>
-            </UiFormField>
+                type="text"
+                required
+                autofocus
+                autocomplete="name"
+                placeholder="Full name"
+            />
 
-            <UiFormField
+            <UiFormFieldInput
                 name="email"
                 label="Email address"
                 :serverError="form.errors.email"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiInputText
-                        v-bind="fieldProps"
-                        :id="id"
-                        type="email"
-                        required
-                        autocomplete="email"
-                        placeholder="email@example.com"
-                    />
-                </template>
-            </UiFormField>
+                type="email"
+                required
+                autocomplete="email"
+                placeholder="email@example.com"
+            />
 
-            <UiFormField
+            <UiFormFieldPassword
                 name="password"
                 label="Password"
                 :serverError="form.errors.password"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiPassword
-                        v-bind="fieldProps"
-                        :id="id"
-                        required
-                        autocomplete="new-password"
-                        placeholder="Password"
-                    />
-                </template>
-            </UiFormField>
+                required
+                autocomplete="new-password"
+                placeholder="Password"
+            />
 
-            <UiFormField
+            <UiFormFieldPassword
                 name="password_confirmation"
                 label="Confirm password"
                 :serverError="form.errors.password_confirmation"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiPassword
-                        v-bind="fieldProps"
-                        :id="id"
-                        required
-                        autocomplete="new-password"
-                        placeholder="Confirm password"
-                    />
-                </template>
-            </UiFormField>
+                required
+                autocomplete="new-password"
+                placeholder="Confirm password"
+            />
 
             <UiButton
                 type="submit"

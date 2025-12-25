@@ -1,12 +1,10 @@
 <script setup lang="ts">
-import { useForm } from '@inertiajs/vue3';
 import ProfileController from '@/actions/App/Http/Controllers/ProfileController';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import { useToast } from '@/composables/useToast';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 
 interface Props {
     user: {
@@ -17,25 +15,14 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { showSuccess } = useToast();
-
-// Inertia form for server submission
-const form = useForm({
-    name: props.user.name,
-    email: props.user.email,
+const { form, onSubmit } = useFormSubmission({
+    route: ProfileController.update,
+    initialValues: {
+        name: props.user.name,
+        email: props.user.email,
+    },
+    successMessage: 'Profile updated successfully.',
 });
-
-// Handle PrimeVue Form submission (client-side validation)
-function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
-    if (valid) {
-        Object.assign(form, values);
-        form.submit(ProfileController.update(), {
-            onSuccess: () => {
-                showSuccess('Profile updated successfully.');
-            },
-        });
-    }
-}
 </script>
 
 <template>
@@ -47,39 +34,25 @@ function onSubmit({ valid, values }: { valid: boolean; values: Record<string, an
                 :initialValues="{ name: user.name, email: user.email }"
                 @submit="onSubmit"
             >
-                <UiFormField
+                <UiFormFieldInput
                     name="name"
                     label="Name"
                     :serverError="form.errors.name"
-                >
-                    <template #default="{ props: fieldProps, id }">
-                        <UiInputText
-                            v-bind="fieldProps"
-                            :id="id"
-                            type="text"
-                            required
-                            autocomplete="name"
-                            placeholder="Full name"
-                        />
-                    </template>
-                </UiFormField>
+                    type="text"
+                    required
+                    autocomplete="name"
+                    placeholder="Full name"
+                />
 
-                <UiFormField
+                <UiFormFieldInput
                     name="email"
                     label="Email address"
                     :serverError="form.errors.email"
-                >
-                    <template #default="{ props: fieldProps, id }">
-                        <UiInputText
-                            v-bind="fieldProps"
-                            :id="id"
-                            type="email"
-                            required
-                            autocomplete="username"
-                            placeholder="Email address"
-                        />
-                    </template>
-                </UiFormField>
+                    type="email"
+                    required
+                    autocomplete="username"
+                    placeholder="Email address"
+                />
 
                 <UiButton
                     type="submit"

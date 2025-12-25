@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref, useTemplateRef, nextTick } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, useTemplateRef } from 'vue';
 import ProfileController from '@/actions/App/Http/Controllers/ProfileController';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
@@ -8,34 +7,25 @@ import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiPassword from '@/components/ui/UiPassword.vue';
 import UiButton from '@/components/ui/UiButton.vue';
+import { useFormSubmission } from '@/composables/useFormSubmission';
+import { focusPasswordInput } from '@/utils/focusPasswordInput';
 
-const passwordInput = useTemplateRef<{ $el: HTMLInputElement }>('passwordInput');
+const passwordInput = useTemplateRef<{ $el: HTMLElement }>('passwordInput');
 const dialogVisible = ref(false);
 
-// Inertia form for server submission
-const form = useForm({
-    password: '',
+const { form, onSubmit } = useFormSubmission({
+    route: ProfileController.destroy,
+    initialValues: {
+        password: '',
+    },
+    preserveScroll: true,
+    onSuccess: () => {
+        dialogVisible.value = false;
+    },
+    onError: async () => {
+        await focusPasswordInput(passwordInput);
+    },
 });
-
-// Handle PrimeVue Form submission (client-side validation)
-function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
-    if (valid) {
-        Object.assign(form, values);
-        form.submit(ProfileController.destroy(), {
-            preserveScroll: true,
-            onSuccess: () => {
-                form.reset();
-                dialogVisible.value = false;
-            },
-            onError: async () => {
-                // Focus password input on error
-                await nextTick();
-                const input = passwordInput.value?.$el?.querySelector('input') as HTMLInputElement;
-                input?.focus();
-            },
-        });
-    }
-}
 
 function handleCancel(): void {
     form.clearErrors();

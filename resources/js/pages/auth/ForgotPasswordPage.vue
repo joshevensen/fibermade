@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import { watch } from 'vue';
-import { useForm } from '@inertiajs/vue3';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { email } from '@/routes/password';
 import { useToast } from '@/composables/useToast';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const props = defineProps<{
     status?: string;
@@ -26,22 +25,13 @@ watch(
     { immediate: true },
 );
 
-// Inertia form for server submission
-const form = useForm({
-    email: '',
+const { form, onSubmit } = useFormSubmission({
+    route: email,
+    initialValues: {
+        email: '',
+    },
+    successMessage: 'We have emailed your password reset link!',
 });
-
-// Handle PrimeVue Form submission (client-side validation)
-function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
-    if (valid) {
-        Object.assign(form, values);
-        form.submit(email(), {
-            onSuccess: () => {
-                showSuccess('We have emailed your password reset link!');
-            },
-        });
-    }
-}
 </script>
 
 <template>
@@ -51,22 +41,15 @@ function onSubmit({ valid, values }: { valid: boolean; values: Record<string, an
         page-title="Forgot password"
     >
         <UiForm :initialValues="{ email: '' }" @submit="onSubmit">
-            <UiFormField
+            <UiFormFieldInput
                 name="email"
                 label="Email address"
                 :serverError="form.errors.email"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiInputText
-                        v-bind="fieldProps"
-                        :id="id"
-                        type="email"
-                        autocomplete="off"
-                        autofocus
-                        placeholder="email@example.com"
-                    />
-                </template>
-            </UiFormField>
+                type="email"
+                autocomplete="off"
+                autofocus
+                placeholder="email@example.com"
+            />
 
             <UiButton
                 type="submit"

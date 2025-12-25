@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { watch } from 'vue';
-import { useForm } from '@inertiajs/vue3';
 import UiForm from '@/components/ui/UiForm.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
 import UiPassword from '@/components/ui/UiPassword.vue';
 import UiCheckbox from '@/components/ui/UiCheckbox.vue';
 import UiButton from '@/components/ui/UiButton.vue';
@@ -13,6 +12,7 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import { useToast } from '@/composables/useToast';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const props = defineProps<{
     status?: string;
@@ -31,25 +31,16 @@ watch(
     { immediate: true },
 );
 
-// Inertia form for server submission
-const form = useForm({
-    email: '',
-    password: '',
-    remember: false,
+const { form, onSubmit } = useFormSubmission({
+    route: store,
+    initialValues: {
+        email: '',
+        password: '',
+        remember: false,
+    },
+    successMessage: 'You have been successfully logged in.',
+    resetFieldsOnSuccess: ['password'],
 });
-
-// Handle PrimeVue Form submission (client-side validation)
-function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
-    if (valid) {
-        Object.assign(form, values);
-        form.submit(store(), {
-            onSuccess: () => {
-                form.reset('password');
-                showSuccess('You have been successfully logged in.');
-            },
-        });
-    }
-}
 </script>
 
 <template>
@@ -62,23 +53,16 @@ function onSubmit({ valid, values }: { valid: boolean; values: Record<string, an
             :initialValues="{ email: '', password: '', remember: false }"
             @submit="onSubmit"
         >
-            <UiFormField
+            <UiFormFieldInput
                 name="email"
                 label="Email address"
                 :serverError="form.errors.email"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiInputText
-                        v-bind="fieldProps"
-                        :id="id"
-                        type="email"
-                        required
-                        autofocus
-                        autocomplete="email"
-                        placeholder="email@example.com"
-                    />
-                </template>
-            </UiFormField>
+                type="email"
+                required
+                autofocus
+                autocomplete="email"
+                placeholder="email@example.com"
+            />
 
             <UiFormField
                 name="password"

@@ -1,50 +1,35 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
-import UiPassword from '@/components/ui/UiPassword.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { update } from '@/routes/password';
-import { useToast } from '@/composables/useToast';
+import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const props = defineProps<{
     token: string;
     email: string;
 }>();
 
-const { showSuccess } = useToast();
-const inputEmail = ref(props.email);
-
-// Inertia form for server submission
-const form = useForm({
-    email: props.email,
-    password: '',
-    password_confirmation: '',
-    token: props.token,
+const { form, onSubmit } = useFormSubmission({
+    route: update,
+    initialValues: {
+        email: props.email,
+        password: '',
+        password_confirmation: '',
+        token: props.token,
+    },
+    successMessage: 'Your password has been reset successfully.',
+    resetFieldsOnSuccess: ['password', 'password_confirmation'],
+    transform: (values) => ({
+        ...values,
+        token: props.token,
+        email: props.email,
+    }),
 });
-
-// Handle PrimeVue Form submission (client-side validation)
-function onSubmit({ valid, values }: { valid: boolean; values: Record<string, any> }): void {
-    if (valid) {
-        // Apply transform: merge token and email
-        const transformedData = {
-            ...values,
-            token: props.token,
-            email: props.email,
-        };
-        Object.assign(form, transformedData);
-        form.submit(update(), {
-            onSuccess: () => {
-                form.reset('password');
-                form.reset('password_confirmation');
-                showSuccess('Your password has been reset successfully.');
-            },
-        });
-    }
-}
 </script>
 
 <template>
@@ -69,42 +54,28 @@ function onSubmit({ valid, values }: { valid: boolean; values: Record<string, an
                         :id="id"
                         type="email"
                         autocomplete="email"
-                        v-model="inputEmail"
+                        :value="props.email"
                         readonly
                     />
                 </template>
             </UiFormField>
 
-            <UiFormField
+            <UiFormFieldPassword
                 name="password"
                 label="Password"
                 :serverError="form.errors.password"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiPassword
-                        v-bind="fieldProps"
-                        :id="id"
-                        autocomplete="new-password"
-                        autofocus
-                        placeholder="Password"
-                    />
-                </template>
-            </UiFormField>
+                autocomplete="new-password"
+                autofocus
+                placeholder="Password"
+            />
 
-            <UiFormField
+            <UiFormFieldPassword
                 name="password_confirmation"
                 label="Confirm Password"
                 :serverError="form.errors.password_confirmation"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiPassword
-                        v-bind="fieldProps"
-                        :id="id"
-                        autocomplete="new-password"
-                        placeholder="Confirm password"
-                    />
-                </template>
-            </UiFormField>
+                autocomplete="new-password"
+                placeholder="Confirm password"
+            />
 
             <UiButton
                 type="submit"
