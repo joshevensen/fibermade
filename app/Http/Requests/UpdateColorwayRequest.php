@@ -2,7 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\ColorwayStatus;
+use App\Enums\Technique;
+use App\Models\Account;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateColorwayRequest extends FormRequest
 {
@@ -22,7 +27,17 @@ class UpdateColorwayRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'slug' => ['sometimes', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'technique' => ['nullable', Rule::enum(Technique::class)],
+            'colors' => ['nullable', 'array'],
+            'colors.*' => ['string'],
+            'status' => ['sometimes', Rule::enum(ColorwayStatus::class)],
+            'shopify_product_id' => ['nullable', 'string', 'max:255'],
+            'created_by' => ['nullable', 'integer', Rule::exists(User::class, 'id')],
+            'updated_by' => ['nullable', 'integer', Rule::exists(User::class, 'id')],
         ];
     }
 }

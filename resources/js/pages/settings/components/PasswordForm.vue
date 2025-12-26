@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import PasswordController from '@/actions/App/Http/Controllers/PasswordController';
+import UserController from '@/actions/App/Http/Controllers/UserController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
@@ -7,7 +7,7 @@ import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 
 const { form, onSubmit } = useFormSubmission({
-    route: PasswordController.update,
+    route: UserController.updatePassword,
     initialValues: {
         current_password: '',
         password: '',

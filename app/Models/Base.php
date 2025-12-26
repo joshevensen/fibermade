@@ -2,8 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\BaseStatus;
+use App\Enums\Weight;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Represents a yarn base/type (different yarn materials) in the catalog.
@@ -17,12 +22,97 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name
  * @property string $slug
  * @property string|null $description
- * @property string $status
+ * @property \App\Enums\BaseStatus $status
+ * @property \App\Enums\Weight|null $weight
+ * @property string|null $descriptor
+ * @property int|null $size
+ * @property float|null $cost
+ * @property float|null $retail_price
+ * @property float|null $wool_percent
+ * @property float|null $nylon_percent
+ * @property float|null $alpaca_percent
+ * @property float|null $yak_percent
+ * @property float|null $camel_percent
+ * @property float|null $cotton_percent
+ * @property float|null $bamboo_percent
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class Base extends Model
 {
     /** @use HasFactory<\Database\Factories\BaseFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'account_id',
+        'name',
+        'slug',
+        'description',
+        'status',
+        'weight',
+        'descriptor',
+        'size',
+        'cost',
+        'retail_price',
+        'wool_percent',
+        'nylon_percent',
+        'alpaca_percent',
+        'yak_percent',
+        'camel_percent',
+        'cotton_percent',
+        'bamboo_percent',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => BaseStatus::class,
+            'weight' => Weight::class,
+            'size' => 'integer',
+            'cost' => 'decimal:2',
+            'retail_price' => 'decimal:2',
+            'wool_percent' => 'decimal:2',
+            'nylon_percent' => 'decimal:2',
+            'alpaca_percent' => 'decimal:2',
+            'yak_percent' => 'decimal:2',
+            'camel_percent' => 'decimal:2',
+            'cotton_percent' => 'decimal:2',
+            'bamboo_percent' => 'decimal:2',
+        ];
+    }
+
+    /**
+     * Get the account that owns this base.
+     */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Get the inventory entries for this base.
+     */
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    /**
+     * Get the order items for this base.
+     */
+    public function orderItems(): HasMany
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }

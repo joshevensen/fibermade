@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ProfileController from '@/actions/App/Http/Controllers/ProfileController';
+import UserController from '@/actions/App/Http/Controllers/UserController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
@@ -14,7 +14,7 @@ const passwordInput = useTemplateRef<{ $el: HTMLElement }>('passwordInput');
 const dialogVisible = ref(false);
 
 const { form, onSubmit } = useFormSubmission({
-    route: ProfileController.destroy,
+    route: UserController.destroy,
     initialValues: {
         password: '',
     },
@@ -23,7 +23,11 @@ const { form, onSubmit } = useFormSubmission({
         dialogVisible.value = false;
     },
     onError: async () => {
-        await focusPasswordInput(passwordInput);
+        await focusPasswordInput(
+            passwordInput.value
+                ? { value: passwordInput.value }
+                : null,
+        );
     },
 });
 

@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\IntegrationLogStatus;
+use App\Models\Integration;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreIntegrationLogRequest extends FormRequest
 {
@@ -22,7 +25,13 @@ class StoreIntegrationLogRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'integration_id' => ['required', 'integer', Rule::exists(Integration::class, 'id')],
+            'loggable_type' => ['required', 'string', 'max:255'],
+            'loggable_id' => ['required', 'integer'],
+            'status' => ['required', Rule::enum(IntegrationLogStatus::class)],
+            'message' => ['required', 'string'],
+            'metadata' => ['nullable', 'array'],
+            'synced_at' => ['nullable', 'date'],
         ];
     }
 }

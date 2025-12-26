@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Account;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateDyeRequest extends FormRequest
 {
@@ -22,7 +24,11 @@ class UpdateDyeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
+            'does_bleed' => ['sometimes', 'boolean'],
+            'do_like' => ['sometimes', 'boolean'],
         ];
     }
 }

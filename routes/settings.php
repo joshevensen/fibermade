@@ -1,16 +1,14 @@
 <?php
 
-use App\Http\Controllers\PasswordController;
-use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('settings', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('settings/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-
-    Route::put('settings/password', [PasswordController::class, 'update'])
+    Route::get('settings', [UserController::class, 'edit'])->name('user.edit');
+    Route::patch('settings/profile', [UserController::class, 'update'])->name('user.update');
+    Route::put('settings/password', [UserController::class, 'updatePassword'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');
+    Route::delete('settings/profile', [UserController::class, 'destroy'])->name('user.destroy');
 });

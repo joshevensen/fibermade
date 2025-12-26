@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\IntegrationType;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreIntegrationRequest extends FormRequest
 {
@@ -22,7 +25,11 @@ class StoreIntegrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'user_id' => ['required', 'integer', Rule::exists(User::class, 'id')],
+            'type' => ['required', Rule::enum(IntegrationType::class)],
+            'credentials' => ['required', 'string'],
+            'settings' => ['nullable', 'array'],
+            'active' => ['required', 'boolean'],
         ];
     }
 }

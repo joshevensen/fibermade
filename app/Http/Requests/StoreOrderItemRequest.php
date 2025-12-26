@@ -2,7 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Base;
+use App\Models\Colorway;
+use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreOrderItemRequest extends FormRequest
 {
@@ -22,7 +26,12 @@ class StoreOrderItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'order_id' => ['required', 'integer', Rule::exists(Order::class, 'id')],
+            'colorway_id' => ['required', 'integer', Rule::exists(Colorway::class, 'id')],
+            'base_id' => ['required', 'integer', Rule::exists(Base::class, 'id')],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'unit_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
+            'line_total' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
         ];
     }
 }

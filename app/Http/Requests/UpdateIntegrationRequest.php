@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\IntegrationType;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateIntegrationRequest extends FormRequest
 {
@@ -22,7 +25,11 @@ class UpdateIntegrationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'user_id' => ['sometimes', 'integer', Rule::exists(User::class, 'id')],
+            'type' => ['sometimes', Rule::enum(IntegrationType::class)],
+            'credentials' => ['sometimes', 'string'],
+            'settings' => ['nullable', 'array'],
+            'active' => ['sometimes', 'boolean'],
         ];
     }
 }

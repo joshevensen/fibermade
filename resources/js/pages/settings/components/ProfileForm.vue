@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ProfileController from '@/actions/App/Http/Controllers/ProfileController';
+import UserController from '@/actions/App/Http/Controllers/UserController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
@@ -16,7 +16,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const { form, onSubmit } = useFormSubmission({
-    route: ProfileController.update,
+    route: UserController.update,
     initialValues: {
         name: props.user.name,
         email: props.user.email,

@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Account;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateCollectionRequest extends FormRequest
 {
@@ -22,7 +24,10 @@ class UpdateCollectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
+            'name' => ['sometimes', 'string', 'max:255'],
+            'slug' => ['sometimes', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
         ];
     }
 }

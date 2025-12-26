@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Represents a collection of colorways in the catalog.
@@ -17,11 +20,41 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name
  * @property string $slug
  * @property string|null $description
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
 class Collection extends Model
 {
     /** @use HasFactory<\Database\Factories\CollectionFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'account_id',
+        'name',
+        'slug',
+        'description',
+    ];
+
+    /**
+     * Get the account that owns this collection.
+     */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Get the colorways that belong to this collection.
+     */
+    public function colorways(): BelongsToMany
+    {
+        return $this->belongsToMany(Colorway::class, 'colorway_collection')
+            ->withTimestamps();
+    }
 }

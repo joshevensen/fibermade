@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Base;
+use App\Models\Colorway;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateInventoryRequest extends FormRequest
 {
@@ -22,7 +25,10 @@ class UpdateInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'colorway_id' => ['sometimes', 'integer', Rule::exists(Colorway::class, 'id')],
+            'base_id' => ['sometimes', 'integer', Rule::exists(Base::class, 'id')],
+            'quantity' => ['sometimes', 'integer', 'min:0'],
+            'shopify_variant_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }
