@@ -39,7 +39,7 @@ const mobileDrawerVisible = ref(false);
             <AppHeader @toggle-mobile-drawer="mobileDrawerVisible = !mobileDrawerVisible" />
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-auto py-6 px-4">
+            <main class="flex-1 overflow-auto pt-3.5 px-4 pb-8">
                 <slot />
             </main>
         </div>

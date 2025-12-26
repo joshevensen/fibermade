@@ -8,6 +8,9 @@ import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderContro
 import { index as inventoryIndex } from '@/routes/inventory';
 import { dashboard } from '@/routes';
 import { edit as profileEdit } from '@/routes/profile';
+import { useIcon } from '@/composables/useIcon';
+
+const { IconList } = useIcon();
 
 interface NavigationItem extends Omit<NavItem, 'icon'> {
     icon?: string;
@@ -18,42 +21,42 @@ export function useNavigation(): NavigationItem[] {
         {
             title: 'Dashboard',
             href: dashboard.url(),
-            icon: 'pi pi-home',
-        },
-        {
-            title: 'Orders',
-            href: ordersIndex.url(),
-            icon: 'pi pi-shopping-cart',
+            icon: IconList.Dashboard,
         },
         {
             title: 'Inventory',
             href: inventoryIndex.url(),
-            icon: 'pi pi-th-large',
+            icon: IconList.Inventory,
+        },
+        {
+            title: 'Orders',
+            href: ordersIndex.url(),
+            icon: IconList.Orders,
         },
         {
             title: 'Colorways',
             href: colorwaysIndex.url(),
-            icon: 'pi pi-palette',
+            icon: IconList.Colorways,
         },
         {
             title: 'Collections',
             href: collectionsIndex.url(),
-            icon: 'pi pi-folder',
+            icon: IconList.Collections,
         },
         {
             title: 'Bases',
             href: basesIndex.url(),
-            icon: 'pi pi-box',
+            icon: IconList.Bases,
         },
         {
             title: 'Dyes',
             href: dyesIndex.url(),
-            icon: 'pi pi-circle',
+            icon: IconList.Dyes,
         },
         {
             title: 'Discounts',
             href: discountsIndex.url(),
-            icon: 'pi pi-tag',
+            icon: IconList.Discounts,
         },
     ];
 }
