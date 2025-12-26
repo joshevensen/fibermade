@@ -6,7 +6,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -88,21 +87,5 @@ class User extends Authenticatable
         return $this->belongsToMany(Account::class, 'account_user')
             ->withPivot('role')
             ->withTimestamps();
-    }
-
-    /**
-     * Get the integrations for this user.
-     */
-    public function integrations(): HasMany
-    {
-        return $this->hasMany(Integration::class);
-    }
-
-    /**
-     * Get the orders for this user.
-     */
-    public function orders(): HasMany
-    {
-        return $this->hasMany(Order::class);
     }
 }

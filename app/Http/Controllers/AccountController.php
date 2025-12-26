@@ -2,57 +2,87 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Http\Requests\StoreAccountRequest;
 use App\Http\Requests\UpdateAccountRequest;
 use App\Models\Account;
+use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AccountController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $this->authorize('viewAny', Account::class);
+
+        $user = auth()->user();
+        $accounts = $user->is_admin
+            ? Account::with('users')->get()
+            : $user->accounts()->with('users')->get();
+
+        return Inertia::render('accounts/AccountIndexPage', [
+            'accounts' => $accounts,
+        ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
-        //
+        $this->authorize('create', Account::class);
+
+        return Inertia::render('accounts/AccountCreatePage');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreAccountRequest $request)
+    public function store(StoreAccountRequest $request): RedirectResponse
     {
-        //
+        $account = Account::create($request->validated());
+
+        // Attach user as Owner
+        $request->user()->accounts()->attach($account->id, ['role' => UserRole::Owner->value]);
+
+        return redirect()->route('accounts.index');
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Account $account)
+    public function edit(Account $account): Response
     {
-        //
+        $this->authorize('view', $account);
+
+        return Inertia::render('accounts/AccountEditPage', [
+            'account' => $account->load('users'),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAccountRequest $request, Account $account)
+    public function update(UpdateAccountRequest $request, Account $account): RedirectResponse
     {
-        //
+        $account->update($request->validated());
+
+        return redirect()->route('accounts.index');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Account $account)
+    public function destroy(Account $account): RedirectResponse
     {
-        //
+        $this->authorize('delete', $account);
+
+        $account->delete();
+
+        return redirect()->route('accounts.index');
     }
 }

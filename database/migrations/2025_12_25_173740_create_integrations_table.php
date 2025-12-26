@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('integrations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('type');
             $table->text('credentials'); // encrypted JSON
             $table->json('settings')->nullable();

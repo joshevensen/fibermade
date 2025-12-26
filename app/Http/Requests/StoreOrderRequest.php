@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Account;
-use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,7 +15,7 @@ class StoreOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('create', \App\Models\Order::class);
     }
 
     /**
@@ -29,8 +28,7 @@ class StoreOrderRequest extends FormRequest
         return [
             'type' => ['required', Rule::enum(OrderType::class)],
             'status' => ['required', Rule::enum(OrderStatus::class)],
-            'account_id' => ['nullable', 'integer', Rule::exists(Account::class, 'id')],
-            'user_id' => ['required', 'integer', Rule::exists(User::class, 'id')],
+            'account_id' => ['required', 'integer', Rule::exists(Account::class, 'id')],
             'shopify_order_id' => ['nullable', 'string', 'max:255'],
             'order_date' => ['required', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

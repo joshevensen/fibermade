@@ -12,7 +12,7 @@ class DiscountPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -20,7 +20,7 @@ class DiscountPolicy
      */
     public function view(User $user, Discount $discount): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $discount->account_id);
     }
 
     /**
@@ -28,7 +28,7 @@ class DiscountPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -36,7 +36,7 @@ class DiscountPolicy
      */
     public function update(User $user, Discount $discount): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $discount->account_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class DiscountPolicy
      */
     public function delete(User $user, Discount $discount): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $discount->account_id);
     }
 
     /**
@@ -52,7 +52,7 @@ class DiscountPolicy
      */
     public function restore(User $user, Discount $discount): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $discount->account_id);
     }
 
     /**
@@ -60,6 +60,22 @@ class DiscountPolicy
      */
     public function forceDelete(User $user, Discount $discount): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $discount->account_id);
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    private function isAdmin(User $user): bool
+    {
+        return $user->is_admin === true;
+    }
+
+    /**
+     * Check if the user belongs to the account.
+     */
+    private function belongsToAccount(User $user, int $accountId): bool
+    {
+        return $user->accounts()->where('account_id', $accountId)->exists();
     }
 }

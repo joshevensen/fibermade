@@ -12,7 +12,7 @@ class MediaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -20,7 +20,17 @@ class MediaPolicy
      */
     public function view(User $user, Media $media): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $accountId = $this->getAccountIdFromMediable($media);
+
+        if ($accountId === null) {
+            return false;
+        }
+
+        return $this->belongsToAccount($user, $accountId);
     }
 
     /**
@@ -28,7 +38,7 @@ class MediaPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -36,7 +46,17 @@ class MediaPolicy
      */
     public function update(User $user, Media $media): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $accountId = $this->getAccountIdFromMediable($media);
+
+        if ($accountId === null) {
+            return false;
+        }
+
+        return $this->belongsToAccount($user, $accountId);
     }
 
     /**
@@ -44,7 +64,17 @@ class MediaPolicy
      */
     public function delete(User $user, Media $media): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $accountId = $this->getAccountIdFromMediable($media);
+
+        if ($accountId === null) {
+            return false;
+        }
+
+        return $this->belongsToAccount($user, $accountId);
     }
 
     /**
@@ -52,7 +82,17 @@ class MediaPolicy
      */
     public function restore(User $user, Media $media): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $accountId = $this->getAccountIdFromMediable($media);
+
+        if ($accountId === null) {
+            return false;
+        }
+
+        return $this->belongsToAccount($user, $accountId);
     }
 
     /**
@@ -60,6 +100,51 @@ class MediaPolicy
      */
     public function forceDelete(User $user, Media $media): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $accountId = $this->getAccountIdFromMediable($media);
+
+        if ($accountId === null) {
+            return false;
+        }
+
+        return $this->belongsToAccount($user, $accountId);
+    }
+
+    /**
+     * Get the account ID from the mediable model.
+     */
+    private function getAccountIdFromMediable(Media $media): ?int
+    {
+        $media->loadMissing('mediable');
+
+        if ($media->mediable === null) {
+            return null;
+        }
+
+        // Check if the mediable model has an account_id property
+        if (isset($media->mediable->account_id)) {
+            return $media->mediable->account_id;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    private function isAdmin(User $user): bool
+    {
+        return $user->is_admin === true;
+    }
+
+    /**
+     * Check if the user belongs to the account.
+     */
+    private function belongsToAccount(User $user, int $accountId): bool
+    {
+        return $user->accounts()->where('account_id', $accountId)->exists();
     }
 }

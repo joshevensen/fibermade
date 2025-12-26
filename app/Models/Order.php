@@ -22,8 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property \App\Enums\OrderType $type
  * @property \App\Enums\OrderStatus $status
- * @property int|null $account_id
- * @property int $user_id
+ * @property int $account_id
  * @property string|null $shopify_order_id
  * @property \Illuminate\Support\Carbon $order_date
  * @property float|null $subtotal_amount
@@ -52,7 +51,6 @@ class Order extends Model
         'type',
         'status',
         'account_id',
-        'user_id',
         'shopify_order_id',
         'order_date',
         'subtotal_amount',
@@ -90,14 +88,6 @@ class Order extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
-    }
-
-    /**
-     * Get the user that owns this order.
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
     }
 
     /**

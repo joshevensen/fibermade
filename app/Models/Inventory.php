@@ -12,9 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Inventory maintains the truth about physical yarn quantities. It tracks total
  * quantity for each Colorway + Base combination. Inventory reflects production
  * reality and is the system of record for inventory truth, while Shopify receives
- * availability values. Each Inventory entry represents a unique Colorway + Base combination.
+ * availability values. Each Inventory entry belongs to an Account and represents a unique Colorway + Base combination.
  *
  * @property int $id
+ * @property int $account_id
  * @property int $colorway_id
  * @property int $base_id
  * @property int $quantity
@@ -33,6 +34,7 @@ class Inventory extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'account_id',
         'colorway_id',
         'base_id',
         'quantity',
@@ -49,6 +51,14 @@ class Inventory extends Model
         return [
             'quantity' => 'integer',
         ];
+    }
+
+    /**
+     * Get the account that owns this inventory entry.
+     */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
     }
 
     /**

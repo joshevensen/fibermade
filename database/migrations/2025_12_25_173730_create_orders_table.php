@@ -15,8 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('type');
             $table->string('status');
-            $table->foreignId('account_id')->nullable()->constrained()->nullOnDelete();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('shopify_order_id')->nullable();
             $table->date('order_date');
             $table->decimal('subtotal_amount', 10, 2)->nullable();

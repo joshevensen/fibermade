@@ -12,7 +12,7 @@ class OrderItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -20,7 +20,13 @@ class OrderItemPolicy
      */
     public function view(User $user, OrderItem $orderItem): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $orderItem->loadMissing('order');
+
+        return $this->belongsToAccount($user, $orderItem->order->account_id);
     }
 
     /**
@@ -28,7 +34,7 @@ class OrderItemPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -36,7 +42,13 @@ class OrderItemPolicy
      */
     public function update(User $user, OrderItem $orderItem): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $orderItem->loadMissing('order');
+
+        return $this->belongsToAccount($user, $orderItem->order->account_id);
     }
 
     /**
@@ -44,7 +56,13 @@ class OrderItemPolicy
      */
     public function delete(User $user, OrderItem $orderItem): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $orderItem->loadMissing('order');
+
+        return $this->belongsToAccount($user, $orderItem->order->account_id);
     }
 
     /**
@@ -52,7 +70,13 @@ class OrderItemPolicy
      */
     public function restore(User $user, OrderItem $orderItem): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $orderItem->loadMissing('order');
+
+        return $this->belongsToAccount($user, $orderItem->order->account_id);
     }
 
     /**
@@ -60,6 +84,28 @@ class OrderItemPolicy
      */
     public function forceDelete(User $user, OrderItem $orderItem): bool
     {
-        return false;
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        $orderItem->loadMissing('order');
+
+        return $this->belongsToAccount($user, $orderItem->order->account_id);
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    private function isAdmin(User $user): bool
+    {
+        return $user->is_admin === true;
+    }
+
+    /**
+     * Check if the user belongs to the account.
+     */
+    private function belongsToAccount(User $user, int $accountId): bool
+    {
+        return $user->accounts()->where('account_id', $accountId)->exists();
     }
 }

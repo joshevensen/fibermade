@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
 use Illuminate\Foundation\Http\FormRequest;
@@ -14,7 +15,7 @@ class UpdateInventoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('update', $this->route('inventory'));
     }
 
     /**
@@ -25,6 +26,7 @@ class UpdateInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
             'colorway_id' => ['sometimes', 'integer', Rule::exists(Colorway::class, 'id')],
             'base_id' => ['sometimes', 'integer', Rule::exists(Base::class, 'id')],
             'quantity' => ['sometimes', 'integer', 'min:0'],

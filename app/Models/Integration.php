@@ -15,10 +15,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * Integrations store connection details and settings for external services.
  * In Stage 1, this primarily represents Shopify connections via the GraphQL
  * Admin API. Credentials are stored encrypted, and settings are stored as JSON.
- * Each Integration belongs to a User and can be activated or deactivated.
+ * Each Integration belongs to an Account and can be activated or deactivated.
  *
  * @property int $id
- * @property int $user_id
+ * @property int $account_id
  * @property \App\Enums\IntegrationType $type
  * @property string $credentials
  * @property array|null $settings
@@ -38,7 +38,7 @@ class Integration extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'user_id',
+        'account_id',
         'type',
         'credentials',
         'settings',
@@ -60,11 +60,11 @@ class Integration extends Model
     }
 
     /**
-     * Get the user that owns this integration.
+     * Get the account that owns this integration.
      */
-    public function user(): BelongsTo
+    public function account(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Account::class);
     }
 
     /**

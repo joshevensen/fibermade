@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\UserRole;
 use App\Models\Account;
 use App\Models\User;
 
@@ -12,7 +13,7 @@ class AccountPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $this->isAdmin($user) || $user->accounts()->exists();
     }
 
     /**
@@ -20,7 +21,7 @@ class AccountPolicy
      */
     public function view(User $user, Account $account): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $account);
     }
 
     /**
@@ -28,7 +29,7 @@ class AccountPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -36,7 +37,7 @@ class AccountPolicy
      */
     public function update(User $user, Account $account): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->isAccountOwner($user, $account);
     }
 
     /**
@@ -44,7 +45,7 @@ class AccountPolicy
      */
     public function delete(User $user, Account $account): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->isAccountOwner($user, $account);
     }
 
     /**
@@ -52,7 +53,7 @@ class AccountPolicy
      */
     public function restore(User $user, Account $account): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->isAccountOwner($user, $account);
     }
 
     /**
@@ -60,6 +61,33 @@ class AccountPolicy
      */
     public function forceDelete(User $user, Account $account): bool
     {
-        return false;
+        return $this->isAdmin($user) || $this->isAccountOwner($user, $account);
+    }
+
+    /**
+     * Check if the user is an admin.
+     */
+    private function isAdmin(User $user): bool
+    {
+        return $user->is_admin === true;
+    }
+
+    /**
+     * Check if the user belongs to the account.
+     */
+    private function belongsToAccount(User $user, Account $account): bool
+    {
+        return $user->accounts()->where('account_id', $account->id)->exists();
+    }
+
+    /**
+     * Check if the user is the owner of the account.
+     */
+    private function isAccountOwner(User $user, Account $account): bool
+    {
+        return $user->accounts()
+            ->where('account_id', $account->id)
+            ->wherePivot('role', UserRole::Owner->value)
+            ->exists();
     }
 }

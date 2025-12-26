@@ -131,6 +131,22 @@ class Account extends Model
     }
 
     /**
+     * Get the integrations for this account.
+     */
+    public function integrations(): HasMany
+    {
+        return $this->hasMany(Integration::class);
+    }
+
+    /**
+     * Get the inventories for this account.
+     */
+    public function inventories(): HasMany
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    /**
      * Get the related accounts (account-to-account relationships).
      */
     public function relatedAccounts(): BelongsToMany

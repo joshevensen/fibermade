@@ -16,7 +16,7 @@ class UpdateOrderRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return $this->user()->can('update', $this->route('order'));
     }
 
     /**
@@ -29,8 +29,7 @@ class UpdateOrderRequest extends FormRequest
         return [
             'type' => ['sometimes', Rule::enum(OrderType::class)],
             'status' => ['sometimes', Rule::enum(OrderStatus::class)],
-            'account_id' => ['nullable', 'integer', Rule::exists(Account::class, 'id')],
-            'user_id' => ['sometimes', 'integer', Rule::exists(User::class, 'id')],
+            'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
             'shopify_order_id' => ['nullable', 'string', 'max:255'],
             'order_date' => ['sometimes', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
