@@ -147,12 +147,46 @@ class Account extends Model
     }
 
     /**
-     * Get the related accounts (account-to-account relationships).
+     * Get the vendors associated with this store account.
      */
-    public function relatedAccounts(): BelongsToMany
+    public function vendors(): BelongsToMany
     {
-        return $this->belongsToMany(Account::class, 'account_account', 'account_id_1', 'account_id_2')
-            ->withPivot('discount_rate')
+        return $this->belongsToMany(Account::class, 'store_vendor', 'store_id', 'vendor_id')
+            ->withPivot([
+                'discount_rate',
+                'minimum_order_quantity',
+                'minimum_order_value',
+                'payment_terms',
+                'lead_time_days',
+                'allows_preorders',
+                'status',
+                'started_at',
+                'ended_at',
+                'share_vendor_contact_info',
+                'notes',
+            ])
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the stores associated with this vendor account.
+     */
+    public function stores(): BelongsToMany
+    {
+        return $this->belongsToMany(Account::class, 'store_vendor', 'vendor_id', 'store_id')
+            ->withPivot([
+                'discount_rate',
+                'minimum_order_quantity',
+                'minimum_order_value',
+                'payment_terms',
+                'lead_time_days',
+                'allows_preorders',
+                'status',
+                'started_at',
+                'ended_at',
+                'share_vendor_contact_info',
+                'notes',
+            ])
             ->withTimestamps();
     }
 }

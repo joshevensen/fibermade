@@ -92,10 +92,10 @@ class AccountSeeder extends Seeder
         }
 
         // Bad Frog Yarn Co. wholesales to Yarnivore
-        DB::table('account_account')->updateOrInsert(
+        DB::table('store_vendor')->updateOrInsert(
             [
-                'account_id_1' => $account->id,
-                'account_id_2' => $yarnivoreAccount->id,
+                'store_id' => $yarnivoreAccount->id,
+                'vendor_id' => $account->id,
             ],
             [
                 'discount_rate' => 60,
