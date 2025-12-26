@@ -43,7 +43,14 @@ const fieldId = computed(() => props.name);
         :validateOnMount="validateOnMount"
     >
         <template v-slot="$field">
-            <label v-if="label" :for="fieldId">{{ label }}</label>
+            <label v-if="label" :for="fieldId" class="flex justify-between w-full mb-1">
+                <span>
+                    {{ label }}
+                </span>
+                <span>
+                    <slot name="extra"/>
+                </span>
+            </label>
             <slot v-bind="{ ...$field, id: fieldId }" />
             <UiMessage
                 v-if="$field?.invalid || serverError"

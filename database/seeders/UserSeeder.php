@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -15,34 +16,35 @@ class UserSeeder extends Seeder
         // Admin user (no account)
         User::factory()->create([
             'name' => 'Josh Evensen',
-            'email' => 'josh@fibermade.com',
+            'email' => 'josh@fibermade.app',
             'is_admin' => true,
+            'password' => Hash::make('password'),
         ]);
 
         // Bad Frog Yarn Co. users (will be associated with account in AccountSeeder)
         User::factory()->create([
             'name' => 'Josh Evensen',
             'email' => 'josh@badfrogyarnco.com',
-            'is_admin' => false,
+            'password' => Hash::make('password'),
         ]);
 
         User::factory()->create([
             'name' => 'Kristen Matte',
             'email' => 'kristen@badfrogyarnco.com',
-            'is_admin' => false,
+            'password' => Hash::make('password'),
         ]);
 
         // Yarnivore users (will be associated with account in AccountSeeder)
         User::factory()->create([
             'name' => 'Caryn',
             'email' => 'caryn@yarnivoresa.net',
-            'is_admin' => false,
+            'password' => Hash::make('password'),
         ]);
 
         User::factory()->create([
             'name' => 'Han Smith',
             'email' => 'han@yarnivoresa.net',
-            'is_admin' => false,
+            'password' => Hash::make('password'),
         ]);
     }
 }

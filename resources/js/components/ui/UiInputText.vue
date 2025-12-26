@@ -16,7 +16,10 @@ interface Props {
     iconPos?: 'start' | 'end';
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+    size: 'small', 
+    fluid: true,
+});
 
 defineOptions({
     inheritAttrs: false,

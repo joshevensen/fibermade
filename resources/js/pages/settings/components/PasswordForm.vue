@@ -52,6 +52,7 @@ const { form, onSubmit } = useFormSubmission({
                     :serverError="form.errors.password"
                     autocomplete="new-password"
                     placeholder="New password"
+                    feedback
                 />
 
                 <UiFormFieldPassword

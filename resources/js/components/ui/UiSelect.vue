@@ -21,6 +21,8 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     scrollHeight: '14rem',
+    size: 'small', 
+    fluid: true,
 });
 
 defineOptions({

@@ -34,7 +34,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    feedback: true,
+    size: 'small', 
+    fluid: true,
 });
 
 defineOptions({

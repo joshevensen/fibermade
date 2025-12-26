@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import { usePage } from '@inertiajs/vue3';
-import AppearanceSettings from './components/AppearanceSettings.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
@@ -15,7 +14,6 @@ const user = page.props.auth.user;
         <div class="space-y-4">
             <ProfileForm :user="user" />
             <PasswordForm />
-            <AppearanceSettings />
             <DeleteAccountDialog />
         </div>
     </AppLayout>

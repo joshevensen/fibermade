@@ -28,7 +28,10 @@ interface Props {
     fluid?: boolean;
 }
 
-defineProps<Props>();
+withDefaults(defineProps<Props>(), {
+    size: 'small', 
+    fluid: true,
+});
 
 defineOptions({
     inheritAttrs: false,

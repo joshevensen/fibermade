@@ -69,18 +69,16 @@ const { form, onSubmit } = useFormSubmission({
                 label="Password"
                 :serverError="form.errors.password"
             >
+                <template #extra>
+                    <UiLink
+                        v-if="canResetPassword"
+                        :href="request()"
+                        class="text-sm"
+                    >
+                        Forgot password?
+                    </UiLink>
+                </template>
                 <template #default="{ props: fieldProps, id }">
-                    <div class="grid gap-2">
-                        <div class="flex items-center justify-between">
-                            <span></span>
-                            <UiLink
-                                v-if="canResetPassword"
-                                :href="request()"
-                                class="text-sm"
-                            >
-                                Forgot password?
-                            </UiLink>
-                        </div>
                         <UiPassword
                             v-bind="fieldProps"
                             :id="id"
@@ -88,7 +86,6 @@ const { form, onSubmit } = useFormSubmission({
                             autocomplete="current-password"
                             placeholder="Password"
                         />
-                    </div>
                 </template>
             </UiFormField>
 

@@ -1,13 +1,20 @@
 <script setup lang="ts">
 import PrimeCard from 'primevue/card';
+import { computed } from 'vue';
 
 defineOptions({
     inheritAttrs: false,
 });
+
+const pt = computed(() => ({
+    root: {
+        class: 'bg-surface-0! border border-surface-200 shadow-none!',
+    },
+}));
 </script>
 
 <template>
-    <PrimeCard v-bind="$attrs">
+    <PrimeCard v-bind="$attrs" :pt="pt">
         <template #header>
             <slot name="header" />
         </template>
