@@ -4,13 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Cashier\Billable;
 
 /**
  * Represents an account that can be used by all account types (wholesale, retail, show).
  *
  * Accounts store buyer relationships and can represent wholesale buyers, retail
  * customers, or show organizers. Each Account belongs to a User (owner) and owns
- * catalog items (Colorways, Bases, Collections, Tags). Accounts support account-level
+ * catalog items (Colorways, Bases, Collections). Accounts support account-level
  * pricing rules and are used for wholesale order management and relationship tracking.
  *
  * @property int $id
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 class Account extends Model
 {
     /** @use HasFactory<\Database\Factories\AccountFactory> */
-    use HasFactory;
+    use Billable, HasFactory;
 
     /**
      * The attributes that are mass assignable.

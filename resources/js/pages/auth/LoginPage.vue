@@ -7,29 +7,16 @@ import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import UiPassword from '@/components/ui/UiPassword.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
-import { useToast } from '@/composables/useToast';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { watch } from 'vue';
 
 const props = defineProps<{
     status?: string;
     canResetPassword: boolean;
     canRegister: boolean;
 }>();
-
-const { showSuccess } = useToast();
-
-// Show status message as toast when it changes
-watch(
-    () => props.status,
-    (status) => {
-        if (status) showSuccess(status);
-    },
-    { immediate: true },
-);
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -38,7 +25,6 @@ const { form, onSubmit } = useFormSubmission({
         password: '',
         remember: false,
     },
-    successMessage: 'You have been successfully logged in.',
     resetFieldsOnSuccess: ['password'],
 });
 </script>

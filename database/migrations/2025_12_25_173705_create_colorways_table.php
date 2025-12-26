@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
+            $table->string('technique')->nullable();
+            $table->json('colors')->nullable();
             $table->string('status')->default('active');
             $table->string('shopify_product_id')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
