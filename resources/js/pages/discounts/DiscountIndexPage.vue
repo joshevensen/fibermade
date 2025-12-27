@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import PrimeColumn from 'primevue/column';
 import { create as createDiscount, edit as editDiscount, destroy as destroyDiscount } from '@/actions/App/Http/Controllers/DiscountController';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
@@ -70,7 +69,34 @@ function handleDelete(discount: Props['discounts'][0], event: Event) {
 const columns = computed(() => [
     { field: 'name', header: 'Name', sortable: true, columnKey: 'name' },
     { field: 'code', header: 'Code', sortable: true, columnKey: 'code' },
-    { field: 'shopify_discount_id', header: 'Shopify Discount ID', sortable: true, columnKey: 'shopify_discount_id' },
+    {
+        field: 'type',
+        header: 'Type',
+        sortable: true,
+        columnKey: 'type',
+        bodyTemplate: (data: Props['discounts'][0]) => formatEnum(data.type),
+    },
+    {
+        field: 'is_active',
+        header: 'Is Active',
+        sortable: true,
+        columnKey: 'is_active',
+        bodyTemplate: (data: Props['discounts'][0]) => formatBoolean(data.is_active),
+    },
+    {
+        field: 'starts_at',
+        header: 'Starts At',
+        sortable: true,
+        columnKey: 'starts_at',
+        bodyTemplate: (data: Props['discounts'][0]) => formatDate(data.starts_at),
+    },
+    {
+        field: 'ends_at',
+        header: 'Ends At',
+        sortable: true,
+        columnKey: 'ends_at',
+        bodyTemplate: (data: Props['discounts'][0]) => formatDate(data.ends_at),
+    },
 ]);
 </script>
 
@@ -98,55 +124,21 @@ const columns = computed(() => [
                 striped-rows
                 show-gridlines
             >
-                <PrimeColumn field="type" header="Type" sortable columnKey="type">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.type) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="parameters" header="Parameters" sortable columnKey="parameters">
-                    <template #body="{ data }">
-                        {{ formatParameters(data.parameters) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="starts_at" header="Starts At" sortable columnKey="starts_at">
-                    <template #body="{ data }">
-                        {{ formatDate(data.starts_at) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="ends_at" header="Ends At" sortable columnKey="ends_at">
-                    <template #body="{ data }">
-                        {{ formatDate(data.ends_at) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="is_active" header="Is Active" sortable columnKey="is_active">
-                    <template #body="{ data }">
-                        {{ formatBoolean(data.is_active) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn header="Actions" :exportable="false" style="width: 8rem" columnKey="actions">
-                    <template #body="{ data }">
-                        <div class="flex gap-2">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editDiscount.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </div>
-                    </template>
-                </PrimeColumn>
+                <template #actions="{ data }">
+                    <UiButton
+                        :icon="IconList.Settings"
+                        text
+                        size="small"
+                        @click="router.visit(editDiscount.url(data.id))"
+                    />
+                    <UiButton
+                        :icon="IconList.Close"
+                        text
+                        size="small"
+                        severity="danger"
+                        @click="handleDelete(data, $event)"
+                    />
+                </template>
             </UiDataTable>
         </div>
     </AppLayout>

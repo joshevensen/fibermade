@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import PrimeColumn from 'primevue/column';
 import { create as createBase, edit as editBase, destroy as destroyBase } from '@/actions/App/Http/Controllers/BaseController';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
@@ -70,10 +69,29 @@ function handleDelete(base: Props['bases'][0], event: Event) {
 
 const columns = computed(() => [
     { field: 'name', header: 'Name', sortable: true, columnKey: 'name' },
-    { field: 'slug', header: 'Slug', sortable: true, columnKey: 'slug' },
-    { field: 'description', header: 'Description', sortable: true, columnKey: 'description' },
     { field: 'descriptor', header: 'Descriptor', sortable: true, columnKey: 'descriptor' },
     { field: 'size', header: 'Size', sortable: true, columnKey: 'size' },
+    {
+        field: 'status',
+        header: 'Status',
+        sortable: true,
+        columnKey: 'status',
+        bodyTemplate: (data: Props['bases'][0]) => formatEnum(data.status),
+    },
+    {
+        field: 'weight',
+        header: 'Weight',
+        sortable: true,
+        columnKey: 'weight',
+        bodyTemplate: (data: Props['bases'][0]) => formatEnum(data.weight),
+    },
+    {
+        field: 'retail_price',
+        header: 'Retail Price',
+        sortable: true,
+        columnKey: 'retail_price',
+        bodyTemplate: (data: Props['bases'][0]) => formatCurrency(data.retail_price),
+    },
 ]);
 </script>
 
@@ -101,91 +119,21 @@ const columns = computed(() => [
                 striped-rows
                 show-gridlines
             >
-                <PrimeColumn field="status" header="Status" sortable columnKey="status">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.status) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="weight" header="Weight" sortable columnKey="weight">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.weight) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="cost" header="Cost" sortable columnKey="cost">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.cost) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="retail_price" header="Retail Price" sortable columnKey="retail_price">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.retail_price) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="wool_percent" header="Wool %" sortable columnKey="wool_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.wool_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="nylon_percent" header="Nylon %" sortable columnKey="nylon_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.nylon_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="alpaca_percent" header="Alpaca %" sortable columnKey="alpaca_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.alpaca_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="yak_percent" header="Yak %" sortable columnKey="yak_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.yak_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="camel_percent" header="Camel %" sortable columnKey="camel_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.camel_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="cotton_percent" header="Cotton %" sortable columnKey="cotton_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.cotton_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="bamboo_percent" header="Bamboo %" sortable columnKey="bamboo_percent">
-                    <template #body="{ data }">
-                        {{ formatPercent(data.bamboo_percent) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn header="Actions" :exportable="false" style="width: 8rem" columnKey="actions">
-                    <template #body="{ data }">
-                        <div class="flex gap-2">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editBase.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </div>
-                    </template>
-                </PrimeColumn>
+                <template #actions="{ data }">
+                    <UiButton
+                        :icon="IconList.Settings"
+                        text
+                        size="small"
+                        @click="router.visit(editBase.url(data.id))"
+                    />
+                    <UiButton
+                        :icon="IconList.Close"
+                        text
+                        size="small"
+                        severity="danger"
+                        @click="handleDelete(data, $event)"
+                    />
+                </template>
             </UiDataTable>
         </div>
     </AppLayout>

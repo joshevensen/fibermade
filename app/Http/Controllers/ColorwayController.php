@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Color;
+use App\Enums\ColorwayStatus;
+use App\Enums\Technique;
 use App\Http\Requests\StoreColorwayRequest;
 use App\Http\Requests\UpdateColorwayRequest;
 use App\Models\Colorway;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,7 +25,7 @@ class ColorwayController extends Controller
         $user = auth()->user();
         $colorways = $user->is_admin
             ? Colorway::with('account')->get()
-            : Colorway::whereIn('account_id', $user->accounts()->pluck('id'))->with('account')->get();
+            : ($user->account_id ? Colorway::where('account_id', $user->account_id)->with('account')->get() : collect());
 
         return Inertia::render('colorways/ColorwayIndexPage', [
             'colorways' => $colorways,
@@ -35,7 +39,32 @@ class ColorwayController extends Controller
     {
         $this->authorize('create', Colorway::class);
 
-        return Inertia::render('colorways/ColorwayCreatePage');
+        $colorwayStatusOptions = collect(ColorwayStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $techniqueOptions = collect(Technique::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $colorOptions = collect(Color::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        return Inertia::render('colorways/ColorwayCreatePage', [
+            'colorwayStatusOptions' => $colorwayStatusOptions,
+            'techniqueOptions' => $techniqueOptions,
+            'colorOptions' => $colorOptions,
+        ]);
     }
 
     /**
@@ -43,9 +72,11 @@ class ColorwayController extends Controller
      */
     public function store(StoreColorwayRequest $request): RedirectResponse
     {
-        $colorway = Colorway::create($request->validated());
-        $colorway->created_by = $request->user()->id;
-        $colorway->save();
+        $colorway = Colorway::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+            'created_by' => $request->user()->id,
+        ]);
 
         return redirect()->route('colorways.index');
     }

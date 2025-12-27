@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,7 +24,7 @@ class OrderController extends Controller
         $user = auth()->user();
         $orders = $user->is_admin
             ? Order::with(['account', 'orderItems'])->get()
-            : Order::whereIn('account_id', $user->accounts()->pluck('id'))->with(['account', 'orderItems'])->get();
+            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems'])->get() : collect());
 
         return Inertia::render('orders/OrderIndexPage', [
             'orders' => $orders,
@@ -35,7 +38,24 @@ class OrderController extends Controller
     {
         $this->authorize('create', Order::class);
 
-        return Inertia::render('orders/OrderCreatePage');
+        $orderTypeOptions = collect(OrderType::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $orderStatusOptions = collect(OrderStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        return Inertia::render('orders/OrderCreatePage', [
+            'orderTypeOptions' => $orderTypeOptions,
+            'orderStatusOptions' => $orderStatusOptions,
+        ]);
     }
 
     /**
@@ -43,9 +63,11 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): RedirectResponse
     {
-        $order = Order::create($request->validated());
-        $order->created_by = $request->user()->id;
-        $order->save();
+        $order = Order::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+            'created_by' => $request->user()->id,
+        ]);
 
         return redirect()->route('orders.index');
     }

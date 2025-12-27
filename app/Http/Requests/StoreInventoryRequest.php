@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
 use Illuminate\Foundation\Http\FormRequest;
@@ -26,7 +25,6 @@ class StoreInventoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => ['required', 'integer', Rule::exists(Account::class, 'id')],
             'colorway_id' => ['required', 'integer', Rule::exists(Colorway::class, 'id')],
             'base_id' => ['required', 'integer', Rule::exists(Base::class, 'id')],
             'quantity' => ['required', 'integer', 'min:0'],

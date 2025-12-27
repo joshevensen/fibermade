@@ -11,6 +11,7 @@ interface Column {
     filterField?: string | ((item: any) => string);
     dataType?: string;
     columnKey?: string;
+    bodyTemplate?: (data: any) => string | number | null | undefined;
     [key: string]: any;
 }
 
@@ -72,7 +73,24 @@ defineOptions({
             v-for="(col, index) of columns"
             :key="col.columnKey || (typeof col.field === 'string' ? col.field : null) || col.header || index"
             v-bind="col"
-        />
+        >
+            <template v-if="col.bodyTemplate" #body="{ data }">
+                {{ col.bodyTemplate(data) }}
+            </template>
+        </PrimeColumn>
+        <PrimeColumn
+            v-if="$slots.actions"
+            header="Actions"
+            :exportable="false"
+            style="width: 8rem"
+            columnKey="actions"
+        >
+            <template #body="{ data }">
+                <div class="flex gap-2">
+                    <slot name="actions" :data="data" />
+                </div>
+            </template>
+        </PrimeColumn>
         <slot />
         <template #empty>
             <div class="flex items-center justify-center min-h-[60vh]">

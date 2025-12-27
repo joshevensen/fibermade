@@ -21,9 +21,9 @@ class IntegrationLogController extends Controller
         $user = auth()->user();
         $integrationLogs = $user->is_admin
             ? IntegrationLog::with('integration.account')->get()
-            : IntegrationLog::whereHas('integration', function ($query) use ($user) {
-                $query->whereIn('account_id', $user->accounts()->pluck('id'));
-            })->with('integration.account')->get();
+            : ($user->account_id ? IntegrationLog::whereHas('integration', function ($query) use ($user) {
+                $query->where('account_id', $user->account_id);
+            })->with('integration.account')->get() : collect());
 
         return Inertia::render('integration-logs/IntegrationLogIndexPage', [
             'integrationLogs' => $integrationLogs,

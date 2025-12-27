@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
-use App\Models\Account;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -27,7 +26,6 @@ class StoreColorwayRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => ['required', 'integer', Rule::exists(Account::class, 'id')],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],

@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Account;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreDyeRequest extends FormRequest
 {
@@ -24,7 +22,6 @@ class StoreDyeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'account_id' => ['required', 'integer', Rule::exists(Account::class, 'id')],
             'name' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'does_bleed' => ['required', 'boolean'],

@@ -6,6 +6,7 @@ import { index as dyesIndex } from '@/actions/App/Http/Controllers/DyeController
 import { index as discountsIndex } from '@/actions/App/Http/Controllers/DiscountController';
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
 import { index as inventoryIndex } from '@/routes/inventory';
+import { index as storesIndex } from '@/routes/stores';
 import { dashboard } from '@/routes';
 import { edit as profileEdit } from '@/routes/user';
 import { useIcon } from '@/composables/useIcon';
@@ -27,6 +28,11 @@ export function useNavigation(): NavigationItem[] {
             title: 'Inventory',
             href: inventoryIndex.url(),
             icon: IconList.Inventory,
+        },
+        {
+            title: 'Stores',
+            href: storesIndex.url(),
+            icon: IconList.Stores,
         },
         {
             title: 'Orders',

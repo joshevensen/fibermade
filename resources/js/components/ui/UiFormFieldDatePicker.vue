@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiFormField from '@/components/ui/UiFormField.vue';
-import UiCheckbox from '@/components/ui/UiCheckbox.vue';
+import UiDatePicker from '@/components/ui/UiDatePicker.vue';
 
 interface Props {
     // UiFormField props
@@ -17,19 +17,34 @@ interface Props {
     validateOnSubmit?: boolean;
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
-    labelPosition?: 'top' | 'left' | 'right';
-    // UiCheckbox props
-    binary?: boolean;
-    indeterminate?: boolean;
+    // UiDatePicker props
+    selectionMode?: 'single' | 'multiple' | 'range';
+    dateFormat?: string;
+    showIcon?: boolean;
+    icon?: string;
+    inline?: boolean;
+    minDate?: Date;
+    maxDate?: Date;
+    disabledDates?: Date[];
+    disabledDays?: number[];
+    showTime?: boolean;
+    timeOnly?: boolean;
+    hourFormat?: '12' | '24';
+    showClear?: boolean;
     size?: 'small' | 'large';
     invalid?: boolean;
     disabled?: boolean;
     variant?: 'outlined' | 'filled';
     readonly?: boolean;
-    required?: boolean;
+    placeholder?: string;
+    fluid?: boolean;
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    selectionMode: 'single',
+    size: 'small',
+    fluid: true,
+});
 
 defineOptions({
     inheritAttrs: false,
@@ -49,20 +64,31 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
-        :labelPosition="labelPosition ?? 'right'"
     >
         <template #default="{ props: fieldProps, id }">
-            <UiCheckbox
+            <UiDatePicker
                 v-bind="{ ...fieldProps, ...$attrs }"
                 :id="id"
-                :binary="binary"
-                :indeterminate="indeterminate"
+                :selectionMode="selectionMode"
+                :dateFormat="dateFormat"
+                :showIcon="showIcon"
+                :icon="icon"
+                :inline="inline"
+                :minDate="minDate"
+                :maxDate="maxDate"
+                :disabledDates="disabledDates"
+                :disabledDays="disabledDays"
+                :showTime="showTime"
+                :timeOnly="timeOnly"
+                :hourFormat="hourFormat"
+                :showClear="showClear"
                 :size="size"
                 :invalid="invalid"
                 :disabled="disabled"
                 :variant="variant"
                 :readonly="readonly"
-                :required="required"
+                :placeholder="placeholder"
+                :fluid="fluid"
             />
         </template>
     </UiFormField>

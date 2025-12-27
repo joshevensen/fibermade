@@ -22,6 +22,7 @@ export const IconList = {
     Settings: 'pi pi-cog',
     SignOut: 'pi pi-sign-out',
     Spinner: 'pi pi-spinner',
+    Stores: 'pi pi-shopping-bag',
     SystemMode: 'pi pi-desktop',
 } as const;
 

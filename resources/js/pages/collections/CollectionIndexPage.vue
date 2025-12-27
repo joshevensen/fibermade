@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import PrimeColumn from 'primevue/column';
 import { create as createCollection, edit as editCollection, destroy as destroyCollection } from '@/actions/App/Http/Controllers/CollectionController';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
@@ -36,7 +35,6 @@ function handleDelete(collection: Props['collections'][0], event: Event) {
 
 const columns = computed(() => [
     { field: 'name', header: 'Name', sortable: true, columnKey: 'name' },
-    { field: 'slug', header: 'Slug', sortable: true, columnKey: 'slug' },
     { field: 'description', header: 'Description', sortable: true, columnKey: 'description' },
 ]);
 </script>
@@ -65,25 +63,21 @@ const columns = computed(() => [
                 striped-rows
                 show-gridlines
             >
-                <PrimeColumn header="Actions" :exportable="false" style="width: 8rem" columnKey="actions">
-                    <template #body="{ data }">
-                        <div class="flex gap-2">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editCollection.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </div>
-                    </template>
-                </PrimeColumn>
+                <template #actions="{ data }">
+                    <UiButton
+                        :icon="IconList.Settings"
+                        text
+                        size="small"
+                        @click="router.visit(editCollection.url(data.id))"
+                    />
+                    <UiButton
+                        :icon="IconList.Close"
+                        text
+                        size="small"
+                        severity="danger"
+                        @click="handleDelete(data, $event)"
+                    />
+                </template>
             </UiDataTable>
         </div>
     </AppLayout>

@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import PrimeColumn from 'primevue/column';
 import { create as createDye, edit as editDye, destroy as destroyDye } from '@/actions/App/Http/Controllers/DyeController';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
@@ -44,7 +43,20 @@ function handleDelete(dye: Props['dyes'][0], event: Event) {
 
 const columns = computed(() => [
     { field: 'name', header: 'Name', sortable: true, columnKey: 'name' },
-    { field: 'notes', header: 'Notes', sortable: true, columnKey: 'notes' },
+    {
+        field: 'does_bleed',
+        header: 'Does Bleed',
+        sortable: true,
+        columnKey: 'does_bleed',
+        bodyTemplate: (data: Props['dyes'][0]) => formatBoolean(data.does_bleed),
+    },
+    {
+        field: 'do_like',
+        header: 'Do Like',
+        sortable: true,
+        columnKey: 'do_like',
+        bodyTemplate: (data: Props['dyes'][0]) => formatBoolean(data.do_like),
+    },
 ]);
 </script>
 
@@ -72,37 +84,21 @@ const columns = computed(() => [
                 striped-rows
                 show-gridlines
             >
-                <PrimeColumn field="does_bleed" header="Does Bleed" sortable columnKey="does_bleed">
-                    <template #body="{ data }">
-                        {{ formatBoolean(data.does_bleed) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="do_like" header="Do Like" sortable columnKey="do_like">
-                    <template #body="{ data }">
-                        {{ formatBoolean(data.do_like) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn header="Actions" :exportable="false" style="width: 8rem" columnKey="actions">
-                    <template #body="{ data }">
-                        <div class="flex gap-2">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editDye.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </div>
-                    </template>
-                </PrimeColumn>
+                <template #actions="{ data }">
+                    <UiButton
+                        :icon="IconList.Settings"
+                        text
+                        size="small"
+                        @click="router.visit(editDye.url(data.id))"
+                    />
+                    <UiButton
+                        :icon="IconList.Close"
+                        text
+                        size="small"
+                        severity="danger"
+                        @click="handleDelete(data, $event)"
+                    />
+                </template>
             </UiDataTable>
         </div>
     </AppLayout>

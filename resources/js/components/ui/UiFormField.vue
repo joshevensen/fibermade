@@ -3,6 +3,8 @@ import { computed } from 'vue';
 import { FormField as PrimeFormField } from '@primevue/forms';
 import UiMessage from '@/components/ui/UiMessage.vue';
 
+type LabelPosition = 'top' | 'left' | 'right';
+
 interface Props {
     name: string;
     label?: string;
@@ -17,9 +19,12 @@ interface Props {
     validateOnSubmit?: boolean;
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
+    labelPosition?: LabelPosition;
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    labelPosition: 'top',
+});
 
 defineOptions({
     inheritAttrs: false,
@@ -27,6 +32,9 @@ defineOptions({
 
 // Use name as the field ID for label-input association
 const fieldId = computed(() => props.name);
+
+const isHorizontal = computed(() => props.labelPosition === 'left' || props.labelPosition === 'right');
+const isLabelRight = computed(() => props.labelPosition === 'right');
 </script>
 
 <template>
@@ -43,20 +51,45 @@ const fieldId = computed(() => props.name);
         :validateOnMount="validateOnMount"
     >
         <template v-slot="$field">
-            <label v-if="label" :for="fieldId" class="flex justify-between w-full mb-1">
-                <span>
-                    {{ label }}
-                </span>
-                <span>
-                    <slot name="extra"/>
-                </span>
-            </label>
-            <slot v-bind="{ ...$field, id: fieldId }" />
+            <div :class="{
+                'flex gap-4 items-start': isHorizontal,
+            }">
+                <!-- Label positioned based on labelPosition prop -->
+                <label
+                    v-if="label"
+                    :for="fieldId"
+                    :class="{
+                        'flex justify-between w-full mb-1': labelPosition === 'top',
+                        'flex items-center gap-2 shrink-0': isHorizontal && !isLabelRight,
+                        'flex items-center gap-2 shrink-0 order-2': isHorizontal && isLabelRight,
+                    }"
+                >
+                    <span>
+                        {{ label }}
+                    </span>
+                    <span v-if="labelPosition === 'top'">
+                        <slot name="extra"/>
+                    </span>
+                </label>
+                
+                <!-- Input wrapper with proper order for right-side labels -->
+                <div :class="{
+                    'flex-1': isHorizontal,
+                    'order-1': isHorizontal && isLabelRight,
+                }">
+                    <slot v-bind="{ ...$field, id: fieldId }" />
+                </div>
+            </div>
+            
+            <!-- Error message always full width underneath -->
             <UiMessage
                 v-if="$field?.invalid || serverError"
                 severity="error"
                 size="small"
                 variant="simple"
+                :class="{
+                    'mt-1': labelPosition === 'top' || isHorizontal,
+                }"
             >
                 {{ serverError || $field.error?.message }}
             </UiMessage>

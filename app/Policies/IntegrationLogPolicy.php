@@ -12,7 +12,7 @@ class IntegrationLogPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $this->isAdmin($user) || $user->accounts()->exists();
+        return $this->isAdmin($user) || $user->account_id !== null;
     }
 
     /**
@@ -34,7 +34,7 @@ class IntegrationLogPolicy
      */
     public function create(User $user): bool
     {
-        return $this->isAdmin($user) || $user->accounts()->exists();
+        return $this->isAdmin($user) || $user->account_id !== null;
     }
 
     /**
@@ -106,6 +106,6 @@ class IntegrationLogPolicy
      */
     private function belongsToAccount(User $user, int $accountId): bool
     {
-        return $user->accounts()->where('account_id', $accountId)->exists();
+        return $user->account_id === $accountId;
     }
 }

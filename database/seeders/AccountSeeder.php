@@ -26,31 +26,17 @@ class AccountSeeder extends Seeder
         $kristen = User::where('email', 'kristen@badfrogyarnco.com')->first();
 
         if ($josh) {
-            DB::table('account_user')->updateOrInsert(
-                [
-                    'account_id' => $account->id,
-                    'user_id' => $josh->id,
-                ],
-                [
-                    'role' => UserRole::Owner->value,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+            $josh->update([
+                'account_id' => $account->id,
+                'role' => UserRole::Owner->value,
+            ]);
         }
 
         if ($kristen) {
-            DB::table('account_user')->updateOrInsert(
-                [
-                    'account_id' => $account->id,
-                    'user_id' => $kristen->id,
-                ],
-                [
-                    'role' => UserRole::Owner->value,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+            $kristen->update([
+                'account_id' => $account->id,
+                'role' => UserRole::Owner->value,
+            ]);
         }
 
         // Yarnivore account (Store type)
@@ -64,31 +50,17 @@ class AccountSeeder extends Seeder
         $han = User::where('email', 'han@yarnivoresa.net')->first();
 
         if ($caryn) {
-            DB::table('account_user')->updateOrInsert(
-                [
-                    'account_id' => $yarnivoreAccount->id,
-                    'user_id' => $caryn->id,
-                ],
-                [
-                    'role' => UserRole::Owner->value,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+            $caryn->update([
+                'account_id' => $yarnivoreAccount->id,
+                'role' => UserRole::Owner->value,
+            ]);
         }
 
         if ($han) {
-            DB::table('account_user')->updateOrInsert(
-                [
-                    'account_id' => $yarnivoreAccount->id,
-                    'user_id' => $han->id,
-                ],
-                [
-                    'role' => UserRole::Owner->value,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
-            );
+            $han->update([
+                'account_id' => $yarnivoreAccount->id,
+                'role' => UserRole::Owner->value,
+            ]);
         }
 
         // Bad Frog Yarn Co. wholesales to Yarnivore

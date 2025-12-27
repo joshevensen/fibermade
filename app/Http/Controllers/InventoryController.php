@@ -21,7 +21,7 @@ class InventoryController extends Controller
         $user = auth()->user();
         $inventories = $user->is_admin
             ? Inventory::with(['account', 'colorway', 'base'])->get()
-            : Inventory::whereIn('account_id', $user->accounts()->pluck('id'))->with(['account', 'colorway', 'base'])->get();
+            : ($user->account_id ? Inventory::where('account_id', $user->account_id)->with(['account', 'colorway', 'base'])->get() : collect());
 
         return Inertia::render('inventory/InventoryPage', [
             'inventories' => $inventories,
@@ -43,7 +43,10 @@ class InventoryController extends Controller
      */
     public function store(StoreInventoryRequest $request): RedirectResponse
     {
-        Inventory::create($request->validated());
+        Inventory::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+        ]);
 
         return redirect()->route('inventory.index');
     }

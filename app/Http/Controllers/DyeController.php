@@ -21,7 +21,7 @@ class DyeController extends Controller
         $user = auth()->user();
         $dyes = $user->is_admin
             ? Dye::with('account')->get()
-            : Dye::whereIn('account_id', $user->accounts()->pluck('id'))->with('account')->get();
+            : ($user->account_id ? Dye::where('account_id', $user->account_id)->with('account')->get() : collect());
 
         return Inertia::render('dyes/DyeIndexPage', [
             'dyes' => $dyes,
@@ -43,7 +43,10 @@ class DyeController extends Controller
      */
     public function store(StoreDyeRequest $request): RedirectResponse
     {
-        Dye::create($request->validated());
+        Dye::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+        ]);
 
         return redirect()->route('dyes.index');
     }

@@ -22,7 +22,7 @@ class AccountController extends Controller
         $user = auth()->user();
         $accounts = $user->is_admin
             ? Account::with('users')->get()
-            : $user->accounts()->with('users')->get();
+            : ($user->account_id ? Account::with('users')->where('id', $user->account_id)->get() : collect());
 
         return Inertia::render('accounts/AccountIndexPage', [
             'accounts' => $accounts,
@@ -46,8 +46,11 @@ class AccountController extends Controller
     {
         $account = Account::create($request->validated());
 
-        // Attach user as Owner
-        $request->user()->accounts()->attach($account->id, ['role' => UserRole::Owner->value]);
+        // Associate user with account as Owner
+        $request->user()->update([
+            'account_id' => $account->id,
+            'role' => UserRole::Owner->value,
+        ]);
 
         return redirect()->route('accounts.index');
     }

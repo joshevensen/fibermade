@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import PrimeColumn from 'primevue/column';
 import { create as createColorway, edit as editColorway, destroy as destroyColorway } from '@/actions/App/Http/Controllers/ColorwayController';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
@@ -54,9 +53,27 @@ function handleDelete(colorway: Props['colorways'][0], event: Event) {
 
 const columns = computed(() => [
     { field: 'name', header: 'Name', sortable: true, columnKey: 'name' },
-    { field: 'slug', header: 'Slug', sortable: true, columnKey: 'slug' },
-    { field: 'description', header: 'Description', sortable: true, columnKey: 'description' },
-    { field: 'shopify_product_id', header: 'Shopify Product ID', sortable: true, columnKey: 'shopify_product_id' },
+    {
+        field: 'technique',
+        header: 'Technique',
+        sortable: true,
+        columnKey: 'technique',
+        bodyTemplate: (data: Props['colorways'][0]) => formatEnum(data.technique),
+    },
+    {
+        field: 'colors',
+        header: 'Colors',
+        sortable: true,
+        columnKey: 'colors',
+        bodyTemplate: (data: Props['colorways'][0]) => formatColors(data.colors),
+    },
+    {
+        field: 'status',
+        header: 'Status',
+        sortable: true,
+        columnKey: 'status',
+        bodyTemplate: (data: Props['colorways'][0]) => formatEnum(data.status),
+    },
 ]);
 </script>
 
@@ -84,43 +101,21 @@ const columns = computed(() => [
                 striped-rows
                 show-gridlines
             >
-                <PrimeColumn field="technique" header="Technique" sortable columnKey="technique">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.technique) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="colors" header="Colors" sortable columnKey="colors">
-                    <template #body="{ data }">
-                        {{ formatColors(data.colors) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="status" header="Status" sortable columnKey="status">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.status) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn header="Actions" :exportable="false" style="width: 8rem" columnKey="actions">
-                    <template #body="{ data }">
-                        <div class="flex gap-2">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editColorway.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </div>
-                    </template>
-                </PrimeColumn>
+                <template #actions="{ data }">
+                    <UiButton
+                        :icon="IconList.Settings"
+                        text
+                        size="small"
+                        @click="router.visit(editColorway.url(data.id))"
+                    />
+                    <UiButton
+                        :icon="IconList.Close"
+                        text
+                        size="small"
+                        severity="danger"
+                        @click="handleDelete(data, $event)"
+                    />
+                </template>
             </UiDataTable>
         </div>
     </AppLayout>

@@ -18,4 +18,5 @@ require __DIR__.'/dyes.php';
 require __DIR__.'/collections.php';
 require __DIR__.'/discounts.php';
 require __DIR__.'/inventory.php';
+require __DIR__.'/stores.php';
 require __DIR__.'/orders.php';

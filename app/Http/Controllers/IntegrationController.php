@@ -21,7 +21,7 @@ class IntegrationController extends Controller
         $user = auth()->user();
         $integrations = $user->is_admin
             ? Integration::with('account')->get()
-            : Integration::whereIn('account_id', $user->accounts()->pluck('id'))->with('account')->get();
+            : ($user->account_id ? Integration::where('account_id', $user->account_id)->with('account')->get() : collect());
 
         return Inertia::render('integrations/IntegrationIndexPage', [
             'integrations' => $integrations,
@@ -43,7 +43,10 @@ class IntegrationController extends Controller
      */
     public function store(StoreIntegrationRequest $request): RedirectResponse
     {
-        Integration::create($request->validated());
+        Integration::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+        ]);
 
         return redirect()->route('integrations.index');
     }

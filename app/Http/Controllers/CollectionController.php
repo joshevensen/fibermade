@@ -21,7 +21,7 @@ class CollectionController extends Controller
         $user = auth()->user();
         $collections = $user->is_admin
             ? Collection::with('account')->get()
-            : Collection::whereIn('account_id', $user->accounts()->pluck('id'))->with('account')->get();
+            : ($user->account_id ? Collection::where('account_id', $user->account_id)->with('account')->get() : collect());
 
         return Inertia::render('collections/CollectionIndexPage', [
             'collections' => $collections,
@@ -43,7 +43,10 @@ class CollectionController extends Controller
      */
     public function store(StoreCollectionRequest $request): RedirectResponse
     {
-        Collection::create($request->validated());
+        Collection::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+        ]);
 
         return redirect()->route('collections.index');
     }

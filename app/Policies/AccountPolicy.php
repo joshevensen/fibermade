@@ -13,7 +13,7 @@ class AccountPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $this->isAdmin($user) || $user->accounts()->exists();
+        return $this->isAdmin($user) || $user->account_id !== null;
     }
 
     /**
@@ -77,7 +77,7 @@ class AccountPolicy
      */
     private function belongsToAccount(User $user, Account $account): bool
     {
-        return $user->accounts()->where('account_id', $account->id)->exists();
+        return $user->account_id === $account->id;
     }
 
     /**
@@ -85,9 +85,6 @@ class AccountPolicy
      */
     private function isAccountOwner(User $user, Account $account): bool
     {
-        return $user->accounts()
-            ->where('account_id', $account->id)
-            ->wherePivot('role', UserRole::Owner->value)
-            ->exists();
+        return $user->account_id === $account->id && $user->role === UserRole::Owner;
     }
 }

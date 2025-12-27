@@ -19,16 +19,15 @@ class MediaController extends Controller
         $this->authorize('viewAny', Media::class);
 
         $user = auth()->user();
-        $accountIds = $user->accounts()->pluck('id');
         $medias = $user->is_admin
             ? Media::with('mediable')->get()
-            : Media::whereHasMorph('mediable', [
+            : ($user->account_id ? Media::whereHasMorph('mediable', [
                 \App\Models\Colorway::class,
                 \App\Models\Base::class,
                 \App\Models\Collection::class,
-            ], function ($query) use ($accountIds) {
-                $query->whereIn('account_id', $accountIds);
-            })->with('mediable')->get();
+            ], function ($query) use ($user) {
+                $query->where('account_id', $user->account_id);
+            })->with('mediable')->get() : collect());
 
         return Inertia::render('media/MediaIndexPage', [
             'medias' => $medias,

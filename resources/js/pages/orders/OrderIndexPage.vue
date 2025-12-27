@@ -3,7 +3,6 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import PrimeColumn from 'primevue/column';
 import { create as createOrder, edit as editOrder, destroy as destroyOrder } from '@/actions/App/Http/Controllers/OrderController';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
@@ -63,8 +62,34 @@ function handleDelete(order: Props['orders'][0], event: Event) {
 }
 
 const columns = computed(() => [
-    { field: 'shopify_order_id', header: 'Shopify Order ID', sortable: true, columnKey: 'shopify_order_id' },
-    { field: 'notes', header: 'Notes', sortable: true, columnKey: 'notes' },
+    {
+        field: 'type',
+        header: 'Type',
+        sortable: true,
+        columnKey: 'type',
+        bodyTemplate: (data: Props['orders'][0]) => formatEnum(data.type),
+    },
+    {
+        field: 'status',
+        header: 'Status',
+        sortable: true,
+        columnKey: 'status',
+        bodyTemplate: (data: Props['orders'][0]) => formatEnum(data.status),
+    },
+    {
+        field: 'order_date',
+        header: 'Order Date',
+        sortable: true,
+        columnKey: 'order_date',
+        bodyTemplate: (data: Props['orders'][0]) => formatDate(data.order_date),
+    },
+    {
+        field: 'total_amount',
+        header: 'Total',
+        sortable: true,
+        columnKey: 'total_amount',
+        bodyTemplate: (data: Props['orders'][0]) => formatCurrency(data.total_amount),
+    },
 ]);
 </script>
 
@@ -92,73 +117,21 @@ const columns = computed(() => [
                 striped-rows
                 show-gridlines
             >
-                <PrimeColumn field="type" header="Type" sortable columnKey="type">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.type) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="status" header="Status" sortable columnKey="status">
-                    <template #body="{ data }">
-                        {{ formatEnum(data.status) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="order_date" header="Order Date" sortable columnKey="order_date">
-                    <template #body="{ data }">
-                        {{ formatDate(data.order_date) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="subtotal_amount" header="Subtotal" sortable columnKey="subtotal_amount">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.subtotal_amount) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="shipping_amount" header="Shipping" sortable columnKey="shipping_amount">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.shipping_amount) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="discount_amount" header="Discount" sortable columnKey="discount_amount">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.discount_amount) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="tax_amount" header="Tax" sortable columnKey="tax_amount">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.tax_amount) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn field="total_amount" header="Total" sortable columnKey="total_amount">
-                    <template #body="{ data }">
-                        {{ formatCurrency(data.total_amount) }}
-                    </template>
-                </PrimeColumn>
-
-                <PrimeColumn header="Actions" :exportable="false" style="width: 8rem" columnKey="actions">
-                    <template #body="{ data }">
-                        <div class="flex gap-2">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editOrder.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </div>
-                    </template>
-                </PrimeColumn>
+                <template #actions="{ data }">
+                    <UiButton
+                        :icon="IconList.Settings"
+                        text
+                        size="small"
+                        @click="router.visit(editOrder.url(data.id))"
+                    />
+                    <UiButton
+                        :icon="IconList.Close"
+                        text
+                        size="small"
+                        severity="danger"
+                        @click="handleDelete(data, $event)"
+                    />
+                </template>
             </UiDataTable>
         </div>
     </AppLayout>

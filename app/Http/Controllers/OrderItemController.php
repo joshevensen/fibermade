@@ -21,9 +21,9 @@ class OrderItemController extends Controller
         $user = auth()->user();
         $orderItems = $user->is_admin
             ? OrderItem::with(['order.account', 'colorway', 'base'])->get()
-            : OrderItem::whereHas('order', function ($query) use ($user) {
-                $query->whereIn('account_id', $user->accounts()->pluck('id'));
-            })->with(['order.account', 'colorway', 'base'])->get();
+            : ($user->account_id ? OrderItem::whereHas('order', function ($query) use ($user) {
+                $query->where('account_id', $user->account_id);
+            })->with(['order.account', 'colorway', 'base'])->get() : collect());
 
         return Inertia::render('order-items/OrderItemIndexPage', [
             'orderItems' => $orderItems,

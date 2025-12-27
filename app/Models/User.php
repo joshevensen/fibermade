@@ -5,7 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +25,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_admin',
+        'account_id',
+        'role',
     ];
 
     /**
@@ -48,6 +50,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_admin' => 'boolean',
+            'role' => \App\Enums\UserRole::class,
         ];
     }
 
@@ -80,12 +83,10 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the accounts that belong to this user.
+     * Get the account that this user belongs to.
      */
-    public function accounts(): BelongsToMany
+    public function account(): BelongsTo
     {
-        return $this->belongsToMany(Account::class, 'account_user')
-            ->withPivot('role')
-            ->withTimestamps();
+        return $this->belongsTo(Account::class);
     }
 }

@@ -18,6 +18,8 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->boolean('is_admin')->default(false);
+            $table->foreignId('account_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('role')->default('owner');
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();
