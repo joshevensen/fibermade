@@ -33,11 +33,13 @@ interface Props {
     size?: 'small' | 'large';
     stripedRows?: boolean;
     showGridlines?: boolean;
+    emptyMessage?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     paginatorPosition: 'bottom',
     size: 'small',
+    emptyMessage: 'No records found',
 });
 
 defineOptions({
@@ -72,6 +74,11 @@ defineOptions({
             v-bind="col"
         />
         <slot />
+        <template #empty>
+            <div class="flex items-center justify-center min-h-[60vh]">
+                <p class="text-surface-500 text-lg">{{ emptyMessage }}</p>
+            </div>
+        </template>
     </PrimeDataTable>
 </template>
 

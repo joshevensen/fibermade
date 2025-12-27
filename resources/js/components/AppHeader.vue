@@ -2,7 +2,7 @@
 import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
-import { edit as profileEdit } from '@/routes/profile';
+import { edit as profileEdit } from '@/routes/user';
 import { router } from '@inertiajs/vue3';
 
 const emit = defineEmits<{

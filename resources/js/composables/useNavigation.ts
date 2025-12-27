@@ -7,7 +7,7 @@ import { index as discountsIndex } from '@/actions/App/Http/Controllers/Discount
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
 import { index as inventoryIndex } from '@/routes/inventory';
 import { dashboard } from '@/routes';
-import { edit as profileEdit } from '@/routes/profile';
+import { edit as profileEdit } from '@/routes/user';
 import { useIcon } from '@/composables/useIcon';
 
 const { IconList } = useIcon();
