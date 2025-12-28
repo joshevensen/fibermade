@@ -30,7 +30,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.colorway.id),
@@ -54,7 +54,7 @@ const { form, onSubmit } = useFormSubmission({
     <AppLayout page-title="Edit Colorway">
         <PageHeader
             heading="Edit Colorway"
-            :icon="IconList.Colorways"
+            :business-icon="BusinessIconList.Colorways"
         />
 
         <div class="mt-6 max-w-2xl">

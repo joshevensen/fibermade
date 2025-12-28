@@ -31,7 +31,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 const { requireDelete } = useConfirm();
 const { openDrawer } = useCreateDrawer();
 const toast = useToast();
@@ -191,7 +191,7 @@ function handleDelete(dye: Dye, event: Event): void {
     <AppLayout page-title="Dyes">
         <PageHeader
             heading="Dyes"
-            :icon="IconList.Dyes"
+            :business-icon="BusinessIconList.Dyes"
         >
             <template #actions>
                 <UiButton
@@ -216,7 +216,7 @@ function handleDelete(dye: Dye, event: Event): void {
                             {{ filteredAndSortedDyes.length }} {{ filteredAndSortedDyes.length === 1 ? 'dye' : 'dyes' }}
                         </div>
                         <div class="flex items-center gap-4">
-                            <UiFormFieldSelect
+                        <UiFormFieldSelect
                             name="manufacturer-filter"
                             label="Manufacturer"
                             label-position="left"

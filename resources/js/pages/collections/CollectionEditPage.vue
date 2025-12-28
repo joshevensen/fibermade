@@ -21,7 +21,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.collection.id),
@@ -41,7 +41,7 @@ const { form, onSubmit } = useFormSubmission({
     <AppLayout page-title="Edit Collection">
         <PageHeader
             heading="Edit Collection"
-            :icon="IconList.Collections"
+            :business-icon="BusinessIconList.Collections"
         />
 
         <div class="mt-6 max-w-2xl">

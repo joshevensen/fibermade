@@ -30,7 +30,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.discount.id),
@@ -68,7 +68,7 @@ const { form, onSubmit } = useFormSubmission({
     <AppLayout page-title="Edit Discount">
         <PageHeader
             heading="Edit Discount"
-            :icon="IconList.Discounts"
+            :business-icon="BusinessIconList.Discounts"
         />
 
         <div class="mt-6 max-w-2xl">

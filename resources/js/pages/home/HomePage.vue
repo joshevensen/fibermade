@@ -3,14 +3,14 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import { useIcon } from '@/composables/useIcon';
 
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 </script>
 
 <template>
     <AppLayout page-title="Dashboard">
         <PageHeader
             heading="Dashboard"
-            :icon="IconList.Dashboard"
+            :business-icon="BusinessIconList.Dashboard"
         />
     </AppLayout>
 </template>

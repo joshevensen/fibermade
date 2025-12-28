@@ -10,11 +10,12 @@ import { index as storesIndex } from '@/routes/stores';
 import { dashboard } from '@/routes';
 import { edit as profileEdit } from '@/routes/user';
 import { useIcon } from '@/composables/useIcon';
+import type { Component } from 'vue';
 
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 interface NavigationItem extends Omit<NavItem, 'icon'> {
-    icon?: string;
+    icon?: string | Component;
 }
 
 export function useNavigation(): NavigationItem[] {
@@ -22,47 +23,47 @@ export function useNavigation(): NavigationItem[] {
         {
             title: 'Dashboard',
             href: dashboard.url(),
-            icon: IconList.Dashboard,
+            icon: BusinessIconList.Dashboard,
         },
         {
             title: 'Inventory',
             href: inventoryIndex.url(),
-            icon: IconList.Inventory,
+            icon: BusinessIconList.Inventory,
         },
         {
             title: 'Stores',
             href: storesIndex.url(),
-            icon: IconList.Stores,
+            icon: BusinessIconList.Stores,
         },
         {
             title: 'Orders',
             href: ordersIndex.url(),
-            icon: IconList.Orders,
+            icon: BusinessIconList.Orders,
         },
         {
             title: 'Colorways',
             href: colorwaysIndex.url(),
-            icon: IconList.Colorways,
+            icon: BusinessIconList.Colorways,
         },
         {
             title: 'Collections',
             href: collectionsIndex.url(),
-            icon: IconList.Collections,
+            icon: BusinessIconList.Collections,
         },
         {
             title: 'Bases',
             href: basesIndex.url(),
-            icon: IconList.Bases,
+            icon: BusinessIconList.Bases,
         },
         {
             title: 'Dyes',
             href: dyesIndex.url(),
-            icon: IconList.Dyes,
+            icon: BusinessIconList.Dyes,
         },
         {
             title: 'Discounts',
             href: discountsIndex.url(),
-            icon: IconList.Discounts,
+            icon: BusinessIconList.Discounts,
         },
     ];
 }

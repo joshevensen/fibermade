@@ -49,10 +49,10 @@ import UiTabs from '@/components/ui/UiTabs.vue';
 import UiTabPanel from '@/components/ui/UiTabPanel.vue';
 import { useIcon } from '@/composables/useIcon';
 
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 const tabs = [
-    { value: '0', label: 'Tab 1', icon: IconList.Dashboard },
+    { value: '0', label: 'Tab 1', icon: BusinessIconList.Dashboard },
     { value: '1', label: 'Tab 2', disabled: true },
     { value: '2', label: 'Tab 3' },
 ];
@@ -74,12 +74,12 @@ import UiTabs from '@/components/ui/UiTabs.vue';
 import { dashboard } from '@/routes';
 import { useIcon } from '@/composables/useIcon';
 
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 const tabs = [
-    { value: '/dashboard', label: 'Dashboard', icon: IconList.Dashboard, href: dashboard() },
-    { value: '/transactions', label: 'Transactions', icon: IconList.Orders, href: '/transactions' },
-    { value: '/products', label: 'Products', icon: IconList.Bases, href: '/products' },
+    { value: '/dashboard', label: 'Dashboard', icon: BusinessIconList.Dashboard, href: dashboard() },
+    { value: '/transactions', label: 'Transactions', icon: BusinessIconList.Orders, href: '/transactions' },
+    { value: '/products', label: 'Products', icon: BusinessIconList.Bases, href: '/products' },
 ];
 </script>
 
@@ -154,6 +154,63 @@ import UiButton from '@/components/ui/UiButton.vue';
 - **UiTag** (`UiTag.vue`) - PrimeVue Tag wrapper
 
 #### Icon Component
+
+The application uses a hybrid icon system with two separate icon lists:
+
+- **`IconList`**: Prime Icons (CSS classes) for UI/functional icons - compatible with PrimeVue components
+- **`BusinessIconList`**: Tabler Icons (Vue components) for business/domain icons
+
+**Usage with PrimeVue Components (UI Icons):**
+```vue
+<script setup lang="ts">
+import { useIcon } from '@/composables/useIcon';
+const { IconList } = useIcon();
+</script>
+
+<template>
+  <!-- PrimeVue components expect CSS class strings -->
+  <UiButton :icon="IconList.Menu" />
+  <UiInputText :icon="IconList.Search" />
+</template>
+```
+
+**Usage with Custom Components (Business Icons):**
+```vue
+<script setup lang="ts">
+import { useIcon } from '@/composables/useIcon';
+import PageHeader from '@/components/PageHeader.vue';
+
+const { BusinessIconList } = useIcon();
+</script>
+
+<template>
+  <!-- Custom components use UiIcon which handles Vue components -->
+  <PageHeader 
+    heading="Dyes" 
+    :business-icon="BusinessIconList.Dyes" 
+  />
+</template>
+```
+
+**UiIcon Component:**
+The `UiIcon` component intelligently renders either Prime Icons (CSS classes) or Tabler Icons (Vue components):
+
+```vue
+<script setup lang="ts">
+import UiIcon from '@/components/ui/UiIcon.vue';
+import { useIcon } from '@/composables/useIcon';
+
+const { IconList, BusinessIconList } = useIcon();
+</script>
+
+<template>
+  <!-- Prime Icon (CSS class string) -->
+  <UiIcon :name="IconList.Menu" />
+  
+  <!-- Tabler Icon (Vue component) -->
+  <UiIcon :component="BusinessIconList.Dyes" />
+</template>
+```
 - **UiIcon** (`UiIcon.vue`) - PrimeIcons wrapper component (special case - wraps CSS classes)
 
 ## Tooltips

@@ -36,7 +36,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+const { BusinessIconList } = useIcon();
 
 const accountOptions = computed(() =>
     props.accounts.map((account) => ({
@@ -79,7 +79,7 @@ const { form, onSubmit } = useFormSubmission({
     <AppLayout page-title="Edit Order">
         <PageHeader
             heading="Edit Order"
-            :icon="IconList.Orders"
+            :business-icon="BusinessIconList.Orders"
         />
 
         <div class="mt-6 max-w-2xl">

@@ -19,20 +19,6 @@ const createMenuRef = ref();
 
 const createMenuItems = [
     {
-        label: 'Base',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('base');
-        },
-    },
-    {
-        label: 'Collection',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('collection');
-        },
-    },
-    {
         label: 'Colorway',
         icon: IconList.Plus,
         command: () => {
@@ -40,17 +26,10 @@ const createMenuItems = [
         },
     },
     {
-        label: 'Discount',
+        label: 'Collection',
         icon: IconList.Plus,
         command: () => {
-            openDrawer('discount');
-        },
-    },
-    {
-        label: 'Dye',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('dye');
+            openDrawer('collection');
         },
     },
     {

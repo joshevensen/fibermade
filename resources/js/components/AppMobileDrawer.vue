@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiDrawer from '@/components/ui/UiDrawer.vue';
+import UiIcon from '@/components/ui/UiIcon.vue';
 import AppLogo from '@/components/AppLogo.vue';
 import { urlIsActive, toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
@@ -8,13 +9,14 @@ import { Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { logout } from '@/routes';
 import { useIcon } from '@/composables/useIcon';
+import type { Component } from 'vue';
 
 interface Props {
     visible: boolean;
     navItems: Array<{
         title: string;
         href: NonNullable<NavItem['href']>;
-        icon?: string;
+        icon?: string | Component;
     }>;
 }
 
@@ -62,10 +64,14 @@ function handleLogout() {
                 ]"
                 @click="closeDrawer"
             >
-                <i :class="[
-                    item.icon,
-                    isActive(item) ? 'text-primary' : 'text-surface-400',
-                ]" />
+                <UiIcon
+                    v-if="item.icon"
+                    :name="typeof item.icon === 'string' ? item.icon : undefined"
+                    :component="typeof item.icon !== 'string' ? (item.icon as Component) : undefined"
+                    :class="[
+                        isActive(item) ? 'text-primary' : 'text-surface-400',
+                    ]"
+                />
                 <span 
                     :class="[
                         isActive(item) ? 'text-primary' : 'text-surface-500', 
@@ -82,7 +88,10 @@ function handleLogout() {
                     class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
                     @click="handleLogout"
                 >
-                    <i :class="[IconList.SignOut, 'text-lg']" />
+                    <UiIcon
+                        :name="IconList.SignOut"
+                        class="text-lg"
+                    />
                     <span>Logout</span>
                 </button>
             </div>

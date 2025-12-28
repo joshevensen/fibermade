@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
+import UiIcon from '@/components/ui/UiIcon.vue';
 import { IconList } from '@/composables/useIcon';
 import { urlIsActive, toUrl } from '@/lib/utils';
 import type { NavItem } from '@/types';
@@ -8,13 +9,14 @@ import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { Link, router } from '@inertiajs/vue3';
 import { logout } from '@/routes';
+import type { Component } from 'vue';
 
 interface Props {
     collapsed: boolean;
     navItems: Array<{
         title: string;
         href: NonNullable<NavItem['href']>;
-        icon?: string;
+        icon?: string | Component;
     }>;
 }
 
@@ -71,10 +73,14 @@ function handleLogout() {
                         collapsed ? 'justify-center' : '',
                     ]"
                 >
-                    <i :class="[
-                        item.icon,
-                        isActive(item) ? 'text-primary' : 'text-surface-400',
-                    ]" />
+                    <UiIcon
+                        v-if="item.icon"
+                        :name="typeof item.icon === 'string' ? item.icon : undefined"
+                        :component="typeof item.icon !== 'string' ? (item.icon as Component) : undefined"
+                        :class="[
+                            isActive(item) ? 'text-primary' : 'text-surface-400',
+                        ]"
+                    />
                     <span 
                         v-if="!collapsed" 
                         :class="[

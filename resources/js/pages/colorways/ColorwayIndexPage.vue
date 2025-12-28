@@ -25,7 +25,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+const { IconList, BusinessIconList } = useIcon();
 const confirm = useConfirm();
 const { openDrawer } = useCreateDrawer();
 
@@ -84,7 +84,7 @@ const columns = computed(() => [
     <AppLayout page-title="Colorways">
         <PageHeader
             heading="Colorways"
-            :icon="IconList.Colorways"
+            :business-icon="BusinessIconList.Colorways"
         >
             <template #actions>
                 <UiButton
