@@ -79,8 +79,30 @@ class OrderController extends Controller
     {
         $this->authorize('view', $order);
 
+        $orderTypeOptions = collect(OrderType::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $orderStatusOptions = collect(OrderStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $user = auth()->user();
+        $accounts = $user->is_admin
+            ? \App\Models\Account::select('id', 'name')->get()
+            : ($user->account_id ? \App\Models\Account::where('id', $user->account_id)->select('id', 'name')->get() : collect());
+
         return Inertia::render('orders/OrderEditPage', [
             'order' => $order->load(['account', 'orderItems']),
+            'orderTypeOptions' => $orderTypeOptions,
+            'orderStatusOptions' => $orderStatusOptions,
+            'accounts' => $accounts,
         ]);
     }
 

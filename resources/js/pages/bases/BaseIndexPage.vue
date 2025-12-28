@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
+import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
 import { edit as editBase, destroy as destroyBase } from '@/actions/App/Http/Controllers/BaseController';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
@@ -113,29 +114,33 @@ const columns = computed(() => [
         </PageHeader>
 
         <div class="mt-6">
-            <UiDataTable
-                :value="bases"
-                :columns="columns"
-                data-key="id"
-                striped-rows
-                show-gridlines
-            >
-                <template #actions="{ data }">
-                    <UiButton
-                        :icon="IconList.Settings"
-                        text
-                        size="small"
-                        @click="router.visit(editBase.url(data.id))"
-                    />
-                    <UiButton
-                        :icon="IconList.Close"
-                        text
-                        size="small"
-                        severity="danger"
-                        @click="handleDelete(data, $event)"
-                    />
+            <UiCard>
+                <template #content>
+                    <UiDataTable
+                        :value="bases"
+                        :columns="columns"
+                        data-key="id"
+                        striped-rows
+                        show-gridlines
+                    >
+                        <template #actions="{ data }">
+                            <UiButton
+                                :icon="IconList.Settings"
+                                text
+                                size="small"
+                                @click="router.visit(editBase.url(data.id))"
+                            />
+                            <UiButton
+                                :icon="IconList.Close"
+                                text
+                                size="small"
+                                severity="danger"
+                                @click="handleDelete(data, $event)"
+                            />
+                        </template>
+                    </UiDataTable>
                 </template>
-            </UiDataTable>
+            </UiCard>
         </div>
     </AppLayout>
 </template>

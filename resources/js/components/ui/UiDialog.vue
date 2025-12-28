@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PrimeDialog from 'primevue/dialog';
+import { computed } from 'vue';
 
 interface Props {
     visible?: boolean;
@@ -15,6 +16,7 @@ interface Props {
     maximizable?: boolean;
     draggable?: boolean;
     appendTo?: HTMLElement | 'body' | 'self';
+    size?: 'small' | 'medium' | 'large';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -25,6 +27,26 @@ const props = withDefaults(defineProps<Props>(), {
     showHeader: true,
     position: 'center',
     draggable: true,
+    size: 'medium',
+});
+
+const dialogStyle = computed(() => {
+    const widthMap = {
+        small: '28rem', // 448px 
+        medium: '32rem', // 512px 
+    };
+
+    if (props.size === 'large') {
+        return {
+            width: '90vw',
+            maxWidth: '90vw',
+        };
+    }
+
+    return {
+        width: widthMap[props.size],
+        maxWidth: '90vw',
+    };
 });
 
 defineOptions({
@@ -48,6 +70,7 @@ defineOptions({
         :maximizable="maximizable"
         :draggable="draggable"
         :appendTo="appendTo"
+        :style="dialogStyle"
     >
         <template #header>
             <slot name="header" />

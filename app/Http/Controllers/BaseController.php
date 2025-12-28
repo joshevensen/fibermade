@@ -78,8 +78,24 @@ class BaseController extends Controller
     {
         $this->authorize('view', $base);
 
+        $baseStatusOptions = collect(BaseStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $weightOptions = collect(Weight::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
         return Inertia::render('bases/BaseEditPage', [
             'base' => $base,
+            'baseStatusOptions' => $baseStatusOptions,
+            'weightOptions' => $weightOptions,
         ]);
     }
 

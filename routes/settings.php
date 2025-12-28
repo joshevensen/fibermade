@@ -11,4 +11,5 @@ Route::middleware('auth')->group(function () {
         ->middleware('throttle:6,1')
         ->name('user-password.update');
     Route::delete('settings/profile', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::delete('settings/account', [UserController::class, 'destroyAccount'])->name('account.destroy');
 });

@@ -88,8 +88,32 @@ class ColorwayController extends Controller
     {
         $this->authorize('view', $colorway);
 
+        $colorwayStatusOptions = collect(ColorwayStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $techniqueOptions = collect(Technique::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $colorOptions = collect(Color::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
         return Inertia::render('colorways/ColorwayEditPage', [
             'colorway' => $colorway,
+            'colorwayStatusOptions' => $colorwayStatusOptions,
+            'techniqueOptions' => $techniqueOptions,
+            'colorOptions' => $colorOptions,
         ]);
     }
 

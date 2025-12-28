@@ -1,5 +1,9 @@
 <?php
 
+use App\Enums\AccountType;
+use App\Enums\BaseStatus;
+use App\Enums\UserRole;
+use App\Models\Account;
 use App\Models\User;
 
 test('user page is displayed', function () {
@@ -51,11 +55,23 @@ test('email verification status is unchanged when the email address is unchanged
 });
 
 test('user can delete their account', function () {
-    $user = User::factory()->create();
+    $account = Account::create([
+        'type' => AccountType::Creator,
+        'status' => BaseStatus::Active,
+        'name' => 'Test Account',
+    ]);
+
+    $user = User::factory()->create([
+        'account_id' => $account->id,
+        'role' => UserRole::Owner,
+    ]);
+
+    $accountId = $account->id;
+    $userId = $user->id;
 
     $response = $this
         ->actingAs($user)
-        ->delete(route('user.destroy'), [
+        ->delete(route('account.destroy'), [
             'password' => 'password',
         ]);
 
@@ -64,18 +80,28 @@ test('user can delete their account', function () {
         ->assertRedirect(route('home'));
 
     $this->assertGuest();
-    expect(User::withTrashed()->find($user->id))->not->toBeNull();
-    expect(User::withTrashed()->find($user->id)->deleted_at)->not->toBeNull();
-    expect(User::find($user->id))->toBeNull();
+    expect(Account::withTrashed()->find($accountId))->not->toBeNull();
+    expect(Account::withTrashed()->find($accountId)->deleted_at)->not->toBeNull();
+    expect(Account::find($accountId))->toBeNull();
+    expect(User::find($userId))->not->toBeNull();
 });
 
 test('correct password must be provided to delete account', function () {
-    $user = User::factory()->create();
+    $account = Account::create([
+        'type' => AccountType::Creator,
+        'status' => BaseStatus::Active,
+        'name' => 'Test Account',
+    ]);
+
+    $user = User::factory()->create([
+        'account_id' => $account->id,
+        'role' => UserRole::Owner,
+    ]);
 
     $response = $this
         ->actingAs($user)
         ->from(route('user.edit'))
-        ->delete(route('user.destroy'), [
+        ->delete(route('account.destroy'), [
             'password' => 'wrong-password',
         ]);
 
@@ -83,5 +109,6 @@ test('correct password must be provided to delete account', function () {
         ->assertSessionHasErrors('password')
         ->assertRedirect(route('user.edit'));
 
+    expect($account->fresh())->not->toBeNull();
     expect($user->fresh())->not->toBeNull();
 });

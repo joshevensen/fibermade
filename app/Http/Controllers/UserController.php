@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateUserRequest;
+use App\Models\Account;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -64,6 +65,35 @@ class UserController extends Controller
         Auth::logout();
 
         $user->delete();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/');
+    }
+
+    /**
+     * Delete the user's account (not the user).
+     */
+    public function destroyAccount(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        if (! $user->account_id) {
+            abort(403, 'User does not have an account.');
+        }
+
+        $account = $user->account;
+
+        $this->authorize('delete', $account);
+
+        Auth::logout();
+
+        $account->delete();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

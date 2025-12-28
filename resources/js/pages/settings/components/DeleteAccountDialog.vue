@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import UserController from '@/actions/App/Http/Controllers/UserController';
+import { destroy as destroyAccount } from '@/routes/account';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
@@ -14,7 +14,7 @@ const passwordInput = useTemplateRef<{ $el: HTMLElement }>('passwordInput');
 const dialogVisible = ref(false);
 
 const { form, onSubmit } = useFormSubmission({
-    route: UserController.destroy,
+    route: destroyAccount,
     initialValues: {
         password: '',
     },
@@ -50,10 +50,10 @@ function openDialog(): void {
         >
         <template #content>
             <div
-                class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
+                class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10"
             >
                 <div
-                    class="relative space-y-0.5 text-red-600 dark:text-red-100"
+                    class="relative space-y-0.5 text-red-600"
                 >
                     <p class="font-medium">Warning</p>
                     <p class="text-sm">
@@ -62,7 +62,7 @@ function openDialog(): void {
                 </div>
                 <UiButton
                     variant="destructive"
-                    data-test="delete-user-button"
+                    data-test="delete-account-button"
                     @click="openDialog"
                 >
                     Delete account
@@ -77,6 +77,7 @@ function openDialog(): void {
         header="Are you sure you want to delete your account?"
         :closable="true"
         :close-on-escape="true"
+        size="small"
         @update:visible="(value: boolean) => (dialogVisible = value)"
     >
         <UiForm :initialValues="{ password: '' }" @submit="onSubmit">
@@ -114,7 +115,7 @@ function openDialog(): void {
                     type="submit"
                     variant="destructive"
                     :loading="form.processing"
-                    data-test="confirm-delete-user-button"
+                    data-test="confirm-delete-account-button"
                 >
                     Delete account
                 </UiButton>

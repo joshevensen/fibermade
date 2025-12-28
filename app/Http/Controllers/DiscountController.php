@@ -69,8 +69,16 @@ class DiscountController extends Controller
     {
         $this->authorize('view', $discount);
 
+        $discountTypeOptions = collect(DiscountType::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
         return Inertia::render('discounts/DiscountEditPage', [
             'discount' => $discount,
+            'discountTypeOptions' => $discountTypeOptions,
         ]);
     }
 
