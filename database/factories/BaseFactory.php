@@ -2,7 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Enums\BaseStatus;
+use App\Enums\Weight;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Base>
@@ -16,8 +19,49 @@ class BaseFactory extends Factory
      */
     public function definition(): array
     {
+        $baseNames = [
+            'Merino Wool',
+            'Alpaca Blend',
+            'Superwash Merino',
+            'DK Weight',
+            'Fingering Weight',
+            'Worsted Weight',
+            'Bulky Weight',
+            'Lace Weight',
+            'Cashmere Blend',
+            'Silk Blend',
+        ];
+
+        $name = fake()->randomElement($baseNames);
+        $weight = fake()->randomElement(Weight::cases());
+        $status = fake()->randomElement(BaseStatus::cases());
+
+        // Generate realistic fiber percentages that sum to ~100%
+        $woolPercent = fake()->optional(0.8)->randomFloat(2, 50, 100);
+        $alpacaPercent = fake()->optional(0.3)->randomFloat(2, 10, 50);
+        $nylonPercent = fake()->optional(0.4)->randomFloat(2, 5, 30);
+        $yakPercent = fake()->optional(0.2)->randomFloat(2, 10, 40);
+        $camelPercent = fake()->optional(0.1)->randomFloat(2, 10, 30);
+        $cottonPercent = fake()->optional(0.2)->randomFloat(2, 20, 50);
+        $bambooPercent = fake()->optional(0.2)->randomFloat(2, 20, 50);
+
         return [
-            //
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'description' => fake()->optional(0.7)->sentence(),
+            'status' => $status,
+            'weight' => $weight,
+            'descriptor' => fake()->optional(0.5)->randomElement(['Superwash', 'Non-superwash', 'Organic', 'Hand-dyed']),
+            'size' => fake()->optional(0.6)->numberBetween(100, 500),
+            'cost' => fake()->optional(0.8)->randomFloat(2, 5, 25),
+            'retail_price' => fake()->optional(0.8)->randomFloat(2, 15, 45),
+            'wool_percent' => $woolPercent,
+            'nylon_percent' => $nylonPercent,
+            'alpaca_percent' => $alpacaPercent,
+            'yak_percent' => $yakPercent,
+            'camel_percent' => $camelPercent,
+            'cotton_percent' => $cottonPercent,
+            'bamboo_percent' => $bambooPercent,
         ];
     }
 }

@@ -3,7 +3,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import { create as createOrder, edit as editOrder, destroy as destroyOrder } from '@/actions/App/Http/Controllers/OrderController';
+import { edit as editOrder, destroy as destroyOrder } from '@/actions/App/Http/Controllers/OrderController';
+import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
 import { useConfirm } from 'primevue/useconfirm';
@@ -27,6 +28,7 @@ interface Props {
 
 const props = defineProps<Props>();
 const { IconList } = useIcon();
+const { openDrawer } = useCreateDrawer();
 const confirm = useConfirm();
 
 function formatEnum(value: string | null | undefined): string {
@@ -101,10 +103,9 @@ const columns = computed(() => [
         >
             <template #actions>
                 <UiButton
-                    :icon="IconList.Plus"
                     size="small"
-                    label="Order"
-                    @click="router.visit(createOrder.url())"
+                    label="Create"
+                    @click="openDrawer('order')"
                 />
             </template>
         </PageHeader>

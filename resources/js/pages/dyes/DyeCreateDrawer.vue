@@ -1,21 +1,27 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
-import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import { store } from '@/actions/App/Http/Controllers/DyeController';
-import { index } from '@/actions/App/Http/Controllers/DyeController';
-import { useIcon } from '@/composables/useIcon';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { router } from '@inertiajs/vue3';
 
-const props = defineProps();
-const { IconList } = useIcon();
+interface Props {
+    visible: boolean;
+}
+
+const props = defineProps<Props>();
+
+const emit = defineEmits<{
+    'update:visible': [value: boolean];
+}>();
+
+function closeDrawer(): void {
+    emit('update:visible', false);
+}
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -27,23 +33,25 @@ const { form, onSubmit } = useFormSubmission({
     },
     successMessage: 'Dye created successfully.',
     onSuccess: () => {
-        router.visit(index.url());
+        closeDrawer();
+        router.reload({ only: ['dyes'] });
     },
 });
 </script>
 
 <template>
-    <AppLayout page-title="Create Dye">
-        <PageHeader
-            heading="Create Dye"
-            :icon="IconList.Dyes"
-        />
+    <UiDrawer
+        :visible="visible"
+        position="right"
+        class="!w-[30rem]"
+        @update:visible="emit('update:visible', $event)"
+    >
+        <template #header>
+            <h2 class="text-xl font-semibold">Create Dye</h2>
+        </template>
 
-        <div class="mt-6">
-            <UiCard>
-                <template #title>Dye Information</template>
-                <template #content>
-                    <UiForm @submit="onSubmit">
+        <div class="p-4">
+            <UiForm @submit="onSubmit">
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -80,8 +88,7 @@ const { form, onSubmit } = useFormSubmission({
                             Create Dye
                         </UiButton>
                     </UiForm>
-                </template>
-            </UiCard>
         </div>
-    </AppLayout>
+    </UiDrawer>
 </template>
+

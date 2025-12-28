@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import PrimeDrawer from 'primevue/drawer';
+import { useSlots } from 'vue';
 
 interface Props {
     visible?: boolean;
@@ -24,6 +25,9 @@ const props = withDefaults(defineProps<Props>(), {
 defineOptions({
     inheritAttrs: false,
 });
+
+const slots = useSlots();
+const hasFooter = !!slots.footer;
 </script>
 
 <template>
@@ -41,7 +45,7 @@ defineOptions({
         <template #header>
             <slot name="header" />
         </template>
-        <template #footer>
+        <template v-if="hasFooter" #footer>
             <slot name="footer" />
         </template>
         <slot />

@@ -16,8 +16,26 @@ class DyeFactory extends Factory
      */
     public function definition(): array
     {
+        $dyeNames = [
+            'Turquoise Blue',
+            'Scarlet Red',
+            'Forest Green',
+            'Sunset Orange',
+            'Lavender Purple',
+            'Golden Yellow',
+            'Charcoal Black',
+            'Ivory White',
+            'Rose Pink',
+            'Ocean Teal',
+            'Amber Brown',
+            'Coral Peach',
+        ];
+
         return [
-            //
+            'name' => fake()->randomElement($dyeNames),
+            'notes' => fake()->optional(0.6)->sentence(),
+            'does_bleed' => fake()->boolean(30),
+            'do_like' => fake()->boolean(80),
         ];
     }
 }

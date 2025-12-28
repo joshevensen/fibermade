@@ -2,12 +2,69 @@
 import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
+import UiMenu from '@/components/ui/UiMenu.vue';
 import { edit as profileEdit } from '@/routes/user';
+import { useCreateDrawer } from '@/composables/useCreateDrawer';
+import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const emit = defineEmits<{
     'toggle-mobile-drawer': [];
 }>();
+
+const { openDrawer } = useCreateDrawer();
+const { IconList } = useIcon();
+const createMenuRef = ref();
+
+const createMenuItems = [
+    {
+        label: 'Base',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('base');
+        },
+    },
+    {
+        label: 'Collection',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('collection');
+        },
+    },
+    {
+        label: 'Colorway',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('colorway');
+        },
+    },
+    {
+        label: 'Discount',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('discount');
+        },
+    },
+    {
+        label: 'Dye',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('dye');
+        },
+    },
+    {
+        label: 'Order',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('order');
+        },
+    },
+];
+
+function toggleCreateMenu(event: Event): void {
+    createMenuRef.value?.toggle(event);
+}
 </script>
 
 <template>
@@ -40,22 +97,24 @@ const emit = defineEmits<{
         </div>
 
         <!-- Icon Buttons (all screens) -->
-        <div class="flex items-center gap-2">
-            <UiButton
-                icon="pi pi-question-circle"
-                text
-                aria-label="Support"
-            />
-            <UiButton
-                icon="pi pi-bell"
-                text
-                aria-label="Notifications"
-            />
+        <div class="relative flex items-center gap-2">
             <UiButton
                 icon="pi pi-cog"
                 text
                 aria-label="Settings"
                 @click="router.visit(profileEdit.url())"
+            />
+            <UiButton
+                icon="pi pi-plus"
+                text
+                aria-label="Create"
+                @click="toggleCreateMenu"
+            />
+            <UiMenu
+                ref="createMenuRef"
+                :model="createMenuItems"
+                popup
+                append-to="body"
             />
         </div>
     </header>

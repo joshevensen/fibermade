@@ -52,7 +52,9 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
     >
         <template v-slot="$field">
             <div :class="{
-                'flex gap-4 items-start': isHorizontal,
+                'flex items-start': isHorizontal,
+                'gap-4': isHorizontal && !isLabelRight,
+                'gap-2': isLabelRight,
             }">
                 <!-- Label positioned based on labelPosition prop -->
                 <label
@@ -74,7 +76,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
                 
                 <!-- Input wrapper with proper order for right-side labels -->
                 <div :class="{
-                    'flex-1': isHorizontal,
+                    'flex-1': isHorizontal && !isLabelRight,
                     'order-1': isHorizontal && isLabelRight,
                 }">
                     <slot v-bind="{ ...$field, id: fieldId }" />

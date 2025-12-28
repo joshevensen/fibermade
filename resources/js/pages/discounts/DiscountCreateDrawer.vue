@@ -1,28 +1,40 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
 import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import { store } from '@/actions/App/Http/Controllers/DiscountController';
-import { index } from '@/actions/App/Http/Controllers/DiscountController';
-import { useIcon } from '@/composables/useIcon';
 import { useFormSubmission } from '@/composables/useFormSubmission';
+import { enumToOptions } from '@/utils/enumOptions';
 import { router } from '@inertiajs/vue3';
 
+// Enum cases - these match the PHP enums
+const discountTypeCases = [
+    { name: 'OrderThresholdFreeShipping', value: 'order_threshold_free_shipping' },
+    { name: 'QuantityPerSkein', value: 'quantity_per_skein' },
+    { name: 'Percentage', value: 'percentage' },
+    { name: 'ManualFreeShipping', value: 'manual_free_shipping' },
+    { name: 'TimeBoxed', value: 'time_boxed' },
+];
+
+const discountTypeOptions = enumToOptions(discountTypeCases);
+
 interface Props {
-    discountTypeOptions: Array<{
-        label: string;
-        value: string;
-    }>;
+    visible: boolean;
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+
+const emit = defineEmits<{
+    'update:visible': [value: boolean];
+}>();
+
+function closeDrawer(): void {
+    emit('update:visible', false);
+}
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -37,23 +49,25 @@ const { form, onSubmit } = useFormSubmission({
     },
     successMessage: 'Discount created successfully.',
     onSuccess: () => {
-        router.visit(index.url());
+        closeDrawer();
+        router.reload({ only: ['discounts'] });
     },
 });
 </script>
 
 <template>
-    <AppLayout page-title="Create Discount">
-        <PageHeader
-            heading="Create Discount"
-            :icon="IconList.Discounts"
-        />
+    <UiDrawer
+        :visible="visible"
+        position="right"
+        class="!w-[30rem]"
+        @update:visible="emit('update:visible', $event)"
+    >
+        <template #header>
+            <h2 class="text-xl font-semibold">Create Discount</h2>
+        </template>
 
-        <div class="mt-6">
-            <UiCard>
-                <template #title>Discount Information</template>
-                <template #content>
-                    <UiForm @submit="onSubmit">
+        <div class="p-4">
+            <UiForm @submit="onSubmit">
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -118,8 +132,7 @@ const { form, onSubmit } = useFormSubmission({
                             Create Discount
                         </UiButton>
                     </UiForm>
-                </template>
-            </UiCard>
         </div>
-    </AppLayout>
+    </UiDrawer>
 </template>
+

@@ -15,9 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('colorway_id')->constrained()->cascadeOnDelete();
             $table->foreignId('dye_id')->constrained()->cascadeOnDelete();
-            $table->integer('dry_weight')->nullable();
-            $table->integer('concentration')->nullable();
-            $table->integer('wet_amount')->nullable();
+            $table->decimal('dry_weight', 8, 2)->nullable();
+            $table->decimal('concentration', 8, 2)->nullable();
+            $table->decimal('wet_amount', 8, 2)->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
 

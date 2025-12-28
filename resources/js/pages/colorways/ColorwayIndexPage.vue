@@ -3,7 +3,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import { create as createColorway, edit as editColorway, destroy as destroyColorway } from '@/actions/App/Http/Controllers/ColorwayController';
+import { edit as editColorway, destroy as destroyColorway } from '@/actions/App/Http/Controllers/ColorwayController';
+import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
 import { router } from '@inertiajs/vue3';
 import { useConfirm } from 'primevue/useconfirm';
@@ -25,6 +26,7 @@ interface Props {
 const props = defineProps<Props>();
 const { IconList } = useIcon();
 const confirm = useConfirm();
+const { openDrawer } = useCreateDrawer();
 
 function formatEnum(value: string | null | undefined): string {
     if (!value) {
@@ -85,10 +87,9 @@ const columns = computed(() => [
         >
             <template #actions>
                 <UiButton
-                    :icon="IconList.Plus"
                     size="small"
-                    label="Colorway"
-                    @click="router.visit(createColorway.url())"
+                    label="Create"
+                    @click="openDrawer('colorway')"
                 />
             </template>
         </PageHeader>

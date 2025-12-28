@@ -1,32 +1,46 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import { store } from '@/actions/App/Http/Controllers/BaseController';
-import { index } from '@/actions/App/Http/Controllers/BaseController';
-import { useIcon } from '@/composables/useIcon';
 import { useFormSubmission } from '@/composables/useFormSubmission';
+import { enumToOptions } from '@/utils/enumOptions';
 import { router } from '@inertiajs/vue3';
 
+// Enum cases - these match the PHP enums
+const baseStatusCases = [
+    { name: 'Active', value: 'active' },
+    { name: 'Retired', value: 'retired' },
+];
+
+const weightCases = [
+    { name: 'Lace', value: 'lace' },
+    { name: 'Fingering', value: 'fingering' },
+    { name: 'DK', value: 'dk' },
+    { name: 'Worsted', value: 'worsted' },
+    { name: 'Bulky', value: 'bulky' },
+];
+
+const baseStatusOptions = enumToOptions(baseStatusCases);
+const weightOptions = enumToOptions(weightCases);
+
 interface Props {
-    baseStatusOptions: Array<{
-        label: string;
-        value: string;
-    }>;
-    weightOptions: Array<{
-        label: string;
-        value: string;
-    }>;
+    visible: boolean;
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+
+const emit = defineEmits<{
+    'update:visible': [value: boolean];
+}>();
+
+function closeDrawer(): void {
+    emit('update:visible', false);
+}
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -50,23 +64,25 @@ const { form, onSubmit } = useFormSubmission({
     },
     successMessage: 'Base created successfully.',
     onSuccess: () => {
-        router.visit(index.url());
+        closeDrawer();
+        router.reload({ only: ['bases'] });
     },
 });
 </script>
 
 <template>
-    <AppLayout page-title="Create Base">
-        <PageHeader
-            heading="Create Base"
-            :icon="IconList.Bases"
-        />
+    <UiDrawer
+        :visible="visible"
+        position="right"
+        class="!w-[30rem]"
+        @update:visible="emit('update:visible', $event)"
+    >
+        <template #header>
+            <h2 class="text-xl font-semibold">Create Base</h2>
+        </template>
 
-        <div class="mt-6">
-            <UiCard>
-                <template #title>Base Information</template>
-                <template #content>
-                    <UiForm @submit="onSubmit">
+        <div class="p-4">
+            <UiForm @submit="onSubmit">
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -205,8 +221,7 @@ const { form, onSubmit } = useFormSubmission({
                             Create Base
                         </UiButton>
                     </UiForm>
-                </template>
-            </UiCard>
         </div>
-    </AppLayout>
+    </UiDrawer>
 </template>
+

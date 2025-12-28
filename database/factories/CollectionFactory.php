@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Collection>
@@ -16,8 +17,25 @@ class CollectionFactory extends Factory
      */
     public function definition(): array
     {
+        $collectionNames = [
+            'Fall Collection',
+            'Rainbow Series',
+            'Ocean Depths',
+            'Forest Dreams',
+            'Sunset Palette',
+            'Winter Wonderland',
+            'Spring Blooms',
+            'Desert Sands',
+            'Mountain Vista',
+            'Garden Party',
+        ];
+
+        $name = fake()->randomElement($collectionNames);
+
         return [
-            //
+            'name' => $name,
+            'slug' => Str::slug($name),
+            'description' => fake()->optional(0.7)->paragraph(),
         ];
     }
 }

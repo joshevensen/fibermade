@@ -3,12 +3,19 @@ import type { BreadcrumbItemType } from '@/types';
 import AppHeader from '@/components/AppHeader.vue';
 import AppMobileDrawer from '@/components/AppMobileDrawer.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
+import BaseCreateDrawer from '@/pages/bases/BaseCreateDrawer.vue';
+import CollectionCreateDrawer from '@/pages/collections/CollectionCreateDrawer.vue';
+import ColorwayCreateDrawer from '@/pages/colorways/ColorwayCreateDrawer.vue';
+import DiscountCreateDrawer from '@/pages/discounts/DiscountCreateDrawer.vue';
+import DyeCreateDrawer from '@/pages/dyes/DyeCreateDrawer.vue';
+import OrderCreateDrawer from '@/pages/orders/OrderCreateDrawer.vue';
+import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useNavigation } from '@/composables/useNavigation';
 import { useSidebarState } from '@/composables/useSidebarState';
 import { Head } from '@inertiajs/vue3';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Toast from 'primevue/toast';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
@@ -20,6 +27,16 @@ withDefaults(defineProps<Props>(), {});
 const navItems = useNavigation();
 const { collapsed: sidebarCollapsed } = useSidebarState();
 const mobileDrawerVisible = ref(false);
+
+const { activeDrawer, closeDrawer } = useCreateDrawer();
+
+const baseDrawerVisible = computed(() => activeDrawer.value === 'base');
+const collectionDrawerVisible = computed(() => activeDrawer.value === 'collection');
+const colorwayDrawerVisible = computed(() => activeDrawer.value === 'colorway');
+const discountDrawerVisible = computed(() => activeDrawer.value === 'discount');
+const dyeDrawerVisible = computed(() => activeDrawer.value === 'dye');
+const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
+
 </script>
 
 <template>
@@ -50,6 +67,32 @@ const mobileDrawerVisible = ref(false);
             :nav-items="navItems"
         />
     </div>
+
+    <!-- Create Drawers -->
+    <BaseCreateDrawer
+        :visible="baseDrawerVisible"
+        @update:visible="(value) => { if (!value) closeDrawer(); }"
+    />
+    <CollectionCreateDrawer
+        :visible="collectionDrawerVisible"
+        @update:visible="(value) => { if (!value) closeDrawer(); }"
+    />
+    <ColorwayCreateDrawer
+        :visible="colorwayDrawerVisible"
+        @update:visible="(value) => { if (!value) closeDrawer(); }"
+    />
+    <DiscountCreateDrawer
+        :visible="discountDrawerVisible"
+        @update:visible="(value) => { if (!value) closeDrawer(); }"
+    />
+    <DyeCreateDrawer
+        :visible="dyeDrawerVisible"
+        @update:visible="(value) => { if (!value) closeDrawer(); }"
+    />
+    <OrderCreateDrawer
+        :visible="orderDrawerVisible"
+        @update:visible="(value) => { if (!value) closeDrawer(); }"
+    />
 
     <!-- Global Components -->
     <ConfirmPopup />

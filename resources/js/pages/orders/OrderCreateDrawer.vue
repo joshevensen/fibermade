@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
@@ -10,24 +8,40 @@ import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
 import { store } from '@/actions/App/Http/Controllers/OrderController';
-import { index } from '@/actions/App/Http/Controllers/OrderController';
-import { useIcon } from '@/composables/useIcon';
 import { useFormSubmission } from '@/composables/useFormSubmission';
+import { enumToOptions } from '@/utils/enumOptions';
 import { router } from '@inertiajs/vue3';
 
+// Enum cases - these match the PHP enums
+const orderTypeCases = [
+    { name: 'Wholesale', value: 'wholesale' },
+    { name: 'Retail', value: 'retail' },
+    { name: 'Show', value: 'show' },
+];
+
+const orderStatusCases = [
+    { name: 'Draft', value: 'draft' },
+    { name: 'Open', value: 'open' },
+    { name: 'Closed', value: 'closed' },
+    { name: 'Cancelled', value: 'cancelled' },
+];
+
+const orderTypeOptions = enumToOptions(orderTypeCases);
+const orderStatusOptions = enumToOptions(orderStatusCases);
+
 interface Props {
-    orderTypeOptions: Array<{
-        label: string;
-        value: string;
-    }>;
-    orderStatusOptions: Array<{
-        label: string;
-        value: string;
-    }>;
+    visible: boolean;
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+
+const emit = defineEmits<{
+    'update:visible': [value: boolean];
+}>();
+
+function closeDrawer(): void {
+    emit('update:visible', false);
+}
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -45,23 +59,25 @@ const { form, onSubmit } = useFormSubmission({
     },
     successMessage: 'Order created successfully.',
     onSuccess: () => {
-        router.visit(index.url());
+        closeDrawer();
+        router.reload({ only: ['orders'] });
     },
 });
 </script>
 
 <template>
-    <AppLayout page-title="Create Order">
-        <PageHeader
-            heading="Create Order"
-            :icon="IconList.Orders"
-        />
+    <UiDrawer
+        :visible="visible"
+        position="right"
+        class="!w-[30rem]"
+        @update:visible="emit('update:visible', $event)"
+    >
+        <template #header>
+            <h2 class="text-xl font-semibold">Create Order</h2>
+        </template>
 
-        <div class="mt-6">
-            <UiCard>
-                <template #title>Order Information</template>
-                <template #content>
-                    <UiForm @submit="onSubmit">
+        <div class="p-4">
+            <UiForm @submit="onSubmit">
                         <UiFormFieldSelect
                             name="type"
                             label="Type"
@@ -149,8 +165,7 @@ const { form, onSubmit } = useFormSubmission({
                             Create Order
                         </UiButton>
                     </UiForm>
-                </template>
-            </UiCard>
         </div>
-    </AppLayout>
+    </UiDrawer>
 </template>
+

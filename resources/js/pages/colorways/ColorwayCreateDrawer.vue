@@ -1,36 +1,69 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
-import PageHeader from '@/components/PageHeader.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import { store } from '@/actions/App/Http/Controllers/ColorwayController';
-import { index } from '@/actions/App/Http/Controllers/ColorwayController';
-import { useIcon } from '@/composables/useIcon';
 import { useFormSubmission } from '@/composables/useFormSubmission';
+import { enumToOptions } from '@/utils/enumOptions';
 import { router } from '@inertiajs/vue3';
 
+// Enum cases - these match the PHP enums
+const colorwayStatusCases = [
+    { name: 'Idea', value: 'idea' },
+    { name: 'Active', value: 'active' },
+    { name: 'Retired', value: 'retired' },
+];
+
+const techniqueCases = [
+    { name: 'Solid', value: 'solid' },
+    { name: 'Tonal', value: 'tonal' },
+    { name: 'Variegated', value: 'variegated' },
+    { name: 'Speckled', value: 'speckled' },
+    { name: 'Other', value: 'other' },
+];
+
+const colorCases = [
+    { name: 'Red', value: 'red' },
+    { name: 'Orange', value: 'orange' },
+    { name: 'Yellow', value: 'yellow' },
+    { name: 'Green', value: 'green' },
+    { name: 'Blue', value: 'blue' },
+    { name: 'Purple', value: 'purple' },
+    { name: 'Pink', value: 'pink' },
+    { name: 'Brown', value: 'brown' },
+    { name: 'Black', value: 'black' },
+    { name: 'White', value: 'white' },
+    { name: 'Gray', value: 'gray' },
+    { name: 'Teal', value: 'teal' },
+    { name: 'Maroon', value: 'maroon' },
+    { name: 'Navy', value: 'navy' },
+    { name: 'Beige', value: 'beige' },
+    { name: 'Tan', value: 'tan' },
+    { name: 'Coral', value: 'coral' },
+    { name: 'Turquoise', value: 'turquoise' },
+];
+
+const colorwayStatusOptions = enumToOptions(colorwayStatusCases);
+const techniqueOptions = enumToOptions(techniqueCases);
+const colorOptions = enumToOptions(colorCases);
+
 interface Props {
-    colorwayStatusOptions: Array<{
-        label: string;
-        value: string;
-    }>;
-    techniqueOptions: Array<{
-        label: string;
-        value: string;
-    }>;
-    colorOptions: Array<{
-        label: string;
-        value: string;
-    }>;
+    visible: boolean;
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
+
+const emit = defineEmits<{
+    'update:visible': [value: boolean];
+}>();
+
+function closeDrawer(): void {
+    emit('update:visible', false);
+}
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
@@ -45,23 +78,25 @@ const { form, onSubmit } = useFormSubmission({
     },
     successMessage: 'Colorway created successfully.',
     onSuccess: () => {
-        router.visit(index.url());
+        closeDrawer();
+        router.reload({ only: ['colorways'] });
     },
 });
 </script>
 
 <template>
-    <AppLayout page-title="Create Colorway">
-        <PageHeader
-            heading="Create Colorway"
-            :icon="IconList.Colorways"
-        />
+    <UiDrawer
+        :visible="visible"
+        position="right"
+        class="!w-[30rem]"
+        @update:visible="emit('update:visible', $event)"
+    >
+        <template #header>
+            <h2 class="text-xl font-semibold">Create Colorway</h2>
+        </template>
 
-        <div class="mt-6">
-            <UiCard>
-                <template #title>Colorway Information</template>
-                <template #content>
-                    <UiForm @submit="onSubmit">
+        <div class="p-4">
+            <UiForm @submit="onSubmit">
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -131,8 +166,7 @@ const { form, onSubmit } = useFormSubmission({
                             Create Colorway
                         </UiButton>
                     </UiForm>
-                </template>
-            </UiCard>
         </div>
-    </AppLayout>
+    </UiDrawer>
 </template>
+
