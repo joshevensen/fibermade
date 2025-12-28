@@ -4,7 +4,7 @@
  * then applies title case.
  */
 export function enumToOptions<T extends { name: string; value: string }>(
-    enumCases: T[]
+    enumCases: T[],
 ): Array<{ label: string; value: string }> {
     return enumCases.map((enumCase) => {
         // Convert CamelCase to "Camel Case" by adding space before capital letters
@@ -14,7 +14,10 @@ export function enumToOptions<T extends { name: string; value: string }>(
         // Apply title case (capitalize first letter of each word)
         label = label
             .split(' ')
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+            .map(
+                (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
+            )
             .join(' ');
 
         return {
@@ -23,4 +26,3 @@ export function enumToOptions<T extends { name: string; value: string }>(
         };
     });
 }
-

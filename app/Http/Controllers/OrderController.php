@@ -6,7 +6,10 @@ use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Models\Customer;
 use App\Models\Order;
+use App\Models\Show;
+use App\Models\Store;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -23,8 +26,8 @@ class OrderController extends Controller
 
         $user = auth()->user();
         $orders = $user->is_admin
-            ? Order::with(['account', 'orderItems'])->get()
-            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems'])->get() : collect());
+            ? Order::with(['account', 'orderItems', 'orderable'])->get()
+            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable'])->get() : collect());
 
         return Inertia::render('orders/OrderIndexPage', [
             'orders' => $orders,
@@ -63,8 +66,20 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): RedirectResponse
     {
+        $validated = $request->validated();
+        $type = OrderType::from($validated['type']);
+
+        // Set orderable_type based on order type
+        if ($type === OrderType::Wholesale) {
+            $validated['orderable_type'] = Store::class;
+        } elseif ($type === OrderType::Retail) {
+            $validated['orderable_type'] = Customer::class;
+        } elseif ($type === OrderType::Show) {
+            $validated['orderable_type'] = Show::class;
+        }
+
         $order = Order::create([
-            ...$request->validated(),
+            ...$validated,
             'account_id' => $request->user()->account_id,
             'created_by' => $request->user()->id,
         ]);
@@ -99,7 +114,7 @@ class OrderController extends Controller
             : ($user->account_id ? \App\Models\Account::where('id', $user->account_id)->select('id', 'name')->get() : collect());
 
         return Inertia::render('orders/OrderEditPage', [
-            'order' => $order->load(['account', 'orderItems']),
+            'order' => $order->load(['account', 'orderItems', 'orderable']),
             'orderTypeOptions' => $orderTypeOptions,
             'orderStatusOptions' => $orderStatusOptions,
             'accounts' => $accounts,
@@ -111,7 +126,22 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, Order $order): RedirectResponse
     {
-        $order->update($request->validated());
+        $validated = $request->validated();
+
+        // Update orderable_type if type is being changed
+        if (isset($validated['type'])) {
+            $type = OrderType::from($validated['type']);
+
+            if ($type === OrderType::Wholesale) {
+                $validated['orderable_type'] = Store::class;
+            } elseif ($type === OrderType::Retail) {
+                $validated['orderable_type'] = Customer::class;
+            } elseif ($type === OrderType::Show) {
+                $validated['orderable_type'] = Show::class;
+            }
+        }
+
+        $order->update($validated);
         $order->updated_by = $request->user()->id;
         $order->save();
 

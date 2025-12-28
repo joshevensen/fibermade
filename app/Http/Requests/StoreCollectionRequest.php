@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BaseStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreCollectionRequest extends FormRequest
 {
@@ -25,6 +27,7 @@ class StoreCollectionRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'status' => ['required', Rule::enum(BaseStatus::class)],
         ];
     }
 }

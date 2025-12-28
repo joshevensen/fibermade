@@ -14,9 +14,11 @@ Route::get('dashboard', function () {
 require __DIR__.'/settings.php';
 require __DIR__.'/colorways.php';
 require __DIR__.'/bases.php';
+require __DIR__.'/customers.php';
 require __DIR__.'/dyes.php';
 require __DIR__.'/collections.php';
 require __DIR__.'/discounts.php';
 require __DIR__.'/inventory.php';
 require __DIR__.'/stores.php';
 require __DIR__.'/orders.php';
+require __DIR__.'/shows.php';

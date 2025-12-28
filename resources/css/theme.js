@@ -14,7 +14,7 @@ const theme = definePreset(Aura, {
             700: '{orange.700}',
             800: '{orange.800}',
             900: '{orange.900}',
-            950: '{orange.950}'
+            950: '{orange.950}',
         },
         colorScheme: {
             light: {
@@ -30,11 +30,11 @@ const theme = definePreset(Aura, {
                     700: '{stone.700}',
                     800: '{stone.800}',
                     900: '{stone.900}',
-                    950: '{stone.950}'
-                }
+                    950: '{stone.950}',
+                },
             },
-        }
-    }
+        },
+    },
 });
 
 export default theme;

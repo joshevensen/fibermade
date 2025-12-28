@@ -1,15 +1,15 @@
-import type { NavItem } from '@/types';
 import { index as basesIndex } from '@/actions/App/Http/Controllers/BaseController';
 import { index as collectionsIndex } from '@/actions/App/Http/Controllers/CollectionController';
 import { index as colorwaysIndex } from '@/actions/App/Http/Controllers/ColorwayController';
+import { index as customersIndex } from '@/actions/App/Http/Controllers/CustomerController';
 import { index as dyesIndex } from '@/actions/App/Http/Controllers/DyeController';
-import { index as discountsIndex } from '@/actions/App/Http/Controllers/DiscountController';
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
+import { index as showsIndex } from '@/actions/App/Http/Controllers/ShowController';
+import { useIcon } from '@/composables/useIcon';
+import { dashboard } from '@/routes';
 import { index as inventoryIndex } from '@/routes/inventory';
 import { index as storesIndex } from '@/routes/stores';
-import { dashboard } from '@/routes';
-import { edit as profileEdit } from '@/routes/user';
-import { useIcon } from '@/composables/useIcon';
+import type { NavItem } from '@/types';
 import type { Component } from 'vue';
 
 const { BusinessIconList } = useIcon();
@@ -29,16 +29,6 @@ export function useNavigation(): NavigationItem[] {
             title: 'Inventory',
             href: inventoryIndex.url(),
             icon: BusinessIconList.Inventory,
-        },
-        {
-            title: 'Stores',
-            href: storesIndex.url(),
-            icon: BusinessIconList.Stores,
-        },
-        {
-            title: 'Orders',
-            href: ordersIndex.url(),
-            icon: BusinessIconList.Orders,
         },
         {
             title: 'Colorways',
@@ -61,10 +51,24 @@ export function useNavigation(): NavigationItem[] {
             icon: BusinessIconList.Dyes,
         },
         {
-            title: 'Discounts',
-            href: discountsIndex.url(),
-            icon: BusinessIconList.Discounts,
+            title: 'Orders',
+            href: ordersIndex.url(),
+            icon: BusinessIconList.Orders,
+        },
+        {
+            title: 'Stores',
+            href: storesIndex.url(),
+            icon: BusinessIconList.Stores,
+        },
+        {
+            title: 'Shows',
+            href: showsIndex.url(),
+            icon: BusinessIconList.Shows,
+        },
+        {
+            title: 'Customers',
+            href: customersIndex.url(),
+            icon: BusinessIconList.Customers,
         },
     ];
 }
-

@@ -33,7 +33,7 @@ withDefaults(defineProps<Props>(), {
     </template>
     <template v-else>
         <div
-            class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
+            class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-md"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"

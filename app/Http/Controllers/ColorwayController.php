@@ -7,6 +7,7 @@ use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
 use App\Http\Requests\StoreColorwayRequest;
 use App\Http\Requests\UpdateColorwayRequest;
+use App\Models\Collection;
 use App\Models\Colorway;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
@@ -24,11 +25,56 @@ class ColorwayController extends Controller
 
         $user = auth()->user();
         $colorways = $user->is_admin
-            ? Colorway::with('account')->get()
-            : ($user->account_id ? Colorway::where('account_id', $user->account_id)->with('account')->get() : collect());
+            ? Colorway::with(['account', 'media', 'collections'])->get()
+            : ($user->account_id ? Colorway::where('account_id', $user->account_id)->with(['account', 'media', 'collections'])->get() : collect());
+
+        $colorways = $colorways->map(function ($colorway) {
+            $colorwayArray = $colorway->toArray();
+            $colorwayArray['primary_image_url'] = $colorway->primary_image_url;
+            $colorwayArray['collections'] = $colorway->collections->map(fn ($collection) => [
+                'id' => $collection->id,
+                'name' => $collection->name,
+            ])->toArray();
+
+            return $colorwayArray;
+        });
+
+        $colorwayStatusOptions = collect(ColorwayStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $techniqueOptions = collect(Technique::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $colorOptions = collect(Color::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $collections = $user->is_admin
+            ? Collection::orderBy('name')->get()
+            : ($user->account_id ? Collection::where('account_id', $user->account_id)->orderBy('name')->get() : collect());
+
+        $collectionOptions = $collections->map(fn ($collection) => [
+            'label' => $collection->name,
+            'value' => $collection->id,
+        ])->toArray();
 
         return Inertia::render('colorways/ColorwayIndexPage', [
             'colorways' => $colorways,
+            'colorwayStatusOptions' => $colorwayStatusOptions,
+            'techniqueOptions' => $techniqueOptions,
+            'colorOptions' => $colorOptions,
+            'collectionOptions' => $collectionOptions,
         ]);
     }
 

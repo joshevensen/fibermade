@@ -27,12 +27,12 @@ class UpdateBaseRequest extends FormRequest
     {
         return [
             'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
-            'name' => ['sometimes', 'string', 'max:255'],
             'slug' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::enum(BaseStatus::class)],
             'weight' => ['nullable', Rule::enum(Weight::class)],
-            'descriptor' => ['nullable', 'string'],
+            'descriptor' => ['sometimes', 'required', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:255'],
             'size' => ['nullable', 'integer', 'min:0'],
             'cost' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'retail_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

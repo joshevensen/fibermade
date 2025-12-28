@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -31,6 +32,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float|null $tax_amount
  * @property float|null $total_amount
  * @property string|null $notes
+ * @property int|null $orderable_id
+ * @property string|null $orderable_type
+ * @property \App\Models\Show|\App\Models\Store|\App\Models\Customer|null $orderable
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -59,6 +63,8 @@ class Order extends Model
         'tax_amount',
         'total_amount',
         'notes',
+        'orderable_id',
+        'orderable_type',
         'created_by',
         'updated_by',
     ];
@@ -96,6 +102,14 @@ class Order extends Model
     public function orderItems(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    /**
+     * Get the parent orderable model (Show, Store, or Customer).
+     */
+    public function orderable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     /**

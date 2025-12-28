@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import UiDrawer from '@/components/ui/UiDrawer.vue';
+import { store } from '@/actions/App/Http/Controllers/DyeController';
 import UiButton from '@/components/ui/UiButton.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiForm from '@/components/ui/UiForm.vue';
+import UiFormFieldAutoComplete from '@/components/ui/UiFormFieldAutoComplete.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import UiFormFieldToggleSwitch from '@/components/ui/UiFormFieldToggleSwitch.vue';
-import UiFormFieldAutoComplete from '@/components/ui/UiFormFieldAutoComplete.vue';
-import { store } from '@/actions/App/Http/Controllers/DyeController';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -46,9 +46,10 @@ const { form, onSubmit } = useFormSubmission({
 function searchManufacturer(event: { query: string }): void {
     const query = event.query.toLowerCase();
     const filtered = ['Dharma', 'Jacquard'].filter((m) =>
-        m.toLowerCase().includes(query)
+        m.toLowerCase().includes(query),
     );
-    manufacturerSuggestions.value = filtered.length > 0 ? filtered : ['Dharma', 'Jacquard'];
+    manufacturerSuggestions.value =
+        filtered.length > 0 ? filtered : ['Dharma', 'Jacquard'];
 }
 </script>
 
@@ -65,50 +66,46 @@ function searchManufacturer(event: { query: string }): void {
 
         <div class="p-4">
             <UiForm @submit="onSubmit">
-                        <UiFormFieldInput
-                            name="name"
-                            label="Name"
-                            placeholder="Dye name"
-                            :server-error="form.errors.name"
-                            required
-                        />
+                <UiFormFieldInput
+                    name="name"
+                    label="Name"
+                    placeholder="Dye name"
+                    :server-error="form.errors.name"
+                    required
+                />
 
-                        <UiFormFieldAutoComplete
-                            name="manufacturer"
-                            label="Manufacturer"
-                            placeholder="Select or type manufacturer"
-                            :suggestions="manufacturerSuggestions"
-                            :server-error="form.errors.manufacturer"
-                            @complete="searchManufacturer"
-                        />
+                <UiFormFieldAutoComplete
+                    name="manufacturer"
+                    label="Manufacturer"
+                    placeholder="Select or type manufacturer"
+                    :suggestions="manufacturerSuggestions"
+                    :server-error="form.errors.manufacturer"
+                    @complete="searchManufacturer"
+                />
 
-                        <UiFormFieldTextarea
-                            name="notes"
-                            label="Notes"
-                            placeholder="Dye notes"
-                            :server-error="form.errors.notes"
-                        />
+                <UiFormFieldTextarea
+                    name="notes"
+                    label="Notes"
+                    placeholder="Dye notes"
+                    :server-error="form.errors.notes"
+                />
 
-                        <UiFormFieldToggleSwitch
-                            name="does_bleed"
-                            label="Does Bleed"
-                            :server-error="form.errors.does_bleed"
-                        />
+                <UiFormFieldToggleSwitch
+                    name="does_bleed"
+                    label="Does Bleed"
+                    :server-error="form.errors.does_bleed"
+                />
 
-                        <UiFormFieldToggleSwitch
-                            name="do_like"
-                            label="Do Like"
-                            :server-error="form.errors.do_like"
-                        />
+                <UiFormFieldToggleSwitch
+                    name="do_like"
+                    label="Do Like"
+                    :server-error="form.errors.do_like"
+                />
 
-                        <UiButton
-                            type="submit"
-                            :loading="form.processing"
-                        >
-                            Create Dye
-                        </UiButton>
-                    </UiForm>
+                <UiButton type="submit" :loading="form.processing">
+                    Create Dye
+                </UiButton>
+            </UiForm>
         </div>
     </UiDrawer>
 </template>
-

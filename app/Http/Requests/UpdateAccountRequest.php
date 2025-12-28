@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,7 +24,6 @@ class UpdateAccountRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['sometimes', Rule::enum(AccountType::class)],
             'status' => ['sometimes', Rule::enum(BaseStatus::class)],
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['nullable', 'string', 'email', 'max:255'],

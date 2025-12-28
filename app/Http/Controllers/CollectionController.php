@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BaseStatus;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionRequest;
 use App\Models\Collection;
@@ -20,11 +21,17 @@ class CollectionController extends Controller
 
         $user = auth()->user();
         $collections = $user->is_admin
-            ? Collection::with('account')->get()
-            : ($user->account_id ? Collection::where('account_id', $user->account_id)->with('account')->get() : collect());
+            ? Collection::with('account')->withCount('colorways')->get()
+            : ($user->account_id ? Collection::where('account_id', $user->account_id)->with('account')->withCount('colorways')->get() : collect());
+
+        $statusOptions = [
+            ['label' => 'Active', 'value' => BaseStatus::Active->value],
+            ['label' => 'Retired', 'value' => BaseStatus::Retired->value],
+        ];
 
         return Inertia::render('collections/CollectionIndexPage', [
             'collections' => $collections,
+            'statusOptions' => $statusOptions,
         ]);
     }
 

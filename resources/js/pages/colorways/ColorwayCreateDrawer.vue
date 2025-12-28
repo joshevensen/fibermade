@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import UiDrawer from '@/components/ui/UiDrawer.vue';
-import UiButton from '@/components/ui/UiButton.vue';
-import UiForm from '@/components/ui/UiForm.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
-import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import { store } from '@/actions/App/Http/Controllers/ColorwayController';
+import UiButton from '@/components/ui/UiButton.vue';
+import UiDrawer from '@/components/ui/UiDrawer.vue';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
+import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
+import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import UiSelectButton from '@/components/ui/UiSelectButton.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { enumToOptions } from '@/utils/enumOptions';
 import { router } from '@inertiajs/vue3';
@@ -97,76 +99,63 @@ const { form, onSubmit } = useFormSubmission({
 
         <div class="p-4">
             <UiForm @submit="onSubmit">
-                        <UiFormFieldInput
-                            name="name"
-                            label="Name"
-                            placeholder="Colorway name"
-                            :server-error="form.errors.name"
-                            required
-                        />
-
-                        <UiFormFieldInput
-                            name="slug"
-                            label="Slug"
-                            placeholder="colorway-slug"
-                            :server-error="form.errors.slug"
-                            required
-                        />
-
-                        <UiFormFieldTextarea
-                            name="description"
-                            label="Description"
-                            placeholder="Colorway description"
-                            :server-error="form.errors.description"
-                        />
-
-                        <UiFormFieldSelect
-                            name="technique"
-                            label="Technique"
-                            :options="techniqueOptions"
-                            option-label="label"
-                            option-value="value"
-                            placeholder="Select technique"
-                            :server-error="form.errors.technique"
-                            show-clear
-                        />
-
-                        <UiFormFieldMultiSelect
-                            name="colors"
-                            label="Colors"
-                            :options="colorOptions"
-                            option-label="label"
-                            option-value="value"
-                            placeholder="Select colors"
-                            :server-error="form.errors.colors"
-                        />
-
-                        <UiFormFieldSelect
-                            name="status"
-                            label="Status"
+                <UiFormField
+                    name="status"
+                    label="Status"
+                    :server-error="form.errors.status"
+                >
+                    <template #default="{ props: fieldProps }">
+                        <UiSelectButton
+                            v-bind="fieldProps"
                             :options="colorwayStatusOptions"
                             option-label="label"
                             option-value="value"
-                            placeholder="Select status"
-                            :server-error="form.errors.status"
-                            required
+                            size="small"
+                            fluid
                         />
+                    </template>
+                </UiFormField>
 
-                        <UiFormFieldInput
-                            name="shopify_product_id"
-                            label="Shopify Product ID"
-                            placeholder="Shopify product ID"
-                            :server-error="form.errors.shopify_product_id"
-                        />
+                <UiFormFieldInput
+                    name="name"
+                    label="Name"
+                    placeholder="Colorway name"
+                    :server-error="form.errors.name"
+                    required
+                />
 
-                        <UiButton
-                            type="submit"
-                            :loading="form.processing"
-                        >
-                            Create Colorway
-                        </UiButton>
-                    </UiForm>
+                <UiFormFieldSelect
+                    name="technique"
+                    label="Technique"
+                    :options="techniqueOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Select technique"
+                    :server-error="form.errors.technique"
+                    show-clear
+                />
+
+                <UiFormFieldMultiSelect
+                    name="colors"
+                    label="Colors"
+                    :options="colorOptions"
+                    option-label="label"
+                    option-value="value"
+                    placeholder="Select colors"
+                    :server-error="form.errors.colors"
+                />
+
+                <UiFormFieldTextarea
+                    name="description"
+                    label="Description"
+                    placeholder="Colorway description"
+                    :server-error="form.errors.description"
+                />
+
+                <UiButton type="submit" :loading="form.processing">
+                    Create Colorway
+                </UiButton>
+            </UiForm>
         </div>
     </UiDrawer>
 </template>
-

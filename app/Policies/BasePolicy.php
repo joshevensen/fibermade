@@ -20,7 +20,20 @@ class BasePolicy
      */
     public function view(User $user, Base $base): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $base->account_id);
+        if ($this->isAdmin($user)) {
+            return true;
+        }
+
+        // Ensure account_id is loaded (refresh if not in attributes)
+        if (! array_key_exists('account_id', $base->getAttributes())) {
+            $base->refresh();
+        }
+
+        if ($base->account_id === null) {
+            return false;
+        }
+
+        return $this->belongsToAccount($user, $base->account_id);
     }
 
     /**
@@ -36,7 +49,7 @@ class BasePolicy
      */
     public function update(User $user, Base $base): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $base->account_id);
+        return $this->isAdmin($user) || ($base->account_id !== null && $this->belongsToAccount($user, $base->account_id));
     }
 
     /**
@@ -44,7 +57,7 @@ class BasePolicy
      */
     public function delete(User $user, Base $base): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $base->account_id);
+        return $this->isAdmin($user) || ($base->account_id !== null && $this->belongsToAccount($user, $base->account_id));
     }
 
     /**
@@ -52,7 +65,7 @@ class BasePolicy
      */
     public function restore(User $user, Base $base): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $base->account_id);
+        return $this->isAdmin($user) || ($base->account_id !== null && $this->belongsToAccount($user, $base->account_id));
     }
 
     /**
@@ -60,7 +73,7 @@ class BasePolicy
      */
     public function forceDelete(User $user, Base $base): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $base->account_id);
+        return $this->isAdmin($user) || ($base->account_id !== null && $this->belongsToAccount($user, $base->account_id));
     }
 
     /**

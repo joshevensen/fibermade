@@ -4,6 +4,9 @@ namespace Database\Factories;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Models\Customer;
+use App\Models\Show;
+use App\Models\Store;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -40,5 +43,31 @@ class OrderFactory extends Factory
             'total_amount' => $total,
             'notes' => fake()->optional(0.3)->sentence(),
         ];
+    }
+
+    /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function ($order) {
+            if ($order->orderable_id === null && $order->orderable_type === null) {
+                $type = $order->type ?? fake()->randomElement(OrderType::cases());
+
+                if ($type === OrderType::Wholesale) {
+                    $store = Store::factory()->create();
+                    $order->orderable_id = $store->id;
+                    $order->orderable_type = Store::class;
+                } elseif ($type === OrderType::Retail) {
+                    $customer = Customer::factory()->create(['account_id' => $order->account_id]);
+                    $order->orderable_id = $customer->id;
+                    $order->orderable_type = Customer::class;
+                } elseif ($type === OrderType::Show) {
+                    $show = Show::factory()->create(['account_id' => $order->account_id]);
+                    $order->orderable_id = $show->id;
+                    $order->orderable_type = Show::class;
+                }
+            }
+        });
     }
 }

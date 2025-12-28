@@ -5,6 +5,9 @@ namespace App\Http\Requests;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Models\Account;
+use App\Models\Customer;
+use App\Models\Show;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -26,10 +29,22 @@ class UpdateOrderRequest extends FormRequest
      */
     public function rules(): array
     {
+        $type = $this->input('type', $this->route('order')->type?->value);
+        $orderableIdRule = ['sometimes', 'nullable', 'integer'];
+
+        if ($type === OrderType::Wholesale->value) {
+            $orderableIdRule[] = Rule::exists(Store::class, 'id');
+        } elseif ($type === OrderType::Retail->value) {
+            $orderableIdRule[] = Rule::exists(Customer::class, 'id');
+        } elseif ($type === OrderType::Show->value) {
+            $orderableIdRule[] = Rule::exists(Show::class, 'id');
+        }
+
         return [
             'type' => ['sometimes', Rule::enum(OrderType::class)],
             'status' => ['sometimes', Rule::enum(OrderStatus::class)],
             'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
+            'orderable_id' => $orderableIdRule,
             'shopify_order_id' => ['nullable', 'string', 'max:255'],
             'order_date' => ['sometimes', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

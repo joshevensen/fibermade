@@ -12,13 +12,9 @@ defineProps<Props>();
 </script>
 
 <template>
-    <div class="mb-2 h-10 flex items-center justify-between">
+    <div class="mb-2 flex h-10 items-center justify-between">
         <div class="flex items-center gap-2">
-            <UiIcon
-                v-if="icon"
-                :name="icon"
-                class="text-lg text-surface-400"
-            />
+            <UiIcon v-if="icon" :name="icon" class="text-lg text-surface-400" />
             <UiIcon
                 v-else-if="businessIcon"
                 :component="businessIcon"
@@ -31,4 +27,3 @@ defineProps<Props>();
         </div>
     </div>
 </template>
-

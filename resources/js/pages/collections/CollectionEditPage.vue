@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import { update } from '@/actions/App/Http/Controllers/CollectionController';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
-import { update } from '@/actions/App/Http/Controllers/CollectionController';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { useIcon } from '@/composables/useIcon';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 
 interface Props {
@@ -48,44 +48,41 @@ const { form, onSubmit } = useFormSubmission({
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
-                <UiFormFieldInput
-                    name="name"
-                    label="Name"
-                    placeholder="Collection name"
-                    :server-error="form.errors.name"
-                    required
-                />
+                        <UiFormFieldInput
+                            name="name"
+                            label="Name"
+                            placeholder="Collection name"
+                            :server-error="form.errors.name"
+                            required
+                        />
 
-                <UiFormFieldInput
-                    name="slug"
-                    label="Slug"
-                    placeholder="collection-slug"
-                    :server-error="form.errors.slug"
-                    required
-                />
+                        <UiFormFieldInput
+                            name="slug"
+                            label="Slug"
+                            placeholder="collection-slug"
+                            :server-error="form.errors.slug"
+                            required
+                        />
 
-                <UiFormFieldTextarea
-                    name="description"
-                    label="Description"
-                    placeholder="Collection description"
-                    :server-error="form.errors.description"
-                />
+                        <UiFormFieldTextarea
+                            name="description"
+                            label="Description"
+                            placeholder="Collection description"
+                            :server-error="form.errors.description"
+                        />
 
-                <div class="flex gap-4">
-                    <UiButton
-                        type="submit"
-                        :loading="form.processing"
-                    >
-                        Update Collection
-                    </UiButton>
-                    <UiButton
-                        type="button"
-                        severity="secondary"
-                        @click="router.visit('/collections')"
-                    >
-                        Cancel
-                    </UiButton>
-                </div>
+                        <div class="flex gap-4">
+                            <UiButton type="submit" :loading="form.processing">
+                                Update Collection
+                            </UiButton>
+                            <UiButton
+                                type="button"
+                                severity="secondary"
+                                @click="router.visit('/collections')"
+                            >
+                                Cancel
+                            </UiButton>
+                        </div>
                     </UiForm>
                 </template>
             </UiCard>

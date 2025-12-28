@@ -17,6 +17,7 @@ interface Props {
     validateOnSubmit?: boolean;
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
+    labelPosition?: 'top' | 'left' | 'right';
     // UiMultiSelect props
     options?: any[];
     optionLabel?: string | ((data: any) => string);
@@ -62,6 +63,7 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
+        :labelPosition="labelPosition"
     >
         <template #default="{ props: fieldProps, id }">
             <UiMultiSelect

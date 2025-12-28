@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $account_id
- * @property string $name
  * @property string $slug
  * @property string|null $description
  * @property \App\Enums\BaseStatus $status
  * @property \App\Enums\Weight|null $weight
- * @property string|null $descriptor
+ * @property string $descriptor
+ * @property string|null $code
  * @property int|null $size
  * @property float|null $cost
  * @property float|null $retail_price
@@ -51,12 +51,12 @@ class Base extends Model
      */
     protected $fillable = [
         'account_id',
-        'name',
         'slug',
         'description',
         'status',
         'weight',
         'descriptor',
+        'code',
         'size',
         'cost',
         'retail_price',
@@ -68,6 +68,43 @@ class Base extends Model
         'cotton_percent',
         'bamboo_percent',
     ];
+
+    /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (Base $base): void {
+            if (empty($base->code) && ! empty($base->descriptor)) {
+                $base->code = static::generateCodeFromDescriptor($base->descriptor);
+            }
+        });
+    }
+
+    /**
+     * Generate a code from the descriptor by taking initials.
+     */
+    public static function generateCodeFromDescriptor(string $descriptor): string
+    {
+        $words = explode(' ', trim($descriptor));
+
+        if (count($words) === 0) {
+            return '';
+        }
+
+        if (count($words) === 1) {
+            return strtoupper(substr($words[0], 0, 1));
+        }
+
+        $initials = '';
+        foreach ($words as $word) {
+            $initials .= strtoupper(substr($word, 0, 1));
+        }
+
+        return $initials;
+    }
 
     /**
      * Get the attributes that should be cast.

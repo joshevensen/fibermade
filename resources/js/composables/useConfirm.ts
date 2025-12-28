@@ -10,8 +10,24 @@ export interface ConfirmOptions {
     reject?: () => void;
     acceptLabel?: string;
     rejectLabel?: string;
-    acceptSeverity?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'help' | 'contrast';
-    rejectSeverity?: 'primary' | 'secondary' | 'success' | 'info' | 'warning' | 'danger' | 'help' | 'contrast';
+    acceptSeverity?:
+        | 'primary'
+        | 'secondary'
+        | 'success'
+        | 'info'
+        | 'warning'
+        | 'danger'
+        | 'help'
+        | 'contrast';
+    rejectSeverity?:
+        | 'primary'
+        | 'secondary'
+        | 'success'
+        | 'info'
+        | 'warning'
+        | 'danger'
+        | 'help'
+        | 'contrast';
     group?: string;
 }
 
@@ -27,7 +43,8 @@ export function useConfirm() {
     }): void {
         confirm.require({
             target: options.target,
-            message: options.message || 'Are you sure you want to delete this item?',
+            message:
+                options.message || 'Are you sure you want to delete this item?',
             icon: IconList.ExclamationTriangle,
             header: 'Confirm Deletion',
             rejectProps: {
@@ -71,4 +88,3 @@ export function useConfirm() {
         require,
     };
 }
-

@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('bases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
             $table->string('slug');
             $table->text('description')->nullable();
             $table->string('status')->default('active');
             $table->string('weight')->nullable();
-            $table->text('descriptor')->nullable();
+            $table->string('descriptor');
+            $table->string('code')->nullable();
             $table->integer('size')->nullable();
             $table->decimal('cost', 10, 2)->nullable();
             $table->decimal('retail_price', 10, 2)->nullable();
@@ -36,6 +36,7 @@ return new class extends Migration
             $table->unique(['account_id', 'slug']);
             $table->index('status');
             $table->index('weight');
+            $table->index('code');
         });
     }
 

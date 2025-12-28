@@ -23,26 +23,30 @@ export const IconList = {
 // Business Icons - Tabler Icons (Vue components)
 import {
     IconBox,
-    IconFolder,
-    IconPalette,
-    IconDroplet,
-    IconTag,
-    IconShoppingCart,
-    IconShoppingBag,
-    IconLayoutGrid,
+    IconCalendarEvent,
     IconDashboard,
+    IconDroplet,
+    IconFolder,
+    IconLayoutGrid,
+    IconPalette,
+    IconShoppingBag,
+    IconShoppingCart,
+    IconTag,
+    IconUsers,
 } from '@tabler/icons-vue';
 
 export const BusinessIconList = {
     Bases: IconBox,
     Collections: IconFolder,
     Colorways: IconPalette,
+    Customers: IconUsers,
     Dyes: IconDroplet,
     Discounts: IconTag,
     Orders: IconShoppingCart,
     Stores: IconShoppingBag,
     Inventory: IconLayoutGrid,
     Dashboard: IconDashboard,
+    Shows: IconCalendarEvent,
 } as const;
 
 export function useIcon() {

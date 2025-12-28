@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $name
  * @property string $slug
  * @property string|null $description
+ * @property \App\Enums\BaseStatus $status
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -39,7 +40,20 @@ class Collection extends Model
         'name',
         'slug',
         'description',
+        'status',
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'status' => \App\Enums\BaseStatus::class,
+        ];
+    }
 
     /**
      * Get the account that owns this collection.

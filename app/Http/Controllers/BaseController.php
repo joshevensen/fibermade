@@ -22,12 +22,25 @@ class BaseController extends Controller
         $this->authorize('viewAny', Base::class);
 
         $user = auth()->user();
-        $bases = $user->is_admin
-            ? Base::with('account')->get()
-            : ($user->account_id ? Base::where('account_id', $user->account_id)->with('account')->get() : collect());
+        $status = request()->query('status', 'active');
+
+        $baseQuery = $user->is_admin
+            ? Base::with('account')
+            : ($user->account_id ? Base::where('account_id', $user->account_id)->with('account') : Base::query()->whereRaw('1 = 0'));
+
+        // Get total count before status filtering
+        $totalBases = (clone $baseQuery)->count();
+
+        $query = clone $baseQuery;
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $bases = $query->get();
 
         return Inertia::render('bases/BaseIndexPage', [
             'bases' => $bases,
+            'totalBases' => $totalBases,
         ]);
     }
 
@@ -46,10 +59,16 @@ class BaseController extends Controller
             ->toArray();
 
         $weightOptions = collect(Weight::cases())
-            ->map(fn ($case) => [
-                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
-                'value' => $case->value,
-            ])
+            ->map(function ($case) {
+                $label = $case->name === 'DK'
+                    ? 'DK'
+                    : Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name)));
+
+                return [
+                    'label' => $label,
+                    'value' => $case->value,
+                ];
+            })
             ->toArray();
 
         return Inertia::render('bases/BaseCreatePage', [
@@ -76,6 +95,9 @@ class BaseController extends Controller
      */
     public function edit(Base $base): Response
     {
+        // Ensure account_id is loaded (refresh if needed)
+        $base->refresh();
+
         $this->authorize('view', $base);
 
         $baseStatusOptions = collect(BaseStatus::cases())
@@ -86,10 +108,16 @@ class BaseController extends Controller
             ->toArray();
 
         $weightOptions = collect(Weight::cases())
-            ->map(fn ($case) => [
-                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
-                'value' => $case->value,
-            ])
+            ->map(function ($case) {
+                $label = $case->name === 'DK'
+                    ? 'DK'
+                    : Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name)));
+
+                return [
+                    'label' => $label,
+                    'value' => $case->value,
+                ];
+            })
             ->toArray();
 
         return Inertia::render('bases/BaseEditPage', [

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
-import { ref } from 'vue';
 import { useIcon } from '@/composables/useIcon';
+import { ref } from 'vue';
 
 interface PricingTier {
     id: string;
@@ -107,7 +107,10 @@ const { IconList } = useIcon();
                             class="flex gap-x-3"
                         >
                             <i
-                                :class="[IconList.Check, 'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400']"
+                                :class="[
+                                    IconList.Check,
+                                    'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400',
+                                ]"
                                 aria-hidden="true"
                             ></i>
                             {{ feature }}
@@ -366,7 +369,10 @@ const { IconList } = useIcon();
                                         class="flex gap-x-3"
                                     >
                                         <i
-                                            :class="[IconList.Check, 'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400']"
+                                            :class="[
+                                                IconList.Check,
+                                                'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400',
+                                            ]"
                                             aria-hidden="true"
                                         ></i>
                                         {{ feature }}
@@ -601,7 +607,10 @@ const { IconList } = useIcon();
                                     class="flex gap-x-3"
                                 >
                                     <i
-                                        :class="[IconList.Check, 'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400']"
+                                        :class="[
+                                            IconList.Check,
+                                            'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400',
+                                        ]"
                                         aria-hidden="true"
                                     ></i>
                                     {{ feature }}

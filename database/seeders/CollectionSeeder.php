@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\BaseStatus;
 use App\Models\Account;
 use App\Models\Collection;
 use Illuminate\Database\Seeder;
@@ -41,6 +42,7 @@ class CollectionSeeder extends Seeder
                 'name' => $collectionData['name'],
                 'slug' => Str::slug($collectionData['name']),
                 'description' => $collectionData['description'],
+                'status' => BaseStatus::Active,
             ]);
         }
     }

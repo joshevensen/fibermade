@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
-            $table->string('type')->default('creator');
             $table->string('status')->default('active');
             $table->string('name');
             $table->string('email')->nullable();

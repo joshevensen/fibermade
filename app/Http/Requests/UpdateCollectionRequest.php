@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\BaseStatus;
 use App\Models\Account;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -28,6 +29,7 @@ class UpdateCollectionRequest extends FormRequest
             'name' => ['sometimes', 'string', 'max:255'],
             'slug' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
+            'status' => ['sometimes', Rule::enum(BaseStatus::class)],
         ];
     }
 }

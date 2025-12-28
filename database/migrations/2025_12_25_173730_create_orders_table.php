@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('type');
             $table->string('status');
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('orderable_id')->nullable();
+            $table->string('orderable_type')->nullable();
             $table->string('shopify_order_id')->nullable();
             $table->date('order_date');
             $table->decimal('subtotal_amount', 10, 2)->nullable();
@@ -33,6 +35,7 @@ return new class extends Migration
             $table->index('status');
             $table->index('order_date');
             $table->index('shopify_order_id');
+            $table->index(['orderable_id', 'orderable_type']);
         });
     }
 

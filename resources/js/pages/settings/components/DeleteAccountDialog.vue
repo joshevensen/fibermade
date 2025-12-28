@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { destroy as destroyAccount } from '@/routes/account';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
@@ -7,6 +6,7 @@ import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiPassword from '@/components/ui/UiPassword.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
+import { destroy as destroyAccount } from '@/routes/account';
 import { focusPasswordInput } from '@/utils/focusPasswordInput';
 import { ref, useTemplateRef } from 'vue';
 
@@ -24,9 +24,7 @@ const { form, onSubmit } = useFormSubmission({
     },
     onError: async () => {
         await focusPasswordInput(
-            passwordInput.value
-                ? { value: passwordInput.value }
-                : null,
+            passwordInput.value ? { value: passwordInput.value } : null,
         );
     },
 });
@@ -52,9 +50,7 @@ function openDialog(): void {
             <div
                 class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10"
             >
-                <div
-                    class="relative space-y-0.5 text-red-600"
-                >
+                <div class="relative space-y-0.5 text-red-600">
                     <p class="font-medium">Warning</p>
                     <p class="text-sm">
                         Please proceed with caution, this cannot be undone.

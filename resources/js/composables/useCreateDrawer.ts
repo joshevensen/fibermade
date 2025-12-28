@@ -1,6 +1,16 @@
 import { ref } from 'vue';
 
-export type DrawerType = 'base' | 'collection' | 'colorway' | 'discount' | 'dye' | 'order' | null;
+export type DrawerType =
+    | 'base'
+    | 'collection'
+    | 'colorway'
+    | 'customer'
+    | 'discount'
+    | 'dye'
+    | 'order'
+    | 'show'
+    | 'store'
+    | null;
 
 // Shared state across all instances
 const activeDrawer = ref<DrawerType>(null);
@@ -25,4 +35,3 @@ export function useCreateDrawer() {
         isDrawerOpen,
     };
 }
-

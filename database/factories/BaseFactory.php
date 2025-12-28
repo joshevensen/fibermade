@@ -19,7 +19,7 @@ class BaseFactory extends Factory
      */
     public function definition(): array
     {
-        $baseNames = [
+        $baseDescriptors = [
             'Merino Wool',
             'Alpaca Blend',
             'Superwash Merino',
@@ -32,9 +32,12 @@ class BaseFactory extends Factory
             'Silk Blend',
         ];
 
-        $name = fake()->randomElement($baseNames);
+        $descriptor = fake()->randomElement($baseDescriptors);
         $weight = fake()->randomElement(Weight::cases());
         $status = fake()->randomElement(BaseStatus::cases());
+
+        // Generate code from descriptor initials
+        $code = \App\Models\Base::generateCodeFromDescriptor($descriptor);
 
         // Generate realistic fiber percentages that sum to ~100%
         $woolPercent = fake()->optional(0.8)->randomFloat(2, 50, 100);
@@ -46,13 +49,14 @@ class BaseFactory extends Factory
         $bambooPercent = fake()->optional(0.2)->randomFloat(2, 20, 50);
 
         return [
-            'name' => $name,
-            'slug' => Str::slug($name),
+            'account_id' => \App\Models\Account::factory(),
+            'slug' => Str::slug($descriptor),
             'description' => fake()->optional(0.7)->sentence(),
             'status' => $status,
             'weight' => $weight,
-            'descriptor' => fake()->optional(0.5)->randomElement(['Superwash', 'Non-superwash', 'Organic', 'Hand-dyed']),
-            'size' => fake()->optional(0.6)->numberBetween(100, 500),
+            'descriptor' => $descriptor,
+            'code' => $code,
+            'size' => fake()->optional(0.6)->randomElement([20, 50, 100]),
             'cost' => fake()->optional(0.8)->randomFloat(2, 5, 25),
             'retail_price' => fake()->optional(0.8)->randomFloat(2, 15, 45),
             'wool_percent' => $woolPercent,

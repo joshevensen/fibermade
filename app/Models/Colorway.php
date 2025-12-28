@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Represents a yarn colorway (unique color pattern) in the catalog.
@@ -131,5 +133,33 @@ class Colorway extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Get the media files for this colorway.
+     */
+    public function media(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable');
+    }
+
+    /**
+     * Get the primary image URL for this colorway.
+     */
+    public function getPrimaryImageUrlAttribute(): ?string
+    {
+        $primaryMedia = $this->media()->where('is_primary', true)->first();
+
+        if ($primaryMedia) {
+            return Storage::disk('public')->url($primaryMedia->file_path);
+        }
+
+        $firstMedia = $this->media()->first();
+
+        if ($firstMedia) {
+            return Storage::disk('public')->url($firstMedia->file_path);
+        }
+
+        return null;
     }
 }

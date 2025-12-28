@@ -150,6 +150,7 @@ import UiButton from '@/components/ui/UiButton.vue';
 #### Display Components
 - **UiAvatar** (`UiAvatar.vue`) - PrimeVue Avatar wrapper
 - **UiChip** (`UiChip.vue`) - PrimeVue Chip wrapper
+- **UiImage** (`UiImage.vue`) - PrimeVue Image wrapper with placeholder support
 - **UiProgressSpinner** (`UiProgressSpinner.vue`) - PrimeVue ProgressSpinner wrapper
 - **UiTag** (`UiTag.vue`) - PrimeVue Tag wrapper
 

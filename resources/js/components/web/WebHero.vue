@@ -302,7 +302,10 @@ const { IconList } = useIcon();
                     >
                         <span>{{ badge.text }}</span>
                         <i
-                            :class="[IconList.Right, 'size-5 text-gray-400 dark:text-gray-500']"
+                            :class="[
+                                IconList.Right,
+                                'size-5 text-gray-400 dark:text-gray-500',
+                            ]"
                             aria-hidden="true"
                         ></i>
                     </span>

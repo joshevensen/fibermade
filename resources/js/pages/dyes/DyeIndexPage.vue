@@ -1,29 +1,29 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import { destroy as destroyDye } from '@/actions/App/Http/Controllers/DyeController';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
+import UiDivider from '@/components/ui/UiDivider.vue';
+import UiEditor from '@/components/ui/UiEditor.vue';
+import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiPanel from '@/components/ui/UiPanel.vue';
 import UiToggleSwitch from '@/components/ui/UiToggleSwitch.vue';
-import UiEditor from '@/components/ui/UiEditor.vue';
-import UiDivider from '@/components/ui/UiDivider.vue';
-import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import { destroy as destroyDye } from '@/actions/App/Http/Controllers/DyeController';
+import { useConfirm } from '@/composables/useConfirm';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
-import { useConfirm } from '@/composables/useConfirm';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { useDebounceFn } from '@vueuse/core';
-import { reactive, computed, ref } from 'vue';
 import { useToast } from 'primevue/usetoast';
+import { computed, reactive, ref } from 'vue';
 
 interface Dye {
-        id: number;
-        name: string;
+    id: number;
+    name: string;
     manufacturer?: string | null;
-        notes?: string | null;
-        does_bleed: boolean;
-        do_like: boolean;
+    notes?: string | null;
+    does_bleed: boolean;
+    do_like: boolean;
 }
 
 interface Props {
@@ -67,13 +67,16 @@ const filteredAndSortedDyes = computed(() => {
     // Apply manufacturer filter
     if (manufacturerFilter.value !== 'All') {
         if (manufacturerFilter.value === 'Other') {
-            filtered = filtered.filter((dye) => 
-                dye.manufacturer && 
-                dye.manufacturer !== 'Dharma' && 
-                dye.manufacturer !== 'Jacquard'
+            filtered = filtered.filter(
+                (dye) =>
+                    dye.manufacturer &&
+                    dye.manufacturer !== 'Dharma' &&
+                    dye.manufacturer !== 'Jacquard',
             );
         } else {
-            filtered = filtered.filter((dye) => dye.manufacturer === manufacturerFilter.value);
+            filtered = filtered.filter(
+                (dye) => dye.manufacturer === manufacturerFilter.value,
+            );
         }
     }
 
@@ -112,68 +115,83 @@ function togglePanel(dyeId: number): void {
     expandedPanels[dyeId] = !expandedPanels[dyeId];
 }
 
-function handleToggleField(dye: Dye, field: 'does_bleed' | 'do_like', value: boolean): void {
+function handleToggleField(
+    dye: Dye,
+    field: 'does_bleed' | 'do_like',
+    value: boolean,
+): void {
     const key = `${dye.id}-${field}`;
     toggleLoading[key] = true;
 
     debouncedSaveToggle(dye.id, field, value);
 }
 
-const debouncedSaveToggle = useDebounceFn((dyeId: number, field: 'does_bleed' | 'do_like', value: boolean) => {
-    const key = `${dyeId}-${field}`;
-    router.patch(`/dyes/${dyeId}/toggle-field`, {
-        field,
-        value,
-    }, {
-        preserveScroll: true,
-        only: ['dyes'],
-        onSuccess: () => {
-            toggleLoading[key] = false;
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Dye updated successfully',
-                life: 3000,
-            });
-        },
-        onError: () => {
-            toggleLoading[key] = false;
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to update dye',
-                life: 3000,
-            });
-        },
-    });
-}, 500);
+const debouncedSaveToggle = useDebounceFn(
+    (dyeId: number, field: 'does_bleed' | 'do_like', value: boolean) => {
+        const key = `${dyeId}-${field}`;
+        router.patch(
+            `/dyes/${dyeId}/toggle-field`,
+            {
+                field,
+                value,
+            },
+            {
+                preserveScroll: true,
+                only: ['dyes'],
+                onSuccess: () => {
+                    toggleLoading[key] = false;
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Dye updated successfully',
+                        life: 3000,
+                    });
+                },
+                onError: () => {
+                    toggleLoading[key] = false;
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to update dye',
+                        life: 3000,
+                    });
+                },
+            },
+        );
+    },
+    500,
+);
 
 function handleSaveNotes(dye: Dye): void {
     savingNotes[dye.id] = true;
 
-    router.patch(`/dyes/${dye.id}/notes`, {
-        notes: editingNotes[dye.id],
-    }, {
-        preserveScroll: true,
-        onSuccess: () => {
-            savingNotes[dye.id] = false;
-            toast.add({
-                severity: 'success',
-                summary: 'Success',
-                detail: 'Notes saved successfully',
-                life: 3000,
-            });
+    router.patch(
+        `/dyes/${dye.id}/notes`,
+        {
+            notes: editingNotes[dye.id],
         },
-        onError: () => {
-            savingNotes[dye.id] = false;
-            toast.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to save notes',
-                life: 3000,
-            });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                savingNotes[dye.id] = false;
+                toast.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Notes saved successfully',
+                    life: 3000,
+                });
+            },
+            onError: () => {
+                savingNotes[dye.id] = false;
+                toast.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to save notes',
+                    life: 3000,
+                });
+            },
         },
-    });
+    );
 }
 
 function handleDelete(dye: Dye, event: Event): void {
@@ -189,10 +207,7 @@ function handleDelete(dye: Dye, event: Event): void {
 
 <template>
     <AppLayout page-title="Dyes">
-        <PageHeader
-            heading="Dyes"
-            :business-icon="BusinessIconList.Dyes"
-        >
+        <PageHeader heading="Dyes" :business-icon="BusinessIconList.Dyes">
             <template #actions>
                 <UiButton
                     size="small"
@@ -213,57 +228,75 @@ function handleDelete(dye: Dye, event: Event): void {
                 <template #header>
                     <div class="flex items-center justify-between gap-4">
                         <div class="text-sm text-surface-600">
-                            {{ filteredAndSortedDyes.length }} {{ filteredAndSortedDyes.length === 1 ? 'dye' : 'dyes' }}
+                            <template
+                                v-if="
+                                    filteredAndSortedDyes.length !==
+                                    props.dyes.length
+                                "
+                            >
+                                {{ filteredAndSortedDyes.length }} of
+                                {{ props.dyes.length }}
+                            </template>
+                            <template v-else>
+                                {{ filteredAndSortedDyes.length }}
+                            </template>
+                            {{
+                                filteredAndSortedDyes.length === 1
+                                    ? 'dye'
+                                    : 'dyes'
+                            }}
                         </div>
                         <div class="flex items-center gap-4">
-                        <UiFormFieldSelect
-                            name="manufacturer-filter"
-                            label="Manufacturer"
-                            label-position="left"
-                            :options="manufacturerOptions"
-                            option-label="label"
-                            option-value="value"
-                            :initial-value="manufacturerFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="true"
-                            size="small"
-                            class="w-40"
-                            @update:model-value="manufacturerFilter = $event"
-                        />
-                        <UiFormFieldSelect
-                            name="bleeds-filter"
-                            label="Bleeds"
-                            label-position="left"
-                            :options="bleedsOptions"
-                            option-label="label"
-                            option-value="value"
-                            :initial-value="bleedsFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="true"
-                            size="small"
-                            class="w-32"
-                            @update:model-value="bleedsFilter = $event"
-                        />
-                        <UiFormFieldSelect
-                            name="like-filter"
-                            label="Like"
-                            label-position="left"
-                            :options="likeOptions"
-                            option-label="label"
-                            option-value="value"
-                            :initial-value="likeFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="true"
+                            <UiFormFieldSelect
+                                name="manufacturer-filter"
+                                label="Manufacturer"
+                                label-position="left"
+                                :options="manufacturerOptions"
+                                option-label="label"
+                                option-value="value"
+                                :initial-value="manufacturerFilter"
+                                :validate-on-mount="false"
+                                :validate-on-blur="false"
+                                :validate-on-submit="false"
+                                :validate-on-value-update="true"
                                 size="small"
-                            class="w-32"
-                            @update:model-value="likeFilter = $event"
-                        />
+                                class="w-40"
+                                @update:model-value="
+                                    manufacturerFilter = $event
+                                "
+                            />
+                            <UiFormFieldSelect
+                                name="bleeds-filter"
+                                label="Bleeds"
+                                label-position="left"
+                                :options="bleedsOptions"
+                                option-label="label"
+                                option-value="value"
+                                :initial-value="bleedsFilter"
+                                :validate-on-mount="false"
+                                :validate-on-blur="false"
+                                :validate-on-submit="false"
+                                :validate-on-value-update="true"
+                                size="small"
+                                class="w-32"
+                                @update:model-value="bleedsFilter = $event"
+                            />
+                            <UiFormFieldSelect
+                                name="like-filter"
+                                label="Like"
+                                label-position="left"
+                                :options="likeOptions"
+                                option-label="label"
+                                option-value="value"
+                                :initial-value="likeFilter"
+                                :validate-on-mount="false"
+                                :validate-on-blur="false"
+                                :validate-on-submit="false"
+                                :validate-on-value-update="true"
+                                size="small"
+                                class="w-32"
+                                @update:model-value="likeFilter = $event"
+                            />
                         </div>
                     </div>
                 </template>
@@ -277,7 +310,9 @@ function handleDelete(dye: Dye, event: Event): void {
                             @toggle="togglePanel(dye.id)"
                         >
                             <template #header>
-                                <div class="flex items-center justify-between w-full gap-4 pr-3">
+                                <div
+                                    class="flex w-full items-center justify-between gap-4 pr-3"
+                                >
                                     <div class="flex flex-col">
                                         <span
                                             v-if="dye.manufacturer"
@@ -285,26 +320,54 @@ function handleDelete(dye: Dye, event: Event): void {
                                         >
                                             {{ dye.manufacturer }}
                                         </span>
-                                        <span class="font-semibold">{{ dye.name }}</span>
+                                        <span class="font-semibold">{{
+                                            dye.name
+                                        }}</span>
                                     </div>
                                     <div
                                         class="flex items-center gap-4"
                                         @click.stop
                                     >
                                         <div class="flex items-center gap-2">
-                                            <span class="text-sm text-surface-600">Bleeds</span>
+                                            <span
+                                                class="text-sm text-surface-600"
+                                                >Bleeds</span
+                                            >
                                             <UiToggleSwitch
                                                 :model-value="dye.does_bleed"
-                                                :disabled="toggleLoading[`${dye.id}-does_bleed`]"
-                                                @update:model-value="handleToggleField(dye, 'does_bleed', $event)"
+                                                :disabled="
+                                                    toggleLoading[
+                                                        `${dye.id}-does_bleed`
+                                                    ]
+                                                "
+                                                @update:model-value="
+                                                    handleToggleField(
+                                                        dye,
+                                                        'does_bleed',
+                                                        $event,
+                                                    )
+                                                "
                                             />
                                         </div>
                                         <div class="flex items-center gap-2">
-                                            <span class="text-sm text-surface-600">Like</span>
+                                            <span
+                                                class="text-sm text-surface-600"
+                                                >Like</span
+                                            >
                                             <UiToggleSwitch
                                                 :model-value="dye.do_like"
-                                                :disabled="toggleLoading[`${dye.id}-do_like`]"
-                                                @update:model-value="handleToggleField(dye, 'do_like', $event)"
+                                                :disabled="
+                                                    toggleLoading[
+                                                        `${dye.id}-do_like`
+                                                    ]
+                                                "
+                                                @update:model-value="
+                                                    handleToggleField(
+                                                        dye,
+                                                        'do_like',
+                                                        $event,
+                                                    )
+                                                "
                                             />
                                         </div>
                                     </div>
@@ -313,12 +376,15 @@ function handleDelete(dye: Dye, event: Event): void {
 
                             <div class="flex flex-col gap-4 pt-4">
                                 <div class="flex flex-col gap-2">
-                                    <label class="text-sm font-medium text-surface-700">Notes</label>
+                                    <label
+                                        class="text-sm font-medium text-surface-700"
+                                        >Notes</label
+                                    >
                                     <UiEditor
                                         v-model="editingNotes[dye.id]"
                                         placeholder="Add notes about this dye..."
-                            />
-                            <UiButton
+                                    />
+                                    <UiButton
                                         label="Save Notes"
                                         :loading="savingNotes[dye.id]"
                                         @click="handleSaveNotes(dye)"
@@ -329,18 +395,18 @@ function handleDelete(dye: Dye, event: Event): void {
 
                                 <UiButton
                                     label="Delete Dye"
-                                severity="danger"
+                                    severity="danger"
                                     outlined
                                     @click="handleDelete(dye, $event)"
-                            />
+                                />
                             </div>
                         </UiPanel>
                     </div>
-                        </template>
+                </template>
 
                 <template #empty>
-                    <div class="flex items-center justify-center min-h-[60vh]">
-                        <p class="text-surface-500 text-lg">No dyes found</p>
+                    <div class="flex min-h-[60vh] items-center justify-center">
+                        <p class="text-lg text-surface-500">No dyes found</p>
                     </div>
                 </template>
             </UiDataView>

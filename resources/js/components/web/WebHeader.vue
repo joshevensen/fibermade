@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import UiDialog from '@/components/ui/UiDialog.vue';
 import UiLink from '@/components/ui/UiLink.vue';
-import { ref } from 'vue';
 import { useIcon } from '@/composables/useIcon';
+import { ref } from 'vue';
 
 interface NavigationLink {
     name: string;
@@ -70,7 +70,10 @@ const { IconList } = useIcon();
                     @click="mobileMenuOpen = true"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <i :class="[IconList.Menu, 'size-6']" aria-hidden="true"></i>
+                    <i
+                        :class="[IconList.Menu, 'size-6']"
+                        aria-hidden="true"
+                    ></i>
                 </button>
             </div>
             <div class="hidden lg:flex lg:items-center lg:gap-x-4">
@@ -148,7 +151,10 @@ const { IconList } = useIcon();
                     @click="mobileMenuOpen = true"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <i :class="[IconList.Menu, 'size-6']" aria-hidden="true"></i>
+                    <i
+                        :class="[IconList.Menu, 'size-6']"
+                        aria-hidden="true"
+                    ></i>
                 </button>
             </div>
         </nav>

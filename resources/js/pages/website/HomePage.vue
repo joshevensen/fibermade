@@ -8,9 +8,7 @@ import { Head, Link } from '@inertiajs/vue3';
     <div
         class="flex min-h-screen flex-col items-center bg-[#FDFDFC] px-6 text-[#1b1b18] lg:px-8 dark:bg-[#0a0a0a]"
     >
-        <header
-            class="mb-6 w-full max-w-[335px] text-sm lg:max-w-4xl py-4"
-        >
+        <header class="mb-6 w-full max-w-[335px] py-4 text-sm lg:max-w-4xl">
             <nav class="flex items-center justify-end gap-4">
                 <Link
                     v-if="$page.props.auth.user"

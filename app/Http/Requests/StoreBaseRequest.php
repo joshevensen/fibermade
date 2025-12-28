@@ -25,12 +25,11 @@ class StoreBaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'status' => ['required', Rule::enum(BaseStatus::class)],
             'weight' => ['nullable', Rule::enum(Weight::class)],
-            'descriptor' => ['nullable', 'string'],
+            'descriptor' => ['required', 'string', 'max:255'],
             'size' => ['nullable', 'integer', 'min:0'],
             'cost' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'retail_price' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

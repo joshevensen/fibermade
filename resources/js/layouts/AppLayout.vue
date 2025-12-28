@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import type { BreadcrumbItemType } from '@/types';
 import AppHeader from '@/components/AppHeader.vue';
 import AppMobileDrawer from '@/components/AppMobileDrawer.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
+import { useCreateDrawer } from '@/composables/useCreateDrawer';
+import { useNavigation } from '@/composables/useNavigation';
+import { useSidebarState } from '@/composables/useSidebarState';
 import BaseCreateDrawer from '@/pages/bases/BaseCreateDrawer.vue';
 import CollectionCreateDrawer from '@/pages/collections/CollectionCreateDrawer.vue';
 import ColorwayCreateDrawer from '@/pages/colorways/ColorwayCreateDrawer.vue';
 import DiscountCreateDrawer from '@/pages/discounts/DiscountCreateDrawer.vue';
 import DyeCreateDrawer from '@/pages/dyes/DyeCreateDrawer.vue';
 import OrderCreateDrawer from '@/pages/orders/OrderCreateDrawer.vue';
-import { useCreateDrawer } from '@/composables/useCreateDrawer';
-import { useNavigation } from '@/composables/useNavigation';
-import { useSidebarState } from '@/composables/useSidebarState';
+import ShowCreateDrawer from '@/pages/shows/ShowCreateDrawer.vue';
+import StoreCreateDrawer from '@/pages/stores/StoreCreateDrawer.vue';
+import type { BreadcrumbItemType } from '@/types';
 import { Head } from '@inertiajs/vue3';
 import ConfirmPopup from 'primevue/confirmpopup';
 import Toast from 'primevue/toast';
@@ -31,12 +33,15 @@ const mobileDrawerVisible = ref(false);
 const { activeDrawer, closeDrawer } = useCreateDrawer();
 
 const baseDrawerVisible = computed(() => activeDrawer.value === 'base');
-const collectionDrawerVisible = computed(() => activeDrawer.value === 'collection');
+const collectionDrawerVisible = computed(
+    () => activeDrawer.value === 'collection',
+);
 const colorwayDrawerVisible = computed(() => activeDrawer.value === 'colorway');
 const discountDrawerVisible = computed(() => activeDrawer.value === 'discount');
 const dyeDrawerVisible = computed(() => activeDrawer.value === 'dye');
 const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
-
+const showDrawerVisible = computed(() => activeDrawer.value === 'show');
+const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
 </script>
 
 <template>
@@ -53,10 +58,14 @@ const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
         <!-- Main Content Area -->
         <div class="flex flex-1 flex-col overflow-hidden">
             <!-- Header -->
-            <AppHeader @toggle-mobile-drawer="mobileDrawerVisible = !mobileDrawerVisible" />
+            <AppHeader
+                @toggle-mobile-drawer="
+                    mobileDrawerVisible = !mobileDrawerVisible
+                "
+            />
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-auto pt-3.5 px-4 pb-8">
+            <main class="flex-1 overflow-auto px-4 pt-3.5 pb-8">
                 <slot />
             </main>
         </div>
@@ -71,27 +80,67 @@ const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
     <!-- Create Drawers -->
     <BaseCreateDrawer
         :visible="baseDrawerVisible"
-        @update:visible="(value) => { if (!value) closeDrawer(); }"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
     />
     <CollectionCreateDrawer
         :visible="collectionDrawerVisible"
-        @update:visible="(value) => { if (!value) closeDrawer(); }"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
     />
     <ColorwayCreateDrawer
         :visible="colorwayDrawerVisible"
-        @update:visible="(value) => { if (!value) closeDrawer(); }"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
     />
     <DiscountCreateDrawer
         :visible="discountDrawerVisible"
-        @update:visible="(value) => { if (!value) closeDrawer(); }"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
     />
     <DyeCreateDrawer
         :visible="dyeDrawerVisible"
-        @update:visible="(value) => { if (!value) closeDrawer(); }"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
     />
     <OrderCreateDrawer
         :visible="orderDrawerVisible"
-        @update:visible="(value) => { if (!value) closeDrawer(); }"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
+    />
+    <ShowCreateDrawer
+        :visible="showDrawerVisible"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
+    />
+    <StoreCreateDrawer
+        :visible="storeDrawerVisible"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
     />
 
     <!-- Global Components -->

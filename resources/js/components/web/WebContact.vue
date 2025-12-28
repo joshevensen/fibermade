@@ -176,7 +176,10 @@ function handleSubmit(event: {
                                             </template>
                                         </UiFormField>
                                         <i
-                                            :class="[IconList.Down, 'pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4 dark:text-gray-400']"
+                                            :class="[
+                                                IconList.Down,
+                                                'pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4 dark:text-gray-400',
+                                            ]"
                                             aria-hidden="true"
                                         ></i>
                                     </div>

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,15 +10,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Cashier\Billable;
 
 /**
- * Represents an account that can be used by all account types (wholesale, retail, show).
+ * Represents a creator account.
  *
- * Accounts store buyer relationships and can represent wholesale buyers, retail
- * customers, or show organizers. Each Account has many Users through a pivot table
- * and owns catalog items (Colorways, Bases, Collections). Accounts support account-level
- * pricing rules and are used for wholesale order management and relationship tracking.
+ * Accounts represent creators who own catalog items (Colorways, Bases, Collections).
+ * Each Account has many Users through a pivot table and supports account-level
+ * pricing rules and wholesale order management.
  *
  * @property int $id
- * @property \App\Enums\AccountType $type
  * @property \App\Enums\BaseStatus $status
  * @property string $name
  * @property string|null $email
@@ -45,7 +42,6 @@ class Account extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'type',
         'status',
         'name',
         'email',
@@ -66,7 +62,6 @@ class Account extends Model
     protected function casts(): array
     {
         return [
-            'type' => AccountType::class,
             'status' => BaseStatus::class,
         ];
     }
@@ -144,46 +139,10 @@ class Account extends Model
     }
 
     /**
-     * Get the vendors associated with this store account.
+     * Get the shows for this account.
      */
-    public function vendors(): BelongsToMany
+    public function shows(): HasMany
     {
-        return $this->belongsToMany(Account::class, 'store_vendor', 'store_id', 'vendor_id')
-            ->withPivot([
-                'discount_rate',
-                'minimum_order_quantity',
-                'minimum_order_value',
-                'payment_terms',
-                'lead_time_days',
-                'allows_preorders',
-                'status',
-                'started_at',
-                'ended_at',
-                'share_vendor_contact_info',
-                'notes',
-            ])
-            ->withTimestamps();
-    }
-
-    /**
-     * Get the stores associated with this vendor account.
-     */
-    public function stores(): BelongsToMany
-    {
-        return $this->belongsToMany(Account::class, 'store_vendor', 'vendor_id', 'store_id')
-            ->withPivot([
-                'discount_rate',
-                'minimum_order_quantity',
-                'minimum_order_value',
-                'payment_terms',
-                'lead_time_days',
-                'allows_preorders',
-                'status',
-                'started_at',
-                'ended_at',
-                'share_vendor_contact_info',
-                'notes',
-            ])
-            ->withTimestamps();
+        return $this->hasMany(Show::class);
     }
 }

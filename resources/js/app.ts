@@ -9,8 +9,8 @@ import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import type { DefineComponent } from 'vue';
 import { createApp, h } from 'vue';
-import { initializeTheme } from './composables/useAppearance';
 import theme from '../css/theme';
+import { initializeTheme } from './composables/useAppearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 

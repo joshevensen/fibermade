@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             BaseSeeder::class,
             CollectionSeeder::class,
             ColorwaySeeder::class,
+            CustomerSeeder::class,
             DiscountSeeder::class,
             DyeSeeder::class,
             IntegrationLogSeeder::class,
@@ -29,6 +30,8 @@ class DatabaseSeeder extends Seeder
             MediaSeeder::class,
             OrderItemSeeder::class,
             OrderSeeder::class,
+            ShowSeeder::class,
+            StoreSeeder::class,
         ]);
     }
 

@@ -4,6 +4,9 @@ namespace App\Http\Requests;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Models\Customer;
+use App\Models\Show;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,9 +28,21 @@ class StoreOrderRequest extends FormRequest
      */
     public function rules(): array
     {
+        $type = $this->input('type');
+        $orderableIdRule = ['nullable', 'integer'];
+
+        if ($type === OrderType::Wholesale->value) {
+            $orderableIdRule[] = Rule::exists(Store::class, 'id');
+        } elseif ($type === OrderType::Retail->value) {
+            $orderableIdRule[] = Rule::exists(Customer::class, 'id');
+        } elseif ($type === OrderType::Show->value) {
+            $orderableIdRule[] = Rule::exists(Show::class, 'id');
+        }
+
         return [
             'type' => ['required', Rule::enum(OrderType::class)],
             'status' => ['required', Rule::enum(OrderStatus::class)],
+            'orderable_id' => $orderableIdRule,
             'shopify_order_id' => ['nullable', 'string', 'max:255'],
             'order_date' => ['required', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

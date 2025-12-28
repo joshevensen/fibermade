@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use App\Enums\UserRole;
 use App\Models\Account;
@@ -56,7 +55,6 @@ test('email verification status is unchanged when the email address is unchanged
 
 test('user can delete their account', function () {
     $account = Account::create([
-        'type' => AccountType::Creator,
         'status' => BaseStatus::Active,
         'name' => 'Test Account',
     ]);
@@ -88,7 +86,6 @@ test('user can delete their account', function () {
 
 test('correct password must be provided to delete account', function () {
     $account = Account::create([
-        'type' => AccountType::Creator,
         'status' => BaseStatus::Active,
         'name' => 'Test Account',
     ]);

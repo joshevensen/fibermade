@@ -3,13 +3,12 @@ import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiIcon from '@/components/ui/UiIcon.vue';
 import { IconList } from '@/composables/useIcon';
-import { urlIsActive, toUrl } from '@/lib/utils';
-import type { NavItem } from '@/types';
-import { usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-import { Link, router } from '@inertiajs/vue3';
+import { toUrl, urlIsActive } from '@/lib/utils';
 import { logout } from '@/routes';
+import type { NavItem } from '@/types';
+import { Link, router, usePage } from '@inertiajs/vue3';
 import type { Component } from 'vue';
+import { computed } from 'vue';
 
 interface Props {
     collapsed: boolean;
@@ -51,15 +50,8 @@ function handleLogout() {
         ]"
     >
         <div class="flex h-12 items-center justify-center px-4">
-            <AppLogo
-                v-if="collapsed"
-                variant="icon"
-                class="size-8"
-            />
-            <AppLogo
-                v-else
-                variant="full"
-            />
+            <AppLogo v-if="collapsed" variant="icon" class="size-8" />
+            <AppLogo v-else variant="full" />
         </div>
 
         <div class="flex-1 overflow-y-auto py-4">
@@ -69,25 +61,38 @@ function handleLogout() {
                     :key="toUrl(item.href)"
                     :href="item.href"
                     :class="[
-                        'flex items-center gap-3 rounded-lg py-2 px-3 text-sm font-bold transition-colors hover:bg-surface-200',
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-bold transition-colors hover:bg-surface-200',
                         collapsed ? 'justify-center' : '',
                     ]"
                 >
                     <UiIcon
                         v-if="item.icon"
-                        :name="typeof item.icon === 'string' ? item.icon : undefined"
-                        :component="typeof item.icon !== 'string' ? (item.icon as Component) : undefined"
+                        :name="
+                            typeof item.icon === 'string'
+                                ? item.icon
+                                : undefined
+                        "
+                        :component="
+                            typeof item.icon !== 'string'
+                                ? (item.icon as Component)
+                                : undefined
+                        "
                         :class="[
-                            isActive(item) ? 'text-primary' : 'text-surface-400',
+                            isActive(item)
+                                ? 'text-primary'
+                                : 'text-surface-400',
                         ]"
                     />
-                    <span 
-                        v-if="!collapsed" 
+                    <span
+                        v-if="!collapsed"
                         :class="[
-                            isActive(item) ? 'text-primary' : 'text-surface-500', 
-                            'flex-1'
+                            isActive(item)
+                                ? 'text-primary'
+                                : 'text-surface-500',
+                            'flex-1',
                         ]"
-                    >{{ item.title }}</span>
+                        >{{ item.title }}</span
+                    >
                 </Link>
             </nav>
         </div>
@@ -104,9 +109,8 @@ function handleLogout() {
                 :icon="IconList.SignOut"
                 text
                 class="w-full justify-center"
-                 @click="handleLogout"
+                @click="handleLogout"
             />
         </div>
     </aside>
 </template>
-

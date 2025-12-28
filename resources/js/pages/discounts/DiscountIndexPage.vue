@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import {
+    destroy as destroyDiscount,
+    edit as editDiscount,
+} from '@/actions/App/Http/Controllers/DiscountController';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import { edit as editDiscount, destroy as destroyDiscount } from '@/actions/App/Http/Controllers/DiscountController';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { useConfirm } from 'primevue/useconfirm';
 import { computed } from 'vue';
@@ -34,7 +37,10 @@ function formatEnum(value: string | null | undefined): string {
     if (!value) {
         return '';
     }
-    return value.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    return value
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -51,7 +57,9 @@ function formatBoolean(value: boolean | null | undefined): string {
     return value ? 'Yes' : 'No';
 }
 
-function formatParameters(parameters: Record<string, any> | null | undefined): string {
+function formatParameters(
+    parameters: Record<string, any> | null | undefined,
+): string {
     if (!parameters || Object.keys(parameters).length === 0) {
         return '';
     }
@@ -84,14 +92,16 @@ const columns = computed(() => [
         header: 'Is Active',
         sortable: true,
         columnKey: 'is_active',
-        bodyTemplate: (data: Props['discounts'][0]) => formatBoolean(data.is_active),
+        bodyTemplate: (data: Props['discounts'][0]) =>
+            formatBoolean(data.is_active),
     },
     {
         field: 'starts_at',
         header: 'Starts At',
         sortable: true,
         columnKey: 'starts_at',
-        bodyTemplate: (data: Props['discounts'][0]) => formatDate(data.starts_at),
+        bodyTemplate: (data: Props['discounts'][0]) =>
+            formatDate(data.starts_at),
     },
     {
         field: 'ends_at',

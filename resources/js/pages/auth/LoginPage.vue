@@ -65,13 +65,13 @@ const { form, onSubmit } = useFormSubmission({
                     </UiLink>
                 </template>
                 <template #default="{ props: fieldProps, id }">
-                        <UiPassword
-                            v-bind="fieldProps"
-                            :id="id"
-                            required
-                            autocomplete="current-password"
-                            placeholder="Password"
-                        />
+                    <UiPassword
+                        v-bind="fieldProps"
+                        :id="id"
+                        required
+                        autocomplete="current-password"
+                        placeholder="Password"
+                    />
                 </template>
             </UiFormField>
 

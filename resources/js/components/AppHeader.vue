@@ -3,9 +3,9 @@ import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiInputText from '@/components/ui/UiInputText.vue';
 import UiMenu from '@/components/ui/UiMenu.vue';
-import { edit as profileEdit } from '@/routes/user';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
+import { edit as profileEdit } from '@/routes/user';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
@@ -39,6 +39,20 @@ const createMenuItems = [
             openDrawer('order');
         },
     },
+    {
+        label: 'Show',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('show');
+        },
+    },
+    {
+        label: 'Store',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('store');
+        },
+    },
 ];
 
 function toggleCreateMenu(event: Event): void {
@@ -61,7 +75,7 @@ function toggleCreateMenu(event: Event): void {
         </div>
 
         <!-- Desktop: Search Input -->
-        <div class="hidden lg:flex gap-3 lg:flex-1 lg:max-w-md">
+        <div class="hidden gap-3 lg:flex lg:max-w-md lg:flex-1">
             <UiInputText
                 placeholder="Search"
                 :icon="IconList.Search"
@@ -69,10 +83,7 @@ function toggleCreateMenu(event: Event): void {
                 :fluid="false"
             />
 
-            <UiButton
-                label="Dye List"
-                outlined
-            />
+            <UiButton label="Dye List" outlined />
         </div>
 
         <!-- Icon Buttons (all screens) -->

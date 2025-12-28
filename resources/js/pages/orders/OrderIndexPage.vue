@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import {
+    destroy as destroyOrder,
+    edit as editOrder,
+} from '@/actions/App/Http/Controllers/OrderController';
 import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import { edit as editOrder, destroy as destroyOrder } from '@/actions/App/Http/Controllers/OrderController';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { useConfirm } from 'primevue/useconfirm';
 import { computed } from 'vue';
@@ -36,7 +39,10 @@ function formatEnum(value: string | null | undefined): string {
     if (!value) {
         return '';
     }
-    return value.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    return value
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -50,7 +56,10 @@ function formatCurrency(value: number | null | undefined): string {
     if (value === null || value === undefined) {
         return '';
     }
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(value);
 }
 
 function handleDelete(order: Props['orders'][0], event: Event) {
@@ -91,17 +100,15 @@ const columns = computed(() => [
         header: 'Total',
         sortable: true,
         columnKey: 'total_amount',
-        bodyTemplate: (data: Props['orders'][0]) => formatCurrency(data.total_amount),
+        bodyTemplate: (data: Props['orders'][0]) =>
+            formatCurrency(data.total_amount),
     },
 ]);
 </script>
 
 <template>
     <AppLayout page-title="Orders">
-        <PageHeader
-            heading="Orders"
-            :business-icon="BusinessIconList.Orders"
-        >
+        <PageHeader heading="Orders" :business-icon="BusinessIconList.Orders">
             <template #actions>
                 <UiButton
                     size="small"
