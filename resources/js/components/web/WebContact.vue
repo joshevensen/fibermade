@@ -3,6 +3,7 @@ import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiLink from '@/components/ui/UiLink.vue';
+import { useIcon } from '@/composables/useIcon';
 
 interface ContactFieldConfig {
     name: string;
@@ -46,6 +47,8 @@ const props = withDefaults(defineProps<Props>(), {
     formMethod: 'POST',
     showDecorativeBackground: true,
 });
+
+const { IconList } = useIcon();
 
 function handleSubmit(event: {
     valid: boolean;
@@ -173,7 +176,7 @@ function handleSubmit(event: {
                                             </template>
                                         </UiFormField>
                                         <i
-                                            class="pi pi-chevron-down pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4 dark:text-gray-400"
+                                            :class="[IconList.Down, 'pointer-events-none col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end text-gray-500 sm:size-4 dark:text-gray-400']"
                                             aria-hidden="true"
                                         ></i>
                                     </div>

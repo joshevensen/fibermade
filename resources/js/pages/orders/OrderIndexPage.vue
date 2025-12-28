@@ -57,7 +57,7 @@ function handleDelete(order: Props['orders'][0], event: Event) {
     confirm.require({
         target: event.currentTarget as HTMLElement,
         message: `Are you sure you want to delete order #${order.id}?`,
-        icon: 'pi pi-exclamation-triangle',
+        icon: IconList.ExclamationTriangle,
         accept: () => {
             router.delete(destroyOrder.url(order.id));
         },

@@ -7,6 +7,7 @@ import { usePage } from '@inertiajs/vue3';
 import { Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import { logout } from '@/routes';
+import { useIcon } from '@/composables/useIcon';
 
 interface Props {
     visible: boolean;
@@ -25,6 +26,7 @@ const emit = defineEmits<{
 
 const page = usePage();
 const currentUrl = computed(() => page.url);
+const { IconList } = useIcon();
 
 function closeDrawer() {
     emit('update:visible', false);
@@ -80,7 +82,7 @@ function handleLogout() {
                     class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100"
                     @click="handleLogout"
                 >
-                    <i class="pi pi-sign-out text-lg" />
+                    <i :class="[IconList.SignOut, 'text-lg']" />
                     <span>Logout</span>
                 </button>
             </div>

@@ -21,18 +21,18 @@ class DyeSeeder extends Seeder
         }
 
         $dyes = [
-            ['name' => 'Turquoise Blue', 'notes' => 'Vibrant and colorfast', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Scarlet Red', 'notes' => 'Rich red, slight bleeding', 'does_bleed' => true, 'do_like' => true],
-            ['name' => 'Forest Green', 'notes' => 'Deep emerald green', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Sunset Orange', 'notes' => 'Warm orange with yellow undertones', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Lavender Purple', 'notes' => 'Soft purple, very colorfast', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Golden Yellow', 'notes' => 'Bright yellow, excellent coverage', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Charcoal Black', 'notes' => 'Deep black, may bleed', 'does_bleed' => true, 'do_like' => true],
-            ['name' => 'Ivory White', 'notes' => 'Natural white base', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Rose Pink', 'notes' => 'Delicate pink, colorfast', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Ocean Teal', 'notes' => 'Blue-green blend', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Amber Brown', 'notes' => 'Warm brown with orange hints', 'does_bleed' => false, 'do_like' => true],
-            ['name' => 'Coral Peach', 'notes' => 'Soft coral with pink undertones', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Turquoise Blue', 'manufacturer' => 'Dharma', 'notes' => 'Vibrant and colorfast', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Scarlet Red', 'manufacturer' => 'Jacquard', 'notes' => 'Rich red, slight bleeding', 'does_bleed' => true, 'do_like' => true],
+            ['name' => 'Forest Green', 'manufacturer' => 'Dharma', 'notes' => 'Deep emerald green', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Sunset Orange', 'manufacturer' => 'Jacquard', 'notes' => 'Warm orange with yellow undertones', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Lavender Purple', 'manufacturer' => 'Dharma', 'notes' => 'Soft purple, very colorfast', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Golden Yellow', 'manufacturer' => 'Jacquard', 'notes' => 'Bright yellow, excellent coverage', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Charcoal Black', 'manufacturer' => 'Dharma', 'notes' => 'Deep black, may bleed', 'does_bleed' => true, 'do_like' => true],
+            ['name' => 'Ivory White', 'manufacturer' => 'Jacquard', 'notes' => 'Natural white base', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Rose Pink', 'manufacturer' => 'Dharma', 'notes' => 'Delicate pink, colorfast', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Ocean Teal', 'manufacturer' => 'Other Manufacturer', 'notes' => 'Blue-green blend', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Amber Brown', 'manufacturer' => 'Jacquard', 'notes' => 'Warm brown with orange hints', 'does_bleed' => false, 'do_like' => true],
+            ['name' => 'Coral Peach', 'manufacturer' => 'Dharma', 'notes' => 'Soft coral with pink undertones', 'does_bleed' => false, 'do_like' => true],
         ];
 
         $createdDyes = [];
@@ -41,6 +41,7 @@ class DyeSeeder extends Seeder
             $dye = Dye::create([
                 'account_id' => $account->id,
                 'name' => $dyeData['name'],
+                'manufacturer' => $dyeData['manufacturer'],
                 'notes' => $dyeData['notes'],
                 'does_bleed' => $dyeData['does_bleed'],
                 'do_like' => $dyeData['do_like'],

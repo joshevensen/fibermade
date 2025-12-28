@@ -62,7 +62,7 @@ function handleDelete(discount: Props['discounts'][0], event: Event) {
     confirm.require({
         target: event.currentTarget as HTMLElement,
         message: `Are you sure you want to delete ${discount.name}?`,
-        icon: 'pi pi-exclamation-triangle',
+        icon: IconList.ExclamationTriangle,
         accept: () => {
             router.delete(destroyDiscount.url(discount.id));
         },

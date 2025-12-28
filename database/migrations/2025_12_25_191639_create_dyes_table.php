@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->string('manufacturer')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('does_bleed')->default(false);
             $table->boolean('do_like')->default(false);

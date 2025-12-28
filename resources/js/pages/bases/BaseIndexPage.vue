@@ -63,7 +63,7 @@ function handleDelete(base: Props['bases'][0], event: Event) {
     confirm.require({
         target: event.currentTarget as HTMLElement,
         message: `Are you sure you want to delete ${base.name}?`,
-        icon: 'pi pi-exclamation-triangle',
+        icon: IconList.ExclamationTriangle,
         accept: () => {
             router.delete(destroyBase.url(base.id));
         },

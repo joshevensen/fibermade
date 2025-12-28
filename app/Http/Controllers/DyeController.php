@@ -74,6 +74,35 @@ class DyeController extends Controller
     }
 
     /**
+     * Toggle a boolean field on the dye.
+     */
+    public function toggleField(Dye $dye): RedirectResponse
+    {
+        $this->authorize('update', $dye);
+
+        $field = request()->input('field');
+        $value = request()->boolean('value');
+
+        if (! in_array($field, ['does_bleed', 'do_like'])) {
+            abort(400, 'Invalid field');
+        }
+
+        $dye->update([$field => $value]);
+
+        return redirect()->route('dyes.index');
+    }
+
+    /**
+     * Update the notes field on the dye.
+     */
+    public function updateNotes(UpdateDyeRequest $request, Dye $dye): RedirectResponse
+    {
+        $dye->update(['notes' => $request->input('notes')]);
+
+        return redirect()->route('dyes.index');
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Dye $dye): RedirectResponse

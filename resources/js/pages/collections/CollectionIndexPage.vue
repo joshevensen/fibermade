@@ -29,7 +29,7 @@ function handleDelete(collection: Props['collections'][0], event: Event) {
     confirm.require({
         target: event.currentTarget as HTMLElement,
         message: `Are you sure you want to delete ${collection.name}?`,
-        icon: 'pi pi-exclamation-triangle',
+        icon: IconList.ExclamationTriangle,
         accept: () => {
             router.delete(destroyCollection.url(collection.id));
         },

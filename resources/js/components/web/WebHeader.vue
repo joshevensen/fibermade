@@ -2,6 +2,7 @@
 import UiDialog from '@/components/ui/UiDialog.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import { ref } from 'vue';
+import { useIcon } from '@/composables/useIcon';
 
 interface NavigationLink {
     name: string;
@@ -24,6 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const mobileMenuOpen = ref(false);
+const { IconList } = useIcon();
 </script>
 
 <template>
@@ -68,7 +70,7 @@ const mobileMenuOpen = ref(false);
                     @click="mobileMenuOpen = true"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <i class="pi pi-bars size-6" aria-hidden="true"></i>
+                    <i :class="[IconList.Menu, 'size-6']" aria-hidden="true"></i>
                 </button>
             </div>
             <div class="hidden lg:flex lg:items-center lg:gap-x-4">
@@ -146,7 +148,7 @@ const mobileMenuOpen = ref(false);
                     @click="mobileMenuOpen = true"
                 >
                     <span class="sr-only">Open main menu</span>
-                    <i class="pi pi-bars size-6" aria-hidden="true"></i>
+                    <i :class="[IconList.Menu, 'size-6']" aria-hidden="true"></i>
                 </button>
             </div>
         </nav>
@@ -203,7 +205,7 @@ const mobileMenuOpen = ref(false);
                         >
                             <span class="sr-only">Close menu</span>
                             <i
-                                class="pi pi-times size-6"
+                                :class="[IconList.Close, 'size-6']"
                                 aria-hidden="true"
                             ></i>
                         </button>

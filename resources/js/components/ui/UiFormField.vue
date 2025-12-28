@@ -52,7 +52,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
     >
         <template v-slot="$field">
             <div :class="{
-                'flex items-start': isHorizontal,
+                'flex items-center': isHorizontal,
                 'gap-4': isHorizontal && !isLabelRight,
                 'gap-2': isLabelRight,
             }">

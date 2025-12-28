@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiFormField from '@/components/ui/UiFormField.vue';
-import UiSelect from '@/components/ui/UiSelect.vue';
+import UiToggleSwitch from '@/components/ui/UiToggleSwitch.vue';
 
 interface Props {
     // UiFormField props
@@ -18,28 +18,15 @@ interface Props {
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
     labelPosition?: 'top' | 'left' | 'right';
-    // UiSelect props
-    options?: any[];
-    optionLabel?: string | ((data: any) => string);
-    optionValue?: string | ((data: any) => any);
-    optionDisabled?: string | ((data: any) => boolean);
-    placeholder?: string;
-    size?: 'small' | 'large';
+    // UiToggleSwitch props
+    trueValue?: any;
+    falseValue?: any;
     invalid?: boolean;
     disabled?: boolean;
-    variant?: 'outlined' | 'filled';
-    filter?: boolean;
-    filterPlaceholder?: string;
-    showClear?: boolean;
-    fluid?: boolean;
-    scrollHeight?: string;
+    readonly?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    size: 'small', 
-    scrollHeight: '14rem',
-    fluid: true,
-});
+defineProps<Props>();
 
 defineOptions({
     inheritAttrs: false,
@@ -59,26 +46,17 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
-        :labelPosition="labelPosition"
+        :labelPosition="labelPosition ?? 'right'"
     >
         <template #default="{ props: fieldProps, id }">
-            <UiSelect
+            <UiToggleSwitch
                 v-bind="{ ...fieldProps, ...$attrs }"
                 :id="id"
-                :options="options"
-                :optionLabel="optionLabel"
-                :optionValue="optionValue"
-                :optionDisabled="optionDisabled"
-                :placeholder="placeholder"
-                :size="size"
+                :trueValue="trueValue"
+                :falseValue="falseValue"
                 :invalid="invalid"
                 :disabled="disabled"
-                :variant="variant"
-                :filter="filter"
-                :filterPlaceholder="filterPlaceholder"
-                :showClear="showClear"
-                :fluid="fluid"
-                :scrollHeight="scrollHeight"
+                :readonly="readonly"
             />
         </template>
     </UiFormField>

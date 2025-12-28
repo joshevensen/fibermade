@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $account_id
  * @property string $name
+ * @property string|null $manufacturer
  * @property string|null $notes
  * @property bool $does_bleed
  * @property bool $do_like
@@ -34,6 +35,7 @@ class Dye extends Model
     protected $fillable = [
         'account_id',
         'name',
+        'manufacturer',
         'notes',
         'does_bleed',
         'do_like',

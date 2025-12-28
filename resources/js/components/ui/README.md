@@ -47,9 +47,12 @@ The `UiTabs` component uses a simplified API with a `tabs` prop to define tab he
 <script setup lang="ts">
 import UiTabs from '@/components/ui/UiTabs.vue';
 import UiTabPanel from '@/components/ui/UiTabPanel.vue';
+import { useIcon } from '@/composables/useIcon';
+
+const { IconList } = useIcon();
 
 const tabs = [
-    { value: '0', label: 'Tab 1', icon: 'pi pi-home' },
+    { value: '0', label: 'Tab 1', icon: IconList.Dashboard },
     { value: '1', label: 'Tab 2', disabled: true },
     { value: '2', label: 'Tab 3' },
 ];
@@ -69,11 +72,14 @@ const tabs = [
 <script setup lang="ts">
 import UiTabs from '@/components/ui/UiTabs.vue';
 import { dashboard } from '@/routes';
+import { useIcon } from '@/composables/useIcon';
+
+const { IconList } = useIcon();
 
 const tabs = [
-    { value: '/dashboard', label: 'Dashboard', icon: 'pi pi-home', href: dashboard() },
-    { value: '/transactions', label: 'Transactions', icon: 'pi pi-credit-card', href: '/transactions' },
-    { value: '/products', label: 'Products', icon: 'pi pi-box', href: '/products' },
+    { value: '/dashboard', label: 'Dashboard', icon: IconList.Dashboard, href: dashboard() },
+    { value: '/transactions', label: 'Transactions', icon: IconList.Orders, href: '/transactions' },
+    { value: '/products', label: 'Products', icon: IconList.Bases, href: '/products' },
 ];
 </script>
 
@@ -101,6 +107,7 @@ import UiButton from '@/components/ui/UiButton.vue';
 ### Available Components
 
 #### Form Components
+- **UiAutocomplete** (`UiAutocomplete.vue`) - PrimeVue Autocomplete wrapper
 - **UiCheckbox** (`UiCheckbox.vue`) - PrimeVue Checkbox wrapper
 - **UiDatePicker** (`UiDatePicker.vue`) - PrimeVue DatePicker wrapper
 - **UiEditor** (`UiEditor.vue`) - PrimeVue Editor wrapper (rich text editor)
@@ -127,7 +134,6 @@ import UiButton from '@/components/ui/UiButton.vue';
 - **UiTabPanel** (`UiTabPanel.vue`) - PrimeVue TabPanel wrapper (used with UiTabs)
 
 #### Overlay Components
-- **UiConfirmPopup** (`UiConfirmPopup.vue`) - PrimeVue ConfirmPopup wrapper
 - **UiDialog** (`UiDialog.vue`) - PrimeVue Dialog wrapper
 - **UiDrawer** (`UiDrawer.vue`) - PrimeVue Drawer wrapper
 
@@ -251,6 +257,140 @@ function showCustomToast() {
     detail: 'Custom message',
     life: 5000,
     sticky: false,
+  });
+}
+</script>
+```
+
+## Confirm Popup
+
+PrimeVue ConfirmPopup is implemented using a service and composable pattern. The `ConfirmPopup` component is added to `AppLayout.vue` and the `useConfirm` composable provides helper functions for showing confirmation dialogs.
+
+### Usage
+
+The `ConfirmPopup` component is already included in `AppLayout.vue`, so you only need to use the `useConfirm` composable in your components:
+
+**Basic delete confirmation:**
+
+```vue
+<script setup lang="ts">
+import { useConfirm } from '@/composables/useConfirm';
+import UiButton from '@/components/ui/UiButton.vue';
+
+const { requireDelete } = useConfirm();
+
+function handleDelete(event: Event) {
+  requireDelete({
+    target: event.currentTarget as HTMLElement,
+    message: 'Are you sure you want to delete this item?',
+    onAccept: () => {
+      // Perform delete action
+      console.log('Item deleted');
+    },
+  });
+}
+</script>
+
+<template>
+  <UiButton
+    severity="danger"
+    @click="handleDelete"
+  >
+    Delete
+  </UiButton>
+</template>
+```
+
+**Custom confirmation:**
+
+```vue
+<script setup lang="ts">
+import { useConfirm } from '@/composables/useConfirm';
+import { useIcon } from '@/composables/useIcon';
+import UiButton from '@/components/ui/UiButton.vue';
+
+const { require } = useConfirm();
+const { IconList } = useIcon();
+
+function handleSave(event: Event) {
+  require({
+    target: event.currentTarget as HTMLElement,
+    message: 'Are you sure you want to save these changes?',
+    header: 'Confirm Save',
+    icon: IconList.ExclamationTriangle,
+    acceptLabel: 'Save',
+    rejectLabel: 'Cancel',
+    acceptSeverity: 'primary',
+    onAccept: () => {
+      // Perform save action
+      console.log('Changes saved');
+    },
+  });
+}
+</script>
+
+<template>
+  <UiButton @click="handleSave">
+    Save Changes
+  </UiButton>
+</template>
+```
+
+### Confirm Helper Functions
+
+The `useConfirm` composable provides two helper functions:
+
+- `requireDelete(options)` - Shows a delete confirmation dialog with danger styling
+  - `target: HTMLElement | undefined` - The element that triggered the confirmation (cast `event.currentTarget as HTMLElement`)
+  - `message?: string` - Custom message (default: "Are you sure you want to delete this item?")
+  - `onAccept: () => void` - Callback when user confirms
+  - `onReject?: () => void` - Optional callback when user cancels
+
+- `require(options)` - Shows a custom confirmation dialog
+  - `target: HTMLElement | undefined` - The element that triggered the confirmation (cast `event.currentTarget as HTMLElement`)
+  - `message?: string` - Confirmation message
+  - `header?: string` - Dialog header text
+  - `icon?: string` - Icon class (use `IconList` from `useIcon` composable, e.g., `IconList.ExclamationTriangle`)
+  - `accept?: () => void` - Callback when user confirms
+  - `reject?: () => void` - Callback when user cancels
+  - `acceptLabel?: string` - Accept button label (default: 'Confirm')
+  - `rejectLabel?: string` - Reject button label (default: 'Cancel')
+  - `acceptSeverity?: string` - Accept button severity (default: 'primary')
+  - `rejectSeverity?: string` - Reject button severity (default: 'secondary')
+  - `group?: string` - Optional group key for targeting specific popup instances
+
+### Advanced Usage
+
+For more control, you can access the confirm instance directly:
+
+```vue
+<script setup lang="ts">
+import { useConfirm } from '@/composables/useConfirm';
+import { useIcon } from '@/composables/useIcon';
+
+const { confirm } = useConfirm();
+const { IconList } = useIcon();
+
+function showCustomConfirmation(event: Event) {
+  confirm.require({
+    target: event.currentTarget as HTMLElement,
+    message: 'Custom confirmation message',
+    icon: IconList.ExclamationTriangle,
+    acceptProps: {
+      label: 'Yes',
+      severity: 'success',
+    },
+    rejectProps: {
+      label: 'No',
+      severity: 'secondary',
+      outlined: true,
+    },
+    accept: () => {
+      console.log('Accepted');
+    },
+    reject: () => {
+      console.log('Rejected');
+    },
   });
 }
 </script>

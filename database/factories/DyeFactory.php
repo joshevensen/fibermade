@@ -33,6 +33,7 @@ class DyeFactory extends Factory
 
         return [
             'name' => fake()->randomElement($dyeNames),
+            'manufacturer' => fake()->randomElement(['Dharma', 'Jacquard', 'Other Manufacturer']),
             'notes' => fake()->optional(0.6)->sentence(),
             'does_bleed' => fake()->boolean(30),
             'do_like' => fake()->boolean(80),

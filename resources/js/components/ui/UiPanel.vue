@@ -21,6 +21,9 @@ defineOptions({
         :toggleable="toggleable"
         :collapsed="collapsed"
     >
+        <template v-if="$slots.header" #header>
+            <slot name="header" />
+        </template>
         <slot />
     </PrimePanel>
 </template>

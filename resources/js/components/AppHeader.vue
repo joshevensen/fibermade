@@ -74,7 +74,7 @@ function toggleCreateMenu(event: Event): void {
         <!-- Mobile: Menu toggle + Logo -->
         <div class="flex items-center gap-4 lg:hidden">
             <UiButton
-                icon="pi pi-bars"
+                :icon="IconList.Menu"
                 text
                 @click="emit('toggle-mobile-drawer')"
             />
@@ -85,7 +85,7 @@ function toggleCreateMenu(event: Event): void {
         <div class="hidden lg:flex gap-3 lg:flex-1 lg:max-w-md">
             <UiInputText
                 placeholder="Search"
-                icon="pi pi-search"
+                :icon="IconList.Search"
                 icon-pos="start"
                 :fluid="false"
             />
@@ -99,13 +99,13 @@ function toggleCreateMenu(event: Event): void {
         <!-- Icon Buttons (all screens) -->
         <div class="relative flex items-center gap-2">
             <UiButton
-                icon="pi pi-cog"
+                :icon="IconList.Settings"
                 text
                 aria-label="Settings"
                 @click="router.visit(profileEdit.url())"
             />
             <UiButton
-                icon="pi pi-plus"
+                :icon="IconList.Plus"
                 text
                 aria-label="Create"
                 @click="toggleCreateMenu"

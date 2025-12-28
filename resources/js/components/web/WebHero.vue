@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
+import { useIcon } from '@/composables/useIcon';
 
 interface ImageTile {
     url: string;
@@ -41,6 +42,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
     variant: 'simple',
 });
+
+const { IconList } = useIcon();
 </script>
 
 <template>
@@ -74,7 +77,7 @@ const props = withDefaults(defineProps<Props>(), {
                                     ></span
                                     >Read more
                                     <i
-                                        class="pi pi-chevron-right ml-1"
+                                        :class="[IconList.Right, 'ml-1']"
                                         aria-hidden="true"
                                     ></i>
                                 </UiLink>
@@ -299,7 +302,7 @@ const props = withDefaults(defineProps<Props>(), {
                     >
                         <span>{{ badge.text }}</span>
                         <i
-                            class="pi pi-chevron-right size-5 text-gray-400 dark:text-gray-500"
+                            :class="[IconList.Right, 'size-5 text-gray-400 dark:text-gray-500']"
                             aria-hidden="true"
                         ></i>
                     </span>

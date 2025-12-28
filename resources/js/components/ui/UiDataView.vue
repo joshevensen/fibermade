@@ -39,16 +39,24 @@ defineOptions({
         :sortField="sortField"
         :sortOrder="sortOrder"
         :dataKey="dataKey"
+        :pt="{
+            content: {
+                class: 'p-2!'
+            }
+        }"
     >
-        <template #empty="slotProps">
-            <slot name="empty" v-bind="slotProps" />
-        </template>
-        <template #list="slotProps">
-            <slot name="list" v-bind="slotProps" />
-        </template>
-        <template #grid="slotProps">
-            <slot name="grid" v-bind="slotProps" />
-        </template>
-    </PrimeDataView>
+            <template #header>
+                <slot name="header" />
+            </template>
+            <template #empty="slotProps">
+                <slot name="empty" v-bind="slotProps" />
+            </template>
+            <template #list="slotProps">
+                <slot name="list" v-bind="slotProps" />
+            </template>
+            <template #grid="slotProps">
+                <slot name="grid" v-bind="slotProps" />
+            </template>
+        </PrimeDataView>
 </template>
 

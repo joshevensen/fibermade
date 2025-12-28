@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import UiFormField from '@/components/ui/UiFormField.vue';
-import UiSelect from '@/components/ui/UiSelect.vue';
+import UiAutocomplete from '@/components/ui/UiAutocomplete.vue';
 
 interface Props {
     // UiFormField props
@@ -17,28 +17,38 @@ interface Props {
     validateOnSubmit?: boolean;
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
-    labelPosition?: 'top' | 'left' | 'right';
-    // UiSelect props
-    options?: any[];
-    optionLabel?: string | ((data: any) => string);
-    optionValue?: string | ((data: any) => any);
-    optionDisabled?: string | ((data: any) => boolean);
-    placeholder?: string;
+    // UiAutocomplete props
+    suggestions?: any[];
+    optionLabel?: string | ((option: any) => string);
     size?: 'small' | 'large';
     invalid?: boolean;
-    disabled?: boolean;
     variant?: 'outlined' | 'filled';
-    filter?: boolean;
-    filterPlaceholder?: string;
-    showClear?: boolean;
+    disabled?: boolean;
+    placeholder?: string;
+    required?: boolean;
     fluid?: boolean;
+    multiple?: boolean;
+    dropdown?: boolean;
+    showClear?: boolean;
+    loading?: boolean;
+    forceSelection?: boolean;
+    typeahead?: boolean;
+    minLength?: number;
+    delay?: number;
     scrollHeight?: string;
+    optionDisabled?: string | ((option: any) => boolean);
+    optionGroupLabel?: string | ((option: any) => string);
+    optionGroupChildren?: string | ((option: any) => any[]);
+    dataKey?: string;
+    completeOnFocus?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    size: 'small', 
-    scrollHeight: '14rem',
     fluid: true,
+    typeahead: true,
+    minLength: 1,
+    delay: 300,
+    scrollHeight: '14rem',
 });
 
 defineOptions({
@@ -59,26 +69,34 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
-        :labelPosition="labelPosition"
     >
         <template #default="{ props: fieldProps, id }">
-            <UiSelect
+            <UiAutocomplete
                 v-bind="{ ...fieldProps, ...$attrs }"
                 :id="id"
-                :options="options"
+                :suggestions="suggestions"
                 :optionLabel="optionLabel"
-                :optionValue="optionValue"
-                :optionDisabled="optionDisabled"
-                :placeholder="placeholder"
                 :size="size"
                 :invalid="invalid"
-                :disabled="disabled"
                 :variant="variant"
-                :filter="filter"
-                :filterPlaceholder="filterPlaceholder"
-                :showClear="showClear"
+                :disabled="disabled"
+                :placeholder="placeholder"
+                :required="required"
                 :fluid="fluid"
+                :multiple="multiple"
+                :dropdown="dropdown"
+                :showClear="showClear"
+                :loading="loading"
+                :forceSelection="forceSelection"
+                :typeahead="typeahead"
+                :minLength="minLength"
+                :delay="delay"
                 :scrollHeight="scrollHeight"
+                :optionDisabled="optionDisabled"
+                :optionGroupLabel="optionGroupLabel"
+                :optionGroupChildren="optionGroupChildren"
+                :dataKey="dataKey"
+                :completeOnFocus="completeOnFocus"
             />
         </template>
     </UiFormField>

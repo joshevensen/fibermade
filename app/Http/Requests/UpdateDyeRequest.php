@@ -26,6 +26,7 @@ class UpdateDyeRequest extends FormRequest
         return [
             'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
             'name' => ['sometimes', 'string', 'max:255'],
+            'manufacturer' => ['sometimes', 'nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'does_bleed' => ['sometimes', 'boolean'],
             'do_like' => ['sometimes', 'boolean'],

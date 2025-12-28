@@ -23,6 +23,7 @@ class StoreDyeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'manufacturer' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'does_bleed' => ['required', 'boolean'],
             'do_like' => ['required', 'boolean'],
