@@ -1,3 +1,51 @@
+<script lang="ts">
+import type { DataViewTokenSections } from '@primeuix/themes/types/dataview';
+
+export const dataViewRoot: DataViewTokenSections.Root = {
+    borderColor: 'transparent',
+    borderWidth: '0',
+    borderRadius: '0',
+    padding: '0'
+};
+
+export const dataViewHeader: DataViewTokenSections.Header = {
+    background: '{content.background}',
+    color: '{content.color}',
+    borderColor: '{content.border.color}',
+    borderWidth: '0',
+    padding: '0.75rem 1rem',
+    borderRadius: '0'
+};
+
+export const dataViewContent: DataViewTokenSections.Content = {
+    background: '{content.background}',
+    color: '{content.color}',
+    borderColor: 'transparent',
+    borderWidth: '0',
+    padding: '0',
+    borderRadius: '0'
+};
+
+export const dataViewFooter: DataViewTokenSections.Footer = {
+    background: '{content.background}',
+    color: '{content.color}',
+    borderColor: '{content.border.color}',
+    borderWidth: '0',
+    padding: '0.75rem 1rem',
+    borderRadius: '0'
+};
+
+export const dataViewPaginatorTop: DataViewTokenSections.PaginatorTop = {
+    borderColor: '{content.border.color}',
+    borderWidth: '0'
+};
+
+export const dataViewPaginatorBottom: DataViewTokenSections.PaginatorBottom = {
+    borderColor: '{content.border.color}',
+    borderWidth: '0'
+};
+</script>
+
 <script setup lang="ts">
 import PrimeDataView from 'primevue/dataview';
 
@@ -39,13 +87,8 @@ defineOptions({
         :sortField="sortField"
         :sortOrder="sortOrder"
         :dataKey="dataKey"
-        :pt="{
-            content: {
-                class: 'p-2!'
-            }
-        }"
     >
-            <template #header>
+            <template v-if="$slots.header" #header>
                 <slot name="header" />
             </template>
             <template #empty="slotProps">

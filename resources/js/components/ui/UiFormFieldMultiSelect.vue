@@ -39,7 +39,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    size: 'small', 
     scrollHeight: '14rem',
     display: 'comma',
     fluid: true,

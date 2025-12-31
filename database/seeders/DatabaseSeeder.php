@@ -15,23 +15,9 @@ class DatabaseSeeder extends Seeder
         $this->truncateTables();
 
         $this->call([
-            UserSeeder::class,
-            AccountSeeder::class,
-
-            BaseSeeder::class,
-            CollectionSeeder::class,
-            ColorwaySeeder::class,
-            CustomerSeeder::class,
-            DiscountSeeder::class,
-            DyeSeeder::class,
-            IntegrationLogSeeder::class,
-            IntegrationSeeder::class,
-            InventorySeeder::class,
-            MediaSeeder::class,
-            OrderItemSeeder::class,
-            OrderSeeder::class,
-            ShowSeeder::class,
-            StoreSeeder::class,
+            FoundationSeeder::class,
+            CatalogSeeder::class,
+            OrdersSeeder::class,
         ]);
     }
 

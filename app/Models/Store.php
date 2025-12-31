@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\StoreVendorStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * settings (discount rates, payment terms, etc.) that apply when ordering from creators.
  *
  * @property int $id
+ * @property int $account_id
  * @property string $name
  * @property string $email
  * @property string|null $owner_name
@@ -45,6 +47,7 @@ class Store extends Model
      * @var list<string>
      */
     protected $fillable = [
+        'account_id',
         'name',
         'email',
         'owner_name',
@@ -77,6 +80,14 @@ class Store extends Model
             'discount_rate' => 'decimal:2',
             'minimum_order_value' => 'decimal:2',
         ];
+    }
+
+    /**
+     * Get the account that owns this store.
+     */
+    public function account(): BelongsTo
+    {
+        return $this->belongsTo(Account::class);
     }
 
     /**

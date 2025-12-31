@@ -1,18 +1,11 @@
 <script setup lang="ts">
-import {
-    destroy as destroyOrder,
-    edit as editOrder,
-} from '@/actions/App/Http/Controllers/OrderController';
-import PageHeader from '@/components/PageHeader.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { edit as editOrder } from '@/actions/App/Http/Controllers/OrderController';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import { useCreateDrawer } from '@/composables/useCreateDrawer';
-import { useIcon } from '@/composables/useIcon';
+import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
-import { useConfirm } from 'primevue/useconfirm';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Props {
     orders: Array<{
@@ -27,13 +20,33 @@ interface Props {
         tax_amount?: number | null;
         total_amount?: number | null;
         notes?: string | null;
+        orderable?: {
+            name: string;
+        } | null;
+        orderItems?: Array<{
+            quantity: number;
+        }>;
     }>;
+    orderTypeOptions: Array<{ label: string; value: string }>;
+    orderStatusOptions: Array<{ label: string; value: string }>;
 }
 
 const props = defineProps<Props>();
-const { IconList, BusinessIconList } = useIcon();
-const { openDrawer } = useCreateDrawer();
-const confirm = useConfirm();
+
+// Filter state
+const typeFilter = ref<string | 'all'>('all');
+const statusFilter = ref<string | 'all'>('all');
+
+// Add "All" option to filters
+const typeFilterOptions = [
+    { label: 'All', value: 'all' },
+    ...props.orderTypeOptions,
+];
+
+const statusFilterOptions = [
+    { label: 'All', value: 'all' },
+    ...props.orderStatusOptions,
+];
 
 function formatEnum(value: string | null | undefined): string {
     if (!value) {
@@ -62,18 +75,46 @@ function formatCurrency(value: number | null | undefined): string {
     }).format(value);
 }
 
-function handleDelete(order: Props['orders'][0], event: Event) {
-    confirm.require({
-        target: event.currentTarget as HTMLElement,
-        message: `Are you sure you want to delete order #${order.id}?`,
-        icon: IconList.ExclamationTriangle,
-        accept: () => {
-            router.delete(destroyOrder.url(order.id));
-        },
-    });
+function getOrderableName(order: Props['orders'][0]): string {
+    return order.orderable?.name || '';
 }
 
+function getSkeinCount(order: Props['orders'][0]): number {
+    if (!order.orderItems || order.orderItems.length === 0) {
+        return 0;
+    }
+    return order.orderItems.reduce(
+        (sum, item) => sum + (item.quantity || 0),
+        0,
+    );
+}
+
+// Filter orders
+const filteredOrders = computed(() => {
+    let filtered = [...props.orders];
+
+    // Apply type filter
+    if (typeFilter.value !== 'all') {
+        filtered = filtered.filter((order) => order.type === typeFilter.value);
+    }
+
+    // Apply status filter
+    if (statusFilter.value !== 'all') {
+        filtered = filtered.filter(
+            (order) => order.status === statusFilter.value,
+        );
+    }
+
+    return filtered;
+});
+
 const columns = computed(() => [
+    {
+        field: 'orderable.name',
+        header: 'Name',
+        sortable: true,
+        columnKey: 'name',
+    },
     {
         field: 'type',
         header: 'Type',
@@ -96,6 +137,13 @@ const columns = computed(() => [
         bodyTemplate: (data: Props['orders'][0]) => formatDate(data.order_date),
     },
     {
+        header: '# Skeins',
+        sortable: false,
+        columnKey: 'skeins',
+        bodyTemplate: (data: Props['orders'][0]) =>
+            getSkeinCount(data).toString(),
+    },
+    {
         field: 'total_amount',
         header: 'Total',
         sortable: true,
@@ -108,44 +156,80 @@ const columns = computed(() => [
 
 <template>
     <AppLayout page-title="Orders">
-        <PageHeader heading="Orders" :business-icon="BusinessIconList.Orders">
-            <template #actions>
-                <UiButton
-                    size="small"
-                    label="Create"
-                    @click="openDrawer('order')"
-                />
-            </template>
-        </PageHeader>
-
-        <div class="mt-6">
-            <UiCard>
-                <template #content>
-                    <UiDataTable
-                        :value="orders"
-                        :columns="columns"
-                        data-key="id"
-                        striped-rows
-                        show-gridlines
-                    >
-                        <template #actions="{ data }">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editOrder.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
+        <UiCard>
+            <template #title>
+                <div
+                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                >
+                    <div class="text-surface-600">
+                        <template
+                            v-if="filteredOrders.length !== props.orders.length"
+                        >
+                            {{ filteredOrders.length }} of
+                            {{ props.orders.length }}
                         </template>
-                    </UiDataTable>
-                </template>
-            </UiCard>
-        </div>
+                        <template v-else>
+                            {{ filteredOrders.length }}
+                        </template>
+                        {{ filteredOrders.length === 1 ? 'order' : 'orders' }}
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4">
+                        <UiFormFieldSelect
+                            name="type-filter"
+                            label="Type"
+                            label-position="left"
+                            :options="typeFilterOptions"
+                            option-label="label"
+                            option-value="value"
+                            :initial-value="typeFilter"
+                            :validate-on-mount="false"
+                            :validate-on-blur="false"
+                            :validate-on-submit="false"
+                            :validate-on-value-update="false"
+                            size="small"
+                            class="w-40"
+                            @update:model-value="typeFilter = $event"
+                        />
+                        <UiFormFieldSelect
+                            name="status-filter"
+                            label="Status"
+                            label-position="left"
+                            :options="statusFilterOptions"
+                            option-label="label"
+                            option-value="value"
+                            :initial-value="statusFilter"
+                            :validate-on-mount="false"
+                            :validate-on-blur="false"
+                            :validate-on-submit="false"
+                            :validate-on-value-update="false"
+                            size="small"
+                            class="w-40"
+                            @update:model-value="statusFilter = $event"
+                        />
+                    </div>
+                </div>
+            </template>
+
+            <template #content>
+                <UiDataTable
+                    :value="filteredOrders"
+                    :columns="columns"
+                    data-key="id"
+                    striped-rows
+                    show-gridlines
+                >
+                    <template #name="{ data }">
+                        <button
+                            type="button"
+                            class="cursor-pointer text-primary hover:underline"
+                            @click="router.visit(editOrder.url(data.id))"
+                        >
+                            {{ getOrderableName(data) || '—' }}
+                        </button>
+                    </template>
+                </UiDataTable>
+            </template>
+        </UiCard>
     </AppLayout>
 </template>

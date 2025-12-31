@@ -35,7 +35,6 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     step: 1,
-    size: 'small', 
     fluid: true,
 });
 

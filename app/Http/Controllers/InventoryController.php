@@ -2,10 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BaseStatus;
+use App\Enums\Color;
+use App\Enums\ColorwayStatus;
+use App\Enums\Technique;
 use App\Http\Requests\StoreInventoryRequest;
+use App\Http\Requests\UpdateInventoryQuantityRequest;
 use App\Http\Requests\UpdateInventoryRequest;
+use App\Models\Base;
+use App\Models\Collection;
+use App\Models\Colorway;
 use App\Models\Inventory;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -19,13 +28,118 @@ class InventoryController extends Controller
         $this->authorize('viewAny', Inventory::class);
 
         $user = auth()->user();
-        $inventories = $user->is_admin
-            ? Inventory::with(['account', 'colorway', 'base'])->get()
-            : ($user->account_id ? Inventory::where('account_id', $user->account_id)->with(['account', 'colorway', 'base'])->get() : collect());
 
-        return Inertia::render('inventory/InventoryPage', [
-            'inventories' => $inventories,
+        // Fetch colorways with same filtering/authorization as ColorwayController
+        $colorways = $user->is_admin
+            ? Colorway::with(['account', 'media', 'collections', 'inventories.base'])->get()
+            : ($user->account_id
+                ? Colorway::where('account_id', $user->account_id)
+                    ->with(['account', 'media', 'collections', 'inventories.base'])
+                    ->get()
+                : collect());
+
+        // Fetch all active bases for the account (ordered by code)
+        $bases = $user->is_admin
+            ? Base::where('status', BaseStatus::Active)->orderBy('code')->get()
+            : ($user->account_id
+                ? Base::where('account_id', $user->account_id)
+                    ->where('status', BaseStatus::Active)
+                    ->orderBy('code')
+                    ->get()
+                : collect());
+
+        // Transform colorways to include bases with inventory data
+        $colorways = $colorways->map(function ($colorway) use ($bases) {
+            $colorwayArray = $colorway->toArray();
+            $colorwayArray['primary_image_url'] = $colorway->primary_image_url;
+            $colorwayArray['collections'] = $colorway->collections->map(fn ($collection) => [
+                'id' => $collection->id,
+                'name' => $collection->name,
+            ])->toArray();
+
+            // Map bases with their inventory quantities
+            $baseData = $bases->map(function ($base) use ($colorway) {
+                $inventory = $colorway->inventories->firstWhere('base_id', $base->id);
+
+                return [
+                    'id' => $base->id,
+                    'code' => $base->code,
+                    'descriptor' => $base->descriptor,
+                    'quantity' => $inventory ? $inventory->quantity : 0,
+                    'inventory_id' => $inventory ? $inventory->id : null,
+                ];
+            })->toArray();
+
+            $colorwayArray['bases'] = $baseData;
+
+            // Calculate total quantity for this colorway
+            $colorwayArray['total_quantity'] = collect($baseData)->sum('quantity');
+
+            return $colorwayArray;
+        });
+
+        // Filter options (same as ColorwayController)
+        $colorwayStatusOptions = collect(ColorwayStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $techniqueOptions = collect(Technique::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $colorOptions = collect(Color::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $collections = $user->is_admin
+            ? Collection::orderBy('name')->get()
+            : ($user->account_id
+                ? Collection::where('account_id', $user->account_id)->orderBy('name')->get()
+                : collect());
+
+        $collectionOptions = $collections->map(fn ($collection) => [
+            'label' => $collection->name,
+            'value' => $collection->id,
+        ])->toArray();
+
+        return Inertia::render('inventory/InventoryIndexPage', [
+            'colorways' => $colorways,
+            'colorwayStatusOptions' => $colorwayStatusOptions,
+            'techniqueOptions' => $techniqueOptions,
+            'colorOptions' => $colorOptions,
+            'collectionOptions' => $collectionOptions,
         ]);
+    }
+
+    /**
+     * Update inventory quantity for a colorway-base combination.
+     */
+    public function updateQuantity(UpdateInventoryQuantityRequest $request): RedirectResponse
+    {
+        $validated = $request->validated();
+        $user = $request->user();
+
+        Inventory::updateOrCreate(
+            [
+                'account_id' => $user->account_id,
+                'colorway_id' => $validated['colorway_id'],
+                'base_id' => $validated['base_id'],
+            ],
+            [
+                'quantity' => $validated['quantity'],
+            ]
+        );
+
+        return redirect()->back();
     }
 
     /**

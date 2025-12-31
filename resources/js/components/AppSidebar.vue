@@ -46,7 +46,7 @@ function handleLogout() {
     <aside
         :class="[
             'sticky top-0 hidden h-screen flex-col border-r border-surface-200 bg-surface-100 transition-all duration-300 lg:flex',
-            collapsed ? 'w-16' : 'w-52',
+            collapsed ? 'w-16' : 'w-40',
         ]"
     >
         <div class="flex h-12 items-center justify-center px-4">

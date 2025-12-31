@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { update } from '@/actions/App/Http/Controllers/DiscountController';
-import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
@@ -10,7 +9,6 @@ import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
-import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 
@@ -30,7 +28,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { BusinessIconList } = useIcon();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.discount.id),
@@ -71,11 +68,6 @@ const { form, onSubmit } = useFormSubmission({
 
 <template>
     <AppLayout page-title="Edit Discount">
-        <PageHeader
-            heading="Edit Discount"
-            :business-icon="BusinessIconList.Discounts"
-        />
-
         <div class="mt-6 max-w-2xl">
             <UiCard>
                 <template #content>

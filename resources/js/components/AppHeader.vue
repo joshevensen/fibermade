@@ -1,23 +1,65 @@
 <script setup lang="ts">
 import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
+import UiIcon from '@/components/ui/UiIcon.vue';
 import UiMenu from '@/components/ui/UiMenu.vue';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
 import { edit as profileEdit } from '@/routes/user';
 import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+
+interface Props {
+    pageTitle?: string;
+}
+
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
     'toggle-mobile-drawer': [];
 }>();
 
 const { openDrawer } = useCreateDrawer();
-const { IconList } = useIcon();
+const { IconList, BusinessIconList } = useIcon();
 const createMenuRef = ref();
 
+// Map page titles to icons
+const getPageIcon = (title?: string) => {
+    if (!title) {
+        return null;
+    }
+    const iconMap: Record<string, any> = {
+        Colorways: BusinessIconList.Colorways,
+        Orders: BusinessIconList.Orders,
+        Dashboard: BusinessIconList.Dashboard,
+        Inventory: BusinessIconList.Inventory,
+        Collections: BusinessIconList.Collections,
+        Bases: BusinessIconList.Bases,
+        Dyes: BusinessIconList.Dyes,
+        Stores: BusinessIconList.Stores,
+        Shows: BusinessIconList.Shows,
+        Customers: BusinessIconList.Customers,
+    };
+    return iconMap[title] || null;
+};
+
+const pageIcon = computed(() => getPageIcon(props.pageTitle));
+
 const createMenuItems = [
+    {
+        label: 'Base',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('base');
+        },
+    },
+    {
+        label: 'Collection',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('collection');
+        },
+    },
     {
         label: 'Colorway',
         icon: IconList.Plus,
@@ -26,10 +68,24 @@ const createMenuItems = [
         },
     },
     {
-        label: 'Collection',
+        label: 'Customer',
         icon: IconList.Plus,
         command: () => {
-            openDrawer('collection');
+            openDrawer('customer');
+        },
+    },
+    {
+        label: 'Discount',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('discount');
+        },
+    },
+    {
+        label: 'Dye',
+        icon: IconList.Plus,
+        command: () => {
+            openDrawer('dye');
         },
     },
     {
@@ -71,23 +127,21 @@ function toggleCreateMenu(event: Event): void {
                 text
                 @click="emit('toggle-mobile-drawer')"
             />
-            <AppLogo variant="full" />
+            <AppLogo variant="full" class="max-w-32" />
         </div>
 
-        <!-- Desktop: Search Input -->
-        <div class="hidden gap-3 lg:flex lg:max-w-md lg:flex-1">
-            <UiInputText
-                placeholder="Search"
-                :icon="IconList.Search"
-                icon-pos="start"
-                :fluid="false"
+        <!-- Desktop: Page Title -->
+        <div v-if="pageTitle" class="hidden items-center gap-2 lg:flex">
+            <UiIcon
+                v-if="pageIcon"
+                :component="pageIcon"
+                class="text-lg text-surface-400"
             />
-
-            <UiButton label="Dye List" outlined />
+            <h1 class="text-xl font-bold text-surface-500">{{ pageTitle }}</h1>
         </div>
 
         <!-- Icon Buttons (all screens) -->
-        <div class="relative flex items-center gap-2">
+        <div class="relative ml-auto flex items-center gap-2">
             <UiButton
                 :icon="IconList.Settings"
                 text

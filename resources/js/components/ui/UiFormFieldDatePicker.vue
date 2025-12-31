@@ -42,7 +42,6 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     selectionMode: 'single',
-    size: 'small',
     fluid: true,
 });
 

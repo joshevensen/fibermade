@@ -8,6 +8,7 @@ import { useSidebarState } from '@/composables/useSidebarState';
 import BaseCreateDrawer from '@/pages/bases/BaseCreateDrawer.vue';
 import CollectionCreateDrawer from '@/pages/collections/CollectionCreateDrawer.vue';
 import ColorwayCreateDrawer from '@/pages/colorways/ColorwayCreateDrawer.vue';
+import CustomerCreateDrawer from '@/pages/customers/CustomerCreateDrawer.vue';
 import DiscountCreateDrawer from '@/pages/discounts/DiscountCreateDrawer.vue';
 import DyeCreateDrawer from '@/pages/dyes/DyeCreateDrawer.vue';
 import OrderCreateDrawer from '@/pages/orders/OrderCreateDrawer.vue';
@@ -37,6 +38,7 @@ const collectionDrawerVisible = computed(
     () => activeDrawer.value === 'collection',
 );
 const colorwayDrawerVisible = computed(() => activeDrawer.value === 'colorway');
+const customerDrawerVisible = computed(() => activeDrawer.value === 'customer');
 const discountDrawerVisible = computed(() => activeDrawer.value === 'discount');
 const dyeDrawerVisible = computed(() => activeDrawer.value === 'dye');
 const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
@@ -59,6 +61,7 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
         <div class="flex flex-1 flex-col overflow-hidden">
             <!-- Header -->
             <AppHeader
+                :page-title="pageTitle"
                 @toggle-mobile-drawer="
                     mobileDrawerVisible = !mobileDrawerVisible
                 "
@@ -66,7 +69,19 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
 
             <!-- Page Content -->
             <main class="flex-1 overflow-auto px-4 pt-3.5 pb-8">
-                <slot />
+                <template v-if="$slots.side">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:pr-4">
+                        <div class="flex-[0_0_60%]">
+                            <slot />
+                        </div>
+                        <div class="flex-[0_0_40%]">
+                            <slot name="side" />
+                        </div>
+                    </div>
+                </template>
+                <template v-else>
+                    <slot />
+                </template>
             </main>
         </div>
 
@@ -96,6 +111,14 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
     />
     <ColorwayCreateDrawer
         :visible="colorwayDrawerVisible"
+        @update:visible="
+            (value) => {
+                if (!value) closeDrawer();
+            }
+        "
+    />
+    <CustomerCreateDrawer
+        :visible="customerDrawerVisible"
         @update:visible="
             (value) => {
                 if (!value) closeDrawer();

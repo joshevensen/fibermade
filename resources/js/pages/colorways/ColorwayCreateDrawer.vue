@@ -5,6 +5,7 @@ import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
@@ -75,6 +76,9 @@ const { form, onSubmit } = useFormSubmission({
         description: null,
         technique: null,
         colors: null,
+        per_pan: null,
+        recipe: null,
+        notes: null,
         status: null,
         shopify_product_id: null,
     },
@@ -150,6 +154,30 @@ const { form, onSubmit } = useFormSubmission({
                     label="Description"
                     placeholder="Colorway description"
                     :server-error="form.errors.description"
+                />
+
+                <UiFormFieldInputNumber
+                    name="per_pan"
+                    label="Per Pan"
+                    placeholder="1-6"
+                    :min="1"
+                    :max="6"
+                    :server-error="form.errors.per_pan"
+                    required
+                />
+
+                <UiFormFieldTextarea
+                    name="recipe"
+                    label="Recipe"
+                    placeholder="Colorway recipe"
+                    :server-error="form.errors.recipe"
+                />
+
+                <UiFormFieldTextarea
+                    name="notes"
+                    label="Notes"
+                    placeholder="Additional notes"
+                    :server-error="form.errors.notes"
                 />
 
                 <UiButton type="submit" :loading="form.processing">

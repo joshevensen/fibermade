@@ -58,8 +58,19 @@ class CustomerController extends Controller
     {
         $this->authorize('view', $customer);
 
+        $customer->load(['orders.orderable']);
+
         return Inertia::render('customers/CustomerEditPage', [
             'customer' => $customer,
+            'orders' => $customer->orders->map(fn ($order) => [
+                'id' => $order->id,
+                'order_date' => $order->order_date->toDateString(),
+                'status' => $order->status->value,
+                'total_amount' => $order->total_amount,
+                'orderable' => $order->orderable ? [
+                    'name' => $order->orderable->name,
+                ] : null,
+            ]),
         ]);
     }
 

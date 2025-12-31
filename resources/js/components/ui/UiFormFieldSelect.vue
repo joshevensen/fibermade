@@ -36,7 +36,6 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    size: 'small', 
     scrollHeight: '14rem',
     fluid: true,
 });
@@ -60,6 +59,7 @@ defineOptions({
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
         :labelPosition="labelPosition"
+        :size="size"
     >
         <template #default="{ props: fieldProps, id }">
             <UiSelect

@@ -55,6 +55,9 @@ class ColorwayFactory extends Factory
             'description' => fake()->optional(0.7)->sentence(),
             'technique' => $technique,
             'colors' => $colors,
+            'per_pan' => fake()->numberBetween(1, 6),
+            'recipe' => fake()->optional(0.5)->paragraph(),
+            'notes' => fake()->optional(0.4)->sentence(),
             'status' => $status,
             'shopify_product_id' => fake()->optional(0.3)->numerify('##########'),
         ];

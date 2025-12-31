@@ -19,6 +19,9 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('technique')->nullable();
             $table->json('colors')->nullable();
+            $table->unsignedTinyInteger('per_pan');
+            $table->text('recipe')->nullable();
+            $table->text('notes')->nullable();
             $table->string('status')->default('active');
             $table->string('shopify_product_id')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

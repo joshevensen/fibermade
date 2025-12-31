@@ -20,6 +20,7 @@ interface Props {
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
     labelPosition?: LabelPosition;
+    size?: 'small' | 'large';
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -53,8 +54,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
         <template v-slot="$field">
             <div :class="{
                 'flex items-center': isHorizontal,
-                'gap-4': isHorizontal && !isLabelRight,
-                'gap-2': isLabelRight,
+                'gap-2': isHorizontal,
             }">
                 <!-- Label positioned based on labelPosition prop -->
                 <label
@@ -64,6 +64,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
                         'flex justify-between w-full mb-1': labelPosition === 'top',
                         'flex items-center gap-2 shrink-0': isHorizontal && !isLabelRight,
                         'flex items-center gap-2 shrink-0 order-2': isHorizontal && isLabelRight,
+                        'text-sm': size === 'small',
                     }"
                 >
                     <span>

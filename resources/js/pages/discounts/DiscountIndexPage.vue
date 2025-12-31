@@ -3,11 +3,9 @@ import {
     destroy as destroyDiscount,
     edit as editDiscount,
 } from '@/actions/App/Http/Controllers/DiscountController';
-import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
-import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -29,8 +27,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList, BusinessIconList } = useIcon();
-const { openDrawer } = useCreateDrawer();
+const { IconList } = useIcon();
 const confirm = useConfirm();
 
 function formatEnum(value: string | null | undefined): string {
@@ -115,47 +112,43 @@ const columns = computed(() => [
 
 <template>
     <AppLayout page-title="Discounts">
-        <PageHeader
-            heading="Discounts"
-            :business-icon="BusinessIconList.Discounts"
-        >
-            <template #actions>
-                <UiButton
-                    size="small"
-                    label="Create"
-                    @click="openDrawer('discount')"
-                />
+        <UiCard>
+            <template #title>
+                <div
+                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                >
+                    <div class="text-surface-600">
+                        {{ discounts.length }}
+                        {{ discounts.length === 1 ? 'discount' : 'discounts' }}
+                    </div>
+                </div>
             </template>
-        </PageHeader>
 
-        <div class="mt-6">
-            <UiCard>
-                <template #content>
-                    <UiDataTable
-                        :value="discounts"
-                        :columns="columns"
-                        data-key="id"
-                        striped-rows
-                        show-gridlines
-                    >
-                        <template #actions="{ data }">
-                            <UiButton
-                                :icon="IconList.Settings"
-                                text
-                                size="small"
-                                @click="router.visit(editDiscount.url(data.id))"
-                            />
-                            <UiButton
-                                :icon="IconList.Close"
-                                text
-                                size="small"
-                                severity="danger"
-                                @click="handleDelete(data, $event)"
-                            />
-                        </template>
-                    </UiDataTable>
-                </template>
-            </UiCard>
-        </div>
+            <template #content>
+                <UiDataTable
+                    :value="discounts"
+                    :columns="columns"
+                    data-key="id"
+                    striped-rows
+                    show-gridlines
+                >
+                    <template #actions="{ data }">
+                        <UiButton
+                            :icon="IconList.Settings"
+                            text
+                            size="small"
+                            @click="router.visit(editDiscount.url(data.id))"
+                        />
+                        <UiButton
+                            :icon="IconList.Close"
+                            text
+                            size="small"
+                            severity="danger"
+                            @click="handleDelete(data, $event)"
+                        />
+                    </template>
+                </UiDataTable>
+            </template>
+        </UiCard>
     </AppLayout>
 </template>

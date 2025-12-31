@@ -3,12 +3,10 @@ import {
     destroy as destroyCollection,
     edit as editCollection,
 } from '@/actions/App/Http/Controllers/CollectionController';
-import PageHeader from '@/components/PageHeader.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiTag from '@/components/ui/UiTag.vue';
-import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -31,9 +29,8 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList, BusinessIconList } = useIcon();
+const { IconList } = useIcon();
 const confirm = useConfirm();
-const { openDrawer } = useCreateDrawer();
 
 // Filter state
 const statusFilter = ref<string | 'all'>('active');
@@ -118,101 +115,89 @@ function handleSortChange(value: { field: string; order: number }): void {
 
 <template>
     <AppLayout page-title="Collections">
-        <PageHeader
-            heading="Collections"
-            :business-icon="BusinessIconList.Collections"
-        >
-            <template #actions>
-                <UiButton
-                    size="small"
-                    label="Create"
-                    @click="openDrawer('collection')"
-                />
-            </template>
-        </PageHeader>
-
-        <div class="mt-6 flex flex-col gap-4">
-            <UiDataView
-                :value="filteredAndSortedCollections"
-                layout="grid"
-                data-key="id"
-                paginator
-                :rows="20"
-                :sort-field="sortField"
-                :sort-order="sortOrder"
-            >
-                <template #header>
-                    <div class="flex flex-col gap-4">
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="text-sm text-surface-600">
-                                <template
-                                    v-if="
-                                        filteredAndSortedCollections.length !==
-                                        props.collections.length
-                                    "
-                                >
-                                    {{ filteredAndSortedCollections.length }} of
-                                    {{ props.collections.length }}
-                                </template>
-                                <template v-else>
-                                    {{ filteredAndSortedCollections.length }}
-                                </template>
-                                {{
-                                    filteredAndSortedCollections.length === 1
-                                        ? 'collection'
-                                        : 'collections'
-                                }}
-                            </div>
-                        </div>
-                        <div class="flex flex-wrap items-center gap-4">
-                            <UiFormFieldSelect
-                                name="status-filter"
-                                label="Status"
-                                label-position="left"
-                                :options="statusFilterOptions"
-                                option-label="label"
-                                option-value="value"
-                                :initial-value="statusFilter"
-                                :validate-on-mount="false"
-                                :validate-on-blur="false"
-                                :validate-on-submit="false"
-                                :validate-on-value-update="false"
-                                size="small"
-                                class="w-40"
-                                @update:model-value="statusFilter = $event"
-                            />
-                            <UiFormFieldSelect
-                                name="sort"
-                                label="Sort"
-                                label-position="left"
-                                :options="sortOptions"
-                                option-label="label"
-                                option-value="value"
-                                :initial-value="currentSortValue"
-                                :validate-on-mount="false"
-                                :validate-on-blur="false"
-                                :validate-on-submit="false"
-                                :validate-on-value-update="false"
-                                size="small"
-                                class="w-40"
-                                @update:model-value="handleSortChange($event)"
-                            />
-                        </div>
-                    </div>
-                </template>
-
-                <template #grid="{ items }">
-                    <div
-                        class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                    >
-                        <div
-                            v-for="collection in items"
-                            :key="collection.id"
-                            class="group relative cursor-pointer rounded-lg border border-surface-200 bg-surface-0 p-4 transition-all hover:border-primary-500 hover:shadow-md"
-                            @click="handleCollectionClick(collection)"
+        <UiCard>
+            <template #title>
+                <div
+                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                >
+                    <div class="text-surface-600">
+                        <template
+                            v-if="
+                                filteredAndSortedCollections.length !==
+                                props.collections.length
+                            "
                         >
-                            <div class="flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
+                            {{ filteredAndSortedCollections.length }} of
+                            {{ props.collections.length }}
+                        </template>
+                        <template v-else>
+                            {{ filteredAndSortedCollections.length }}
+                        </template>
+                        {{
+                            filteredAndSortedCollections.length === 1
+                                ? 'collection'
+                                : 'collections'
+                        }}
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4">
+                        <UiFormFieldSelect
+                            name="status-filter"
+                            label="Status"
+                            label-position="left"
+                            :options="statusFilterOptions"
+                            option-label="label"
+                            option-value="value"
+                            :initial-value="statusFilter"
+                            :validate-on-mount="false"
+                            :validate-on-blur="false"
+                            :validate-on-submit="false"
+                            :validate-on-value-update="false"
+                            size="small"
+                            class="w-40"
+                            @update:model-value="statusFilter = $event"
+                        />
+                        <UiFormFieldSelect
+                            name="sort"
+                            label="Sort"
+                            label-position="left"
+                            :options="sortOptions"
+                            option-label="label"
+                            option-value="value"
+                            :initial-value="currentSortValue"
+                            :validate-on-mount="false"
+                            :validate-on-blur="false"
+                            :validate-on-submit="false"
+                            :validate-on-value-update="false"
+                            size="small"
+                            class="w-40"
+                            @update:model-value="handleSortChange($event)"
+                        />
+                    </div>
+                </div>
+            </template>
+
+            <template #content>
+                <UiDataView
+                    :value="filteredAndSortedCollections"
+                    layout="grid"
+                    data-key="id"
+                    paginator
+                    :rows="20"
+                    :sort-field="sortField"
+                    :sort-order="sortOrder"
+                >
+                    <template #grid="{ items }">
+                        <div
+                            class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        >
+                            <div
+                                v-for="collection in items"
+                                :key="collection.id"
+                                class="group relative cursor-pointer rounded-lg border border-surface-200 bg-surface-0 p-4 transition-all hover:border-primary-500 hover:shadow-md"
+                                @click="handleCollectionClick(collection)"
+                            >
+                                <div class="flex flex-col gap-2">
                                     <UiTag
                                         :severity="
                                             collection.status === 'active'
@@ -221,59 +206,50 @@ function handleSortChange(value: { field: string; order: number }): void {
                                         "
                                         :value="formatEnum(collection.status)"
                                     />
-                                    <UiButton
-                                        :icon="IconList.Settings"
-                                        text
-                                        size="small"
-                                        class="opacity-0 transition-opacity group-hover:opacity-100"
-                                        @click.stop="
-                                            router.visit(
-                                                editCollection.url(
-                                                    collection.id,
-                                                ),
-                                            )
-                                        "
-                                    />
-                                </div>
-                                <h3
-                                    class="text-lg font-semibold text-surface-900"
-                                >
-                                    {{ collection.name }}
-                                </h3>
-                                <p
-                                    v-if="collection.description"
-                                    class="line-clamp-2 text-sm text-surface-600"
-                                >
-                                    {{ collection.description }}
-                                </p>
-                                <div
-                                    class="mt-2 flex flex-col gap-1 border-t border-surface-200 pt-2"
-                                >
-                                    <div class="flex justify-between text-sm">
-                                        <span class="text-surface-500"
-                                            >Colorways:</span
+                                    <h3
+                                        class="text-lg font-semibold text-surface-900"
+                                    >
+                                        {{ collection.name }}
+                                    </h3>
+                                    <p
+                                        v-if="collection.description"
+                                        class="line-clamp-2 text-sm text-surface-600"
+                                    >
+                                        {{ collection.description }}
+                                    </p>
+                                    <div
+                                        class="mt-2 flex flex-col gap-1 border-t border-surface-200 pt-2"
+                                    >
+                                        <div
+                                            class="flex justify-between text-sm"
                                         >
-                                        <span
-                                            class="font-medium text-surface-900"
-                                            >{{
-                                                collection.colorways_count
-                                            }}</span
-                                        >
+                                            <span class="text-surface-500"
+                                                >Colorways:</span
+                                            >
+                                            <span
+                                                class="font-medium text-surface-900"
+                                                >{{
+                                                    collection.colorways_count
+                                                }}</span
+                                            >
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
 
-                <template #empty>
-                    <div class="flex min-h-[60vh] items-center justify-center">
-                        <p class="text-lg text-surface-500">
-                            No collections found
-                        </p>
-                    </div>
-                </template>
-            </UiDataView>
-        </div>
+                    <template #empty>
+                        <div
+                            class="flex min-h-[60vh] items-center justify-center"
+                        >
+                            <p class="text-lg text-surface-500">
+                                No collections found
+                            </p>
+                        </div>
+                    </template>
+                </UiDataView>
+            </template>
+        </UiCard>
     </AppLayout>
 </template>

@@ -10,3 +10,7 @@
         'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
         'Noto Color Emoji';
 }
+
+.inventory-input-number .p-inputnumber-input {
+    @apply w-10 text-center;
+}

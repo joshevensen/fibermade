@@ -1,3 +1,31 @@
+<script lang="ts">
+import type { DrawerTokenSections } from '@primeuix/themes/types/drawer';
+
+export const drawerRoot: DrawerTokenSections.Root = {
+    background: '{overlay.modal.background}',
+    borderColor: '{overlay.modal.border.color}',
+    color: '{overlay.modal.color}',
+    shadow: '{overlay.modal.shadow}'
+};
+
+export const drawerHeader: DrawerTokenSections.Header = {
+    padding: '{overlay.modal.padding}'
+};
+
+export const drawerTitle: DrawerTokenSections.Title = {
+    fontSize: '1.5rem',
+    fontWeight: '600'
+};
+
+export const drawerContent: DrawerTokenSections.Content = {
+    padding: '0 {overlay.modal.padding} {overlay.modal.padding} {overlay.modal.padding}'
+};
+
+export const drawerFooter: DrawerTokenSections.Footer = {
+    padding: '{overlay.modal.padding}'
+};
+</script>
+
 <script setup lang="ts">
 import PrimeDrawer from 'primevue/drawer';
 import { useSlots } from 'vue';

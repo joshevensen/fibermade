@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import {
-    destroy as destroyShow,
-    edit as editShow,
-} from '@/actions/App/Http/Controllers/ShowController';
-import PageHeader from '@/components/PageHeader.vue';
-import UiButton from '@/components/ui/UiButton.vue';
+import { edit as editShow } from '@/actions/App/Http/Controllers/ShowController';
+import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
-import UiDivider from '@/components/ui/UiDivider.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiPanel from '@/components/ui/UiPanel.vue';
-import { useConfirm } from '@/composables/useConfirm';
-import { useCreateDrawer } from '@/composables/useCreateDrawer';
-import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
-import { computed, reactive, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Show {
     id: number;
@@ -35,9 +26,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { BusinessIconList } = useIcon();
-const { requireDelete } = useConfirm();
-const { openDrawer } = useCreateDrawer();
 
 // Filter state
 const dateFilter = ref<string>('All');
@@ -74,152 +62,119 @@ const filteredAndSortedShows = computed(() => {
     });
 });
 
-// Track panel expanded state per show
-const expandedPanels = reactive<Record<number, boolean>>({});
-
-function togglePanel(showId: number): void {
-    expandedPanels[showId] = !expandedPanels[showId];
-}
-
-function formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-    });
-}
-
 function formatDateRange(start: string, end: string): string {
     const startDate = new Date(start);
     const endDate = new Date(end);
+
+    // Reset time to compare dates only
+    const startDateOnly = new Date(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate(),
+    );
+    const endDateOnly = new Date(
+        endDate.getFullYear(),
+        endDate.getMonth(),
+        endDate.getDate(),
+    );
+
     const startFormatted = startDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-    });
-    const endFormatted = endDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
         year: 'numeric',
+        month: 'short',
+        day: 'numeric',
     });
 
-    if (startDate.toDateString() === endDate.toDateString()) {
-        return `${startFormatted}, ${startDate.getFullYear()}`;
+    // If same date, just return start date
+    if (startDateOnly.getTime() === endDateOnly.getTime()) {
+        return startFormatted;
     }
+
+    const endFormatted = endDate.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+    });
 
     return `${startFormatted} - ${endFormatted}`;
 }
 
-function getLocationString(show: Show): string {
-    const parts: string[] = [];
-    if (show.location_name) {
-        parts.push(show.location_name);
-    }
-    if (show.location_city) {
-        parts.push(show.location_city);
-    }
-    if (show.location_state) {
-        parts.push(show.location_state);
-    }
-    return parts.join(', ');
-}
-
-function handleDelete(show: Show, event: Event): void {
-    requireDelete({
-        target: event.currentTarget as HTMLElement,
-        message: `Are you sure you want to delete ${show.name}?`,
-        onAccept: () => {
-            router.delete(destroyShow.url(show.id));
-        },
-    });
-}
-
-function handleEdit(show: Show): void {
+function handleShowClick(show: Show): void {
     router.visit(editShow.url(show.id));
 }
 </script>
 
 <template>
     <AppLayout page-title="Shows">
-        <PageHeader heading="Shows" :business-icon="BusinessIconList.Shows">
-            <template #actions>
-                <UiButton
-                    size="small"
-                    label="Create"
-                    @click="openDrawer('show')"
-                />
-            </template>
-        </PageHeader>
-
-        <div class="mt-6 flex flex-col gap-4">
-            <UiDataView
-                :value="filteredAndSortedShows"
-                layout="list"
-                data-key="id"
-                paginator
-                :rows="20"
-            >
-                <template #header>
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="text-sm text-surface-600">
-                            <template
-                                v-if="
-                                    filteredAndSortedShows.length !==
-                                    props.shows.length
-                                "
-                            >
-                                {{ filteredAndSortedShows.length }} of
-                                {{ props.shows.length }}
-                            </template>
-                            <template v-else>
-                                {{ filteredAndSortedShows.length }}
-                            </template>
-                            {{
-                                filteredAndSortedShows.length === 1
-                                    ? 'show'
-                                    : 'shows'
-                            }}
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <UiFormFieldSelect
-                                name="date-filter"
-                                label="Date"
-                                label-position="left"
-                                :options="dateFilterOptions"
-                                option-label="label"
-                                option-value="value"
-                                :initial-value="dateFilter"
-                                :validate-on-mount="false"
-                                :validate-on-blur="false"
-                                :validate-on-submit="false"
-                                :validate-on-value-update="true"
-                                size="small"
-                                class="w-40"
-                                @update:model-value="dateFilter = $event"
-                            />
-                        </div>
-                    </div>
-                </template>
-                <template #list="{ items }">
-                    <div class="flex flex-col gap-2">
-                        <UiPanel
-                            v-for="show in items"
-                            :key="show.id"
-                            :toggleable="true"
-                            :collapsed="!expandedPanels[show.id]"
-                            @toggle="togglePanel(show.id)"
+        <UiCard>
+            <template #title>
+                <div
+                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                >
+                    <div class="text-surface-600">
+                        <template
+                            v-if="
+                                filteredAndSortedShows.length !==
+                                props.shows.length
+                            "
                         >
-                            <template #header>
-                                <div
-                                    class="flex w-full items-center justify-between gap-4 pr-3"
-                                >
-                                    <div class="flex flex-col">
-                                        <span class="font-semibold">{{
-                                            show.name
-                                        }}</span>
-                                        <span class="text-sm text-surface-500">
+                            {{ filteredAndSortedShows.length }} of
+                            {{ props.shows.length }}
+                        </template>
+                        <template v-else>
+                            {{ filteredAndSortedShows.length }}
+                        </template>
+                        {{
+                            filteredAndSortedShows.length === 1
+                                ? 'show'
+                                : 'shows'
+                        }}
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-4">
+                        <UiFormFieldSelect
+                            name="date-filter"
+                            label="Date"
+                            label-position="left"
+                            :options="dateFilterOptions"
+                            option-label="label"
+                            option-value="value"
+                            :initial-value="dateFilter"
+                            :validate-on-mount="false"
+                            :validate-on-blur="false"
+                            :validate-on-submit="false"
+                            :validate-on-value-update="true"
+                            size="small"
+                            class="w-40"
+                            @update:model-value="dateFilter = $event"
+                        />
+                    </div>
+                </div>
+            </template>
+
+            <template #content>
+                <UiDataView
+                    :value="filteredAndSortedShows"
+                    layout="list"
+                    data-key="id"
+                    paginator
+                    :rows="20"
+                >
+                    <template #list="{ items }">
+                        <div class="flex flex-col gap-2">
+                            <div
+                                v-for="show in items"
+                                :key="show.id"
+                                class="flex cursor-pointer items-center justify-between rounded-lg border border-surface-200 p-4 transition-colors hover:bg-surface-50"
+                                @click="handleShowClick(show)"
+                            >
+                                <div class="min-w-0 flex-1">
+                                    <div class="font-semibold text-surface-900">
+                                        {{ show.name }}
+                                    </div>
+                                    <div
+                                        class="mt-1 flex gap-4 text-sm text-surface-600"
+                                    >
+                                        <span>
                                             {{
                                                 formatDateRange(
                                                     show.start_at,
@@ -227,145 +182,26 @@ function handleEdit(show: Show): void {
                                                 )
                                             }}
                                         </span>
-                                        <span
-                                            v-if="getLocationString(show)"
-                                            class="text-sm text-surface-500"
-                                        >
-                                            {{ getLocationString(show) }}
+                                        <span v-if="show.location_name">
+                                            {{ show.location_name }}
                                         </span>
                                     </div>
                                 </div>
-                            </template>
-
-                            <div class="flex flex-col gap-4 pt-4">
-                                <div class="flex flex-col gap-2">
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <span
-                                                class="text-sm font-medium text-surface-700"
-                                                >Start</span
-                                            >
-                                            <p class="text-sm text-surface-600">
-                                                {{ formatDate(show.start_at) }}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <span
-                                                class="text-sm font-medium text-surface-700"
-                                                >End</span
-                                            >
-                                            <p class="text-sm text-surface-600">
-                                                {{ formatDate(show.end_at) }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    v-if="
-                                        show.location_name ||
-                                        show.location_address ||
-                                        show.location_city ||
-                                        show.location_state ||
-                                        show.location_zip
-                                    "
-                                    class="flex flex-col gap-2"
-                                >
-                                    <span
-                                        class="text-sm font-medium text-surface-700"
-                                        >Location</span
-                                    >
-                                    <div class="text-sm text-surface-600">
-                                        <p v-if="show.location_name">
-                                            {{ show.location_name }}
-                                        </p>
-                                        <p v-if="show.location_address">
-                                            {{ show.location_address }}
-                                        </p>
-                                        <p>
-                                            <span v-if="show.location_city">{{
-                                                show.location_city
-                                            }}</span
-                                            ><span
-                                                v-if="
-                                                    show.location_city &&
-                                                    show.location_state
-                                                "
-                                                >, </span
-                                            ><span v-if="show.location_state">{{
-                                                show.location_state
-                                            }}</span
-                                            ><span
-                                                v-if="
-                                                    (show.location_city ||
-                                                        show.location_state) &&
-                                                    show.location_zip
-                                                "
-                                            >
-                                            </span
-                                            ><span v-if="show.location_zip">{{
-                                                show.location_zip
-                                            }}</span>
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div
-                                    v-if="show.description"
-                                    class="flex flex-col gap-2"
-                                >
-                                    <span
-                                        class="text-sm font-medium text-surface-700"
-                                        >Description</span
-                                    >
-                                    <p class="text-sm text-surface-600">
-                                        {{ show.description }}
-                                    </p>
-                                </div>
-
-                                <div
-                                    v-if="show.website"
-                                    class="flex flex-col gap-2"
-                                >
-                                    <span
-                                        class="text-sm font-medium text-surface-700"
-                                        >Website</span
-                                    >
-                                    <a
-                                        :href="show.website"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        class="text-sm text-primary-600 hover:underline"
-                                    >
-                                        {{ show.website }}
-                                    </a>
-                                </div>
-
-                                <UiDivider />
-
-                                <div class="flex gap-4">
-                                    <UiButton
-                                        label="Edit"
-                                        @click="handleEdit(show)"
-                                    />
-                                    <UiButton
-                                        label="Delete Show"
-                                        severity="danger"
-                                        outlined
-                                        @click="handleDelete(show, $event)"
-                                    />
-                                </div>
                             </div>
-                        </UiPanel>
-                    </div>
-                </template>
+                        </div>
+                    </template>
 
-                <template #empty>
-                    <div class="flex min-h-[60vh] items-center justify-center">
-                        <p class="text-lg text-surface-500">No shows found</p>
-                    </div>
-                </template>
-            </UiDataView>
-        </div>
+                    <template #empty>
+                        <div
+                            class="flex min-h-[60vh] items-center justify-center"
+                        >
+                            <p class="text-lg text-surface-500">
+                                No shows found
+                            </p>
+                        </div>
+                    </template>
+                </UiDataView>
+            </template>
+        </UiCard>
     </AppLayout>
 </template>

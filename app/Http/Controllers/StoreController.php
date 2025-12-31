@@ -24,8 +24,8 @@ class StoreController extends Controller
         $status = request()->query('status', 'active');
 
         $storeQuery = $user->is_admin
-            ? Store::query()
-            : Store::query()->whereRaw('1 = 0'); // Non-admins see no stores for now
+            ? Store::with('account')
+            : ($user->account_id ? Store::where('account_id', $user->account_id)->with('account') : Store::query()->whereRaw('1 = 0'));
 
         // Get total count before status filtering
         $totalStores = (clone $storeQuery)->count();
@@ -48,7 +48,10 @@ class StoreController extends Controller
      */
     public function store(StoreStoreRequest $request): RedirectResponse
     {
-        Store::create($request->validated());
+        Store::create([
+            ...$request->validated(),
+            'account_id' => $request->user()->account_id,
+        ]);
 
         return redirect()->route('stores.index');
     }

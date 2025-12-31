@@ -29,7 +29,6 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-    size: 'small', 
     fluid: true,
 });
 

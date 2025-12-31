@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { update } from '@/actions/App/Http/Controllers/OrderController';
-import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
@@ -10,7 +9,6 @@ import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
-import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -36,7 +34,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { BusinessIconList } = useIcon();
 
 const accountOptions = computed(() =>
     props.accounts.map((account) => ({
@@ -77,11 +74,6 @@ const { form, onSubmit } = useFormSubmission({
 
 <template>
     <AppLayout page-title="Edit Order">
-        <PageHeader
-            heading="Edit Order"
-            :business-icon="BusinessIconList.Orders"
-        />
-
         <div class="mt-6 max-w-2xl">
             <UiCard>
                 <template #content>

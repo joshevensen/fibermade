@@ -31,6 +31,9 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $description
  * @property \App\Enums\Technique|null $technique
  * @property \Illuminate\Support\Collection<int, \App\Enums\Color>|null $colors
+ * @property int $per_pan
+ * @property string|null $recipe
+ * @property string|null $notes
  * @property \App\Enums\ColorwayStatus $status
  * @property string|null $shopify_product_id
  * @property int|null $created_by
@@ -56,6 +59,9 @@ class Colorway extends Model
         'description',
         'technique',
         'colors',
+        'per_pan',
+        'recipe',
+        'notes',
         'status',
         'shopify_product_id',
         'created_by',

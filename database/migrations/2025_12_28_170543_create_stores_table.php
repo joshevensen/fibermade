@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('stores', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('email')->unique();
             $table->string('owner_name')->nullable();
@@ -31,6 +32,8 @@ return new class extends Migration
             $table->string('status')->default('active');
             $table->text('notes')->nullable();
             $table->timestamps();
+
+            $table->index('account_id');
         });
     }
 

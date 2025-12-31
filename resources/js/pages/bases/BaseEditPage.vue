@@ -3,7 +3,6 @@ import {
     destroy as destroyBase,
     update,
 } from '@/actions/App/Http/Controllers/BaseController';
-import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDivider from '@/components/ui/UiDivider.vue';
@@ -47,7 +46,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { BusinessIconList, IconList } = useIcon();
+const { IconList } = useIcon();
 const { requireDelete } = useConfirm();
 
 const { form, onSubmit } = useFormSubmission({
@@ -88,11 +87,6 @@ function handleDelete(event: Event): void {
 
 <template>
     <AppLayout page-title="Edit Base">
-        <PageHeader
-            heading="Edit Base"
-            :business-icon="BusinessIconList.Bases"
-        />
-
         <div class="mt-6 max-w-2xl">
             <UiCard>
                 <template #content>

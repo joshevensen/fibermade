@@ -29,8 +29,24 @@ class OrderController extends Controller
             ? Order::with(['account', 'orderItems', 'orderable'])->get()
             : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable'])->get() : collect());
 
+        $orderTypeOptions = collect(OrderType::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
+        $orderStatusOptions = collect(OrderStatus::cases())
+            ->map(fn ($case) => [
+                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
+                'value' => $case->value,
+            ])
+            ->toArray();
+
         return Inertia::render('orders/OrderIndexPage', [
             'orders' => $orders,
+            'orderTypeOptions' => $orderTypeOptions,
+            'orderStatusOptions' => $orderStatusOptions,
         ]);
     }
 

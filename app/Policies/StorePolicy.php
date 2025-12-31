@@ -20,7 +20,7 @@ class StorePolicy
      */
     public function view(User $user, Store $store): bool
     {
-        return $this->isAdmin($user) || $user->account_id !== null;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $store->account_id);
     }
 
     /**
@@ -36,7 +36,7 @@ class StorePolicy
      */
     public function update(User $user, Store $store): bool
     {
-        return $this->isAdmin($user) || $user->account_id !== null;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $store->account_id);
     }
 
     /**
@@ -44,7 +44,7 @@ class StorePolicy
      */
     public function delete(User $user, Store $store): bool
     {
-        return $this->isAdmin($user);
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $store->account_id);
     }
 
     /**
@@ -69,5 +69,13 @@ class StorePolicy
     private function isAdmin(User $user): bool
     {
         return $user->is_admin === true;
+    }
+
+    /**
+     * Check if the user belongs to the account.
+     */
+    private function belongsToAccount(User $user, int $accountId): bool
+    {
+        return $user->account_id === $accountId;
     }
 }

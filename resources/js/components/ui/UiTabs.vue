@@ -1,3 +1,86 @@
+<script lang="ts">
+import type { TabsTokenSections } from '@primeuix/themes/types/tabs';
+
+export const tabsRoot: TabsTokenSections.Root = {
+    transitionDuration: '{transition.duration}'
+};
+
+export const tabsTablist: TabsTokenSections.Tablist = {
+    borderWidth: '0 0 1px 0',
+    background: '{content.background}',
+    borderColor: '{content.border.color}'
+};
+
+export const tabsTab: TabsTokenSections.Tab = {
+    background: 'transparent',
+    hoverBackground: 'transparent',
+    activeBackground: 'transparent',
+    borderWidth: '0 0 1px 0',
+    borderColor: '{content.border.color}',
+    hoverBorderColor: '{content.border.color}',
+    activeBorderColor: '{primary.color}',
+    color: '{text.muted.color}',
+    hoverColor: '{text.color}',
+    activeColor: '{primary.color}',
+    padding: '1rem 1.125rem',
+    fontWeight: '600',
+    margin: '0 0 -1px 0',
+    gap: '0.5rem',
+    focusRing: {
+        width: '{focus.ring.width}',
+        style: '{focus.ring.style}',
+        color: '{focus.ring.color}',
+        offset: '-1px',
+        shadow: '{focus.ring.shadow}'
+    }
+};
+
+export const tabsTabpanel: TabsTokenSections.Tabpanel = {
+    background: '{content.background}',
+    color: '{content.color}',
+    padding: '0.875rem 1.125rem 1.125rem 1.125rem',
+    focusRing: {
+        width: '{focus.ring.width}',
+        style: '{focus.ring.style}',
+        color: '{focus.ring.color}',
+        offset: '{focus.ring.offset}',
+        shadow: 'inset {focus.ring.shadow}'
+    }
+};
+
+export const tabsNavButton: TabsTokenSections.NavButton = {
+    background: '{content.background}',
+    color: '{text.muted.color}',
+    hoverColor: '{text.color}',
+    width: '2.5rem',
+    focusRing: {
+        width: '{focus.ring.width}',
+        style: '{focus.ring.style}',
+        color: '{focus.ring.color}',
+        offset: '-1px',
+        shadow: '{focus.ring.shadow}'
+    }
+};
+
+export const tabsActiveBar: TabsTokenSections.ActiveBar = {
+    height: '1px',
+    bottom: '-1px',
+    background: '{primary.color}'
+};
+
+export const tabsLight = {
+    navButton: {
+        shadow: '0px 0px 10px 50px rgba(255, 255, 255, 0.6)'
+    }
+};
+
+export const tabsDark = {
+    navButton: {
+        shadow: '0px 0px 10px 50px color-mix(in srgb, {content.background}, transparent 50%)'
+    }
+};
+</script>
+
 <script setup lang="ts">
 import PrimeTabs from 'primevue/tabs';
 import TabList from 'primevue/tablist';

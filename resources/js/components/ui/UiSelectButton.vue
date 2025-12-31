@@ -1,3 +1,23 @@
+<script lang="ts">
+import type { SelectButtonTokenSections } from '@primeuix/themes/types/selectbutton';
+
+export const selectButtonRoot: SelectButtonTokenSections.Root = {
+    borderRadius: '{form.field.border.radius}'
+};
+
+export const selectButtonLight = {
+    root: {
+        invalidBorderColor: '{form.field.invalid.border.color}'
+    }
+};
+
+export const selectButtonDark = {
+    root: {
+        invalidBorderColor: '{form.field.invalid.border.color}'
+    }
+};
+</script>
+
 <script setup lang="ts">
 import PrimeSelectButton from 'primevue/selectbutton';
 

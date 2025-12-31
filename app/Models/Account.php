@@ -145,4 +145,12 @@ class Account extends Model
     {
         return $this->hasMany(Show::class);
     }
+
+    /**
+     * Get the stores for this account.
+     */
+    public function stores(): HasMany
+    {
+        return $this->hasMany(Store::class);
+    }
 }

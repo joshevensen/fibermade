@@ -3,13 +3,14 @@ import {
     destroy as destroyColorway,
     update,
 } from '@/actions/App/Http/Controllers/ColorwayController';
-import PageHeader from '@/components/PageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDivider from '@/components/ui/UiDivider.vue';
+import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
@@ -28,6 +29,9 @@ interface Props {
         description?: string | null;
         technique?: string | null;
         colors?: string[] | null;
+        per_pan: number;
+        recipe?: string | null;
+        notes?: string | null;
         status: string;
         shopify_product_id?: string | null;
     };
@@ -37,7 +41,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { BusinessIconList, IconList } = useIcon();
+const { IconList } = useIcon();
 const { requireDelete } = useConfirm();
 
 const { form, onSubmit } = useFormSubmission({
@@ -48,6 +52,9 @@ const { form, onSubmit } = useFormSubmission({
         description: props.colorway.description || null,
         technique: props.colorway.technique || null,
         colors: props.colorway.colors || null,
+        per_pan: props.colorway.per_pan ?? null,
+        recipe: props.colorway.recipe || null,
+        notes: props.colorway.notes || null,
         status: props.colorway.status || null,
         shopify_product_id: props.colorway.shopify_product_id || null,
     },
@@ -70,15 +77,25 @@ function handleDelete(event: Event): void {
 
 <template>
     <AppLayout page-title="Edit Colorway">
-        <PageHeader
-            heading="Edit Colorway"
-            :business-icon="BusinessIconList.Colorways"
-        />
-
         <div class="mt-6 max-w-2xl">
             <UiCard>
                 <template #content>
-                    <UiForm @submit="onSubmit">
+                    <UiForm
+                        :initial-values="{
+                            name: props.colorway.name || '',
+                            slug: props.colorway.slug || '',
+                            description: props.colorway.description || null,
+                            technique: props.colorway.technique || null,
+                            colors: props.colorway.colors || null,
+                            per_pan: props.colorway.per_pan ?? null,
+                            recipe: props.colorway.recipe || null,
+                            notes: props.colorway.notes || null,
+                            status: props.colorway.status || null,
+                            shopify_product_id:
+                                props.colorway.shopify_product_id || null,
+                        }"
+                        @submit="onSubmit"
+                    >
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -123,6 +140,36 @@ function handleDelete(event: Event): void {
                             :server-error="form.errors.colors"
                         />
 
+                        <UiFormFieldInputNumber
+                            name="per_pan"
+                            label="Per Pan"
+                            placeholder="1-6"
+                            :min="1"
+                            :max="6"
+                            :server-error="form.errors.per_pan"
+                            required
+                        />
+
+                        <UiFormFieldTextarea
+                            name="recipe"
+                            label="Recipe"
+                            placeholder="Colorway recipe"
+                            :server-error="form.errors.recipe"
+                        />
+
+                        <UiFormField
+                            name="notes"
+                            label="Notes"
+                            :server-error="form.errors.notes"
+                        >
+                            <template #default="{ props: fieldProps }">
+                                <UiEditor
+                                    v-bind="fieldProps"
+                                    placeholder="Additional notes"
+                                />
+                            </template>
+                        </UiFormField>
+
                         <UiFormField
                             name="status"
                             label="Status"
@@ -134,7 +181,6 @@ function handleDelete(event: Event): void {
                                     :options="colorwayStatusOptions"
                                     option-label="label"
                                     option-value="value"
-                                    size="small"
                                     fluid
                                 />
                             </template>
@@ -149,18 +195,9 @@ function handleDelete(event: Event): void {
 
                         <UiDivider />
 
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Colorway
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/colorways')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Colorway
+                        </UiButton>
 
                         <UiDivider />
 

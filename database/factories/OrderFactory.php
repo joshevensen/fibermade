@@ -54,8 +54,38 @@ class OrderFactory extends Factory
             if ($order->orderable_id === null && $order->orderable_type === null) {
                 $type = $order->type ?? fake()->randomElement(OrderType::cases());
 
+                // If account_id is set, try to use existing orderables first
+                if ($order->account_id) {
+                    if ($type === OrderType::Wholesale) {
+                        $store = Store::where('account_id', $order->account_id)->inRandomOrder()->first();
+                        if ($store) {
+                            $order->orderable_id = $store->id;
+                            $order->orderable_type = Store::class;
+
+                            return;
+                        }
+                    } elseif ($type === OrderType::Retail) {
+                        $customer = Customer::where('account_id', $order->account_id)->inRandomOrder()->first();
+                        if ($customer) {
+                            $order->orderable_id = $customer->id;
+                            $order->orderable_type = Customer::class;
+
+                            return;
+                        }
+                    } elseif ($type === OrderType::Show) {
+                        $show = Show::where('account_id', $order->account_id)->inRandomOrder()->first();
+                        if ($show) {
+                            $order->orderable_id = $show->id;
+                            $order->orderable_type = Show::class;
+
+                            return;
+                        }
+                    }
+                }
+
+                // Fallback: create new orderables if none exist (for testing scenarios)
                 if ($type === OrderType::Wholesale) {
-                    $store = Store::factory()->create();
+                    $store = Store::factory()->create(['account_id' => $order->account_id]);
                     $order->orderable_id = $store->id;
                     $order->orderable_type = Store::class;
                 } elseif ($type === OrderType::Retail) {
