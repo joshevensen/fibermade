@@ -25,8 +25,8 @@ class ColorwayController extends Controller
 
         $user = auth()->user();
         $colorways = $user->is_admin
-            ? Colorway::with(['account', 'media', 'collections'])->get()
-            : ($user->account_id ? Colorway::where('account_id', $user->account_id)->with(['account', 'media', 'collections'])->get() : collect());
+            ? Colorway::with(['account', 'media', 'collections', 'externalIdentifiers.integration'])->get()
+            : ($user->account_id ? Colorway::where('account_id', $user->account_id)->with(['account', 'media', 'collections', 'externalIdentifiers.integration'])->get() : collect());
 
         $colorways = $colorways->map(function ($colorway) {
             $colorwayArray = $colorway->toArray();
@@ -34,6 +34,12 @@ class ColorwayController extends Controller
             $colorwayArray['collections'] = $colorway->collections->map(fn ($collection) => [
                 'id' => $collection->id,
                 'name' => $collection->name,
+            ])->toArray();
+            $colorwayArray['external_identifiers'] = $colorway->externalIdentifiers->map(fn ($identifier) => [
+                'integration_type' => $identifier->integration->type->value,
+                'external_type' => $identifier->external_type,
+                'external_id' => $identifier->external_id,
+                'data' => $identifier->data,
             ])->toArray();
 
             return $colorwayArray;
@@ -155,8 +161,17 @@ class ColorwayController extends Controller
             ])
             ->toArray();
 
+        $colorway->load(['externalIdentifiers.integration']);
+        $colorwayArray = $colorway->toArray();
+        $colorwayArray['external_identifiers'] = $colorway->externalIdentifiers->map(fn ($identifier) => [
+            'integration_type' => $identifier->integration->type->value,
+            'external_type' => $identifier->external_type,
+            'external_id' => $identifier->external_id,
+            'data' => $identifier->data,
+        ])->toArray();
+
         return Inertia::render('colorways/ColorwayEditPage', [
-            'colorway' => $colorway,
+            'colorway' => $colorwayArray,
             'colorwayStatusOptions' => $colorwayStatusOptions,
             'techniqueOptions' => $techniqueOptions,
             'colorOptions' => $colorOptions,

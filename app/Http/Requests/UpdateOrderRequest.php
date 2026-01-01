@@ -45,7 +45,6 @@ class UpdateOrderRequest extends FormRequest
             'status' => ['sometimes', Rule::enum(OrderStatus::class)],
             'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
             'orderable_id' => $orderableIdRule,
-            'shopify_order_id' => ['nullable', 'string', 'max:255'],
             'order_date' => ['sometimes', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'shipping_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

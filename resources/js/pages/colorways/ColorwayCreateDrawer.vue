@@ -8,7 +8,6 @@ import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { enumToOptions } from '@/utils/enumOptions';
@@ -68,20 +67,17 @@ function closeDrawer(): void {
     emit('update:visible', false);
 }
 
+const initialValues = {
+    name: '',
+    technique: null,
+    colors: null,
+    per_pan: null,
+    status: 'idea',
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: store,
-    initialValues: {
-        name: '',
-        slug: '',
-        description: null,
-        technique: null,
-        colors: null,
-        per_pan: null,
-        recipe: null,
-        notes: null,
-        status: null,
-        shopify_product_id: null,
-    },
+    initialValues,
     successMessage: 'Colorway created successfully.',
     onSuccess: () => {
         closeDrawer();
@@ -102,7 +98,7 @@ const { form, onSubmit } = useFormSubmission({
         </template>
 
         <div class="p-4">
-            <UiForm @submit="onSubmit">
+            <UiForm :initial-values="initialValues" @submit="onSubmit">
                 <UiFormField
                     name="status"
                     label="Status"
@@ -112,8 +108,6 @@ const { form, onSubmit } = useFormSubmission({
                         <UiSelectButton
                             v-bind="fieldProps"
                             :options="colorwayStatusOptions"
-                            option-label="label"
-                            option-value="value"
                             size="small"
                             fluid
                         />
@@ -123,7 +117,6 @@ const { form, onSubmit } = useFormSubmission({
                 <UiFormFieldInput
                     name="name"
                     label="Name"
-                    placeholder="Colorway name"
                     :server-error="form.errors.name"
                     required
                 />
@@ -132,9 +125,6 @@ const { form, onSubmit } = useFormSubmission({
                     name="technique"
                     label="Technique"
                     :options="techniqueOptions"
-                    option-label="label"
-                    option-value="value"
-                    placeholder="Select technique"
                     :server-error="form.errors.technique"
                     show-clear
                 />
@@ -143,41 +133,16 @@ const { form, onSubmit } = useFormSubmission({
                     name="colors"
                     label="Colors"
                     :options="colorOptions"
-                    option-label="label"
-                    option-value="value"
-                    placeholder="Select colors"
                     :server-error="form.errors.colors"
-                />
-
-                <UiFormFieldTextarea
-                    name="description"
-                    label="Description"
-                    placeholder="Colorway description"
-                    :server-error="form.errors.description"
                 />
 
                 <UiFormFieldInputNumber
                     name="per_pan"
                     label="Per Pan"
-                    placeholder="1-6"
                     :min="1"
                     :max="6"
                     :server-error="form.errors.per_pan"
                     required
-                />
-
-                <UiFormFieldTextarea
-                    name="recipe"
-                    label="Recipe"
-                    placeholder="Colorway recipe"
-                    :server-error="form.errors.recipe"
-                />
-
-                <UiFormFieldTextarea
-                    name="notes"
-                    label="Notes"
-                    placeholder="Additional notes"
-                    :server-error="form.errors.notes"
                 />
 
                 <UiButton type="submit" :loading="form.processing">

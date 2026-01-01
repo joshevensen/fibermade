@@ -22,8 +22,20 @@ class DiscountController extends Controller
 
         $user = auth()->user();
         $discounts = $user->is_admin
-            ? Discount::with('account')->get()
-            : ($user->account_id ? Discount::where('account_id', $user->account_id)->with('account')->get() : collect());
+            ? Discount::with(['account', 'externalIdentifiers.integration'])->get()
+            : ($user->account_id ? Discount::where('account_id', $user->account_id)->with(['account', 'externalIdentifiers.integration'])->get() : collect());
+
+        $discounts = $discounts->map(function ($discount) {
+            $discountArray = $discount->toArray();
+            $discountArray['external_identifiers'] = $discount->externalIdentifiers->map(fn ($identifier) => [
+                'integration_type' => $identifier->integration->type->value,
+                'external_type' => $identifier->external_type,
+                'external_id' => $identifier->external_id,
+                'data' => $identifier->data,
+            ])->toArray();
+
+            return $discountArray;
+        });
 
         return Inertia::render('discounts/DiscountIndexPage', [
             'discounts' => $discounts,
@@ -76,8 +88,17 @@ class DiscountController extends Controller
             ])
             ->toArray();
 
+        $discount->load(['externalIdentifiers.integration']);
+        $discountArray = $discount->toArray();
+        $discountArray['external_identifiers'] = $discount->externalIdentifiers->map(fn ($identifier) => [
+            'integration_type' => $identifier->integration->type->value,
+            'external_type' => $identifier->external_type,
+            'external_id' => $identifier->external_id,
+            'data' => $identifier->data,
+        ])->toArray();
+
         return Inertia::render('discounts/DiscountEditPage', [
-            'discount' => $discount,
+            'discount' => $discountArray,
             'discountTypeOptions' => $discountTypeOptions,
         ]);
     }

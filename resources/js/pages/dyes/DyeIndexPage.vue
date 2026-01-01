@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { edit as editDye } from '@/actions/App/Http/Controllers/DyeController';
+import ListItem from '@/components/ListItem.vue';
+import ListItemWrapper from '@/components/ListItemWrapper.vue';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
@@ -85,41 +88,41 @@ const filteredAndSortedDyes = computed(() => {
 function handleDyeClick(dye: Dye): void {
     router.visit(editDye.url(dye.id));
 }
+
+function getListItemProps(dye: Dye) {
+    const metadata: string[] = [];
+    if (dye.manufacturer) {
+        metadata.push(dye.manufacturer);
+    }
+    if (dye.does_bleed) {
+        metadata.push('Bleeds');
+    }
+    if (!dye.do_like) {
+        metadata.push("Don't Like");
+    }
+
+    return {
+        title: dye.name,
+        metadata: metadata.length > 0 ? metadata : undefined,
+    };
+}
 </script>
 
 <template>
     <AppLayout page-title="Dyes">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.dyes.length"
+                    :filtered-count="filteredAndSortedDyes.length"
+                    label="dye"
                 >
-                    <div class="text-surface-600">
-                        <template
-                            v-if="
-                                filteredAndSortedDyes.length !==
-                                props.dyes.length
-                            "
-                        >
-                            {{ filteredAndSortedDyes.length }} of
-                            {{ props.dyes.length }}
-                        </template>
-                        <template v-else>
-                            {{ filteredAndSortedDyes.length }}
-                        </template>
-                        {{
-                            filteredAndSortedDyes.length === 1 ? 'dye' : 'dyes'
-                        }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="manufacturer-filter"
                             label="Manufacturer"
                             label-position="left"
                             :options="manufacturerOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="manufacturerFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -134,8 +137,6 @@ function handleDyeClick(dye: Dye): void {
                             label="Bleeds"
                             label-position="left"
                             :options="bleedsOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="bleedsFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -150,8 +151,6 @@ function handleDyeClick(dye: Dye): void {
                             label="Like"
                             label-position="left"
                             :options="likeOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="likeFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -161,8 +160,8 @@ function handleDyeClick(dye: Dye): void {
                             class="w-32"
                             @update:model-value="likeFilter = $event"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -172,45 +171,17 @@ function handleDyeClick(dye: Dye): void {
                     data-key="id"
                     paginator
                     :rows="20"
+                    empty-message="No dyes found"
                 >
                     <template #list="{ items }">
-                        <div class="flex flex-col gap-2">
-                            <div
+                        <ListItemWrapper>
+                            <ListItem
                                 v-for="dye in items"
                                 :key="dye.id"
-                                class="flex cursor-pointer items-center gap-4 rounded-lg border border-surface-200 p-2 pr-4 transition-colors hover:bg-surface-50"
+                                v-bind="getListItemProps(dye)"
                                 @click="handleDyeClick(dye)"
-                            >
-                                <div class="min-w-0 flex-1">
-                                    <div class="font-semibold text-surface-900">
-                                        {{ dye.name }}
-                                    </div>
-                                    <div
-                                        class="mt-1 flex gap-4 text-sm text-surface-600"
-                                    >
-                                        <span v-if="dye.manufacturer">
-                                            {{ dye.manufacturer }}
-                                        </span>
-                                        <span v-if="dye.does_bleed"
-                                            >Bleeds</span
-                                        >
-                                        <span v-if="!dye.do_like"
-                                            >Don't Like</span
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty>
-                        <div
-                            class="flex min-h-[60vh] items-center justify-center"
-                        >
-                            <p class="text-lg text-surface-500">
-                                No dyes found
-                            </p>
-                        </div>
+                            />
+                        </ListItemWrapper>
                     </template>
                 </UiDataView>
             </template>

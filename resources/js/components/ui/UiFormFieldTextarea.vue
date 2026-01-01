@@ -50,6 +50,8 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
+        :required="required"
+        :size="size"
     >
         <template #default="{ props: fieldProps, id }">
             <UiTextarea

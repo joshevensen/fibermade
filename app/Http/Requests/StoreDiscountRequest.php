@@ -31,7 +31,6 @@ class StoreDiscountRequest extends FormRequest
             'starts_at' => ['nullable', 'date'],
             'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
             'is_active' => ['required', 'boolean'],
-            'shopify_discount_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

@@ -31,10 +31,10 @@ class InventoryController extends Controller
 
         // Fetch colorways with same filtering/authorization as ColorwayController
         $colorways = $user->is_admin
-            ? Colorway::with(['account', 'media', 'collections', 'inventories.base'])->get()
+            ? Colorway::with(['account', 'media', 'collections', 'inventories.base', 'inventories.externalIdentifiers.integration'])->get()
             : ($user->account_id
                 ? Colorway::where('account_id', $user->account_id)
-                    ->with(['account', 'media', 'collections', 'inventories.base'])
+                    ->with(['account', 'media', 'collections', 'inventories.base', 'inventories.externalIdentifiers.integration'])
                     ->get()
                 : collect());
 
@@ -61,13 +61,26 @@ class InventoryController extends Controller
             $baseData = $bases->map(function ($base) use ($colorway) {
                 $inventory = $colorway->inventories->firstWhere('base_id', $base->id);
 
-                return [
+                $baseArray = [
                     'id' => $base->id,
                     'code' => $base->code,
                     'descriptor' => $base->descriptor,
                     'quantity' => $inventory ? $inventory->quantity : 0,
                     'inventory_id' => $inventory ? $inventory->id : null,
                 ];
+
+                if ($inventory) {
+                    $baseArray['external_identifiers'] = $inventory->externalIdentifiers->map(fn ($identifier) => [
+                        'integration_type' => $identifier->integration->type->value,
+                        'external_type' => $identifier->external_type,
+                        'external_id' => $identifier->external_id,
+                        'data' => $identifier->data,
+                    ])->toArray();
+                } else {
+                    $baseArray['external_identifiers'] = [];
+                }
+
+                return $baseArray;
             })->toArray();
 
             $colorwayArray['bases'] = $baseData;
@@ -172,8 +185,17 @@ class InventoryController extends Controller
     {
         $this->authorize('view', $inventory);
 
+        $inventory->load(['colorway', 'base', 'externalIdentifiers.integration']);
+        $inventoryArray = $inventory->toArray();
+        $inventoryArray['external_identifiers'] = $inventory->externalIdentifiers->map(fn ($identifier) => [
+            'integration_type' => $identifier->integration->type->value,
+            'external_type' => $identifier->external_type,
+            'external_id' => $identifier->external_id,
+            'data' => $identifier->data,
+        ])->toArray();
+
         return Inertia::render('inventory/InventoryEditPage', [
-            'inventory' => $inventory->load(['colorway', 'base']),
+            'inventory' => $inventoryArray,
         ]);
     }
 

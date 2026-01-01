@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { edit as editStore } from '@/actions/App/Http/Controllers/StoreController';
+import GridItem from '@/components/GridItem.vue';
+import GridItemWrapper from '@/components/GridItemWrapper.vue';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiTag from '@/components/ui/UiTag.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -14,12 +16,12 @@ interface Props {
         name: string;
         email: string;
         owner_name?: string | null;
-        address_line_1: string;
-        address_line_2?: string | null;
+        address_line1: string;
+        address_line2?: string | null;
         city: string;
-        state: string;
-        zip: string;
-        country: string;
+        state_region: string;
+        postal_code: string;
+        country_code: string;
         discount_rate?: number | null;
         minimum_order_quantity?: number | null;
         minimum_order_value?: number | null;
@@ -74,12 +76,14 @@ function formatEnum(value: string | null | undefined): string {
         .join(' ');
 }
 
-function getStatusSeverity(status: string): string {
+function getStatusSeverity(
+    status: string,
+): 'success' | 'info' | 'secondary' | 'warn' | 'danger' | 'contrast' {
     switch (status) {
         case 'active':
             return 'success';
         case 'paused':
-            return 'warning';
+            return 'warn';
         case 'ended':
             return 'secondary';
         default:
@@ -90,38 +94,54 @@ function getStatusSeverity(status: string): string {
 function handleCardClick(store: Props['stores'][0]): void {
     router.visit(editStore.url(store.id));
 }
+
+function getGridItemProps(store: Props['stores'][0]) {
+    const metadata: Array<{ label: string; value: string | null }> = [];
+    if (store.email) {
+        metadata.push({
+            label: 'Email',
+            value: store.email,
+        });
+    }
+    if (store.owner_name) {
+        metadata.push({
+            label: 'Owner',
+            value: store.owner_name,
+        });
+    }
+    if (store.city && store.state_region) {
+        metadata.push({
+            label: 'Location',
+            value: `${store.city}, ${store.state_region}`,
+        });
+    }
+
+    return {
+        title: store.name,
+        tag: {
+            severity: getStatusSeverity(store.status),
+            value: formatEnum(store.status),
+        },
+        metadata: metadata.length > 0 ? metadata : undefined,
+    };
+}
 </script>
 
 <template>
     <AppLayout page-title="Stores">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.totalStores ?? stores.length"
+                    :filtered-count="stores.length"
+                    label="store"
                 >
-                    <div class="text-surface-600">
-                        <template
-                            v-if="
-                                props.totalStores &&
-                                stores.length !== props.totalStores
-                            "
-                        >
-                            {{ stores.length }} of {{ props.totalStores }}
-                        </template>
-                        <template v-else>
-                            {{ stores.length }}
-                        </template>
-                        {{ stores.length === 1 ? 'store' : 'stores' }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="status-filter"
                             label="Status"
                             label-position="left"
                             :options="statusOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="statusFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -131,8 +151,8 @@ function handleCardClick(store: Props['stores'][0]): void {
                             class="w-32"
                             @update:model-value="handleStatusFilterChange"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -142,86 +162,17 @@ function handleCardClick(store: Props['stores'][0]): void {
                     data-key="id"
                     paginator
                     :rows="12"
+                    empty-message="No stores found"
                 >
                     <template #grid="{ items }">
-                        <div
-                            class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        >
-                            <div
+                        <GridItemWrapper>
+                            <GridItem
                                 v-for="store in items"
                                 :key="store.id"
-                                class="cursor-pointer rounded-lg border border-surface-200 bg-surface-0 p-4 transition-all hover:border-primary-500 hover:shadow-md"
+                                v-bind="getGridItemProps(store)"
                                 @click="handleCardClick(store)"
-                            >
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex justify-start">
-                                        <UiTag
-                                            :severity="
-                                                getStatusSeverity(store.status)
-                                            "
-                                            :value="formatEnum(store.status)"
-                                        />
-                                    </div>
-                                    <h3
-                                        class="text-lg font-semibold text-surface-900"
-                                    >
-                                        {{ store.name }}
-                                    </h3>
-
-                                    <div
-                                        class="mt-2 flex flex-col gap-1 border-t border-surface-200 pt-2"
-                                    >
-                                        <div
-                                            v-if="store.email"
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Email:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{ store.email }}</span
-                                            >
-                                        </div>
-                                        <div
-                                            v-if="store.owner_name"
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Owner:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{ store.owner_name }}</span
-                                            >
-                                        </div>
-                                        <div
-                                            v-if="store.city && store.state"
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Location:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{ store.city }},
-                                                {{ store.state }}</span
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty>
-                        <div
-                            class="flex min-h-[60vh] items-center justify-center"
-                        >
-                            <p class="text-lg text-surface-500">
-                                No stores found
-                            </p>
-                        </div>
+                            />
+                        </GridItemWrapper>
                     </template>
                 </UiDataView>
             </template>

@@ -49,7 +49,7 @@ function handleLogout() {
             collapsed ? 'w-16' : 'w-40',
         ]"
     >
-        <div class="flex h-12 items-center justify-center px-4">
+        <div class="flex h-12 items-center justify-center px-2">
             <AppLogo v-if="collapsed" variant="icon" class="size-8" />
             <AppLogo v-else variant="full" />
         </div>
@@ -77,11 +77,9 @@ function handleLogout() {
                                 ? (item.icon as Component)
                                 : undefined
                         "
-                        :class="[
-                            isActive(item)
-                                ? 'text-primary'
-                                : 'text-surface-400',
-                        ]"
+                        :class="
+                            isActive(item) ? 'text-primary' : 'text-surface-400'
+                        "
                     />
                     <span
                         v-if="!collapsed"
@@ -97,7 +95,12 @@ function handleLogout() {
             </nav>
         </div>
 
-        <div class="flex justify-between p-4">
+        <div
+            :class="[
+                'flex justify-between p-4',
+                collapsed ? 'flex-col-reverse gap-4' : 'flex-row',
+            ]"
+        >
             <UiButton
                 :icon="collapsed ? IconList.Right : IconList.Left"
                 text

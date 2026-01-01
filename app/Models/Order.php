@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,7 +25,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \App\Enums\OrderType $type
  * @property \App\Enums\OrderStatus $status
  * @property int $account_id
- * @property string|null $shopify_order_id
  * @property \Illuminate\Support\Carbon $order_date
  * @property float|null $subtotal_amount
  * @property float|null $shipping_amount
@@ -55,7 +55,6 @@ class Order extends Model
         'type',
         'status',
         'account_id',
-        'shopify_order_id',
         'order_date',
         'subtotal_amount',
         'shipping_amount',
@@ -126,5 +125,50 @@ class Order extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    /**
+     * Get the external identifiers for this order.
+     */
+    public function externalIdentifiers(): MorphMany
+    {
+        return $this->morphMany(ExternalIdentifier::class, 'identifiable');
+    }
+
+    /**
+     * Get external ID for a specific integration and external type.
+     */
+    public function getExternalIdFor(Integration $integration, string $externalType): ?string
+    {
+        $identifier = $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->first();
+
+        return $identifier?->external_id;
+    }
+
+    /**
+     * Get all external IDs grouped by integration type.
+     */
+    public function getExternalIdsByIntegration(): array
+    {
+        return $this->externalIdentifiers()
+            ->with('integration')
+            ->get()
+            ->groupBy(fn ($identifier) => $identifier->integration->type->value)
+            ->map(fn ($identifiers) => $identifiers->keyBy('external_type')->map->external_id)
+            ->toArray();
+    }
+
+    /**
+     * Check if this order has an external ID for the given integration and type.
+     */
+    public function hasExternalId(Integration $integration, string $externalType): bool
+    {
+        return $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->exists();
     }
 }

@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { update } from '@/actions/App/Http/Controllers/DyeController';
+import {
+    destroy as destroyDye,
+    update,
+} from '@/actions/App/Http/Controllers/DyeController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -21,6 +25,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { requireDelete } = useConfirm();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.dye.id),
@@ -35,11 +40,21 @@ const { form, onSubmit } = useFormSubmission({
         router.visit('/dyes');
     },
 });
+
+function handleDelete(event: Event): void {
+    requireDelete({
+        target: event.currentTarget as HTMLElement,
+        message: `Are you sure you want to delete ${props.dye.name}?`,
+        onAccept: () => {
+            router.delete(destroyDye.url(props.dye.id));
+        },
+    });
+}
 </script>
 
 <template>
     <AppLayout page-title="Edit Dye">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
@@ -72,21 +87,39 @@ const { form, onSubmit } = useFormSubmission({
                             binary
                         />
 
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Dye
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/dyes')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Dye
+                        </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this dye will permanently remove
+                                    all associated data. This action cannot be
+                                    undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Dye
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

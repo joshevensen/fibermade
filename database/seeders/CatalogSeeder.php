@@ -12,10 +12,11 @@ use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Dye;
+use App\Models\ExternalIdentifier;
+use App\Models\Integration;
 use App\Models\Inventory;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class CatalogSeeder extends Seeder
 {
@@ -102,7 +103,6 @@ class CatalogSeeder extends Seeder
         foreach ($bases as $baseData) {
             Base::create([
                 'account_id' => $account->id,
-                'slug' => Str::slug($baseData['descriptor']),
                 'description' => $baseData['description'],
                 'status' => $baseData['status'],
                 'weight' => $baseData['weight'],
@@ -146,7 +146,6 @@ class CatalogSeeder extends Seeder
             Collection::create([
                 'account_id' => $account->id,
                 'name' => $collectionData['name'],
-                'slug' => Str::slug($collectionData['name']),
                 'description' => $collectionData['description'],
                 'status' => BaseStatus::Active,
             ]);
@@ -306,7 +305,6 @@ class CatalogSeeder extends Seeder
             $colorway = Colorway::create([
                 'account_id' => $account->id,
                 'name' => $colorwayData['name'],
-                'slug' => Str::slug($colorwayData['name']),
                 'description' => $colorwayData['description'],
                 'technique' => $colorwayData['technique'],
                 'colors' => $colorwayData['colors'],
@@ -319,6 +317,20 @@ class CatalogSeeder extends Seeder
 
             if ($colorwayData['collection']) {
                 $colorway->collections()->attach($colorwayData['collection']->id);
+            }
+
+            // Create external identifier for some colorways (30% chance)
+            if (fake()->boolean(30)) {
+                $integration = Integration::where('account_id', $account->id)->first();
+                if ($integration) {
+                    ExternalIdentifier::create([
+                        'integration_id' => $integration->id,
+                        'identifiable_type' => Colorway::class,
+                        'identifiable_id' => $colorway->id,
+                        'external_type' => 'product',
+                        'external_id' => fake()->numerify('##########'),
+                    ]);
+                }
             }
         }
     }
@@ -395,12 +407,26 @@ class CatalogSeeder extends Seeder
             $selectedBases = $bases->random(fake()->numberBetween(2, 3));
 
             foreach ($selectedBases as $base) {
-                Inventory::create([
+                $inventory = Inventory::create([
                     'account_id' => $account->id,
                     'colorway_id' => $colorway->id,
                     'base_id' => $base->id,
                     'quantity' => fake()->numberBetween(5, 50),
                 ]);
+
+                // Create external identifier for some inventory entries (30% chance)
+                if (fake()->boolean(30)) {
+                    $integration = Integration::where('account_id', $account->id)->first();
+                    if ($integration) {
+                        ExternalIdentifier::create([
+                            'integration_id' => $integration->id,
+                            'identifiable_type' => Inventory::class,
+                            'identifiable_id' => $inventory->id,
+                            'external_type' => 'variant',
+                            'external_id' => fake()->numerify('##########'),
+                        ]);
+                    }
+                }
             }
         }
     }

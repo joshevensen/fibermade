@@ -47,6 +47,7 @@ export const dataViewPaginatorBottom: DataViewTokenSections.PaginatorBottom = {
 </script>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import PrimeDataView from 'primevue/dataview';
 
 interface Props {
@@ -61,15 +62,29 @@ interface Props {
     sortField?: string | ((item: any) => string);
     sortOrder?: number;
     dataKey?: string;
+    emptyMessage?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     layout: 'list',
     paginatorPosition: 'bottom',
+    emptyMessage: 'No records found',
 });
 
 defineOptions({
     inheritAttrs: false,
+});
+
+const shouldShowPaginator = computed(() => {
+    if (!props.paginator) {
+        return false;
+    }
+    if (props.lazy && props.totalRecords !== undefined) {
+        return props.totalRecords > (props.rows ?? 0);
+    }
+    const dataLength = props.value?.length ?? 0;
+    const rowsValue = props.rows ?? 0;
+    return dataLength > rowsValue;
 });
 </script>
 
@@ -81,7 +96,7 @@ defineOptions({
         :rows="rows"
         :first="first"
         :totalRecords="totalRecords"
-        :paginator="paginator"
+        :paginator="shouldShowPaginator"
         :paginatorPosition="paginatorPosition"
         :lazy="lazy"
         :sortField="sortField"
@@ -92,7 +107,15 @@ defineOptions({
                 <slot name="header" />
             </template>
             <template #empty="slotProps">
-                <slot name="empty" v-bind="slotProps" />
+                <slot name="empty" v-bind="slotProps">
+                    <div
+                        class="flex min-h-[60vh] items-center justify-center"
+                    >
+                        <p class="text-lg text-surface-500">
+                            {{ props.emptyMessage }}
+                        </p>
+                    </div>
+                </slot>
             </template>
             <template #list="slotProps">
                 <slot name="list" v-bind="slotProps" />

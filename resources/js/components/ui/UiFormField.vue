@@ -21,6 +21,7 @@ interface Props {
     validateOnMount?: boolean;
     labelPosition?: LabelPosition;
     size?: 'small' | 'large';
+    required?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -69,6 +70,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
                 >
                     <span>
                         {{ label }}
+                        <small v-if="required" class="text-surface-500">(required)</small>
                     </span>
                     <span v-if="labelPosition === 'top'">
                         <slot name="extra"/>

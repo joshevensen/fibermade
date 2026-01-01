@@ -23,6 +23,28 @@ const { openDrawer } = useCreateDrawer();
 const { IconList, BusinessIconList } = useIcon();
 const createMenuRef = ref();
 
+// Map page titles to drawer types
+const pageTitleToDrawerType: Record<
+    string,
+    | 'base'
+    | 'collection'
+    | 'colorway'
+    | 'customer'
+    | 'dye'
+    | 'order'
+    | 'show'
+    | 'store'
+> = {
+    Bases: 'base',
+    Collections: 'collection',
+    Colorways: 'colorway',
+    Customers: 'customer',
+    Dyes: 'dye',
+    Orders: 'order',
+    Shows: 'show',
+    Stores: 'store',
+};
+
 // Map page titles to icons
 const getPageIcon = (title?: string) => {
     if (!title) {
@@ -44,6 +66,32 @@ const getPageIcon = (title?: string) => {
 };
 
 const pageIcon = computed(() => getPageIcon(props.pageTitle));
+
+// Check if current page has a create drawer
+const currentPageDrawerType = computed(() => {
+    if (!props.pageTitle) {
+        return null;
+    }
+    return pageTitleToDrawerType[props.pageTitle] || null;
+});
+
+const hasCreateDrawer = computed(() => {
+    return currentPageDrawerType.value !== null;
+});
+
+// Get singular form of page title for button label
+const createButtonLabel = computed(() => {
+    if (!props.pageTitle || !hasCreateDrawer.value) {
+        return undefined;
+    }
+    // Remove 's' from plural (Bases -> Base, Colorways -> Colorway, etc.)
+    return `Create ${props.pageTitle.slice(0, -1)}`;
+});
+
+// Label for the menu toggle button
+const menuToggleButtonLabel = computed(() => {
+    return hasCreateDrawer.value ? undefined : 'Create';
+});
 
 const createMenuItems = [
     {
@@ -72,13 +120,6 @@ const createMenuItems = [
         icon: IconList.Plus,
         command: () => {
             openDrawer('customer');
-        },
-    },
-    {
-        label: 'Discount',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('discount');
         },
     },
     {
@@ -111,7 +152,24 @@ const createMenuItems = [
     },
 ];
 
-function toggleCreateMenu(event: Event): void {
+// Menu items (filtered when on a page with a drawer)
+const menuItems = computed(() => {
+    if (!currentPageDrawerType.value) {
+        return createMenuItems;
+    }
+    return createMenuItems.filter((item) => {
+        const drawerType = pageTitleToDrawerType[item.label];
+        return drawerType !== currentPageDrawerType.value;
+    });
+});
+
+function handleCreateClick(): void {
+    if (currentPageDrawerType.value) {
+        openDrawer(currentPageDrawerType.value);
+    }
+}
+
+function toggleMenu(event: Event): void {
     createMenuRef.value?.toggle(event);
 }
 </script>
@@ -144,19 +202,29 @@ function toggleCreateMenu(event: Event): void {
         <div class="relative ml-auto flex items-center gap-2">
             <UiButton
                 :icon="IconList.Settings"
+                size="small"
                 text
                 aria-label="Settings"
                 @click="router.visit(profileEdit.url())"
             />
             <UiButton
+                v-if="hasCreateDrawer"
                 :icon="IconList.Plus"
-                text
+                size="small"
+                :label="createButtonLabel"
                 aria-label="Create"
-                @click="toggleCreateMenu"
+                @click="handleCreateClick"
+            />
+            <UiButton
+                :icon="IconList.Plus"
+                size="small"
+                :label="menuToggleButtonLabel"
+                :aria-label="hasCreateDrawer ? 'More create options' : 'Create'"
+                @click="toggleMenu"
             />
             <UiMenu
                 ref="createMenuRef"
-                :model="createMenuItems"
+                :model="menuItems"
                 popup
                 append-to="body"
             />

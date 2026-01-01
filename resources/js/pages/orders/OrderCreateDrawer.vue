@@ -2,12 +2,11 @@
 import { store } from '@/actions/App/Http/Controllers/OrderController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDrawer from '@/components/ui/UiDrawer.vue';
+import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
-import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import UiSelectButton from '@/components/ui/UiSelectButton.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { enumToOptions } from '@/utils/enumOptions';
 import { router } from '@inertiajs/vue3';
@@ -27,7 +26,9 @@ const orderStatusCases = [
 ];
 
 const orderTypeOptions = enumToOptions(orderTypeCases);
-const orderStatusOptions = enumToOptions(orderStatusCases);
+const orderStatusOptions = enumToOptions(
+    orderStatusCases.filter((status) => status.value !== 'cancelled'),
+);
 
 interface Props {
     visible: boolean;
@@ -43,20 +44,16 @@ function closeDrawer(): void {
     emit('update:visible', false);
 }
 
+const initialValues = {
+    type: 'wholesale',
+    status: 'draft',
+    order_date: null,
+    notes: null,
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: store,
-    initialValues: {
-        type: null,
-        status: null,
-        shopify_order_id: null,
-        order_date: null,
-        subtotal_amount: null,
-        shipping_amount: null,
-        discount_amount: null,
-        tax_amount: null,
-        total_amount: null,
-        notes: null,
-    },
+    initialValues,
     successMessage: 'Order created successfully.',
     onSuccess: () => {
         closeDrawer();
@@ -77,86 +74,56 @@ const { form, onSubmit } = useFormSubmission({
         </template>
 
         <div class="p-4">
-            <UiForm @submit="onSubmit">
-                <UiFormFieldSelect
+            <UiForm :initial-values="initialValues" @submit="onSubmit">
+                <UiFormField
                     name="type"
                     label="Type"
-                    :options="orderTypeOptions"
-                    option-label="label"
-                    option-value="value"
-                    placeholder="Select order type"
                     :server-error="form.errors.type"
                     required
-                />
+                >
+                    <template #default="{ props: fieldProps }">
+                        <UiSelectButton
+                            v-bind="fieldProps"
+                            :options="orderTypeOptions"
+                            size="small"
+                            fluid
+                        />
+                    </template>
+                </UiFormField>
 
-                <UiFormFieldSelect
+                <UiFormField
                     name="status"
                     label="Status"
-                    :options="orderStatusOptions"
-                    option-label="label"
-                    option-value="value"
-                    placeholder="Select status"
                     :server-error="form.errors.status"
                     required
-                />
-
-                <UiFormFieldInput
-                    name="shopify_order_id"
-                    label="Shopify Order ID"
-                    placeholder="Shopify order ID"
-                    :server-error="form.errors.shopify_order_id"
-                />
+                >
+                    <template #default="{ props: fieldProps }">
+                        <UiSelectButton
+                            v-bind="fieldProps"
+                            :options="orderStatusOptions"
+                            size="small"
+                            fluid
+                        />
+                    </template>
+                </UiFormField>
 
                 <UiFormFieldDatePicker
                     name="order_date"
                     label="Order Date"
-                    placeholder="Select order date"
                     :server-error="form.errors.order_date"
                     show-icon
                     required
                 />
 
-                <UiFormFieldInputNumber
-                    name="subtotal_amount"
-                    label="Subtotal Amount"
-                    :min="0"
-                    :server-error="form.errors.subtotal_amount"
-                />
-
-                <UiFormFieldInputNumber
-                    name="shipping_amount"
-                    label="Shipping Amount"
-                    :min="0"
-                    :server-error="form.errors.shipping_amount"
-                />
-
-                <UiFormFieldInputNumber
-                    name="discount_amount"
-                    label="Discount Amount"
-                    :min="0"
-                    :server-error="form.errors.discount_amount"
-                />
-
-                <UiFormFieldInputNumber
-                    name="tax_amount"
-                    label="Tax Amount"
-                    :min="0"
-                    :server-error="form.errors.tax_amount"
-                />
-
-                <UiFormFieldInputNumber
-                    name="total_amount"
-                    label="Total Amount"
-                    :min="0"
-                    :server-error="form.errors.total_amount"
-                />
-
-                <UiFormFieldTextarea
+                <UiFormField
                     name="notes"
                     label="Notes"
-                    placeholder="Order notes"
                     :server-error="form.errors.notes"
-                />
+                >
+                    <template #default="{ props: fieldProps }">
+                        <UiEditor v-bind="fieldProps" />
+                    </template>
+                </UiFormField>
 
                 <UiButton type="submit" :loading="form.processing">
                     Create Order

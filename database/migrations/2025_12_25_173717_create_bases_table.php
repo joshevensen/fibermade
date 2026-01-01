@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('bases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
-            $table->string('slug');
             $table->text('description')->nullable();
             $table->string('status')->default('active');
             $table->string('weight')->nullable();
@@ -33,7 +32,6 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
 
-            $table->unique(['account_id', 'slug']);
             $table->index('status');
             $table->index('weight');
             $table->index('code');

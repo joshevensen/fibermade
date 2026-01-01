@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $account_id
- * @property string $slug
  * @property string|null $description
  * @property \App\Enums\BaseStatus $status
  * @property \App\Enums\Weight|null $weight
@@ -51,7 +50,6 @@ class Base extends Model
      */
     protected $fillable = [
         'account_id',
-        'slug',
         'description',
         'status',
         'weight',

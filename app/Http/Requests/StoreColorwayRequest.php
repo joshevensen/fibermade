@@ -27,7 +27,6 @@ class StoreColorwayRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'slug' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'technique' => ['nullable', Rule::enum(Technique::class)],
             'colors' => ['nullable', 'array'],
@@ -36,7 +35,6 @@ class StoreColorwayRequest extends FormRequest
             'recipe' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],
             'status' => ['required', Rule::enum(ColorwayStatus::class)],
-            'shopify_product_id' => ['nullable', 'string', 'max:255'],
             'created_by' => ['nullable', 'integer', Rule::exists(User::class, 'id')],
             'updated_by' => ['nullable', 'integer', Rule::exists(User::class, 'id')],
         ];

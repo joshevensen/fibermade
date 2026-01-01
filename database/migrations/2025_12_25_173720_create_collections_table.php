@@ -15,13 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('slug');
             $table->text('description')->nullable();
             $table->string('status')->default('active');
             $table->softDeletes();
             $table->timestamps();
-
-            $table->unique(['account_id', 'slug']);
         });
     }
 

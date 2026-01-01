@@ -47,7 +47,6 @@ class DiscountFactory extends Factory
             'starts_at' => fake()->optional(0.3)->dateTimeBetween('-1 week', '+1 week'),
             'ends_at' => fake()->optional(0.3)->dateTimeBetween('+1 week', '+1 month'),
             'is_active' => fake()->boolean(80),
-            'shopify_discount_id' => fake()->optional(0.2)->numerify('##########'),
         ];
     }
 }

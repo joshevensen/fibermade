@@ -18,7 +18,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $id
  * @property int $account_id
  * @property string $name
- * @property string $slug
  * @property string|null $description
  * @property \App\Enums\BaseStatus $status
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -38,7 +37,6 @@ class Collection extends Model
     protected $fillable = [
         'account_id',
         'name',
-        'slug',
         'description',
         'status',
     ];

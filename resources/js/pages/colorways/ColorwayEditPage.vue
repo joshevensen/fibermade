@@ -5,7 +5,6 @@ import {
 } from '@/actions/App/Http/Controllers/ColorwayController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-import UiDivider from '@/components/ui/UiDivider.vue';
 import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
@@ -25,7 +24,6 @@ interface Props {
     colorway: {
         id: number;
         name: string;
-        slug: string;
         description?: string | null;
         technique?: string | null;
         colors?: string[] | null;
@@ -33,7 +31,6 @@ interface Props {
         recipe?: string | null;
         notes?: string | null;
         status: string;
-        shopify_product_id?: string | null;
     };
     colorwayStatusOptions: Array<{ label: string; value: string }>;
     techniqueOptions: Array<{ label: string; value: string }>;
@@ -48,7 +45,6 @@ const { form, onSubmit } = useFormSubmission({
     route: () => update(props.colorway.id),
     initialValues: {
         name: props.colorway.name || '',
-        slug: props.colorway.slug || '',
         description: props.colorway.description || null,
         technique: props.colorway.technique || null,
         colors: props.colorway.colors || null,
@@ -56,7 +52,6 @@ const { form, onSubmit } = useFormSubmission({
         recipe: props.colorway.recipe || null,
         notes: props.colorway.notes || null,
         status: props.colorway.status || null,
-        shopify_product_id: props.colorway.shopify_product_id || null,
     },
     successMessage: 'Colorway updated successfully.',
     onSuccess: () => {
@@ -77,13 +72,12 @@ function handleDelete(event: Event): void {
 
 <template>
     <AppLayout page-title="Edit Colorway">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm
                         :initial-values="{
                             name: props.colorway.name || '',
-                            slug: props.colorway.slug || '',
                             description: props.colorway.description || null,
                             technique: props.colorway.technique || null,
                             colors: props.colorway.colors || null,
@@ -91,8 +85,6 @@ function handleDelete(event: Event): void {
                             recipe: props.colorway.recipe || null,
                             notes: props.colorway.notes || null,
                             status: props.colorway.status || null,
-                            shopify_product_id:
-                                props.colorway.shopify_product_id || null,
                         }"
                         @submit="onSubmit"
                     >
@@ -101,14 +93,6 @@ function handleDelete(event: Event): void {
                             label="Name"
                             placeholder="Colorway name"
                             :server-error="form.errors.name"
-                            required
-                        />
-
-                        <UiFormFieldInput
-                            name="slug"
-                            label="Slug"
-                            placeholder="colorway-slug"
-                            :server-error="form.errors.slug"
                             required
                         />
 
@@ -123,8 +107,6 @@ function handleDelete(event: Event): void {
                             name="technique"
                             label="Technique"
                             :options="techniqueOptions"
-                            option-label="label"
-                            option-value="value"
                             placeholder="Select technique"
                             :server-error="form.errors.technique"
                             show-clear
@@ -134,8 +116,6 @@ function handleDelete(event: Event): void {
                             name="colors"
                             label="Colors"
                             :options="colorOptions"
-                            option-label="label"
-                            option-value="value"
                             placeholder="Select colors"
                             :server-error="form.errors.colors"
                         />
@@ -179,40 +159,44 @@ function handleDelete(event: Event): void {
                                 <UiSelectButton
                                     v-bind="fieldProps"
                                     :options="colorwayStatusOptions"
-                                    option-label="label"
-                                    option-value="value"
                                     fluid
                                 />
                             </template>
                         </UiFormField>
 
-                        <UiFormFieldInput
-                            name="shopify_product_id"
-                            label="Shopify Product ID"
-                            placeholder="Shopify product ID"
-                            :server-error="form.errors.shopify_product_id"
-                        />
-
-                        <UiDivider />
-
                         <UiButton type="submit" :loading="form.processing">
                             Update Colorway
-                        </UiButton>
-
-                        <UiDivider />
-
-                        <UiButton
-                            type="button"
-                            severity="danger"
-                            outlined
-                            :icon="IconList.Close"
-                            @click="handleDelete"
-                        >
-                            Delete Colorway
                         </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this colorway will permanently
+                                    remove all associated data. This action
+                                    cannot be undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Colorway
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

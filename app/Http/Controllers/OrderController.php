@@ -26,8 +26,20 @@ class OrderController extends Controller
 
         $user = auth()->user();
         $orders = $user->is_admin
-            ? Order::with(['account', 'orderItems', 'orderable'])->get()
-            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable'])->get() : collect());
+            ? Order::with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration'])->get()
+            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration'])->get() : collect());
+
+        $orders = $orders->map(function ($order) {
+            $orderArray = $order->toArray();
+            $orderArray['external_identifiers'] = $order->externalIdentifiers->map(fn ($identifier) => [
+                'integration_type' => $identifier->integration->type->value,
+                'external_type' => $identifier->external_type,
+                'external_id' => $identifier->external_id,
+                'data' => $identifier->data,
+            ])->toArray();
+
+            return $orderArray;
+        });
 
         $orderTypeOptions = collect(OrderType::cases())
             ->map(fn ($case) => [
@@ -129,8 +141,17 @@ class OrderController extends Controller
             ? \App\Models\Account::select('id', 'name')->get()
             : ($user->account_id ? \App\Models\Account::where('id', $user->account_id)->select('id', 'name')->get() : collect());
 
+        $order->load(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration']);
+        $orderArray = $order->toArray();
+        $orderArray['external_identifiers'] = $order->externalIdentifiers->map(fn ($identifier) => [
+            'integration_type' => $identifier->integration->type->value,
+            'external_type' => $identifier->external_type,
+            'external_id' => $identifier->external_id,
+            'data' => $identifier->data,
+        ])->toArray();
+
         return Inertia::render('orders/OrderEditPage', [
-            'order' => $order->load(['account', 'orderItems', 'orderable']),
+            'order' => $orderArray,
             'orderTypeOptions' => $orderTypeOptions,
             'orderStatusOptions' => $orderStatusOptions,
             'accounts' => $accounts,

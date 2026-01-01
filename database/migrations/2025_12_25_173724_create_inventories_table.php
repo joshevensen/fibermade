@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('colorway_id')->constrained()->cascadeOnDelete();
             $table->foreignId('base_id')->constrained()->cascadeOnDelete();
             $table->integer('quantity')->default(0);
-            $table->string('shopify_variant_id')->nullable();
             $table->timestamps();
 
             $table->unique(['account_id', 'colorway_id', 'base_id']);

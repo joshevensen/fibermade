@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { edit as editColorway } from '@/actions/App/Http/Controllers/ColorwayController';
-import UiButton from '@/components/ui/UiButton.vue';
+import GridItem from '@/components/GridItem.vue';
+import GridItemWrapper from '@/components/GridItemWrapper.vue';
+import ListItem from '@/components/ListItem.vue';
+import ListItemWrapper from '@/components/ListItemWrapper.vue';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiImage from '@/components/ui/UiImage.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
-import UiTag from '@/components/ui/UiTag.vue';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -16,7 +18,6 @@ import { computed, ref } from 'vue';
 interface Colorway {
     id: number;
     name: string;
-    slug: string;
     description?: string | null;
     technique?: string | null;
     colors?: string[] | null;
@@ -93,6 +94,81 @@ function formatColors(colors: string[] | null | undefined): string {
 
 function getImageUrl(colorway: Colorway): string | undefined {
     return colorway.primary_image_url ?? undefined;
+}
+
+function getStatusSeverity(status: string): 'success' | 'info' | 'secondary' {
+    if (status === 'active') {
+        return 'success';
+    }
+    if (status === 'idea') {
+        return 'info';
+    }
+    return 'secondary';
+}
+
+function getListItemProps(colorway: Colorway) {
+    const metadata: string[] = [];
+    if (colorway.collections && colorway.collections.length > 0) {
+        metadata.push(
+            colorway.collections
+                .map((c: { id: number; name: string }) => c.name)
+                .join(', '),
+        );
+    }
+    if (colorway.technique) {
+        metadata.push(formatEnum(colorway.technique));
+    }
+    if (colorway.colors && colorway.colors.length > 0) {
+        metadata.push(formatColors(colorway.colors));
+    }
+
+    return {
+        title: colorway.name,
+        image: colorway.primary_image_url
+            ? { src: colorway.primary_image_url, alt: colorway.name }
+            : undefined,
+        metadata: metadata.length > 0 ? metadata : undefined,
+        tag: {
+            severity: getStatusSeverity(colorway.status),
+            value: formatEnum(colorway.status),
+        },
+    };
+}
+
+function getGridItemProps(colorway: Colorway) {
+    const metadata: Array<{ label: string; value: string }> = [];
+    if (colorway.collections && colorway.collections.length > 0) {
+        metadata.push({
+            label: 'Collection',
+            value: colorway.collections
+                .map((c: { id: number; name: string }) => c.name)
+                .join(', '),
+        });
+    }
+    if (colorway.technique) {
+        metadata.push({
+            label: 'Technique',
+            value: formatEnum(colorway.technique),
+        });
+    }
+    if (colorway.colors && colorway.colors.length > 0) {
+        metadata.push({
+            label: 'Colors',
+            value: formatColors(colorway.colors),
+        });
+    }
+
+    return {
+        title: colorway.name,
+        image: colorway.primary_image_url
+            ? { src: colorway.primary_image_url, alt: colorway.name }
+            : undefined,
+        metadata: metadata.length > 0 ? metadata : undefined,
+        tag: {
+            severity: getStatusSeverity(colorway.status),
+            value: formatEnum(colorway.status),
+        },
+    };
 }
 
 // Sort and filter colorways
@@ -185,45 +261,18 @@ function handleSortChange(value: { field: string; order: number }): void {
     <AppLayout page-title="Colorways">
         <UiCard>
             <template #title>
-                <!-- Single row with count, filters, layout toggle, and create button -->
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.colorways.length"
+                    :filtered-count="filteredAndSortedColorways.length"
+                    label="colorway"
                 >
-                    <!-- Left side: Count -->
-                    <div class="text-surface-600">
-                        <template
-                            v-if="
-                                filteredAndSortedColorways.length !==
-                                props.colorways.length
-                            "
-                        >
-                            {{ filteredAndSortedColorways.length }} of
-                            {{ props.colorways.length }}
-                        </template>
-                        <template v-else>
-                            {{ filteredAndSortedColorways.length }}
-                        </template>
-                        {{
-                            filteredAndSortedColorways.length === 1
-                                ? 'colorway'
-                                : 'colorways'
-                        }}
-                    </div>
-
-                    <!-- Right side: Filters and Layout toggle -->
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="status-filter"
                             label="Status"
                             label-position="left"
                             :options="statusFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="statusFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="false"
                             size="small"
                             class="w-40"
                             @update:model-value="statusFilter = $event"
@@ -233,15 +282,8 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Technique"
                             label-position="left"
                             :options="techniqueFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="techniqueFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="false"
                             size="small"
-                            class="w-40"
                             @update:model-value="techniqueFilter = $event"
                         />
                         <UiFormFieldSelect
@@ -249,15 +291,8 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Color"
                             label-position="left"
                             :options="colorFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="colorFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="false"
                             size="small"
-                            class="w-40"
                             @update:model-value="colorFilter = $event"
                         />
                         <UiFormFieldSelect
@@ -265,15 +300,8 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Collection"
                             label-position="left"
                             :options="collectionFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="collectionFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="false"
                             size="small"
-                            class="w-40"
                             @update:model-value="collectionFilter = $event"
                         />
                         <UiFormFieldSelect
@@ -281,29 +309,22 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Sort"
                             label-position="left"
                             :options="sortOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="currentSortValue"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="false"
                             size="small"
-                            class="w-40"
                             @update:model-value="handleSortChange($event)"
                         />
+                    </template>
+                    <template #toggle>
                         <UiSelectButton
                             v-model="layout"
                             :options="[
                                 { label: 'List', value: 'list' },
                                 { label: 'Grid', value: 'grid' },
                             ]"
-                            option-label="label"
-                            option-value="value"
                             size="small"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -315,200 +336,28 @@ function handleSortChange(value: { field: string; order: number }): void {
                     :rows="20"
                     :sort-field="sortField"
                     :sort-order="sortOrder"
+                    empty-message="No colorways found"
                 >
                     <template #list="{ items }">
-                        <div class="flex flex-col gap-2">
-                            <div
+                        <ListItemWrapper>
+                            <ListItem
                                 v-for="colorway in items"
                                 :key="colorway.id"
-                                class="flex cursor-pointer items-center gap-4 rounded-lg border border-surface-200 p-2 pr-4 transition-colors hover:bg-surface-50"
+                                v-bind="getListItemProps(colorway)"
                                 @click="handleColorwayClick(colorway)"
-                            >
-                                <div class="flex-shrink-0">
-                                    <UiImage
-                                        :src="getImageUrl(colorway)"
-                                        :alt="colorway.name"
-                                        class="h-14 w-14 overflow-hidden rounded"
-                                        image-class="h-full w-full object-cover"
-                                    >
-                                        <template #placeholder>
-                                            <span
-                                                class="text-xs text-surface-400"
-                                                >—</span
-                                            >
-                                        </template>
-                                    </UiImage>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <div class="font-semibold text-surface-900">
-                                        {{ colorway.name }}
-                                    </div>
-                                    <div
-                                        class="mt-1 flex gap-4 text-sm text-surface-600"
-                                    >
-                                        <span
-                                            v-if="
-                                                colorway.collections &&
-                                                colorway.collections.length > 0
-                                            "
-                                        >
-                                            {{
-                                                colorway.collections
-                                                    .map(
-                                                        (c: {
-                                                            id: number;
-                                                            name: string;
-                                                        }) => c.name,
-                                                    )
-                                                    .join(', ')
-                                            }}
-                                        </span>
-                                        <span v-if="colorway.technique">
-                                            {{ formatEnum(colorway.technique) }}
-                                        </span>
-                                        <span
-                                            v-if="
-                                                colorway.colors &&
-                                                colorway.colors.length > 0
-                                            "
-                                        >
-                                            {{ formatColors(colorway.colors) }}
-                                        </span>
-                                    </div>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <UiTag
-                                        :severity="
-                                            colorway.status === 'active'
-                                                ? 'success'
-                                                : colorway.status === 'idea'
-                                                  ? 'info'
-                                                  : 'secondary'
-                                        "
-                                        :value="formatEnum(colorway.status)"
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                            />
+                        </ListItemWrapper>
                     </template>
 
                     <template #grid="{ items }">
-                        <div
-                            class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        >
-                            <div
+                        <GridItemWrapper>
+                            <GridItem
                                 v-for="colorway in items"
                                 :key="colorway.id"
-                                class="cursor-pointer rounded-lg border border-surface-200 bg-surface-0 p-4 transition-all hover:border-primary-500 hover:shadow-md"
+                                v-bind="getGridItemProps(colorway)"
                                 @click="handleColorwayClick(colorway)"
-                            >
-                                <div class="flex flex-col gap-2">
-                                    <div class="flex justify-start">
-                                        <UiTag
-                                            :severity="
-                                                colorway.status === 'active'
-                                                    ? 'success'
-                                                    : colorway.status === 'idea'
-                                                      ? 'info'
-                                                      : 'secondary'
-                                            "
-                                            :value="formatEnum(colorway.status)"
-                                        />
-                                    </div>
-                                    <h3
-                                        class="text-lg font-semibold text-surface-900"
-                                    >
-                                        {{ colorway.name }}
-                                    </h3>
-                                    <UiImage
-                                        :src="getImageUrl(colorway)"
-                                        :alt="colorway.name"
-                                        class="aspect-square w-full overflow-hidden rounded"
-                                        image-class="h-full w-full object-cover"
-                                    >
-                                        <template #placeholder>
-                                            <span
-                                                class="text-2xl text-surface-400"
-                                                >—</span
-                                            >
-                                        </template>
-                                    </UiImage>
-                                    <div
-                                        class="mt-2 flex flex-col gap-1 border-t border-surface-200 pt-2"
-                                    >
-                                        <div
-                                            v-if="
-                                                colorway.collections &&
-                                                colorway.collections.length > 0
-                                            "
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Collection:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{
-                                                    colorway.collections
-                                                        .map(
-                                                            (c: {
-                                                                id: number;
-                                                                name: string;
-                                                            }) => c.name,
-                                                        )
-                                                        .join(', ')
-                                                }}</span
-                                            >
-                                        </div>
-                                        <div
-                                            v-if="colorway.technique"
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Technique:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{
-                                                    formatEnum(
-                                                        colorway.technique,
-                                                    )
-                                                }}</span
-                                            >
-                                        </div>
-                                        <div
-                                            v-if="
-                                                colorway.colors &&
-                                                colorway.colors.length > 0
-                                            "
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Colors:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{
-                                                    formatColors(
-                                                        colorway.colors,
-                                                    )
-                                                }}</span
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty>
-                        <div
-                            class="flex min-h-[60vh] items-center justify-center"
-                        >
-                            <p class="text-lg text-surface-500">
-                                No colorways found
-                            </p>
-                        </div>
+                            />
+                        </GridItemWrapper>
                     </template>
                 </UiDataView>
             </template>

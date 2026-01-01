@@ -36,6 +36,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+    optionLabel: 'label',
+    optionValue: 'value',
     multiple: false,
     allowEmpty: true,
 });

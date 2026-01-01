@@ -10,6 +10,7 @@ import UiDivider from '@/components/ui/UiDivider.vue';
 import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldAddress from '@/components/ui/UiFormFieldAddress.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
@@ -22,10 +23,12 @@ interface Props {
         name: string;
         email?: string | null;
         phone?: string | null;
-        address?: string | null;
+        address_line1?: string | null;
+        address_line2?: string | null;
         city?: string | null;
-        state?: string | null;
-        zip?: string | null;
+        state_region?: string | null;
+        postal_code?: string | null;
+        country_code?: string | null;
         notes?: string | null;
     };
     orders: Array<{
@@ -48,10 +51,12 @@ const { form, onSubmit } = useFormSubmission({
         name: props.customer.name || '',
         email: props.customer.email || null,
         phone: props.customer.phone || null,
-        address: props.customer.address || null,
+        address_line1: props.customer.address_line1 || null,
+        address_line2: props.customer.address_line2 || null,
         city: props.customer.city || null,
-        state: props.customer.state || null,
-        zip: props.customer.zip || null,
+        state_region: props.customer.state_region || null,
+        postal_code: props.customer.postal_code || null,
+        country_code: props.customer.country_code || null,
         notes: props.customer.notes || null,
     },
     successMessage: 'Customer updated successfully.',
@@ -108,10 +113,12 @@ function formatEnum(value: string | null | undefined): string {
                             name: props.customer.name || '',
                             email: props.customer.email || null,
                             phone: props.customer.phone || null,
-                            address: props.customer.address || null,
+                            address_line1: props.customer.address_line1 || null,
+                            address_line2: props.customer.address_line2 || null,
                             city: props.customer.city || null,
-                            state: props.customer.state || null,
-                            zip: props.customer.zip || null,
+                            state_region: props.customer.state_region || null,
+                            postal_code: props.customer.postal_code || null,
+                            country_code: props.customer.country_code || null,
                             notes: props.customer.notes || null,
                         }"
                         @submit="onSubmit"
@@ -143,35 +150,7 @@ function formatEnum(value: string | null | undefined): string {
 
                         <h3 class="mb-4 text-lg font-semibold">Address</h3>
 
-                        <UiFormFieldInput
-                            name="address"
-                            label="Address"
-                            placeholder="Street address"
-                            :server-error="form.errors.address"
-                        />
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <UiFormFieldInput
-                                name="city"
-                                label="City"
-                                placeholder="City"
-                                :server-error="form.errors.city"
-                            />
-
-                            <UiFormFieldInput
-                                name="state"
-                                label="State"
-                                placeholder="State"
-                                :server-error="form.errors.state"
-                            />
-                        </div>
-
-                        <UiFormFieldInput
-                            name="zip"
-                            label="ZIP Code"
-                            placeholder="ZIP code"
-                            :server-error="form.errors.zip"
-                        />
+                        <UiFormFieldAddress :errors="form.errors" />
 
                         <UiDivider />
 

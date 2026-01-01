@@ -20,8 +20,6 @@ const appearanceOptions = [
             <UiSelectButton
                 :model-value="appearance"
                 :options="appearanceOptions"
-                option-label="label"
-                option-value="value"
                 @update:model-value="updateAppearance"
             />
         </template>

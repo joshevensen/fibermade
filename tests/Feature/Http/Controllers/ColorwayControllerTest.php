@@ -1,7 +1,56 @@
 <?php
 
-test('example', function () {
-    $response = $this->get('/');
+use App\Enums\ColorwayStatus;
+use App\Enums\Technique;
+use App\Models\Account;
+use App\Models\Colorway;
+use App\Models\User;
 
-    $response->assertStatus(200);
+test('user can create a colorway without slug', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create(['name' => 'Test Account']);
+    $user->account_id = $account->id;
+    $user->save();
+
+    $response = $this->actingAs($user)->post(route('colorways.store'), [
+        'name' => 'Test Colorway',
+        'status' => ColorwayStatus::Active->value,
+        'technique' => Technique::Solid->value,
+        'per_pan' => 3,
+    ]);
+
+    $response->assertRedirect(route('colorways.index'));
+    $this->assertDatabaseHas('colorways', [
+        'account_id' => $account->id,
+        'name' => 'Test Colorway',
+        'status' => ColorwayStatus::Active->value,
+    ]);
+    $this->assertDatabaseMissing('colorways', [
+        'account_id' => $account->id,
+        'name' => 'Test Colorway',
+        'slug' => 'test-colorway',
+    ]);
+});
+
+test('user can update a colorway without slug', function () {
+    $user = User::factory()->create();
+    $account = Account::factory()->create(['name' => 'Test Account']);
+    $user->account_id = $account->id;
+    $user->save();
+
+    $colorway = Colorway::factory()->create([
+        'account_id' => $account->id,
+        'name' => 'Original Colorway',
+    ]);
+
+    $response = $this->actingAs($user)->put(route('colorways.update', $colorway), [
+        'name' => 'Updated Colorway',
+        'status' => ColorwayStatus::Active->value,
+    ]);
+
+    $response->assertRedirect(route('colorways.index'));
+    $this->assertDatabaseHas('colorways', [
+        'id' => $colorway->id,
+        'name' => 'Updated Colorway',
+    ]);
 });

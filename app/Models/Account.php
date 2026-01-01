@@ -21,12 +21,12 @@ use Laravel\Cashier\Billable;
  * @property string $name
  * @property string|null $email
  * @property string|null $phone
- * @property string|null $address_line_1
- * @property string|null $address_line_2
+ * @property string|null $address_line1
+ * @property string|null $address_line2
  * @property string|null $city
- * @property string|null $state
- * @property string|null $zip
- * @property string|null $country
+ * @property string|null $state_region
+ * @property string|null $postal_code
+ * @property string|null $country_code
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -46,12 +46,12 @@ class Account extends Model
         'name',
         'email',
         'phone',
-        'address_line_1',
-        'address_line_2',
+        'address_line1',
+        'address_line2',
         'city',
-        'state',
-        'zip',
-        'country',
+        'state_region',
+        'postal_code',
+        'country_code',
     ];
 
     /**

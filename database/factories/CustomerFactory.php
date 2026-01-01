@@ -21,10 +21,12 @@ class CustomerFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->optional()->safeEmail(),
             'phone' => fake()->optional()->phoneNumber(),
-            'address' => fake()->optional()->streetAddress(),
+            'address_line1' => fake()->optional()->streetAddress(),
+            'address_line2' => fake()->optional()->secondaryAddress(),
             'city' => fake()->optional()->city(),
-            'state' => fake()->optional()->stateAbbr(),
-            'zip' => fake()->optional()->postcode(),
+            'state_region' => fake()->optional()->stateAbbr(),
+            'postal_code' => fake()->optional()->postcode(),
+            'country_code' => fake()->optional()->randomElement(['US', 'CA', 'GB', 'AU', 'NZ']),
             'notes' => fake()->optional()->sentence(),
         ];
     }

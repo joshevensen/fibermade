@@ -50,6 +50,7 @@ defineOptions({
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
         :labelPosition="labelPosition ?? 'right'"
+        :required="required"
     >
         <template #default="{ props: fieldProps, id }">
             <UiCheckbox

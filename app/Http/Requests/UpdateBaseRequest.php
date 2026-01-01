@@ -27,7 +27,6 @@ class UpdateBaseRequest extends FormRequest
     {
         return [
             'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
-            'slug' => ['sometimes', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::enum(BaseStatus::class)],
             'weight' => ['nullable', Rule::enum(Weight::class)],

@@ -519,7 +519,6 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     type: 'button',
-    size: 'small',
 });
 
 defineOptions({
@@ -540,7 +539,6 @@ defineOptions({
         :disabled="disabled || loading"
         :type="type"
         :label="label"
-        rounded
     >
         <slot />
     </PrimeButton>

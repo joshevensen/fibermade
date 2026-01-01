@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
@@ -17,7 +18,6 @@ interface Base {
 interface Colorway {
     id: number;
     name: string;
-    slug: string;
     description?: string | null;
     technique?: string | null;
     colors?: string[] | null;
@@ -199,37 +199,17 @@ function handleSortChange(value: { field: string; order: number }): void {
     <AppLayout page-title="Inventory">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.colorways.length"
+                    :filtered-count="filteredAndSortedColorways.length"
+                    label="colorway"
                 >
-                    <div class="text-surface-600">
-                        <template
-                            v-if="
-                                filteredAndSortedColorways.length !==
-                                props.colorways.length
-                            "
-                        >
-                            {{ filteredAndSortedColorways.length }} of
-                            {{ props.colorways.length }}
-                        </template>
-                        <template v-else>
-                            {{ filteredAndSortedColorways.length }}
-                        </template>
-                        {{
-                            filteredAndSortedColorways.length === 1
-                                ? 'colorway'
-                                : 'colorways'
-                        }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="status-filter"
                             label="Status"
                             label-position="left"
                             :options="statusFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="statusFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -244,8 +224,6 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Technique"
                             label-position="left"
                             :options="techniqueFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="techniqueFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -260,8 +238,6 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Color"
                             label-position="left"
                             :options="colorFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="colorFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -276,8 +252,6 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Collection"
                             label-position="left"
                             :options="collectionFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="collectionFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -292,8 +266,6 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Sort"
                             label-position="left"
                             :options="sortOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="currentSortValue"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -303,8 +275,8 @@ function handleSortChange(value: { field: string; order: number }): void {
                             class="w-40"
                             @update:model-value="handleSortChange($event)"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -316,6 +288,7 @@ function handleSortChange(value: { field: string; order: number }): void {
                     :rows="20"
                     :sort-field="sortField"
                     :sort-order="sortOrder"
+                    empty-message="No colorways found"
                 >
                     <template #list="{ items }">
                         <div class="flex flex-col gap-2">
@@ -355,16 +328,6 @@ function handleSortChange(value: { field: string; order: number }): void {
                                     />
                                 </div>
                             </div>
-                        </div>
-                    </template>
-
-                    <template #empty>
-                        <div
-                            class="flex min-h-[60vh] items-center justify-center"
-                        >
-                            <p class="text-lg text-surface-500">
-                                No colorways found
-                            </p>
                         </div>
                     </template>
                 </UiDataView>

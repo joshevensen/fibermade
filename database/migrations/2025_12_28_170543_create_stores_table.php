@@ -17,12 +17,12 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('owner_name')->nullable();
-            $table->string('address_line_1');
-            $table->string('address_line_2')->nullable();
+            $table->string('address_line1');
+            $table->string('address_line2')->nullable();
             $table->string('city');
-            $table->string('state');
-            $table->string('zip');
-            $table->string('country');
+            $table->string('state_region');
+            $table->string('postal_code');
+            $table->string('country_code', 2);
             $table->decimal('discount_rate', 10, 2)->nullable();
             $table->integer('minimum_order_quantity')->nullable();
             $table->decimal('minimum_order_value', 10, 2)->nullable();

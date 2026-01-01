@@ -8,6 +8,7 @@ import UiCard from '@/components/ui/UiCard.vue';
 import UiDivider from '@/components/ui/UiDivider.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldAddress from '@/components/ui/UiFormFieldAddress.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiInputGroup from '@/components/ui/UiInputGroup.vue';
@@ -27,12 +28,12 @@ interface Props {
         name: string;
         email: string;
         owner_name?: string | null;
-        address_line_1: string;
-        address_line_2?: string | null;
+        address_line1: string;
+        address_line2?: string | null;
         city: string;
-        state: string;
-        zip: string;
-        country: string;
+        state_region: string;
+        postal_code: string;
+        country_code: string;
         discount_rate?: number | null;
         minimum_order_quantity?: number | null;
         minimum_order_value?: number | null;
@@ -55,12 +56,12 @@ const { form, onSubmit } = useFormSubmission({
         name: props.store.name || '',
         email: props.store.email || '',
         owner_name: props.store.owner_name || null,
-        address_line_1: props.store.address_line_1 || '',
-        address_line_2: props.store.address_line_2 || null,
+        address_line1: props.store.address_line1 || '',
+        address_line2: props.store.address_line2 || null,
         city: props.store.city || '',
-        state: props.store.state || '',
-        zip: props.store.zip || '',
-        country: props.store.country || '',
+        state_region: props.store.state_region || '',
+        postal_code: props.store.postal_code || '',
+        country_code: props.store.country_code || '',
         discount_rate: props.store.discount_rate || null,
         minimum_order_quantity: props.store.minimum_order_quantity || null,
         minimum_order_value: props.store.minimum_order_value || null,
@@ -89,7 +90,7 @@ function handleDelete(event: Event): void {
 
 <template>
     <AppLayout page-title="Edit Store">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
@@ -121,56 +122,11 @@ function handleDelete(event: Event): void {
 
                         <h3 class="mb-4 text-lg font-semibold">Location</h3>
 
-                        <UiFormFieldInput
-                            name="address_line_1"
-                            label="Address Line 1"
-                            placeholder="Street address"
-                            :server-error="form.errors.address_line_1"
-                            required
+                        <UiFormFieldAddress
+                            :show-line2="true"
+                            :show-country="true"
+                            :errors="form.errors"
                         />
-
-                        <UiFormFieldInput
-                            name="address_line_2"
-                            label="Address Line 2"
-                            placeholder="Apartment, suite, etc."
-                            :server-error="form.errors.address_line_2"
-                        />
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <UiFormFieldInput
-                                name="city"
-                                label="City"
-                                placeholder="City"
-                                :server-error="form.errors.city"
-                                required
-                            />
-
-                            <UiFormFieldInput
-                                name="state"
-                                label="State"
-                                placeholder="State"
-                                :server-error="form.errors.state"
-                                required
-                            />
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <UiFormFieldInput
-                                name="zip"
-                                label="ZIP Code"
-                                placeholder="ZIP code"
-                                :server-error="form.errors.zip"
-                                required
-                            />
-
-                            <UiFormFieldInput
-                                name="country"
-                                label="Country"
-                                placeholder="Country"
-                                :server-error="form.errors.country"
-                                required
-                            />
-                        </div>
 
                         <UiDivider />
 
@@ -187,8 +143,6 @@ function handleDelete(event: Event): void {
                                 <UiSelectButton
                                     v-bind="fieldProps"
                                     :options="statusOptions"
-                                    option-label="label"
-                                    option-value="value"
                                     size="small"
                                     fluid
                                 />
@@ -264,8 +218,6 @@ function handleDelete(event: Event): void {
                                         { label: 'Yes', value: true },
                                         { label: 'No', value: false },
                                     ]"
-                                    option-label="label"
-                                    option-value="value"
                                     size="small"
                                     fluid
                                 />
@@ -286,34 +238,39 @@ function handleDelete(event: Event): void {
                             </template>
                         </UiFormField>
 
-                        <UiDivider />
-
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Store
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/stores')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
-
-                        <UiDivider />
-
-                        <UiButton
-                            type="button"
-                            severity="danger"
-                            outlined
-                            @click="handleDelete($event)"
-                        >
-                            Delete Store
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Store
                         </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this store will permanently remove
+                                    all associated data. This action cannot be
+                                    undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Store
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

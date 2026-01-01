@@ -18,10 +18,11 @@ return new class extends Migration
             $table->timestamp('start_at');
             $table->timestamp('end_at');
             $table->string('location_name')->nullable();
-            $table->string('location_address')->nullable();
-            $table->string('location_city')->nullable();
-            $table->string('location_state')->nullable();
-            $table->string('location_zip')->nullable();
+            $table->string('address_line1')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state_region')->nullable();
+            $table->string('postal_code')->nullable();
+            $table->string('country_code', 2)->nullable();
             $table->text('description')->nullable();
             $table->string('website')->nullable();
             $table->softDeletes();

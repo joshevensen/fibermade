@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import PageHeader from '@/components/PageHeader.vue';
 import UiTabPanel from '@/components/ui/UiTabPanel.vue';
 import UiTabs from '@/components/ui/UiTabs.vue';
 import { useIcon } from '@/composables/useIcon';
@@ -62,8 +61,6 @@ watch(
 
 <template>
     <AppLayout page-title="Settings">
-        <PageHeader heading="Settings" :icon="IconList.Settings" />
-
         <UiTabs :value="activeTab" :tabs="tabs" @update:value="handleTabChange">
             <UiTabPanel value="account">
                 <div class="space-y-4">

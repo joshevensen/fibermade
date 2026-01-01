@@ -9,7 +9,6 @@ import BaseCreateDrawer from '@/pages/bases/BaseCreateDrawer.vue';
 import CollectionCreateDrawer from '@/pages/collections/CollectionCreateDrawer.vue';
 import ColorwayCreateDrawer from '@/pages/colorways/ColorwayCreateDrawer.vue';
 import CustomerCreateDrawer from '@/pages/customers/CustomerCreateDrawer.vue';
-import DiscountCreateDrawer from '@/pages/discounts/DiscountCreateDrawer.vue';
 import DyeCreateDrawer from '@/pages/dyes/DyeCreateDrawer.vue';
 import OrderCreateDrawer from '@/pages/orders/OrderCreateDrawer.vue';
 import ShowCreateDrawer from '@/pages/shows/ShowCreateDrawer.vue';
@@ -39,7 +38,6 @@ const collectionDrawerVisible = computed(
 );
 const colorwayDrawerVisible = computed(() => activeDrawer.value === 'colorway');
 const customerDrawerVisible = computed(() => activeDrawer.value === 'customer');
-const discountDrawerVisible = computed(() => activeDrawer.value === 'discount');
 const dyeDrawerVisible = computed(() => activeDrawer.value === 'dye');
 const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
 const showDrawerVisible = computed(() => activeDrawer.value === 'show');
@@ -119,14 +117,6 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
     />
     <CustomerCreateDrawer
         :visible="customerDrawerVisible"
-        @update:visible="
-            (value) => {
-                if (!value) closeDrawer();
-            }
-        "
-    />
-    <DiscountCreateDrawer
-        :visible="discountDrawerVisible"
         @update:visible="
             (value) => {
                 if (!value) closeDrawer();

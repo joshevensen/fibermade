@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamp('starts_at')->nullable();
             $table->timestamp('ends_at')->nullable();
             $table->boolean('is_active')->default(true);
-            $table->string('shopify_discount_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

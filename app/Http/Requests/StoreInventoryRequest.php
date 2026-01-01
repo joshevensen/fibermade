@@ -28,7 +28,6 @@ class StoreInventoryRequest extends FormRequest
             'colorway_id' => ['required', 'integer', Rule::exists(Colorway::class, 'id')],
             'base_id' => ['required', 'integer', Rule::exists(Base::class, 'id')],
             'quantity' => ['required', 'integer', 'min:0'],
-            'shopify_variant_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

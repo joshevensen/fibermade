@@ -27,7 +27,6 @@ use Illuminate\Support\Facades\Storage;
  * @property int $id
  * @property int $account_id
  * @property string $name
- * @property string $slug
  * @property string|null $description
  * @property \App\Enums\Technique|null $technique
  * @property \Illuminate\Support\Collection<int, \App\Enums\Color>|null $colors
@@ -35,7 +34,6 @@ use Illuminate\Support\Facades\Storage;
  * @property string|null $recipe
  * @property string|null $notes
  * @property \App\Enums\ColorwayStatus $status
- * @property string|null $shopify_product_id
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -55,7 +53,6 @@ class Colorway extends Model
     protected $fillable = [
         'account_id',
         'name',
-        'slug',
         'description',
         'technique',
         'colors',
@@ -63,7 +60,6 @@ class Colorway extends Model
         'recipe',
         'notes',
         'status',
-        'shopify_product_id',
         'created_by',
         'updated_by',
     ];
@@ -167,5 +163,50 @@ class Colorway extends Model
         }
 
         return null;
+    }
+
+    /**
+     * Get the external identifiers for this colorway.
+     */
+    public function externalIdentifiers(): MorphMany
+    {
+        return $this->morphMany(ExternalIdentifier::class, 'identifiable');
+    }
+
+    /**
+     * Get external ID for a specific integration and external type.
+     */
+    public function getExternalIdFor(Integration $integration, string $externalType): ?string
+    {
+        $identifier = $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->first();
+
+        return $identifier?->external_id;
+    }
+
+    /**
+     * Get all external IDs grouped by integration type.
+     */
+    public function getExternalIdsByIntegration(): array
+    {
+        return $this->externalIdentifiers()
+            ->with('integration')
+            ->get()
+            ->groupBy(fn ($identifier) => $identifier->integration->type->value)
+            ->map(fn ($identifiers) => $identifiers->keyBy('external_type')->map->external_id)
+            ->toArray();
+    }
+
+    /**
+     * Check if this colorway has an external ID for the given integration and type.
+     */
+    public function hasExternalId(Integration $integration, string $externalType): bool
+    {
+        return $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->exists();
     }
 }

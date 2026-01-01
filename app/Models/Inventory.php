@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
  * Represents production-aware inventory tracking for colorway + base combinations.
@@ -19,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $colorway_id
  * @property int $base_id
  * @property int $quantity
- * @property string|null $shopify_variant_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -38,7 +38,6 @@ class Inventory extends Model
         'colorway_id',
         'base_id',
         'quantity',
-        'shopify_variant_id',
     ];
 
     /**
@@ -75,5 +74,50 @@ class Inventory extends Model
     public function base(): BelongsTo
     {
         return $this->belongsTo(Base::class);
+    }
+
+    /**
+     * Get the external identifiers for this inventory entry.
+     */
+    public function externalIdentifiers(): MorphMany
+    {
+        return $this->morphMany(ExternalIdentifier::class, 'identifiable');
+    }
+
+    /**
+     * Get external ID for a specific integration and external type.
+     */
+    public function getExternalIdFor(Integration $integration, string $externalType): ?string
+    {
+        $identifier = $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->first();
+
+        return $identifier?->external_id;
+    }
+
+    /**
+     * Get all external IDs grouped by integration type.
+     */
+    public function getExternalIdsByIntegration(): array
+    {
+        return $this->externalIdentifiers()
+            ->with('integration')
+            ->get()
+            ->groupBy(fn ($identifier) => $identifier->integration->type->value)
+            ->map(fn ($identifiers) => $identifiers->keyBy('external_type')->map->external_id)
+            ->toArray();
+    }
+
+    /**
+     * Check if this inventory entry has an external ID for the given integration and type.
+     */
+    public function hasExternalId(Integration $integration, string $externalType): bool
+    {
+        return $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->exists();
     }
 }

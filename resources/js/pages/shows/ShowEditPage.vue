@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { update } from '@/actions/App/Http/Controllers/ShowController';
+import {
+    destroy as destroyShow,
+    update,
+} from '@/actions/App/Http/Controllers/ShowController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
+import UiFormFieldAddress from '@/components/ui/UiFormFieldAddress.vue';
 import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -17,16 +22,18 @@ interface Props {
         start_at: string;
         end_at: string;
         location_name?: string | null;
-        location_address?: string | null;
-        location_city?: string | null;
-        location_state?: string | null;
-        location_zip?: string | null;
+        address_line1?: string | null;
+        city?: string | null;
+        state_region?: string | null;
+        postal_code?: string | null;
+        country_code?: string | null;
         description?: string | null;
         website?: string | null;
     };
 }
 
 const props = defineProps<Props>();
+const { requireDelete } = useConfirm();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.show.id),
@@ -35,10 +42,11 @@ const { form, onSubmit } = useFormSubmission({
         start_at: props.show.start_at ? new Date(props.show.start_at) : null,
         end_at: props.show.end_at ? new Date(props.show.end_at) : null,
         location_name: props.show.location_name || null,
-        location_address: props.show.location_address || null,
-        location_city: props.show.location_city || null,
-        location_state: props.show.location_state || null,
-        location_zip: props.show.location_zip || null,
+        address_line1: props.show.address_line1 || null,
+        city: props.show.city || null,
+        state_region: props.show.state_region || null,
+        postal_code: props.show.postal_code || null,
+        country_code: props.show.country_code || null,
         description: props.show.description || null,
         website: props.show.website || null,
     },
@@ -47,11 +55,21 @@ const { form, onSubmit } = useFormSubmission({
         router.visit('/shows');
     },
 });
+
+function handleDelete(event: Event): void {
+    requireDelete({
+        target: event.currentTarget as HTMLElement,
+        message: `Are you sure you want to delete ${props.show.name}?`,
+        onAccept: () => {
+            router.delete(destroyShow.url(props.show.id));
+        },
+    });
+}
 </script>
 
 <template>
     <AppLayout page-title="Edit Show">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
@@ -90,35 +108,7 @@ const { form, onSubmit } = useFormSubmission({
                             :server-error="form.errors.location_name"
                         />
 
-                        <UiFormFieldInput
-                            name="location_address"
-                            label="Address"
-                            placeholder="Street address"
-                            :server-error="form.errors.location_address"
-                        />
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <UiFormFieldInput
-                                name="location_city"
-                                label="City"
-                                placeholder="City"
-                                :server-error="form.errors.location_city"
-                            />
-
-                            <UiFormFieldInput
-                                name="location_state"
-                                label="State"
-                                placeholder="State"
-                                :server-error="form.errors.location_state"
-                            />
-                        </div>
-
-                        <UiFormFieldInput
-                            name="location_zip"
-                            label="ZIP Code"
-                            placeholder="ZIP code"
-                            :server-error="form.errors.location_zip"
-                        />
+                        <UiFormFieldAddress :errors="form.errors" />
 
                         <UiFormFieldTextarea
                             name="description"
@@ -134,21 +124,39 @@ const { form, onSubmit } = useFormSubmission({
                             :server-error="form.errors.website"
                         />
 
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Show
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/shows')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Show
+                        </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this show will permanently remove
+                                    all associated data. This action cannot be
+                                    undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Show
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

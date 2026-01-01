@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('slug');
             $table->text('description')->nullable();
             $table->string('technique')->nullable();
             $table->json('colors')->nullable();
@@ -23,15 +22,12 @@ return new class extends Migration
             $table->text('recipe')->nullable();
             $table->text('notes')->nullable();
             $table->string('status')->default('active');
-            $table->string('shopify_product_id')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
 
-            $table->unique(['account_id', 'slug']);
             $table->index('status');
-            $table->index('shopify_product_id');
         });
     }
 

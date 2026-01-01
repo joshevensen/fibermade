@@ -5,8 +5,6 @@ import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldAutoComplete from '@/components/ui/UiFormFieldAutoComplete.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
-import UiFormFieldToggleSwitch from '@/components/ui/UiFormFieldToggleSwitch.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -32,9 +30,6 @@ const { form, onSubmit } = useFormSubmission({
     initialValues: {
         name: '',
         manufacturer: null,
-        notes: null,
-        does_bleed: false,
-        do_like: false,
     },
     successMessage: 'Dye created successfully.',
     onSuccess: () => {
@@ -69,7 +64,6 @@ function searchManufacturer(event: { query: string }): void {
                 <UiFormFieldInput
                     name="name"
                     label="Name"
-                    placeholder="Dye name"
                     :server-error="form.errors.name"
                     required
                 />
@@ -77,29 +71,9 @@ function searchManufacturer(event: { query: string }): void {
                 <UiFormFieldAutoComplete
                     name="manufacturer"
                     label="Manufacturer"
-                    placeholder="Select or type manufacturer"
                     :suggestions="manufacturerSuggestions"
                     :server-error="form.errors.manufacturer"
                     @complete="searchManufacturer"
-                />
-
-                <UiFormFieldTextarea
-                    name="notes"
-                    label="Notes"
-                    placeholder="Dye notes"
-                    :server-error="form.errors.notes"
-                />
-
-                <UiFormFieldToggleSwitch
-                    name="does_bleed"
-                    label="Does Bleed"
-                    :server-error="form.errors.does_bleed"
-                />
-
-                <UiFormFieldToggleSwitch
-                    name="do_like"
-                    label="Do Like"
-                    :server-error="form.errors.do_like"
                 />
 
                 <UiButton type="submit" :loading="form.processing">

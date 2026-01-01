@@ -7,10 +7,11 @@ interface Show {
     start_at: string;
     end_at: string;
     location_name?: string | null;
-    location_address?: string | null;
-    location_city?: string | null;
-    location_state?: string | null;
-    location_zip?: string | null;
+    address_line1?: string | null;
+    city?: string | null;
+    state_region?: string | null;
+    postal_code?: string | null;
+    country_code?: string | null;
 }
 
 interface Props {
@@ -34,12 +35,12 @@ function formatLocation(show: Show): string {
         parts.push(show.location_name);
     }
 
-    if (show.location_city) {
-        parts.push(show.location_city);
+    if (show.city) {
+        parts.push(show.city);
     }
 
-    if (show.location_state) {
-        parts.push(show.location_state);
+    if (show.state_region) {
+        parts.push(show.state_region);
     }
 
     return parts.join(', ') || 'Location TBD';

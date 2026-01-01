@@ -5,7 +5,6 @@ import {
 } from '@/actions/App/Http/Controllers/BaseController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-import UiDivider from '@/components/ui/UiDivider.vue';
 import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
@@ -25,7 +24,6 @@ import { router } from '@inertiajs/vue3';
 interface Props {
     base: {
         id: number;
-        slug: string;
         description?: string | null;
         status: string;
         weight?: string | null;
@@ -52,7 +50,6 @@ const { requireDelete } = useConfirm();
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.base.id),
     initialValues: {
-        slug: props.base.slug || '',
         description: props.base.description || null,
         status: props.base.status || null,
         weight: props.base.weight || null,
@@ -87,7 +84,7 @@ function handleDelete(event: Event): void {
 
 <template>
     <AppLayout page-title="Edit Base">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
@@ -96,14 +93,6 @@ function handleDelete(event: Event): void {
                             label="Descriptor"
                             placeholder="Base descriptor"
                             :server-error="form.errors.descriptor"
-                            required
-                        />
-
-                        <UiFormFieldInput
-                            name="slug"
-                            label="Slug"
-                            placeholder="base-slug"
-                            :server-error="form.errors.slug"
                             required
                         />
 
@@ -129,8 +118,6 @@ function handleDelete(event: Event): void {
                                 <UiSelectButton
                                     v-bind="fieldProps"
                                     :options="baseStatusOptions"
-                                    option-label="label"
-                                    option-value="value"
                                     size="small"
                                     fluid
                                 />
@@ -141,8 +128,6 @@ function handleDelete(event: Event): void {
                             name="weight"
                             label="Weight"
                             :options="weightOptions"
-                            option-label="label"
-                            option-value="value"
                             placeholder="Select weight"
                             :server-error="form.errors.weight"
                             show-clear
@@ -256,34 +241,39 @@ function handleDelete(event: Event): void {
                             :server-error="form.errors.bamboo_percent"
                         />
 
-                        <UiDivider />
-
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Base
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/bases')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
-
-                        <UiDivider />
-
-                        <UiButton
-                            type="button"
-                            severity="danger"
-                            outlined
-                            @click="handleDelete($event)"
-                        >
-                            Delete Base
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Base
                         </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this base will permanently remove
+                                    all associated data. This action cannot be
+                                    undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Base
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

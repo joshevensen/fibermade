@@ -20,10 +20,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon $start_at
  * @property \Illuminate\Support\Carbon $end_at
  * @property string|null $location_name
- * @property string|null $location_address
- * @property string|null $location_city
- * @property string|null $location_state
- * @property string|null $location_zip
+ * @property string|null $address_line1
+ * @property string|null $city
+ * @property string|null $state_region
+ * @property string|null $postal_code
+ * @property string|null $country_code
  * @property string|null $description
  * @property string|null $website
  * @property \Illuminate\Support\Carbon|null $deleted_at
@@ -46,10 +47,11 @@ class Show extends Model
         'start_at',
         'end_at',
         'location_name',
-        'location_address',
-        'location_city',
-        'location_state',
-        'location_zip',
+        'address_line1',
+        'city',
+        'state_region',
+        'postal_code',
+        'country_code',
         'description',
         'website',
     ];

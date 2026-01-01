@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { edit as editCustomer } from '@/actions/App/Http/Controllers/CustomerController';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -52,14 +53,7 @@ const columns = computed(() => [
     <AppLayout page-title="Customers">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4"
-                >
-                    <div class="text-surface-600">
-                        {{ customers.length }}
-                        {{ customers.length === 1 ? 'customer' : 'customers' }}
-                    </div>
-                </div>
+                <PageFilter :count="props.customers.length" label="customer" />
             </template>
 
             <template #content>

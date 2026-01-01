@@ -5,7 +5,6 @@ export type DrawerType =
     | 'collection'
     | 'colorway'
     | 'customer'
-    | 'discount'
     | 'dye'
     | 'order'
     | 'show'

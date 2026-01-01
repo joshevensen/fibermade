@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { update } from '@/actions/App/Http/Controllers/CollectionController';
+import {
+    destroy as destroyCollection,
+    update,
+} from '@/actions/App/Http/Controllers/CollectionController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -13,18 +17,17 @@ interface Props {
     collection: {
         id: number;
         name: string;
-        slug: string;
         description?: string | null;
     };
 }
 
 const props = defineProps<Props>();
+const { requireDelete } = useConfirm();
 
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.collection.id),
     initialValues: {
         name: props.collection.name || '',
-        slug: props.collection.slug || '',
         description: props.collection.description || null,
     },
     successMessage: 'Collection updated successfully.',
@@ -32,11 +35,21 @@ const { form, onSubmit } = useFormSubmission({
         router.visit('/collections');
     },
 });
+
+function handleDelete(event: Event): void {
+    requireDelete({
+        target: event.currentTarget as HTMLElement,
+        message: `Are you sure you want to delete ${props.collection.name}?`,
+        onAccept: () => {
+            router.delete(destroyCollection.url(props.collection.id));
+        },
+    });
+}
 </script>
 
 <template>
     <AppLayout page-title="Edit Collection">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
@@ -48,14 +61,6 @@ const { form, onSubmit } = useFormSubmission({
                             required
                         />
 
-                        <UiFormFieldInput
-                            name="slug"
-                            label="Slug"
-                            placeholder="collection-slug"
-                            :server-error="form.errors.slug"
-                            required
-                        />
-
                         <UiFormFieldTextarea
                             name="description"
                             label="Description"
@@ -63,21 +68,39 @@ const { form, onSubmit } = useFormSubmission({
                             :server-error="form.errors.description"
                         />
 
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Collection
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/collections')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Collection
+                        </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this collection will permanently
+                                    remove all associated data. This action
+                                    cannot be undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Collection
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

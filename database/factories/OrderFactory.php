@@ -34,7 +34,6 @@ class OrderFactory extends Factory
         return [
             'type' => $type,
             'status' => $status,
-            'shopify_order_id' => $type === OrderType::Retail ? fake()->optional(0.7)->numerify('##########') : null,
             'order_date' => $orderDate,
             'subtotal_amount' => $subtotal,
             'shipping_amount' => $shipping,

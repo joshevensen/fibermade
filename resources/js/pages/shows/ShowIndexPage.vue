@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { edit as editShow } from '@/actions/App/Http/Controllers/ShowController';
+import ListItem from '@/components/ListItem.vue';
+import ListItemWrapper from '@/components/ListItemWrapper.vue';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
@@ -13,10 +16,11 @@ interface Show {
     start_at: string;
     end_at: string;
     location_name?: string | null;
-    location_address?: string | null;
-    location_city?: string | null;
-    location_state?: string | null;
-    location_zip?: string | null;
+    address_line1?: string | null;
+    city?: string | null;
+    state_region?: string | null;
+    postal_code?: string | null;
+    country_code?: string | null;
     description?: string | null;
     website?: string | null;
 }
@@ -101,43 +105,36 @@ function formatDateRange(start: string, end: string): string {
 function handleShowClick(show: Show): void {
     router.visit(editShow.url(show.id));
 }
+
+function getListItemProps(show: Show) {
+    const metadata: string[] = [];
+    metadata.push(formatDateRange(show.start_at, show.end_at));
+    if (show.location_name) {
+        metadata.push(show.location_name);
+    }
+
+    return {
+        title: show.name,
+        metadata: metadata.length > 0 ? metadata : undefined,
+    };
+}
 </script>
 
 <template>
     <AppLayout page-title="Shows">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.shows.length"
+                    :filtered-count="filteredAndSortedShows.length"
+                    label="show"
                 >
-                    <div class="text-surface-600">
-                        <template
-                            v-if="
-                                filteredAndSortedShows.length !==
-                                props.shows.length
-                            "
-                        >
-                            {{ filteredAndSortedShows.length }} of
-                            {{ props.shows.length }}
-                        </template>
-                        <template v-else>
-                            {{ filteredAndSortedShows.length }}
-                        </template>
-                        {{
-                            filteredAndSortedShows.length === 1
-                                ? 'show'
-                                : 'shows'
-                        }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="date-filter"
                             label="Date"
                             label-position="left"
                             :options="dateFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="dateFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -147,8 +144,8 @@ function handleShowClick(show: Show): void {
                             class="w-40"
                             @update:model-value="dateFilter = $event"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -158,47 +155,17 @@ function handleShowClick(show: Show): void {
                     data-key="id"
                     paginator
                     :rows="20"
+                    empty-message="No shows found"
                 >
                     <template #list="{ items }">
-                        <div class="flex flex-col gap-2">
-                            <div
+                        <ListItemWrapper>
+                            <ListItem
                                 v-for="show in items"
                                 :key="show.id"
-                                class="flex cursor-pointer items-center justify-between rounded-lg border border-surface-200 p-4 transition-colors hover:bg-surface-50"
+                                v-bind="getListItemProps(show)"
                                 @click="handleShowClick(show)"
-                            >
-                                <div class="min-w-0 flex-1">
-                                    <div class="font-semibold text-surface-900">
-                                        {{ show.name }}
-                                    </div>
-                                    <div
-                                        class="mt-1 flex gap-4 text-sm text-surface-600"
-                                    >
-                                        <span>
-                                            {{
-                                                formatDateRange(
-                                                    show.start_at,
-                                                    show.end_at,
-                                                )
-                                            }}
-                                        </span>
-                                        <span v-if="show.location_name">
-                                            {{ show.location_name }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty>
-                        <div
-                            class="flex min-h-[60vh] items-center justify-center"
-                        >
-                            <p class="text-lg text-surface-500">
-                                No shows found
-                            </p>
-                        </div>
+                            />
+                        </ListItemWrapper>
                     </template>
                 </UiDataView>
             </template>

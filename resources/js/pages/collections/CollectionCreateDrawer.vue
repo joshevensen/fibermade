@@ -2,9 +2,10 @@
 import { store } from '@/actions/App/Http/Controllers/CollectionController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDrawer from '@/components/ui/UiDrawer.vue';
+import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { router } from '@inertiajs/vue3';
 
@@ -26,7 +27,6 @@ const { form, onSubmit } = useFormSubmission({
     route: store,
     initialValues: {
         name: '',
-        slug: '',
         description: null,
     },
     successMessage: 'Collection created successfully.',
@@ -53,25 +53,19 @@ const { form, onSubmit } = useFormSubmission({
                 <UiFormFieldInput
                     name="name"
                     label="Name"
-                    placeholder="Collection name"
                     :server-error="form.errors.name"
                     required
                 />
 
-                <UiFormFieldInput
-                    name="slug"
-                    label="Slug"
-                    placeholder="collection-slug"
-                    :server-error="form.errors.slug"
-                    required
-                />
-
-                <UiFormFieldTextarea
+                <UiFormField
                     name="description"
                     label="Description"
-                    placeholder="Collection description"
                     :server-error="form.errors.description"
-                />
+                >
+                    <template #default="{ props: fieldProps }">
+                        <UiEditor v-bind="fieldProps" />
+                    </template>
+                </UiFormField>
 
                 <UiButton type="submit" :loading="form.processing">
                     Create Collection

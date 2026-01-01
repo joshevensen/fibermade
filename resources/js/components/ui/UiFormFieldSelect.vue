@@ -18,6 +18,7 @@ interface Props {
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
     labelPosition?: 'top' | 'left' | 'right';
+    required?: boolean;
     // UiSelect props
     options?: any[];
     optionLabel?: string | ((data: any) => string);
@@ -36,6 +37,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+    optionLabel: 'label',
+    optionValue: 'value',
     scrollHeight: '14rem',
     fluid: true,
 });
@@ -59,6 +62,7 @@ defineOptions({
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
         :labelPosition="labelPosition"
+        :required="required"
         :size="size"
     >
         <template #default="{ props: fieldProps, id }">

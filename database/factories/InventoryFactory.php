@@ -18,7 +18,6 @@ class InventoryFactory extends Factory
     {
         return [
             'quantity' => fake()->numberBetween(0, 100),
-            'shopify_variant_id' => fake()->optional(0.3)->numerify('##########'),
         ];
     }
 }

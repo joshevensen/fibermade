@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Enums\BaseStatus;
 use App\Enums\Weight;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Base>
@@ -50,7 +49,6 @@ class BaseFactory extends Factory
 
         return [
             'account_id' => \App\Models\Account::factory(),
-            'slug' => Str::slug($descriptor),
             'description' => fake()->optional(0.7)->sentence(),
             'status' => $status,
             'weight' => $weight,

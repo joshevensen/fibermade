@@ -116,6 +116,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+    optionLabel: 'label',
+    optionValue: 'value',
     scrollHeight: '14rem',
     fluid: true,
 });

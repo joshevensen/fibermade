@@ -43,7 +43,6 @@ class StoreOrderRequest extends FormRequest
             'type' => ['required', Rule::enum(OrderType::class)],
             'status' => ['required', Rule::enum(OrderStatus::class)],
             'orderable_id' => $orderableIdRule,
-            'shopify_order_id' => ['nullable', 'string', 'max:255'],
             'order_date' => ['required', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'shipping_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],

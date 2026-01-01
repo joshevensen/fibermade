@@ -17,6 +17,7 @@ interface Props {
     validateOnSubmit?: boolean;
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
+    required?: boolean;
     // UiInputNumber props
     showButtons?: boolean;
     buttonLayout?: 'horizontal' | 'vertical' | 'stacked';
@@ -56,6 +57,8 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
+        :required="required"
+        :size="size"
     >
         <template #default="{ props: fieldProps, id }">
             <UiInputNumber

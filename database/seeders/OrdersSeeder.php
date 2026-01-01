@@ -2,10 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Enums\OrderStatus;
+use App\Enums\OrderType;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
 use App\Models\Customer;
+use App\Models\ExternalIdentifier;
+use App\Models\Integration;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Show;
@@ -38,11 +42,25 @@ class OrdersSeeder extends Seeder
      */
     protected function seedCustomers(Account $account): void
     {
+        $integration = Integration::where('account_id', $account->id)->first();
+
         Customer::factory()
-            ->count(10)
+            ->count(80)
             ->create([
                 'account_id' => $account->id,
-            ]);
+            ])
+            ->each(function ($customer) use ($integration) {
+                // Create external identifier for some customers (30% chance)
+                if ($integration && fake()->boolean(30)) {
+                    ExternalIdentifier::create([
+                        'integration_id' => $integration->id,
+                        'identifiable_type' => Customer::class,
+                        'identifiable_id' => $customer->id,
+                        'external_type' => 'customer',
+                        'external_id' => fake()->numerify('##########'),
+                    ]);
+                }
+            });
     }
 
     /**
@@ -66,10 +84,10 @@ class OrdersSeeder extends Seeder
                 'start_at' => now()->addMonths(2)->startOfDay()->setTime(9, 0),
                 'end_at' => now()->addMonths(2)->addDays(2)->endOfDay()->setTime(17, 0),
                 'location_name' => 'Convention Center',
-                'location_address' => '123 Main Street',
-                'location_city' => 'Portland',
-                'location_state' => 'OR',
-                'location_zip' => '97201',
+                'address_line1' => '123 Main Street',
+                'city' => 'Portland',
+                'state_region' => 'OR',
+                'postal_code' => '97201',
                 'description' => 'Annual spring fiber festival featuring local yarn dyers, fiber artists, and workshops.',
                 'website' => 'https://springfiberfestival.example.com',
             ],
@@ -78,10 +96,10 @@ class OrdersSeeder extends Seeder
                 'start_at' => now()->addWeeks(3)->setTime(10, 0),
                 'end_at' => now()->addWeeks(3)->setTime(18, 0),
                 'location_name' => 'Knit & Purl Yarn Shop',
-                'location_address' => '456 Oak Avenue',
-                'location_city' => 'Seattle',
-                'location_state' => 'WA',
-                'location_zip' => '98101',
+                'address_line1' => '456 Oak Avenue',
+                'city' => 'Seattle',
+                'state_region' => 'WA',
+                'postal_code' => '98101',
                 'description' => 'Exclusive trunk show featuring our latest colorways and bases.',
                 'website' => null,
             ],
@@ -90,10 +108,10 @@ class OrdersSeeder extends Seeder
                 'start_at' => now()->addMonths(4)->startOfDay()->setTime(8, 0),
                 'end_at' => now()->addMonths(4)->endOfDay()->setTime(20, 0),
                 'location_name' => 'Downtown Market Square',
-                'location_address' => '789 Market Street',
-                'location_city' => 'San Francisco',
-                'location_state' => 'CA',
-                'location_zip' => '94102',
+                'address_line1' => '789 Market Street',
+                'city' => 'San Francisco',
+                'state_region' => 'CA',
+                'postal_code' => '94102',
                 'description' => 'Outdoor yarn market with multiple vendors, food trucks, and live music.',
                 'website' => 'https://downtownyarnmarket.example.com',
             ],
@@ -102,10 +120,10 @@ class OrdersSeeder extends Seeder
                 'start_at' => now()->addMonths(6)->startOfDay()->setTime(9, 0),
                 'end_at' => now()->addMonths(6)->addDays(3)->endOfDay()->setTime(17, 0),
                 'location_name' => 'Fairgrounds',
-                'location_address' => '1000 Fairgrounds Road',
-                'location_city' => 'Denver',
-                'location_state' => 'CO',
-                'location_zip' => '80202',
+                'address_line1' => '1000 Fairgrounds Road',
+                'city' => 'Denver',
+                'state_region' => 'CO',
+                'postal_code' => '80202',
                 'description' => 'Multi-day fiber arts fair with workshops, demonstrations, and vendor booths.',
                 'website' => 'https://fallfiberartsfair.example.com',
             ],
@@ -114,10 +132,10 @@ class OrdersSeeder extends Seeder
                 'start_at' => now()->addMonths(8)->startOfDay()->setTime(10, 0),
                 'end_at' => now()->addMonths(8)->endOfDay()->setTime(16, 0),
                 'location_name' => 'Community Center',
-                'location_address' => '555 Elm Street',
-                'location_city' => 'Boulder',
-                'location_state' => 'CO',
-                'location_zip' => '80301',
+                'address_line1' => '555 Elm Street',
+                'city' => 'Boulder',
+                'state_region' => 'CO',
+                'postal_code' => '80301',
                 'description' => 'Holiday market featuring hand-dyed yarns perfect for gift knitting.',
                 'website' => null,
             ],
@@ -130,10 +148,10 @@ class OrdersSeeder extends Seeder
                 'start_at' => $showData['start_at'],
                 'end_at' => $showData['end_at'],
                 'location_name' => $showData['location_name'],
-                'location_address' => $showData['location_address'],
-                'location_city' => $showData['location_city'],
-                'location_state' => $showData['location_state'],
-                'location_zip' => $showData['location_zip'],
+                'address_line1' => $showData['address_line1'],
+                'city' => $showData['city'],
+                'state_region' => $showData['state_region'],
+                'postal_code' => $showData['postal_code'],
                 'description' => $showData['description'],
                 'website' => $showData['website'],
             ]);
@@ -146,13 +164,38 @@ class OrdersSeeder extends Seeder
     protected function seedOrders(Account $account): void
     {
         $user = User::where('account_id', $account->id)->first();
+        $integration = Integration::where('account_id', $account->id)->first();
 
-        Order::factory()
-            ->count(150)
-            ->create([
-                'account_id' => $account->id,
-                'created_by' => $user?->id,
-            ]);
+        // Create orders with specific status distribution:
+        // 124 closed, 12 cancelled, 10 open, 4 draft
+        $statusDistribution = [
+            [OrderStatus::Closed, 124],
+            [OrderStatus::Cancelled, 12],
+            [OrderStatus::Open, 10],
+            [OrderStatus::Draft, 4],
+        ];
+
+        foreach ($statusDistribution as [$status, $count]) {
+            Order::factory()
+                ->count($count)
+                ->create([
+                    'account_id' => $account->id,
+                    'status' => $status,
+                    'created_by' => $user?->id,
+                ])
+                ->each(function ($order) use ($integration) {
+                    // Create external identifier for retail orders (70% chance)
+                    if ($integration && $order->type === OrderType::Retail && fake()->boolean(70)) {
+                        ExternalIdentifier::create([
+                            'integration_id' => $integration->id,
+                            'identifiable_type' => Order::class,
+                            'identifiable_id' => $order->id,
+                            'external_type' => 'order',
+                            'external_id' => fake()->numerify('##########'),
+                        ]);
+                    }
+                });
+        }
     }
 
     /**

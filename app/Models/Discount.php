@@ -6,6 +6,7 @@ use App\Enums\DiscountType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -26,7 +27,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property \Illuminate\Support\Carbon|null $starts_at
  * @property \Illuminate\Support\Carbon|null $ends_at
  * @property bool $is_active
- * @property string|null $shopify_discount_id
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -50,7 +50,6 @@ class Discount extends Model
         'starts_at',
         'ends_at',
         'is_active',
-        'shopify_discount_id',
     ];
 
     /**
@@ -75,5 +74,50 @@ class Discount extends Model
     public function account(): BelongsTo
     {
         return $this->belongsTo(Account::class);
+    }
+
+    /**
+     * Get the external identifiers for this discount.
+     */
+    public function externalIdentifiers(): MorphMany
+    {
+        return $this->morphMany(ExternalIdentifier::class, 'identifiable');
+    }
+
+    /**
+     * Get external ID for a specific integration and external type.
+     */
+    public function getExternalIdFor(Integration $integration, string $externalType): ?string
+    {
+        $identifier = $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->first();
+
+        return $identifier?->external_id;
+    }
+
+    /**
+     * Get all external IDs grouped by integration type.
+     */
+    public function getExternalIdsByIntegration(): array
+    {
+        return $this->externalIdentifiers()
+            ->with('integration')
+            ->get()
+            ->groupBy(fn ($identifier) => $identifier->integration->type->value)
+            ->map(fn ($identifiers) => $identifiers->keyBy('external_type')->map->external_id)
+            ->toArray();
+    }
+
+    /**
+     * Check if this discount has an external ID for the given integration and type.
+     */
+    public function hasExternalId(Integration $integration, string $externalType): bool
+    {
+        return $this->externalIdentifiers()
+            ->where('integration_id', $integration->id)
+            ->where('external_type', $externalType)
+            ->exists();
     }
 }

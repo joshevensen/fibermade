@@ -37,3 +37,10 @@ export interface User {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+export interface ExternalIdentifier {
+    integration_type: string;
+    external_type: string;
+    external_id: string;
+    data?: Record<string, any>;
+}

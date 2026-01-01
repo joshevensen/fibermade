@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Enums\BaseStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Collection>
@@ -36,7 +35,6 @@ class CollectionFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'description' => fake()->optional(0.7)->paragraph(),
             'status' => $status,
         ];

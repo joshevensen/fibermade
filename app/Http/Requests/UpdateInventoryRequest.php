@@ -30,7 +30,6 @@ class UpdateInventoryRequest extends FormRequest
             'colorway_id' => ['sometimes', 'integer', Rule::exists(Colorway::class, 'id')],
             'base_id' => ['sometimes', 'integer', Rule::exists(Base::class, 'id')],
             'quantity' => ['sometimes', 'integer', 'min:0'],
-            'shopify_variant_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

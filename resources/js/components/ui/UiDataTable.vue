@@ -229,6 +229,7 @@ export const dataTableCss: DataTableTokenSections.CSS = /*css*/ `
 </script>
 
 <script setup lang="ts">
+import { computed } from 'vue';
 import PrimeDataTable from 'primevue/datatable';
 import PrimeColumn from 'primevue/column';
 
@@ -276,6 +277,18 @@ const props = withDefaults(defineProps<Props>(), {
 defineOptions({
     inheritAttrs: false,
 });
+
+const shouldShowPaginator = computed(() => {
+    if (!props.paginator) {
+        return false;
+    }
+    if (props.totalRecords !== undefined) {
+        return props.totalRecords > (props.rows ?? 0);
+    }
+    const dataLength = props.value?.length ?? 0;
+    const rowsValue = props.rows ?? 0;
+    return dataLength > rowsValue;
+});
 </script>
 
 <template>
@@ -286,7 +299,7 @@ defineOptions({
         :rows="rows"
         :first="first"
         :totalRecords="totalRecords"
-        :paginator="paginator"
+        :paginator="shouldShowPaginator"
         :paginatorPosition="paginatorPosition"
         :loading="loading"
         :sortField="sortField"
@@ -329,8 +342,8 @@ defineOptions({
         </PrimeColumn>
         <slot />
         <template #empty>
-            <div class="flex items-center justify-center min-h-[60vh]">
-                <p class="text-surface-500 text-lg">{{ emptyMessage }}</p>
+            <div class="flex min-h-[60vh] items-center justify-center">
+                <p class="text-lg text-surface-500">{{ emptyMessage }}</p>
             </div>
         </template>
     </PrimeDataTable>

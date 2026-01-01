@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\IntegrationType;
 use App\Enums\UserRole;
 use App\Models\Account;
+use App\Models\Integration;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +18,8 @@ class FoundationSeeder extends Seeder
     public function run(): void
     {
         $this->seedUsers();
-        $this->seedAccount();
+        $account = $this->seedAccount();
+        $this->seedIntegration($account);
     }
 
     /**
@@ -49,7 +52,7 @@ class FoundationSeeder extends Seeder
     /**
      * Seed account and associate users.
      */
-    protected function seedAccount(): void
+    protected function seedAccount(): Account
     {
         $account = Account::create([
             'status' => 'active',
@@ -72,5 +75,26 @@ class FoundationSeeder extends Seeder
                 'role' => UserRole::Owner->value,
             ]);
         }
+
+        return $account;
+    }
+
+    /**
+     * Seed integration for the demo account.
+     */
+    protected function seedIntegration(Account $account): void
+    {
+        Integration::create([
+            'account_id' => $account->id,
+            'type' => IntegrationType::Shopify,
+            'credentials' => encrypt(json_encode([
+                'shop' => 'demo-shop.myshopify.com',
+                'access_token' => 'demo_token',
+            ])),
+            'settings' => [
+                'store_name' => 'Bad Frog Yarn Co.',
+            ],
+            'active' => true,
+        ]);
     }
 }

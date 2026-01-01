@@ -8,14 +8,12 @@ import { computed, ref } from 'vue';
 interface Colorway {
     id: number;
     name: string;
-    slug: string;
     per_pan: number;
 }
 
 interface Base {
     id: number;
     descriptor: string;
-    slug: string;
 }
 
 interface DyeListItem {
@@ -37,79 +35,74 @@ const groupByOptions = [
     { label: 'Base', value: 'base' },
 ];
 
-const groupedDyeList = computed(() => {
-    if (groupBy.value === 'colorway') {
-        // Group by colorway, sum quantities and bases
-        const grouped = new Map<
-            number,
-            {
-                colorway: Colorway;
-                bases: Map<number, { base: Base; quantity: number }>;
-            }
-        >();
+const groupedByColorway = computed(() => {
+    const grouped = new Map<
+        number,
+        {
+            colorway: Colorway;
+            bases: Map<number, { base: Base; quantity: number }>;
+        }
+    >();
 
-        props.dyeList.forEach((item) => {
-            if (!grouped.has(item.colorway.id)) {
-                grouped.set(item.colorway.id, {
-                    colorway: item.colorway,
-                    bases: new Map(),
-                });
-            }
+    props.dyeList.forEach((item) => {
+        if (!grouped.has(item.colorway.id)) {
+            grouped.set(item.colorway.id, {
+                colorway: item.colorway,
+                bases: new Map(),
+            });
+        }
 
-            const group = grouped.get(item.colorway.id)!;
-            if (!group.bases.has(item.base.id)) {
-                group.bases.set(item.base.id, {
-                    base: item.base,
-                    quantity: 0,
-                });
-            }
+        const group = grouped.get(item.colorway.id)!;
+        if (!group.bases.has(item.base.id)) {
+            group.bases.set(item.base.id, {
+                base: item.base,
+                quantity: 0,
+            });
+        }
 
-            const baseGroup = group.bases.get(item.base.id)!;
-            baseGroup.quantity += item.quantity;
-        });
+        const baseGroup = group.bases.get(item.base.id)!;
+        baseGroup.quantity += item.quantity;
+    });
 
-        return Array.from(grouped.values()).map((group) => ({
-            colorway: group.colorway,
-            bases: Array.from(group.bases.values()),
-        }));
-    } else {
-        // Group by base, sum quantities and colorways
-        const grouped = new Map<
-            number,
-            {
-                base: Base;
-                colorways: Map<
-                    number,
-                    { colorway: Colorway; quantity: number }
-                >;
-            }
-        >();
+    return Array.from(grouped.values()).map((group) => ({
+        colorway: group.colorway,
+        bases: Array.from(group.bases.values()),
+    }));
+});
 
-        props.dyeList.forEach((item) => {
-            if (!grouped.has(item.base.id)) {
-                grouped.set(item.base.id, {
-                    base: item.base,
-                    colorways: new Map(),
-                });
-            }
+const groupedByBase = computed(() => {
+    const grouped = new Map<
+        number,
+        {
+            base: Base;
+            colorways: Map<number, { colorway: Colorway; quantity: number }>;
+        }
+    >();
 
-            const group = grouped.get(item.base.id)!;
-            if (!group.colorways.has(item.colorway.id)) {
-                group.colorways.set(item.colorway.id, {
-                    colorway: item.colorway,
-                    quantity: 0,
-                });
-            }
+    props.dyeList.forEach((item) => {
+        if (!grouped.has(item.base.id)) {
+            grouped.set(item.base.id, {
+                base: item.base,
+                colorways: new Map(),
+            });
+        }
 
-            const colorwayGroup = group.colorways.get(item.colorway.id)!;
-            colorwayGroup.quantity += item.quantity;
-        });
+        const group = grouped.get(item.base.id)!;
+        if (!group.colorways.has(item.colorway.id)) {
+            group.colorways.set(item.colorway.id, {
+                colorway: item.colorway,
+                quantity: 0,
+            });
+        }
 
-        return Array.from(grouped.values()).map((group) => ({
-            base: group.base,
-            colorways: Array.from(group.colorways.values()),
-        }));
-    }
+        const colorwayGroup = group.colorways.get(item.colorway.id)!;
+        colorwayGroup.quantity += item.quantity;
+    });
+
+    return Array.from(grouped.values()).map((group) => ({
+        base: group.base,
+        colorways: Array.from(group.colorways.values()),
+    }));
 });
 
 const totalSkeins = computed(() => {
@@ -153,8 +146,6 @@ function handleColorwayClick(colorway: Colorway, event: Event): void {
                         <UiSelectButton
                             v-model="groupBy"
                             :options="groupByOptions"
-                            option-label="label"
-                            option-value="value"
                         />
                         <div class="flex gap-6">
                             <div class="text-right">
@@ -183,7 +174,7 @@ function handleColorwayClick(colorway: Colorway, event: Event): void {
                     <!-- Items Grouped by Colorway -->
                     <div v-if="groupBy === 'colorway'" class="space-y-4">
                         <div
-                            v-for="group in groupedDyeList"
+                            v-for="group in groupedByColorway"
                             :key="group.colorway.id"
                             class="space-y-2"
                         >
@@ -191,9 +182,7 @@ function handleColorwayClick(colorway: Colorway, event: Event): void {
                                 class="flex items-center justify-between border-b border-surface-200 pb-2"
                             >
                                 <a
-                                    :href="
-                                        editColorway.url(group.colorway.id).url
-                                    "
+                                    :href="editColorway.url(group.colorway.id)"
                                     class="font-medium text-primary-600 hover:text-primary-700 hover:underline"
                                     @click="
                                         handleColorwayClick(
@@ -249,7 +238,7 @@ function handleColorwayClick(colorway: Colorway, event: Event): void {
                     <!-- Items Grouped by Base -->
                     <div v-else class="space-y-4">
                         <div
-                            v-for="group in groupedDyeList"
+                            v-for="group in groupedByBase"
                             :key="group.base.id"
                             class="space-y-2"
                         >
@@ -270,7 +259,7 @@ function handleColorwayClick(colorway: Colorway, event: Event): void {
                                         :href="
                                             editColorway.url(
                                                 colorwayItem.colorway.id,
-                                            ).url
+                                            )
                                         "
                                         class="text-sm text-primary-600 hover:text-primary-700 hover:underline"
                                         @click="

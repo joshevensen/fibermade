@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { store } from '@/actions/App/Http/Controllers/CustomerController';
 import UiButton from '@/components/ui/UiButton.vue';
+import UiDivider from '@/components/ui/UiDivider.vue';
 import UiDrawer from '@/components/ui/UiDrawer.vue';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldAddress from '@/components/ui/UiFormFieldAddress.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiTextarea from '@/components/ui/UiTextarea.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { router } from '@inertiajs/vue3';
 
@@ -29,11 +29,12 @@ const { form, onSubmit } = useFormSubmission({
         name: '',
         email: null,
         phone: null,
-        address: null,
+        address_line1: null,
+        address_line2: null,
         city: null,
-        state: null,
-        zip: null,
-        notes: null,
+        state_region: null,
+        postal_code: null,
+        country_code: null,
     },
     successMessage: 'Customer created successfully.',
     onSuccess: () => {
@@ -59,7 +60,6 @@ const { form, onSubmit } = useFormSubmission({
                 <UiFormFieldInput
                     name="name"
                     label="Name"
-                    placeholder="Customer name"
                     :server-error="form.errors.name"
                     required
                 />
@@ -68,60 +68,18 @@ const { form, onSubmit } = useFormSubmission({
                     name="email"
                     label="Email"
                     type="email"
-                    placeholder="customer@example.com"
                     :server-error="form.errors.email"
                 />
 
                 <UiFormFieldInput
                     name="phone"
                     label="Phone"
-                    placeholder="Phone number"
                     :server-error="form.errors.phone"
                 />
 
-                <UiFormFieldInput
-                    name="address"
-                    label="Address"
-                    placeholder="Street address"
-                    :server-error="form.errors.address"
-                />
+                <UiDivider />
 
-                <div class="grid grid-cols-2 gap-4">
-                    <UiFormFieldInput
-                        name="city"
-                        label="City"
-                        placeholder="City"
-                        :server-error="form.errors.city"
-                    />
-
-                    <UiFormFieldInput
-                        name="state"
-                        label="State"
-                        placeholder="State"
-                        :server-error="form.errors.state"
-                    />
-                </div>
-
-                <UiFormFieldInput
-                    name="zip"
-                    label="ZIP Code"
-                    placeholder="ZIP code"
-                    :server-error="form.errors.zip"
-                />
-
-                <UiFormField
-                    name="notes"
-                    label="Notes"
-                    :server-error="form.errors.notes"
-                >
-                    <template #default="{ props: fieldProps }">
-                        <UiTextarea
-                            v-bind="fieldProps"
-                            placeholder="Additional notes"
-                            rows="4"
-                        />
-                    </template>
-                </UiFormField>
+                <UiFormFieldAddress :errors="form.errors" />
 
                 <UiButton type="submit" :loading="form.processing">
                     Create Customer

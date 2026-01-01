@@ -18,6 +18,7 @@ interface Props {
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
     labelPosition?: 'top' | 'left' | 'right';
+    required?: boolean;
     // UiToggleSwitch props
     trueValue?: any;
     falseValue?: any;
@@ -47,6 +48,7 @@ defineOptions({
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
         :labelPosition="labelPosition ?? 'right'"
+        :required="required"
     >
         <template #default="{ props: fieldProps, id }">
             <UiToggleSwitch

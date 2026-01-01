@@ -46,18 +46,19 @@ function closeDrawer(): void {
     emit('update:visible', false);
 }
 
+const initialValues = {
+    description: null,
+    status: 'active',
+    weight: null,
+    descriptor: '',
+    size: null,
+    cost: null,
+    retail_price: null,
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: store,
-    initialValues: {
-        slug: '',
-        description: null,
-        status: null,
-        weight: null,
-        descriptor: '',
-        size: null,
-        cost: null,
-        retail_price: null,
-    },
+    initialValues,
     successMessage: 'Base created successfully.',
     onSuccess: () => {
         closeDrawer();
@@ -78,7 +79,7 @@ const { form, onSubmit } = useFormSubmission({
         </template>
 
         <div class="p-4">
-            <UiForm @submit="onSubmit">
+            <UiForm :initial-values="initialValues" @submit="onSubmit">
                 <UiFormField
                     name="status"
                     label="Status"
@@ -88,8 +89,6 @@ const { form, onSubmit } = useFormSubmission({
                         <UiSelectButton
                             v-bind="fieldProps"
                             :options="baseStatusOptions"
-                            option-label="label"
-                            option-value="value"
                             size="small"
                             fluid
                         />
@@ -99,39 +98,14 @@ const { form, onSubmit } = useFormSubmission({
                 <UiFormFieldInput
                     name="descriptor"
                     label="Descriptor"
-                    placeholder="Base descriptor"
                     :server-error="form.errors.descriptor"
                     required
                 />
-
-                <UiFormFieldInput
-                    name="slug"
-                    label="Slug"
-                    placeholder="base-slug"
-                    :server-error="form.errors.slug"
-                    required
-                />
-
-                <UiFormField
-                    name="description"
-                    label="Description"
-                    :server-error="form.errors.description"
-                >
-                    <template #default="{ props: fieldProps }">
-                        <UiEditor
-                            v-bind="fieldProps"
-                            placeholder="Base description"
-                        />
-                    </template>
-                </UiFormField>
 
                 <UiFormFieldSelect
                     name="weight"
                     label="Weight"
                     :options="weightOptions"
-                    option-label="label"
-                    option-value="value"
-                    placeholder="Select weight"
                     :server-error="form.errors.weight"
                     show-clear
                 />
@@ -149,39 +123,51 @@ const { form, onSubmit } = useFormSubmission({
                     </template>
                 </UiFormField>
 
-                <UiFormField
-                    name="cost"
-                    label="Cost"
-                    :server-error="form.errors.cost"
-                >
-                    <template #default="{ props: fieldProps }">
-                        <UiInputGroup>
-                            <UiInputGroupAddon>$</UiInputGroupAddon>
-                            <UiInputNumber
-                                v-bind="fieldProps"
-                                :min="0"
-                                :max="99999999.99"
-                                :step="0.01"
-                            />
-                        </UiInputGroup>
-                    </template>
-                </UiFormField>
+                <div class="grid grid-cols-2 gap-4">
+                    <UiFormField
+                        name="retail_price"
+                        label="Retail Price"
+                        :server-error="form.errors.retail_price"
+                    >
+                        <template #default="{ props: fieldProps }">
+                            <UiInputGroup>
+                                <UiInputGroupAddon>$</UiInputGroupAddon>
+                                <UiInputNumber
+                                    v-bind="fieldProps"
+                                    :min="0"
+                                    :max="99999999.99"
+                                    :step="0.01"
+                                />
+                            </UiInputGroup>
+                        </template>
+                    </UiFormField>
+
+                    <UiFormField
+                        name="cost"
+                        label="Cost"
+                        :server-error="form.errors.cost"
+                    >
+                        <template #default="{ props: fieldProps }">
+                            <UiInputGroup>
+                                <UiInputGroupAddon>$</UiInputGroupAddon>
+                                <UiInputNumber
+                                    v-bind="fieldProps"
+                                    :min="0"
+                                    :max="99999999.99"
+                                    :step="0.01"
+                                />
+                            </UiInputGroup>
+                        </template>
+                    </UiFormField>
+                </div>
 
                 <UiFormField
-                    name="retail_price"
-                    label="Retail Price"
-                    :server-error="form.errors.retail_price"
+                    name="description"
+                    label="Description"
+                    :server-error="form.errors.description"
                 >
                     <template #default="{ props: fieldProps }">
-                        <UiInputGroup>
-                            <UiInputGroupAddon>$</UiInputGroupAddon>
-                            <UiInputNumber
-                                v-bind="fieldProps"
-                                :min="0"
-                                :max="99999999.99"
-                                :step="0.01"
-                            />
-                        </UiInputGroup>
+                        <UiEditor v-bind="fieldProps" />
                     </template>
                 </UiFormField>
 

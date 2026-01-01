@@ -20,8 +20,20 @@ class CustomerController extends Controller
 
         $user = auth()->user();
         $customers = $user->is_admin
-            ? Customer::with('account')->get()
-            : ($user->account_id ? Customer::where('account_id', $user->account_id)->with('account')->get() : collect());
+            ? Customer::with(['account', 'externalIdentifiers.integration'])->get()
+            : ($user->account_id ? Customer::where('account_id', $user->account_id)->with(['account', 'externalIdentifiers.integration'])->get() : collect());
+
+        $customers = $customers->map(function ($customer) {
+            $customerArray = $customer->toArray();
+            $customerArray['external_identifiers'] = $customer->externalIdentifiers->map(fn ($identifier) => [
+                'integration_type' => $identifier->integration->type->value,
+                'external_type' => $identifier->external_type,
+                'external_id' => $identifier->external_id,
+                'data' => $identifier->data,
+            ])->toArray();
+
+            return $customerArray;
+        });
 
         return Inertia::render('customers/CustomerIndexPage', [
             'customers' => $customers,
@@ -58,10 +70,17 @@ class CustomerController extends Controller
     {
         $this->authorize('view', $customer);
 
-        $customer->load(['orders.orderable']);
+        $customer->load(['orders.orderable', 'externalIdentifiers.integration']);
+        $customerArray = $customer->toArray();
+        $customerArray['external_identifiers'] = $customer->externalIdentifiers->map(fn ($identifier) => [
+            'integration_type' => $identifier->integration->type->value,
+            'external_type' => $identifier->external_type,
+            'external_id' => $identifier->external_id,
+            'data' => $identifier->data,
+        ])->toArray();
 
         return Inertia::render('customers/CustomerEditPage', [
-            'customer' => $customer,
+            'customer' => $customerArray,
             'orders' => $customer->orders->map(fn ($order) => [
                 'id' => $order->id,
                 'order_date' => $order->order_date->toDateString(),

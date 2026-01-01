@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { update } from '@/actions/App/Http/Controllers/OrderController';
+import {
+    destroy as destroyOrder,
+    update,
+} from '@/actions/App/Http/Controllers/OrderController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -19,7 +22,6 @@ interface Props {
         type: string;
         status: string;
         account_id: number;
-        shopify_order_id?: string | null;
         order_date: string;
         subtotal_amount?: number | null;
         shipping_amount?: number | null;
@@ -34,6 +36,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const { requireDelete } = useConfirm();
 
 const accountOptions = computed(() =>
     props.accounts.map((account) => ({
@@ -48,7 +51,6 @@ const { form, onSubmit } = useFormSubmission({
         type: props.order.type || null,
         status: props.order.status || null,
         account_id: props.order.account_id?.toString() || null,
-        shopify_order_id: props.order.shopify_order_id || null,
         order_date: props.order.order_date || null,
         subtotal_amount: props.order.subtotal_amount || null,
         shipping_amount: props.order.shipping_amount || null,
@@ -70,11 +72,21 @@ const { form, onSubmit } = useFormSubmission({
         router.visit('/orders');
     },
 });
+
+function handleDelete(event: Event): void {
+    requireDelete({
+        target: event.currentTarget as HTMLElement,
+        message: 'Are you sure you want to delete this order?',
+        onAccept: () => {
+            router.delete(destroyOrder.url(props.order.id));
+        },
+    });
+}
 </script>
 
 <template>
     <AppLayout page-title="Edit Order">
-        <div class="mt-6 max-w-2xl">
+        <template #default>
             <UiCard>
                 <template #content>
                     <UiForm @submit="onSubmit">
@@ -82,8 +94,6 @@ const { form, onSubmit } = useFormSubmission({
                             name="type"
                             label="Type"
                             :options="orderTypeOptions"
-                            option-label="label"
-                            option-value="value"
                             placeholder="Select order type"
                             :server-error="form.errors.type"
                             required
@@ -93,8 +103,6 @@ const { form, onSubmit } = useFormSubmission({
                             name="status"
                             label="Status"
                             :options="orderStatusOptions"
-                            option-label="label"
-                            option-value="value"
                             placeholder="Select order status"
                             :server-error="form.errors.status"
                             required
@@ -104,18 +112,9 @@ const { form, onSubmit } = useFormSubmission({
                             name="account_id"
                             label="Account"
                             :options="accountOptions"
-                            option-label="label"
-                            option-value="value"
                             placeholder="Select account"
                             :server-error="form.errors.account_id"
                             required
-                        />
-
-                        <UiFormFieldInput
-                            name="shopify_order_id"
-                            label="Shopify Order ID"
-                            placeholder="Shopify order ID"
-                            :server-error="form.errors.shopify_order_id"
                         />
 
                         <UiFormFieldDatePicker
@@ -174,21 +173,39 @@ const { form, onSubmit } = useFormSubmission({
                             :server-error="form.errors.notes"
                         />
 
-                        <div class="flex gap-4">
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Order
-                            </UiButton>
-                            <UiButton
-                                type="button"
-                                severity="secondary"
-                                @click="router.visit('/orders')"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
+                        <UiButton type="submit" :loading="form.processing">
+                            Update Order
+                        </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
-        </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this order will permanently remove
+                                    all associated data. This action cannot be
+                                    undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Order
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
     </AppLayout>
 </template>

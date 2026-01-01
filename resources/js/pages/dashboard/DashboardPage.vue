@@ -8,14 +8,12 @@ import UpcomingShowsCard from './components/UpcomingShowsCard.vue';
 interface Colorway {
     id: number;
     name: string;
-    slug: string;
     per_pan: number;
 }
 
 interface Base {
     id: number;
     descriptor: string;
-    slug: string;
 }
 
 interface DyeListItem {

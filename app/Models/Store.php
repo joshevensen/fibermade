@@ -19,12 +19,12 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property string $name
  * @property string $email
  * @property string|null $owner_name
- * @property string $address_line_1
- * @property string|null $address_line_2
+ * @property string $address_line1
+ * @property string|null $address_line2
  * @property string $city
- * @property string $state
- * @property string $zip
- * @property string $country
+ * @property string $state_region
+ * @property string $postal_code
+ * @property string $country_code
  * @property float|null $discount_rate
  * @property int|null $minimum_order_quantity
  * @property float|null $minimum_order_value
@@ -51,12 +51,12 @@ class Store extends Model
         'name',
         'email',
         'owner_name',
-        'address_line_1',
-        'address_line_2',
+        'address_line1',
+        'address_line2',
         'city',
-        'state',
-        'zip',
-        'country',
+        'state_region',
+        'postal_code',
+        'country_code',
         'discount_rate',
         'minimum_order_quantity',
         'minimum_order_value',

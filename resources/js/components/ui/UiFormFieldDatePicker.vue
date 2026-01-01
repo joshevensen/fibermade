@@ -17,6 +17,7 @@ interface Props {
     validateOnSubmit?: boolean;
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
+    required?: boolean;
     // UiDatePicker props
     selectionMode?: 'single' | 'multiple' | 'range';
     dateFormat?: string;
@@ -63,6 +64,8 @@ defineOptions({
         :validateOnSubmit="validateOnSubmit"
         :validateOnValueUpdate="validateOnValueUpdate"
         :validateOnMount="validateOnMount"
+        :required="required"
+        :size="size"
     >
         <template #default="{ props: fieldProps, id }">
             <UiDatePicker

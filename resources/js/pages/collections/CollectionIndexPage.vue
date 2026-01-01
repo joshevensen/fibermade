@@ -3,10 +3,12 @@ import {
     destroy as destroyCollection,
     edit as editCollection,
 } from '@/actions/App/Http/Controllers/CollectionController';
+import GridItem from '@/components/GridItem.vue';
+import GridItemWrapper from '@/components/GridItemWrapper.vue';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiTag from '@/components/ui/UiTag.vue';
 import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
@@ -16,7 +18,6 @@ import { computed, ref } from 'vue';
 interface Collection {
     id: number;
     name: string;
-    slug: string;
     description?: string | null;
     status: string;
     created_at: string;
@@ -111,43 +112,42 @@ function handleSortChange(value: { field: string; order: number }): void {
     sortField.value = value.field;
     sortOrder.value = value.order;
 }
+
+function getGridItemProps(collection: Collection) {
+    return {
+        title: collection.name,
+        description: collection.description ?? undefined,
+        tag: {
+            severity: (collection.status === 'active'
+                ? 'success'
+                : 'secondary') as 'success' | 'secondary',
+            value: formatEnum(collection.status),
+        },
+        metadata: [
+            {
+                label: 'Colorways',
+                value: collection.colorways_count.toString(),
+            },
+        ],
+    };
+}
 </script>
 
 <template>
     <AppLayout page-title="Collections">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.collections.length"
+                    :filtered-count="filteredAndSortedCollections.length"
+                    label="collection"
                 >
-                    <div class="text-surface-600">
-                        <template
-                            v-if="
-                                filteredAndSortedCollections.length !==
-                                props.collections.length
-                            "
-                        >
-                            {{ filteredAndSortedCollections.length }} of
-                            {{ props.collections.length }}
-                        </template>
-                        <template v-else>
-                            {{ filteredAndSortedCollections.length }}
-                        </template>
-                        {{
-                            filteredAndSortedCollections.length === 1
-                                ? 'collection'
-                                : 'collections'
-                        }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="status-filter"
                             label="Status"
                             label-position="left"
                             :options="statusFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="statusFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -162,8 +162,6 @@ function handleSortChange(value: { field: string; order: number }): void {
                             label="Sort"
                             label-position="left"
                             :options="sortOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="currentSortValue"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -173,8 +171,8 @@ function handleSortChange(value: { field: string; order: number }): void {
                             class="w-40"
                             @update:model-value="handleSortChange($event)"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -186,67 +184,17 @@ function handleSortChange(value: { field: string; order: number }): void {
                     :rows="20"
                     :sort-field="sortField"
                     :sort-order="sortOrder"
+                    empty-message="No collections found"
                 >
                     <template #grid="{ items }">
-                        <div
-                            class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        >
-                            <div
+                        <GridItemWrapper>
+                            <GridItem
                                 v-for="collection in items"
                                 :key="collection.id"
-                                class="group relative cursor-pointer rounded-lg border border-surface-200 bg-surface-0 p-4 transition-all hover:border-primary-500 hover:shadow-md"
+                                v-bind="getGridItemProps(collection)"
                                 @click="handleCollectionClick(collection)"
-                            >
-                                <div class="flex flex-col gap-2">
-                                    <UiTag
-                                        :severity="
-                                            collection.status === 'active'
-                                                ? 'success'
-                                                : 'secondary'
-                                        "
-                                        :value="formatEnum(collection.status)"
-                                    />
-                                    <h3
-                                        class="text-lg font-semibold text-surface-900"
-                                    >
-                                        {{ collection.name }}
-                                    </h3>
-                                    <p
-                                        v-if="collection.description"
-                                        class="line-clamp-2 text-sm text-surface-600"
-                                    >
-                                        {{ collection.description }}
-                                    </p>
-                                    <div
-                                        class="mt-2 flex flex-col gap-1 border-t border-surface-200 pt-2"
-                                    >
-                                        <div
-                                            class="flex justify-between text-sm"
-                                        >
-                                            <span class="text-surface-500"
-                                                >Colorways:</span
-                                            >
-                                            <span
-                                                class="font-medium text-surface-900"
-                                                >{{
-                                                    collection.colorways_count
-                                                }}</span
-                                            >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </template>
-
-                    <template #empty>
-                        <div
-                            class="flex min-h-[60vh] items-center justify-center"
-                        >
-                            <p class="text-lg text-surface-500">
-                                No collections found
-                            </p>
-                        </div>
+                            />
+                        </GridItemWrapper>
                     </template>
                 </UiDataView>
             </template>

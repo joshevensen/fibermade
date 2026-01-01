@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { edit as editOrder } from '@/actions/App/Http/Controllers/OrderController';
+import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
@@ -158,30 +159,17 @@ const columns = computed(() => [
     <AppLayout page-title="Orders">
         <UiCard>
             <template #title>
-                <div
-                    class="flex flex-wrap items-center justify-between gap-4 p-4 pb-0"
+                <PageFilter
+                    :count="props.orders.length"
+                    :filtered-count="filteredOrders.length"
+                    label="order"
                 >
-                    <div class="text-surface-600">
-                        <template
-                            v-if="filteredOrders.length !== props.orders.length"
-                        >
-                            {{ filteredOrders.length }} of
-                            {{ props.orders.length }}
-                        </template>
-                        <template v-else>
-                            {{ filteredOrders.length }}
-                        </template>
-                        {{ filteredOrders.length === 1 ? 'order' : 'orders' }}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-4">
+                    <template #filters>
                         <UiFormFieldSelect
                             name="type-filter"
                             label="Type"
                             label-position="left"
                             :options="typeFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="typeFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -196,8 +184,6 @@ const columns = computed(() => [
                             label="Status"
                             label-position="left"
                             :options="statusFilterOptions"
-                            option-label="label"
-                            option-value="value"
                             :initial-value="statusFilter"
                             :validate-on-mount="false"
                             :validate-on-blur="false"
@@ -207,8 +193,8 @@ const columns = computed(() => [
                             class="w-40"
                             @update:model-value="statusFilter = $event"
                         />
-                    </div>
-                </div>
+                    </template>
+                </PageFilter>
             </template>
 
             <template #content>
@@ -218,6 +204,9 @@ const columns = computed(() => [
                     data-key="id"
                     striped-rows
                     show-gridlines
+                    paginator
+                    :rows="20"
+                    empty-message="No orders found"
                 >
                     <template #name="{ data }">
                         <button

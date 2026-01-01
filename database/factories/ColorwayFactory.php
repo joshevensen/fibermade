@@ -6,7 +6,6 @@ use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Colorway>
@@ -51,7 +50,6 @@ class ColorwayFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
             'description' => fake()->optional(0.7)->sentence(),
             'technique' => $technique,
             'colors' => $colors,
@@ -59,7 +57,6 @@ class ColorwayFactory extends Factory
             'recipe' => fake()->optional(0.5)->paragraph(),
             'notes' => fake()->optional(0.4)->sentence(),
             'status' => $status,
-            'shopify_product_id' => fake()->optional(0.3)->numerify('##########'),
         ];
     }
 }
