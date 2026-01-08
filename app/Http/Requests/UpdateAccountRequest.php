@@ -13,7 +13,15 @@ class UpdateAccountRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('account'));
+        $user = $this->user();
+
+        if (! $user->account_id) {
+            return false;
+        }
+
+        $account = \App\Models\Account::find($user->account_id);
+
+        return $account && $this->user()->can('update', $account);
     }
 
     /**

@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BaseStatus;
 use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
 use App\Http\Requests\StoreColorwayRequest;
+use App\Http\Requests\UpdateColorwayCollectionsRequest;
 use App\Http\Requests\UpdateColorwayRequest;
+use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
 use Illuminate\Http\RedirectResponse;
@@ -140,6 +143,36 @@ class ColorwayController extends Controller
     {
         $this->authorize('view', $colorway);
 
+        $colorway->load(['collections', 'inventories', 'externalIdentifiers.integration']);
+
+        $user = auth()->user();
+        $allCollections = $user->is_admin
+            ? Collection::orderBy('name')->get()
+            : ($user->account_id ? Collection::where('account_id', $user->account_id)->orderBy('name')->get() : collect());
+
+        // Fetch all active bases for the account
+        $bases = $user->is_admin
+            ? Base::where('status', BaseStatus::Active)->orderBy('code')->get()
+            : ($user->account_id
+                ? Base::where('account_id', $user->account_id)
+                    ->where('status', BaseStatus::Active)
+                    ->orderBy('code')
+                    ->get()
+                : collect());
+
+        // Map bases with their inventory quantities for this colorway
+        $basesData = $bases->map(function ($base) use ($colorway) {
+            $inventory = $colorway->inventories->firstWhere('base_id', $base->id);
+
+            return [
+                'id' => $base->id,
+                'code' => $base->code,
+                'descriptor' => $base->descriptor,
+                'quantity' => $inventory ? $inventory->quantity : 0,
+                'inventory_id' => $inventory ? $inventory->id : null,
+            ];
+        })->toArray();
+
         $colorwayStatusOptions = collect(ColorwayStatus::cases())
             ->map(fn ($case) => [
                 'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
@@ -161,7 +194,6 @@ class ColorwayController extends Controller
             ])
             ->toArray();
 
-        $colorway->load(['externalIdentifiers.integration']);
         $colorwayArray = $colorway->toArray();
         $colorwayArray['external_identifiers'] = $colorway->externalIdentifiers->map(fn ($identifier) => [
             'integration_type' => $identifier->integration->type->value,
@@ -172,6 +204,9 @@ class ColorwayController extends Controller
 
         return Inertia::render('colorways/ColorwayEditPage', [
             'colorway' => $colorwayArray,
+            'collections' => $colorway->collections,
+            'allCollections' => $allCollections,
+            'bases' => $basesData,
             'colorwayStatusOptions' => $colorwayStatusOptions,
             'techniqueOptions' => $techniqueOptions,
             'colorOptions' => $colorOptions,
@@ -188,6 +223,16 @@ class ColorwayController extends Controller
         $colorway->save();
 
         return redirect()->route('colorways.index');
+    }
+
+    /**
+     * Update the collections for the specified colorway.
+     */
+    public function updateCollections(UpdateColorwayCollectionsRequest $request, Colorway $colorway): RedirectResponse
+    {
+        $colorway->collections()->sync($request->validated()['collection_ids']);
+
+        return redirect()->route('colorways.edit', $colorway)->with('success', 'Collections updated successfully.');
     }
 
     /**

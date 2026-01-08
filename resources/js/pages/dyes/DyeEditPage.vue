@@ -5,10 +5,12 @@ import {
 } from '@/actions/App/Http/Controllers/DyeController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
+import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormFieldTextarea from '@/components/ui/UiFormFieldTextarea.vue';
+import UiMessage from '@/components/ui/UiMessage.vue';
+import UiToggleSwitch from '@/components/ui/UiToggleSwitch.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -27,14 +29,16 @@ interface Props {
 const props = defineProps<Props>();
 const { requireDelete } = useConfirm();
 
+const initialValues = {
+    name: props.dye.name || '',
+    notes: props.dye.notes || null,
+    does_bleed: props.dye.does_bleed ?? false,
+    do_like: props.dye.do_like ?? false,
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: () => update(props.dye.id),
-    initialValues: {
-        name: props.dye.name || '',
-        notes: props.dye.notes || null,
-        does_bleed: props.dye.does_bleed ?? false,
-        do_like: props.dye.do_like ?? false,
-    },
+    initialValues,
     successMessage: 'Dye updated successfully.',
     onSuccess: () => {
         router.visit('/dyes');
@@ -57,7 +61,7 @@ function handleDelete(event: Event): void {
         <template #default>
             <UiCard>
                 <template #content>
-                    <UiForm @submit="onSubmit">
+                    <UiForm :initial-values="initialValues" @submit="onSubmit">
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -66,26 +70,18 @@ function handleDelete(event: Event): void {
                             required
                         />
 
-                        <UiFormFieldTextarea
+                        <UiFormField
                             name="notes"
                             label="Notes"
-                            placeholder="Dye notes"
                             :server-error="form.errors.notes"
-                        />
-
-                        <UiFormFieldCheckbox
-                            name="does_bleed"
-                            label="Does Bleed"
-                            :server-error="form.errors.does_bleed"
-                            binary
-                        />
-
-                        <UiFormFieldCheckbox
-                            name="do_like"
-                            label="Do Like"
-                            :server-error="form.errors.do_like"
-                            binary
-                        />
+                        >
+                            <template #default="{ props: fieldProps }">
+                                <UiEditor
+                                    v-bind="fieldProps"
+                                    placeholder="Dye notes"
+                                />
+                            </template>
+                        </UiFormField>
 
                         <UiButton type="submit" :loading="form.processing">
                             Update Dye
@@ -97,6 +93,60 @@ function handleDelete(event: Event): void {
 
         <template #side>
             <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div
+                                class="flex items-center justify-between gap-2"
+                            >
+                                <label
+                                    for="does_bleed"
+                                    class="text-sm font-medium"
+                                >
+                                    This Dye Bleeds
+                                </label>
+                                <UiToggleSwitch
+                                    id="does_bleed"
+                                    v-model="form.does_bleed"
+                                    :invalid="!!form.errors.does_bleed"
+                                />
+                            </div>
+                            <UiMessage
+                                v-if="form.errors.does_bleed"
+                                severity="error"
+                                size="small"
+                                variant="simple"
+                            >
+                                {{ form.errors.does_bleed }}
+                            </UiMessage>
+
+                            <div
+                                class="flex items-center justify-between gap-2"
+                            >
+                                <label
+                                    for="do_like"
+                                    class="text-sm font-medium"
+                                >
+                                    I Like this Dye
+                                </label>
+                                <UiToggleSwitch
+                                    id="do_like"
+                                    v-model="form.do_like"
+                                    :invalid="!!form.errors.do_like"
+                                />
+                            </div>
+                            <UiMessage
+                                v-if="form.errors.do_like"
+                                severity="error"
+                                size="small"
+                                variant="simple"
+                            >
+                                {{ form.errors.do_like }}
+                            </UiMessage>
+                        </div>
+                    </template>
+                </UiCard>
+
                 <UiCard>
                     <template #content>
                         <div class="space-y-4">

@@ -42,6 +42,8 @@ class UpdateBaseRequest extends FormRequest
             'camel_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'cotton_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'bamboo_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'silk_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'linen_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 }

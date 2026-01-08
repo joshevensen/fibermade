@@ -5,8 +5,6 @@ import UiIcon from '@/components/ui/UiIcon.vue';
 import UiMenu from '@/components/ui/UiMenu.vue';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
-import { edit as profileEdit } from '@/routes/user';
-import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -30,7 +28,6 @@ const pageTitleToDrawerType: Record<
     | 'collection'
     | 'colorway'
     | 'customer'
-    | 'dye'
     | 'order'
     | 'show'
     | 'store'
@@ -39,7 +36,6 @@ const pageTitleToDrawerType: Record<
     Collections: 'collection',
     Colorways: 'colorway',
     Customers: 'customer',
-    Dyes: 'dye',
     Orders: 'order',
     Shows: 'show',
     Stores: 'store',
@@ -57,7 +53,6 @@ const getPageIcon = (title?: string) => {
         Inventory: BusinessIconList.Inventory,
         Collections: BusinessIconList.Collections,
         Bases: BusinessIconList.Bases,
-        Dyes: BusinessIconList.Dyes,
         Stores: BusinessIconList.Stores,
         Shows: BusinessIconList.Shows,
         Customers: BusinessIconList.Customers,
@@ -120,13 +115,6 @@ const createMenuItems = [
         icon: IconList.Plus,
         command: () => {
             openDrawer('customer');
-        },
-    },
-    {
-        label: 'Dye',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('dye');
         },
     },
     {
@@ -200,13 +188,6 @@ function toggleMenu(event: Event): void {
 
         <!-- Icon Buttons (all screens) -->
         <div class="relative ml-auto flex items-center gap-2">
-            <UiButton
-                :icon="IconList.Settings"
-                size="small"
-                text
-                aria-label="Settings"
-                @click="router.visit(profileEdit.url())"
-            />
             <UiButton
                 v-if="hasCreateDrawer"
                 :icon="IconList.Plus"

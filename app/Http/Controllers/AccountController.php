@@ -70,11 +70,18 @@ class AccountController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateAccountRequest $request, Account $account): RedirectResponse
+    public function update(UpdateAccountRequest $request): RedirectResponse
     {
+        $user = $request->user();
+
+        if (! $user->account_id) {
+            abort(403, 'User does not have an account.');
+        }
+
+        $account = Account::findOrFail($user->account_id);
         $account->update($request->validated());
 
-        return redirect()->route('accounts.index');
+        return back();
     }
 
     /**

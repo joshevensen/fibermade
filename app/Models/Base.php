@@ -34,6 +34,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property float|null $camel_percent
  * @property float|null $cotton_percent
  * @property float|null $bamboo_percent
+ * @property float|null $silk_percent
+ * @property float|null $linen_percent
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -65,6 +67,8 @@ class Base extends Model
         'camel_percent',
         'cotton_percent',
         'bamboo_percent',
+        'silk_percent',
+        'linen_percent',
     ];
 
     /**
@@ -124,6 +128,8 @@ class Base extends Model
             'camel_percent' => 'decimal:2',
             'cotton_percent' => 'decimal:2',
             'bamboo_percent' => 'decimal:2',
+            'silk_percent' => 'decimal:2',
+            'linen_percent' => 'decimal:2',
         ];
     }
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Account;
+use App\Models\Dye;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,8 +19,19 @@ class UserController extends Controller
      */
     public function edit(Request $request): Response
     {
+        $user = $request->user();
+        $account = null;
+        $dyes = collect();
+
+        if ($user->account_id) {
+            $account = Account::with('users')->find($user->account_id);
+            $dyes = Dye::where('account_id', $user->account_id)->get();
+        }
+
         return Inertia::render('settings/SettingsPage', [
             'status' => $request->session()->get('status'),
+            'account' => $account,
+            'dyes' => $dyes,
         ]);
     }
 

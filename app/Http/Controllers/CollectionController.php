@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Enums\BaseStatus;
 use App\Http\Requests\StoreCollectionRequest;
+use App\Http\Requests\UpdateCollectionColorwaysRequest;
 use App\Http\Requests\UpdateCollectionRequest;
 use App\Models\Collection;
+use App\Models\Colorway;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -65,8 +67,17 @@ class CollectionController extends Controller
     {
         $this->authorize('view', $collection);
 
+        $collection->load('colorways');
+
+        $user = auth()->user();
+        $allColorways = $user->is_admin
+            ? Colorway::orderBy('name')->get()
+            : ($user->account_id ? Colorway::where('account_id', $user->account_id)->orderBy('name')->get() : collect());
+
         return Inertia::render('collections/CollectionEditPage', [
             'collection' => $collection,
+            'colorways' => $collection->colorways,
+            'allColorways' => $allColorways,
         ]);
     }
 
@@ -78,6 +89,16 @@ class CollectionController extends Controller
         $collection->update($request->validated());
 
         return redirect()->route('collections.index');
+    }
+
+    /**
+     * Update the colorways for the specified collection.
+     */
+    public function updateColorways(UpdateCollectionColorwaysRequest $request, Collection $collection): RedirectResponse
+    {
+        $collection->colorways()->sync($request->validated()['colorway_ids']);
+
+        return redirect()->route('collections.edit', $collection)->with('success', 'Colorways updated successfully.');
     }
 
     /**

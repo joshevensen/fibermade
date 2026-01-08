@@ -2,9 +2,9 @@ import { index as basesIndex } from '@/actions/App/Http/Controllers/BaseControll
 import { index as collectionsIndex } from '@/actions/App/Http/Controllers/CollectionController';
 import { index as colorwaysIndex } from '@/actions/App/Http/Controllers/ColorwayController';
 import { index as customersIndex } from '@/actions/App/Http/Controllers/CustomerController';
-import { index as dyesIndex } from '@/actions/App/Http/Controllers/DyeController';
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
 import { index as showsIndex } from '@/actions/App/Http/Controllers/ShowController';
+import { edit as userEdit } from '@/routes/user';
 import { useIcon } from '@/composables/useIcon';
 import { dashboard } from '@/routes';
 import { index as inventoryIndex } from '@/routes/inventory';
@@ -12,7 +12,7 @@ import { index as storesIndex } from '@/routes/stores';
 import type { NavItem } from '@/types';
 import type { Component } from 'vue';
 
-const { BusinessIconList } = useIcon();
+const { BusinessIconList, IconList } = useIcon();
 
 interface NavigationItem extends Omit<NavItem, 'icon'> {
     icon?: string | Component;
@@ -46,11 +46,6 @@ export function useNavigation(): NavigationItem[] {
             icon: BusinessIconList.Bases,
         },
         {
-            title: 'Dyes',
-            href: dyesIndex.url(),
-            icon: BusinessIconList.Dyes,
-        },
-        {
             title: 'Orders',
             href: ordersIndex.url(),
             icon: BusinessIconList.Orders,
@@ -69,6 +64,11 @@ export function useNavigation(): NavigationItem[] {
             title: 'Customers',
             href: customersIndex.url(),
             icon: BusinessIconList.Customers,
+        },
+        {
+            title: 'Settings',
+            href: userEdit.url(),
+            icon: IconList.Settings,
         },
     ];
 }

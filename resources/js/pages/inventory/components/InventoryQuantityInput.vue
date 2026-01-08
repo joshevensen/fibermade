@@ -10,9 +10,12 @@ interface Props {
     baseId: number;
     baseName: string;
     initialQuantity: number;
+    size?: 'small' | 'large';
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+    size: 'small',
+});
 const emit = defineEmits<{
     quantityChanged: [quantity: number];
 }>();
@@ -91,7 +94,10 @@ function handleUpdate(newQuantity: number | null): void {
 </script>
 
 <template>
-    <div class="flex flex-shrink-0 flex-col gap-1">
+    <div
+        v-if="props.size === 'small'"
+        class="flex flex-shrink-0 flex-col gap-1"
+    >
         <label class="text-xs font-medium text-surface-600">
             {{ baseName }}
         </label>
@@ -103,6 +109,20 @@ function handleUpdate(newQuantity: number | null): void {
             size="small"
             :readonly="isSaving || isProcessing"
             class="inventory-input-number"
+            @update:model-value="handleUpdate($event)"
+        />
+    </div>
+    <div v-else class="flex items-center justify-between gap-4">
+        <label class="text-sm font-medium text-surface-700">
+            {{ baseName }}
+        </label>
+        <UiInputNumber
+            :model-value="quantity"
+            :min="0"
+            show-buttons
+            button-layout="horizontal"
+            :readonly="isSaving || isProcessing"
+            class="inventory-input-number w-32"
             @update:model-value="handleUpdate($event)"
         />
     </div>

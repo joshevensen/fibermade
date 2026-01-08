@@ -63,6 +63,8 @@ class StoreController extends Controller
     {
         $this->authorize('view', $store);
 
+        $store->load(['orders.orderable']);
+
         $statusOptions = collect(StoreVendorStatus::cases())
             ->map(fn ($case) => [
                 'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
@@ -73,6 +75,15 @@ class StoreController extends Controller
         return Inertia::render('stores/StoreEditPage', [
             'store' => $store,
             'statusOptions' => $statusOptions,
+            'orders' => $store->orders->map(fn ($order) => [
+                'id' => $order->id,
+                'order_date' => $order->order_date->toDateString(),
+                'status' => $order->status->value,
+                'total_amount' => $order->total_amount,
+                'orderable' => $order->orderable ? [
+                    'name' => $order->orderable->name,
+                ] : null,
+            ]),
         ]);
     }
 

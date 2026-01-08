@@ -78,7 +78,108 @@ class OrdersSeeder extends Seeder
      */
     protected function seedShows(Account $account): void
     {
-        $shows = [
+        // 8 past shows
+        $pastShows = [
+            [
+                'name' => 'Winter Yarn Market',
+                'start_at' => now()->subMonths(2)->startOfDay()->setTime(9, 0),
+                'end_at' => now()->subMonths(2)->addDays(2)->endOfDay()->setTime(17, 0),
+                'location_name' => 'Convention Center',
+                'address_line1' => '123 Main Street',
+                'city' => 'Portland',
+                'state_region' => 'OR',
+                'postal_code' => '97201',
+                'description' => 'Winter yarn market featuring local yarn dyers, fiber artists, and workshops.',
+                'website' => 'https://winteryarnmarket.example.com',
+            ],
+            [
+                'name' => 'Holiday Trunk Show',
+                'start_at' => now()->subMonths(1)->startOfDay()->setTime(10, 0),
+                'end_at' => now()->subMonths(1)->startOfDay()->setTime(18, 0),
+                'location_name' => 'Knit & Purl Yarn Shop',
+                'address_line1' => '456 Oak Avenue',
+                'city' => 'Seattle',
+                'state_region' => 'WA',
+                'postal_code' => '98101',
+                'description' => 'Holiday trunk show featuring our latest colorways and bases.',
+                'website' => null,
+            ],
+            [
+                'name' => 'Fall Fiber Festival',
+                'start_at' => now()->subMonths(3)->startOfDay()->setTime(9, 0),
+                'end_at' => now()->subMonths(3)->addDays(3)->endOfDay()->setTime(17, 0),
+                'location_name' => 'Fairgrounds',
+                'address_line1' => '1000 Fairgrounds Road',
+                'city' => 'Denver',
+                'state_region' => 'CO',
+                'postal_code' => '80202',
+                'description' => 'Multi-day fiber festival with workshops, demonstrations, and vendor booths.',
+                'website' => 'https://fallfiberfestival.example.com',
+            ],
+            [
+                'name' => 'Summer Yarn Crawl',
+                'start_at' => now()->subMonths(4)->startOfDay()->setTime(8, 0),
+                'end_at' => now()->subMonths(4)->endOfDay()->setTime(20, 0),
+                'location_name' => 'Downtown Market Square',
+                'address_line1' => '789 Market Street',
+                'city' => 'San Francisco',
+                'state_region' => 'CA',
+                'postal_code' => '94102',
+                'description' => 'Summer yarn crawl with multiple vendors, food trucks, and live music.',
+                'website' => 'https://summeryarncrawl.example.com',
+            ],
+            [
+                'name' => 'Spring Fiber Arts Fair',
+                'start_at' => now()->subMonths(5)->startOfDay()->setTime(9, 0),
+                'end_at' => now()->subMonths(5)->addDays(2)->endOfDay()->setTime(17, 0),
+                'location_name' => 'Community Center',
+                'address_line1' => '555 Elm Street',
+                'city' => 'Boulder',
+                'state_region' => 'CO',
+                'postal_code' => '80301',
+                'description' => 'Spring fiber arts fair featuring hand-dyed yarns and workshops.',
+                'website' => null,
+            ],
+            [
+                'name' => 'Local Yarn Store Event',
+                'start_at' => now()->subWeeks(6)->setTime(11, 0),
+                'end_at' => now()->subWeeks(6)->setTime(19, 0),
+                'location_name' => 'Yarn Haven',
+                'address_line1' => '321 Yarn Street',
+                'city' => 'Austin',
+                'state_region' => 'TX',
+                'postal_code' => '78701',
+                'description' => 'Special event at local yarn store showcasing new collections.',
+                'website' => null,
+            ],
+            [
+                'name' => 'Fiber Market Days',
+                'start_at' => now()->subWeeks(8)->startOfDay()->setTime(9, 0),
+                'end_at' => now()->subWeeks(8)->addDays(1)->endOfDay()->setTime(16, 0),
+                'location_name' => 'Market Hall',
+                'address_line1' => '888 Fiber Avenue',
+                'city' => 'Nashville',
+                'state_region' => 'TN',
+                'postal_code' => '37201',
+                'description' => 'Weekend fiber market with local artisans and vendors.',
+                'website' => 'https://fibermarketdays.example.com',
+            ],
+            [
+                'name' => 'Yarn Dyers Showcase',
+                'start_at' => now()->subWeeks(10)->setTime(10, 0),
+                'end_at' => now()->subWeeks(10)->setTime(17, 0),
+                'location_name' => 'Art Gallery',
+                'address_line1' => '777 Creative Lane',
+                'city' => 'Portland',
+                'state_region' => 'OR',
+                'postal_code' => '97202',
+                'description' => 'Showcase event featuring work from local yarn dyers.',
+                'website' => null,
+            ],
+        ];
+
+        // 6 future shows
+        $futureShows = [
             [
                 'name' => 'Spring Fiber Festival',
                 'start_at' => now()->addMonths(2)->startOfDay()->setTime(9, 0),
@@ -139,9 +240,23 @@ class OrdersSeeder extends Seeder
                 'description' => 'Holiday market featuring hand-dyed yarns perfect for gift knitting.',
                 'website' => null,
             ],
+            [
+                'name' => 'Summer Yarn Expo',
+                'start_at' => now()->addWeeks(2)->startOfDay()->setTime(9, 0),
+                'end_at' => now()->addWeeks(2)->addDays(1)->endOfDay()->setTime(17, 0),
+                'location_name' => 'Expo Center',
+                'address_line1' => '999 Expo Boulevard',
+                'city' => 'Chicago',
+                'state_region' => 'IL',
+                'postal_code' => '60601',
+                'description' => 'Summer yarn expo featuring national and international vendors.',
+                'website' => 'https://summeryarnexpo.example.com',
+            ],
         ];
 
-        foreach ($shows as $showData) {
+        $allShows = array_merge($pastShows, $futureShows);
+
+        foreach ($allShows as $showData) {
             Show::create([
                 'account_id' => $account->id,
                 'name' => $showData['name'],
@@ -231,6 +346,20 @@ class OrdersSeeder extends Seeder
                     'line_total' => $lineTotal,
                 ]);
             }
+
+            // Recalculate order totals after creating items
+            $order->refresh();
+            $order->load('orderItems');
+            $subtotal = $order->orderItems->sum('line_total');
+            $shipping = $order->shipping_amount ?? 0;
+            $discount = $order->discount_amount ?? 0;
+            $tax = $order->tax_amount ?? 0;
+            $total = $subtotal + $shipping - $discount + $tax;
+
+            $order->update([
+                'subtotal_amount' => $subtotal,
+                'total_amount' => $total,
+            ]);
         }
     }
 }

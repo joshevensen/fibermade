@@ -136,12 +136,7 @@ class OrderController extends Controller
             ])
             ->toArray();
 
-        $user = auth()->user();
-        $accounts = $user->is_admin
-            ? \App\Models\Account::select('id', 'name')->get()
-            : ($user->account_id ? \App\Models\Account::where('id', $user->account_id)->select('id', 'name')->get() : collect());
-
-        $order->load(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration']);
+        $order->load(['account', 'orderItems.colorway', 'orderItems.base', 'orderable', 'externalIdentifiers.integration']);
         $orderArray = $order->toArray();
         $orderArray['external_identifiers'] = $order->externalIdentifiers->map(fn ($identifier) => [
             'integration_type' => $identifier->integration->type->value,
@@ -150,11 +145,16 @@ class OrderController extends Controller
             'data' => $identifier->data,
         ])->toArray();
 
+        // Add colorways and bases for order item dropdowns
+        $colorways = \App\Models\Colorway::select('id', 'name')->get();
+        $bases = \App\Models\Base::select('id', 'code', 'descriptor')->get();
+
         return Inertia::render('orders/OrderEditPage', [
             'order' => $orderArray,
             'orderTypeOptions' => $orderTypeOptions,
             'orderStatusOptions' => $orderStatusOptions,
-            'accounts' => $accounts,
+            'colorways' => $colorways,
+            'bases' => $bases,
         ]);
     }
 
@@ -177,6 +177,17 @@ class OrderController extends Controller
                 $validated['orderable_type'] = Show::class;
             }
         }
+
+        // Calculate subtotal from order items
+        $order->load('orderItems');
+        $subtotal = $order->orderItems->sum('line_total');
+        $validated['subtotal_amount'] = $subtotal;
+
+        // Recalculate total = subtotal + shipping - discount + tax
+        $shipping = $validated['shipping_amount'] ?? $order->shipping_amount ?? 0;
+        $discount = $validated['discount_amount'] ?? $order->discount_amount ?? 0;
+        $tax = $validated['tax_amount'] ?? $order->tax_amount ?? 0;
+        $validated['total_amount'] = $subtotal + $shipping - $discount + $tax;
 
         $order->update($validated);
         $order->updated_by = $request->user()->id;

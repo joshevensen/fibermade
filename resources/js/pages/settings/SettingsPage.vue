@@ -5,19 +5,57 @@ import { useIcon } from '@/composables/useIcon';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import AccountForm from './components/AccountForm.vue';
+import AccountUsersCard from './components/AccountUsersCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
+import DyesTab from './components/DyesTab.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
 
 const page = usePage();
-const user = page.props.auth.user;
+const user = page.props.auth.user as {
+    id: number;
+    name: string;
+    email: string;
+    role: string;
+    account_id?: number | null;
+};
+const account = page.props.account as
+    | {
+          id: number;
+          name: string;
+          email?: string | null;
+          phone?: string | null;
+          address_line1?: string | null;
+          address_line2?: string | null;
+          city?: string | null;
+          state_region?: string | null;
+          postal_code?: string | null;
+          users?: Array<{
+              id: number;
+              name: string;
+              email: string;
+              role: string;
+          }>;
+      }
+    | null
+    | undefined;
+const dyes = (page.props.dyes as Array<{
+    id: number;
+    name: string;
+    manufacturer?: string | null;
+    notes?: string | null;
+    does_bleed: boolean;
+    do_like: boolean;
+}>) || [];
+
 const { IconList } = useIcon();
 
 const tabs = [
     { value: 'account', label: 'Account' },
     { value: 'profile', label: 'Profile' },
     { value: 'discounts', label: 'Discounts' },
-    { value: 'shopify', label: 'Shopify' },
+    { value: 'dyes', label: 'Dyes' },
 ];
 
 function getTabFromUrl(): string {
@@ -64,6 +102,11 @@ watch(
         <UiTabs :value="activeTab" :tabs="tabs" @update:value="handleTabChange">
             <UiTabPanel value="account">
                 <div class="space-y-4">
+                    <AccountForm v-if="account" :account="account" />
+                    <AccountUsersCard
+                        v-if="account && user.role === 'owner' && account.users"
+                        :users="account.users"
+                    />
                     <DeleteAccountDialog />
                 </div>
             </UiTabPanel>
@@ -83,11 +126,9 @@ watch(
                 </div>
             </UiTabPanel>
 
-            <UiTabPanel value="shopify">
+            <UiTabPanel value="dyes">
                 <div class="space-y-4">
-                    <p class="text-surface-600 dark:text-surface-400">
-                        Shopify integration settings coming soon.
-                    </p>
+                    <DyesTab :dyes="dyes" />
                 </div>
             </UiTabPanel>
         </UiTabs>

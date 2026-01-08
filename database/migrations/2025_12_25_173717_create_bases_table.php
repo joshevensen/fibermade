@@ -29,6 +29,8 @@ return new class extends Migration
             $table->decimal('camel_percent', 5, 2)->nullable();
             $table->decimal('cotton_percent', 5, 2)->nullable();
             $table->decimal('bamboo_percent', 5, 2)->nullable();
+            $table->decimal('silk_percent', 5, 2)->nullable();
+            $table->decimal('linen_percent', 5, 2)->nullable();
             $table->softDeletes();
             $table->timestamps();
 

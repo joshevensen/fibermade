@@ -45,9 +45,19 @@ class OrderItemController extends Controller
      */
     public function store(StoreOrderItemRequest $request): RedirectResponse
     {
-        OrderItem::create($request->validated());
+        $validated = $request->validated();
 
-        return redirect()->route('order-items.index');
+        // Auto-calculate line_total if not provided
+        if (! isset($validated['line_total']) && isset($validated['quantity']) && isset($validated['unit_price'])) {
+            $validated['line_total'] = $validated['quantity'] * $validated['unit_price'];
+        }
+
+        $orderItem = OrderItem::create($validated);
+
+        // Recalculate order totals
+        $this->recalculateOrderTotals($orderItem->order_id);
+
+        return redirect()->route('orders.edit', $orderItem->order_id);
     }
 
     /**
@@ -67,9 +77,23 @@ class OrderItemController extends Controller
      */
     public function update(UpdateOrderItemRequest $request, OrderItem $orderItem): RedirectResponse
     {
-        $orderItem->update($request->validated());
+        $validated = $request->validated();
 
-        return redirect()->route('order-items.index');
+        // Auto-calculate line_total if quantity or unit_price changed
+        if (isset($validated['quantity']) || isset($validated['unit_price'])) {
+            $quantity = $validated['quantity'] ?? $orderItem->quantity;
+            $unitPrice = $validated['unit_price'] ?? $orderItem->unit_price;
+            if ($quantity && $unitPrice) {
+                $validated['line_total'] = $quantity * $unitPrice;
+            }
+        }
+
+        $orderItem->update($validated);
+
+        // Recalculate order totals
+        $this->recalculateOrderTotals($orderItem->order_id);
+
+        return redirect()->route('orders.edit', $orderItem->order_id);
     }
 
     /**
@@ -79,8 +103,32 @@ class OrderItemController extends Controller
     {
         $this->authorize('delete', $orderItem);
 
+        $orderId = $orderItem->order_id;
         $orderItem->delete();
 
-        return redirect()->route('order-items.index');
+        // Recalculate order totals
+        $this->recalculateOrderTotals($orderId);
+
+        return redirect()->route('orders.edit', $orderId);
+    }
+
+    /**
+     * Recalculate order totals based on order items.
+     */
+    private function recalculateOrderTotals(int $orderId): void
+    {
+        $order = \App\Models\Order::findOrFail($orderId);
+        $order->load('orderItems');
+
+        $subtotal = $order->orderItems->sum('line_total');
+        $shipping = $order->shipping_amount ?? 0;
+        $discount = $order->discount_amount ?? 0;
+        $tax = $order->tax_amount ?? 0;
+        $total = $subtotal + $shipping - $discount + $tax;
+
+        $order->update([
+            'subtotal_amount' => $subtotal,
+            'total_amount' => $total,
+        ]);
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Requests;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
-use App\Models\Account;
 use App\Models\Customer;
 use App\Models\Show;
 use App\Models\Store;
@@ -43,7 +42,6 @@ class UpdateOrderRequest extends FormRequest
         return [
             'type' => ['sometimes', Rule::enum(OrderType::class)],
             'status' => ['sometimes', Rule::enum(OrderStatus::class)],
-            'account_id' => ['sometimes', 'integer', Rule::exists(Account::class, 'id')],
             'orderable_id' => $orderableIdRule,
             'order_date' => ['sometimes', 'date'],
             'subtotal_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
