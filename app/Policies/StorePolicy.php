@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\AccountType;
 use App\Models\Store;
 use App\Models\User;
 
@@ -12,7 +13,12 @@ class StorePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $this->isAdmin($user) || $user->account_id !== null;
+        // Admins can see all stores
+        // Creators can see stores they have relationships with
+        // Store accounts can see their own store
+        return $user->is_admin
+            || $user->account?->type === AccountType::Creator
+            || $user->account?->type === AccountType::Store;
     }
 
     /**
@@ -20,7 +26,23 @@ class StorePolicy
      */
     public function view(User $user, Store $store): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $store->account_id);
+        if ($user->is_admin) {
+            return true;
+        }
+
+        // Store accounts can view their own store
+        if ($user->account_id === $store->account_id) {
+            return true;
+        }
+
+        // Creators can view stores they have vendor relationships with
+        if ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            $storeIds = $user->account->creator->stores()->pluck('stores.id');
+
+            return $storeIds->contains($store->id);
+        }
+
+        return false;
     }
 
     /**
@@ -28,7 +50,9 @@ class StorePolicy
      */
     public function create(User $user): bool
     {
-        return $this->isAdmin($user) || $user->account_id !== null;
+        // Only creators or admins can create stores (typically during registration)
+        // Store accounts shouldn't create other stores
+        return $user->is_admin || $user->account?->type === AccountType::Creator;
     }
 
     /**
@@ -36,7 +60,12 @@ class StorePolicy
      */
     public function update(User $user, Store $store): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $store->account_id);
+        if ($user->is_admin) {
+            return true;
+        }
+
+        // Store accounts can update their own store
+        return $user->account_id === $store->account_id;
     }
 
     /**
@@ -44,7 +73,12 @@ class StorePolicy
      */
     public function delete(User $user, Store $store): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $store->account_id);
+        if ($user->is_admin) {
+            return true;
+        }
+
+        // Store accounts can delete their own store
+        return $user->account_id === $store->account_id;
     }
 
     /**
@@ -52,7 +86,12 @@ class StorePolicy
      */
     public function restore(User $user, Store $store): bool
     {
-        return $this->isAdmin($user);
+        if ($user->is_admin) {
+            return true;
+        }
+
+        // Store accounts can restore their own store
+        return $user->account_id === $store->account_id;
     }
 
     /**
@@ -60,22 +99,7 @@ class StorePolicy
      */
     public function forceDelete(User $user, Store $store): bool
     {
-        return $this->isAdmin($user);
-    }
-
-    /**
-     * Check if the user is an admin.
-     */
-    private function isAdmin(User $user): bool
-    {
-        return $user->is_admin === true;
-    }
-
-    /**
-     * Check if the user belongs to the account.
-     */
-    private function belongsToAccount(User $user, int $accountId): bool
-    {
-        return $user->account_id === $accountId;
+        // Only admins can permanently delete
+        return $user->is_admin;
     }
 }
