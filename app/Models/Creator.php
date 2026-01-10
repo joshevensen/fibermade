@@ -6,32 +6,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 /**
- * Represents a store account that can place orders with creators.
+ * Represents a creator account.
  *
- * Stores have their own contact information and location.
- * Vendor relationship settings (discount rates, payment terms, allows_preorders, etc.) are stored
- * in the creator_store pivot table as they vary per relationship.
+ * Creators are dyers who own catalog items (Colorways, Bases, Collections).
+ * Each Creator belongs to an Account and contains creator-specific contact
+ * and business information.
  *
  * @property int $id
  * @property int $account_id
  * @property string $name
- * @property string $email
- * @property string|null $owner_name
- * @property string $address_line1
+ * @property string|null $email
+ * @property string|null $phone
+ * @property string|null $address_line1
  * @property string|null $address_line2
- * @property string $city
- * @property string $state_region
- * @property string $postal_code
- * @property string $country_code
+ * @property string|null $city
+ * @property string|null $state_region
+ * @property string|null $postal_code
+ * @property string|null $country_code
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
-class Store extends Model
+class Creator extends Model
 {
-    /** @use HasFactory<\Database\Factories\StoreFactory> */
+    /** @use HasFactory<\Database\Factories\CreatorFactory> */
     use HasFactory;
 
     /**
@@ -43,7 +42,7 @@ class Store extends Model
         'account_id',
         'name',
         'email',
-        'owner_name',
+        'phone',
         'address_line1',
         'address_line2',
         'city',
@@ -53,17 +52,7 @@ class Store extends Model
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the account that owns this store.
+     * Get the account that this creator belongs to.
      */
     public function account(): BelongsTo
     {
@@ -71,19 +60,11 @@ class Store extends Model
     }
 
     /**
-     * Get all orders for this store.
+     * Get the stores that this creator sells to (vendor relationships).
      */
-    public function orders(): MorphMany
+    public function stores(): BelongsToMany
     {
-        return $this->morphMany(Order::class, 'orderable');
-    }
-
-    /**
-     * Get the creators that this store buys from (vendor relationships).
-     */
-    public function creators(): BelongsToMany
-    {
-        return $this->belongsToMany(Creator::class, 'creator_store')
+        return $this->belongsToMany(Store::class, 'creator_store')
             ->withPivot([
                 'discount_rate',
                 'minimum_order_quantity',

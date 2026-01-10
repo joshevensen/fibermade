@@ -48,7 +48,7 @@ class BaseFactory extends Factory
         $bambooPercent = fake()->optional(0.2)->randomFloat(2, 20, 50);
 
         return [
-            'account_id' => \App\Models\Account::factory(),
+            'account_id' => \App\Models\Account::factory()->creator(),
             'description' => fake()->optional(0.7)->sentence(),
             'status' => $status,
             'weight' => $weight,

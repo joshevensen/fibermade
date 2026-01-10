@@ -11,6 +11,7 @@ use App\Models\Account;
 use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
+use App\Models\Creator;
 use App\Models\Dye;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
@@ -25,11 +26,14 @@ class CatalogSeeder extends Seeder
      */
     public function run(): void
     {
-        $account = Account::where('name', 'Bad Frog Yarn Co.')->first();
+        // Find Bad Frog Yarn Co by creator name
+        $creator = Creator::where('name', 'Bad Frog Yarn Co.')->first();
 
-        if (! $account) {
+        if (! $creator || ! $creator->account) {
             return;
         }
+
+        $account = $creator->account;
 
         $this->seedBases($account);
         $this->seedCollections($account);

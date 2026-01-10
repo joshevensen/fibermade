@@ -2,11 +2,15 @@
 
 namespace Database\Seeders;
 
+use App\Enums\AccountType;
+use App\Enums\BaseStatus;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Enums\StoreVendorStatus;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
+use App\Models\Creator;
 use App\Models\Customer;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
@@ -24,11 +28,14 @@ class OrdersSeeder extends Seeder
      */
     public function run(): void
     {
-        $account = Account::where('name', 'Bad Frog Yarn Co.')->first();
+        // Find Bad Frog Yarn Co by creator name
+        $creator = Creator::where('name', 'Bad Frog Yarn Co.')->first();
 
-        if (! $account) {
+        if (! $creator || ! $creator->account) {
             return;
         }
+
+        $account = $creator->account;
 
         $this->seedCustomers($account);
         $this->seedStores($account);
@@ -65,12 +72,52 @@ class OrdersSeeder extends Seeder
 
     /**
      * Seed stores.
+     *
+     * Note: This creates stores that are already seeded in FoundationSeeder.
+     * This method can be removed or updated if FoundationSeeder already handles this.
+     * For now, we'll check if stores already exist before creating new ones.
      */
-    protected function seedStores(Account $account): void
+    protected function seedStores(Account $creatorAccount): void
     {
-        Store::factory()->count(8)->create([
-            'account_id' => $account->id,
-        ]);
+        // Get the creator record for the creator account
+        $creator = Creator::where('account_id', $creatorAccount->id)->first();
+
+        if (! $creator) {
+            return;
+        }
+
+        // Get existing stores that have vendor relationships with this creator
+        $existingStoreIds = $creator->stores()->pluck('stores.id');
+
+        // Only create additional stores if we need more
+        $storesToCreate = 8 - $existingStoreIds->count();
+
+        if ($storesToCreate > 0) {
+            for ($i = 0; $i < $storesToCreate; $i++) {
+                // Create store account
+                $storeAccount = Account::create([
+                    'status' => BaseStatus::Active,
+                    'type' => AccountType::Store,
+                ]);
+
+                // Create store record
+                $store = Store::factory()->create([
+                    'account_id' => $storeAccount->id,
+                ]);
+
+                // Create vendor relationship
+                $creator->stores()->attach($store->id, [
+                    'discount_rate' => fake()->randomFloat(2, 10, 30),
+                    'minimum_order_quantity' => fake()->numberBetween(5, 20),
+                    'minimum_order_value' => fake()->randomFloat(2, 100, 500),
+                    'payment_terms' => fake()->randomElement(['Net 30', 'Net 60', 'Due on Receipt']),
+                    'lead_time_days' => fake()->numberBetween(14, 60),
+                    'allows_preorders' => fake()->boolean(30),
+                    'status' => StoreVendorStatus::Active->value,
+                    'notes' => fake()->optional()->sentence(),
+                ]);
+            }
+        }
     }
 
     /**

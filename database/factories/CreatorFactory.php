@@ -2,12 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Customer>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Creator>
  */
-class CustomerFactory extends Factory
+class CreatorFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,9 +18,9 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'account_id' => \App\Models\Account::factory()->creator(),
-            'name' => fake()->name(),
-            'email' => fake()->optional()->safeEmail(),
+            'account_id' => Account::factory()->creator(),
+            'name' => fake()->company(),
+            'email' => fake()->unique()->safeEmail(),
             'phone' => fake()->optional()->phoneNumber(),
             'address_line1' => fake()->optional()->streetAddress(),
             'address_line2' => fake()->optional()->secondaryAddress(),
@@ -27,7 +28,6 @@ class CustomerFactory extends Factory
             'state_region' => fake()->optional()->stateAbbr(),
             'postal_code' => fake()->optional()->postcode(),
             'country_code' => fake()->optional()->randomElement(['US', 'CA', 'GB', 'AU', 'NZ']),
-            'notes' => fake()->optional()->sentence(),
         ];
     }
 }

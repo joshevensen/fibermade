@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -33,15 +34,8 @@ class UpdateAccountRequest extends FormRequest
     {
         return [
             'status' => ['sometimes', Rule::enum(BaseStatus::class)],
-            'name' => ['sometimes', 'string', 'max:255'],
-            'email' => ['nullable', 'string', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
-            'address_line1' => ['nullable', 'string', 'max:255'],
-            'address_line2' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'state_region' => ['nullable', 'string', 'max:255'],
-            'postal_code' => ['nullable', 'string', 'max:255'],
-            'country_code' => ['nullable', 'string', 'size:2'],
+            'type' => ['sometimes', Rule::enum(AccountType::class)],
+            'onboarded_at' => ['sometimes', 'nullable', 'date'],
         ];
     }
 }

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import UiCard from '@/components/ui/UiCard.vue';
-import UiDataView from '@/components/ui/UiDataView.vue';
 import ListItem from '@/components/ListItem.vue';
 import ListItemWrapper from '@/components/ListItemWrapper.vue';
+import UiCard from '@/components/ui/UiCard.vue';
+import UiDataView from '@/components/ui/UiDataView.vue';
 
 interface User {
     id: number;
@@ -59,4 +59,3 @@ function getListItemProps(user: User) {
         </template>
     </UiCard>
 </template>
-

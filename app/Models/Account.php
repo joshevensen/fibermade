@@ -2,31 +2,26 @@
 
 namespace App\Models;
 
+use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Cashier\Billable;
 
 /**
- * Represents a creator account.
+ * Represents a generic account for user/account management.
  *
- * Accounts represent creators who own catalog items (Colorways, Bases, Collections).
- * Each Account has many Users through a pivot table and supports account-level
- * pricing rules and wholesale order management.
+ * Accounts can be of different types (Creator, Store, Buyer) and serve as
+ * the base for user management and account-level settings. Type-specific
+ * data is stored in the respective tables (creators, stores, etc.).
  *
  * @property int $id
  * @property \App\Enums\BaseStatus $status
- * @property string $name
- * @property string|null $email
- * @property string|null $phone
- * @property string|null $address_line1
- * @property string|null $address_line2
- * @property string|null $city
- * @property string|null $state_region
- * @property string|null $postal_code
- * @property string|null $country_code
+ * @property \App\Enums\AccountType $type
+ * @property \Illuminate\Support\Carbon|null $onboarded_at
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -43,15 +38,8 @@ class Account extends Model
      */
     protected $fillable = [
         'status',
-        'name',
-        'email',
-        'phone',
-        'address_line1',
-        'address_line2',
-        'city',
-        'state_region',
-        'postal_code',
-        'country_code',
+        'type',
+        'onboarded_at',
     ];
 
     /**
@@ -63,6 +51,8 @@ class Account extends Model
     {
         return [
             'status' => BaseStatus::class,
+            'type' => AccountType::class,
+            'onboarded_at' => 'datetime',
         ];
     }
 
@@ -147,10 +137,18 @@ class Account extends Model
     }
 
     /**
-     * Get the stores for this account.
+     * Get the creator for this account.
      */
-    public function stores(): HasMany
+    public function creator(): HasOne
     {
-        return $this->hasMany(Store::class);
+        return $this->hasOne(Creator::class);
+    }
+
+    /**
+     * Get the store for this account.
+     */
+    public function store(): HasOne
+    {
+        return $this->hasOne(Store::class);
     }
 }

@@ -8,7 +8,7 @@ import { ref, watch } from 'vue';
 import AccountForm from './components/AccountForm.vue';
 import AccountUsersCard from './components/AccountUsersCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
-import DyesTab from './components/DyesTab.vue';
+// import DyesTab from './components/DyesTab.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
 
@@ -40,22 +40,23 @@ const account = page.props.account as
       }
     | null
     | undefined;
-const dyes = (page.props.dyes as Array<{
-    id: number;
-    name: string;
-    manufacturer?: string | null;
-    notes?: string | null;
-    does_bleed: boolean;
-    do_like: boolean;
-}>) || [];
+const dyes =
+    (page.props.dyes as Array<{
+        id: number;
+        name: string;
+        manufacturer?: string | null;
+        notes?: string | null;
+        does_bleed: boolean;
+        do_like: boolean;
+    }>) || [];
 
 const { IconList } = useIcon();
 
 const tabs = [
     { value: 'account', label: 'Account' },
     { value: 'profile', label: 'Profile' },
-    { value: 'discounts', label: 'Discounts' },
-    { value: 'dyes', label: 'Dyes' },
+    // { value: 'discounts', label: 'Discounts' },
+    // { value: 'dyes', label: 'Dyes' },
 ];
 
 function getTabFromUrl(): string {
@@ -118,7 +119,7 @@ watch(
                 </div>
             </UiTabPanel>
 
-            <UiTabPanel value="discounts">
+            <!-- <UiTabPanel value="discounts">
                 <div class="space-y-4">
                     <p class="text-surface-600 dark:text-surface-400">
                         Discounts settings coming soon.
@@ -130,7 +131,7 @@ watch(
                 <div class="space-y-4">
                     <DyesTab :dyes="dyes" />
                 </div>
-            </UiTabPanel>
+            </UiTabPanel> -->
         </UiTabs>
     </AppLayout>
 </template>

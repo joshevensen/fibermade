@@ -41,7 +41,7 @@ class ShowFactory extends Factory
         $endAt = fake()->dateTimeBetween($startAt, (clone $startAt)->modify('+7 days'));
 
         return [
-            'account_id' => \App\Models\Account::factory(),
+            'account_id' => \App\Models\Account::factory()->creator(),
             'name' => fake()->randomElement($showNames),
             'start_at' => $startAt,
             'end_at' => $endAt,

@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('accounts', function (Blueprint $table) {
+        Schema::create('account_vendor_relationships', function (Blueprint $table) {
             $table->id();
-            $table->string('status')->default('active');
-            $table->string('type')->default('creator')->index();
-            $table->timestamp('onboarded_at')->nullable();
-            $table->softDeletes();
             $table->timestamps();
         });
     }
@@ -26,6 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('accounts');
+        Schema::dropIfExists('account_vendor_relationships');
     }
 };

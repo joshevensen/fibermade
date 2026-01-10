@@ -73,10 +73,7 @@ const { form, onSubmit } = useFormSubmission({
                     placeholder="Phone number"
                 />
 
-                <UiFormFieldAddress
-                    :show-line2="true"
-                    :errors="form.errors"
-                />
+                <UiFormFieldAddress :show-line2="true" :errors="form.errors" />
 
                 <UiButton
                     type="submit"
@@ -89,4 +86,3 @@ const { form, onSubmit } = useFormSubmission({
         </template>
     </UiCard>
 </template>
-

@@ -3,12 +3,12 @@ import { index as collectionsIndex } from '@/actions/App/Http/Controllers/Collec
 import { index as colorwaysIndex } from '@/actions/App/Http/Controllers/ColorwayController';
 import { index as customersIndex } from '@/actions/App/Http/Controllers/CustomerController';
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
-import { index as showsIndex } from '@/actions/App/Http/Controllers/ShowController';
-import { edit as userEdit } from '@/routes/user';
+// import { index as showsIndex } from '@/actions/App/Http/Controllers/ShowController';
 import { useIcon } from '@/composables/useIcon';
 import { dashboard } from '@/routes';
 import { index as inventoryIndex } from '@/routes/inventory';
 import { index as storesIndex } from '@/routes/stores';
+import { edit as userEdit } from '@/routes/user';
 import type { NavItem } from '@/types';
 import type { Component } from 'vue';
 
@@ -55,11 +55,11 @@ export function useNavigation(): NavigationItem[] {
             href: storesIndex.url(),
             icon: BusinessIconList.Stores,
         },
-        {
-            title: 'Shows',
-            href: showsIndex.url(),
-            icon: BusinessIconList.Shows,
-        },
+        // {
+        //     title: 'Shows',
+        //     href: showsIndex.url(),
+        //     icon: BusinessIconList.Shows,
+        // },
         {
             title: 'Customers',
             href: customersIndex.url(),

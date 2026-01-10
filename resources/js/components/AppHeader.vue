@@ -24,13 +24,7 @@ const createMenuRef = ref();
 // Map page titles to drawer types
 const pageTitleToDrawerType: Record<
     string,
-    | 'base'
-    | 'collection'
-    | 'colorway'
-    | 'customer'
-    | 'order'
-    | 'show'
-    | 'store'
+    'base' | 'collection' | 'colorway' | 'customer' | 'order' | 'show' | 'store'
 > = {
     Bases: 'base',
     Collections: 'collection',

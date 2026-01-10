@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import {
-    store,
-    update,
-} from '@/actions/App/Http/Controllers/DyeController';
+import { store, update } from '@/actions/App/Http/Controllers/DyeController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
 import UiForm from '@/components/ui/UiForm.vue';
@@ -123,11 +120,7 @@ function searchManufacturer(event: { query: string }): void {
             />
 
             <div class="mt-6 flex justify-end gap-2">
-                <UiButton
-                    variant="secondary"
-                    type="button"
-                    @click="closeModal"
-                >
+                <UiButton variant="secondary" type="button" @click="closeModal">
                     Cancel
                 </UiButton>
                 <UiButton type="submit" :loading="form.processing">
@@ -137,4 +130,3 @@ function searchManufacturer(event: { query: string }): void {
         </UiForm>
     </UiDialog>
 </template>
-

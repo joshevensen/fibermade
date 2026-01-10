@@ -3,7 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import DyeListCard from './components/DyeListCard.vue';
 import OpenOrdersCard from './components/OpenOrdersCard.vue';
 import RevenueThisMonthCard from './components/RevenueThisMonthCard.vue';
-import UpcomingShowsCard from './components/UpcomingShowsCard.vue';
+// import UpcomingShowsCard from './components/UpcomingShowsCard.vue';
 
 interface Colorway {
     id: number;
@@ -60,7 +60,7 @@ const props = defineProps<Props>();
 
             <!-- Right Column: Cards (spans 1 column on desktop) -->
             <div class="order-2 space-y-6">
-                <UpcomingShowsCard :upcoming-shows="upcomingShows" />
+                <!-- <UpcomingShowsCard :upcoming-shows="upcomingShows" /> -->
                 <RevenueThisMonthCard :revenue-this-month="revenueThisMonth" />
                 <OpenOrdersCard :open-orders="openOrders" />
             </div>

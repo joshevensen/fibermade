@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('account_id')->constrained()->cascadeOnDelete();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('owner_name')->nullable();
             $table->string('address_line1');
             $table->string('address_line2')->nullable();
@@ -23,14 +23,6 @@ return new class extends Migration
             $table->string('state_region');
             $table->string('postal_code');
             $table->string('country_code', 2);
-            $table->decimal('discount_rate', 10, 2)->nullable();
-            $table->integer('minimum_order_quantity')->nullable();
-            $table->decimal('minimum_order_value', 10, 2)->nullable();
-            $table->string('payment_terms')->nullable();
-            $table->integer('lead_time_days')->nullable();
-            $table->boolean('allows_preorders')->default(false);
-            $table->string('status')->default('active');
-            $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->index('account_id');

@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\StoreVendorStatus;
+use App\Enums\AccountType;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\UpdateStoreRequest;
 use App\Models\Store;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -21,21 +20,25 @@ class StoreController extends Controller
         $this->authorize('viewAny', Store::class);
 
         $user = auth()->user();
-        $status = request()->query('status', 'active');
 
-        $storeQuery = $user->is_admin
-            ? Store::with('account')
-            : ($user->account_id ? Store::where('account_id', $user->account_id)->with('account') : Store::query()->whereRaw('1 = 0'));
-
-        // Get total count before status filtering
-        $totalStores = (clone $storeQuery)->count();
-
-        $query = clone $storeQuery;
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        // For creators, show stores they have vendor relationships with
+        // For stores, they can see their own store data
+        // For admins, show all stores
+        if ($user->is_admin) {
+            $stores = Store::with('account')->get();
+            $totalStores = $stores->count();
+        } elseif ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            // Get stores that this creator has relationships with
+            $stores = $user->account->creator->stores()->with('account')->get();
+            $totalStores = $stores->count();
+        } elseif ($user->account?->type === AccountType::Store && $user->account_id) {
+            // Store users see only their own store
+            $stores = Store::where('account_id', $user->account_id)->with('account')->get();
+            $totalStores = $stores->count();
+        } else {
+            $stores = collect();
+            $totalStores = 0;
         }
-
-        $stores = $query->get();
 
         return Inertia::render('stores/StoreIndexPage', [
             'stores' => $stores,
@@ -45,9 +48,15 @@ class StoreController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *
+     * Note: Store creation should typically happen during registration.
+     * This method may need to create both Account and Store records,
+     * or handle store creation separately from account creation.
      */
     public function store(StoreStoreRequest $request): RedirectResponse
     {
+        // For now, this assumes the account already exists (e.g., from registration)
+        // If account doesn't exist, it should be created during registration flow
         Store::create([
             ...$request->validated(),
             'account_id' => $request->user()->account_id,
@@ -65,16 +74,8 @@ class StoreController extends Controller
 
         $store->load(['orders.orderable']);
 
-        $statusOptions = collect(StoreVendorStatus::cases())
-            ->map(fn ($case) => [
-                'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
-                'value' => $case->value,
-            ])
-            ->toArray();
-
         return Inertia::render('stores/StoreEditPage', [
             'store' => $store,
-            'statusOptions' => $statusOptions,
             'orders' => $store->orders->map(fn ($order) => [
                 'id' => $order->id,
                 'order_date' => $order->order_date->toDateString(),

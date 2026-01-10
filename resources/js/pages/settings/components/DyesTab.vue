@@ -7,9 +7,9 @@ import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useIcon } from '@/composables/useIcon';
-import DyeModal from './DyeModal.vue';
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import DyeModal from './DyeModal.vue';
 
 interface Dye {
     id: number;
@@ -93,7 +93,9 @@ const sortedDyes = computed(() => {
                         text
                         :disabled="!selectedDye"
                         aria-label="Delete"
-                        @click="selectedDye && handleDelete(selectedDye, $event)"
+                        @click="
+                            selectedDye && handleDelete(selectedDye, $event)
+                        "
                     />
                     <UiButton
                         size="small"
@@ -131,12 +133,13 @@ const sortedDyes = computed(() => {
     <DyeModal
         :visible="modalVisible"
         :dye="selectedDye"
-        @update:visible="(value) => {
-            modalVisible = value;
-            if (!value) {
-                selectedDye = null;
+        @update:visible="
+            (value) => {
+                modalVisible = value;
+                if (!value) {
+                    selectedDye = null;
+                }
             }
-        }"
+        "
     />
 </template>
-

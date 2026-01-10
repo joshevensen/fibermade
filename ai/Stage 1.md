@@ -1,14 +1,15 @@
-# Stage 1 — Shopify Augmentation
+# Stage 1 — Shopify Augmentation (Wholesale & Operations)
 
 ## Purpose
 Stage 1 exists to make Fibermade **indispensable without disruption**.
 
 The goal is not to replace Shopify, redirect buyers, or change how customers sell.
-The goal is to take over the parts of the business that Shopify is fundamentally bad at for hand-dyed yarn:
-- production reality
+The goal is to take over the parts of the business that Shopify is fundamentally bad at for hand-dyed yarn—especially for small-batch dyers selling wholesale selectively.
+
+Stage 1 focuses exclusively on:
 - wholesale management
+- production reality
 - inventory truth
-- discount intent
 - production planning across orders
 
 If Stage 1 is successful, Fibermade becomes the tool dyers open first every day, while Shopify fades into the background.
@@ -16,67 +17,63 @@ If Stage 1 is successful, Fibermade becomes the tool dyers open first every day,
 ---
 
 ## Primary Customer Problem
-Hand-dyed yarn businesses routinely manage:
-- wholesale orders in spreadsheets
+Small-batch hand-dyed yarn businesses routinely manage:
+- wholesale orders in spreadsheets, email, or PDFs
 - production planning in notebooks or notes apps
 - inventory that is technically “accurate” but operationally wrong
-- discounts scattered across Shopify settings that are hard to reason about
-- no unified view of what actually needs to be dyed across multiple orders
+- no unified view of what actually needs to be dyed across multiple wholesale and retail orders
 - manual, error-prone inventory adjustments after sales occur
 
 These problems create:
 - constant mental overhead
-- errors during busy periods
-- friction when scaling wholesale
-- anxiety around launches, events, and sales
+- mistakes during busy periods
+- friction when growing wholesale responsibly
+- anxiety around fulfilling commitments
 - loss of trust in inventory numbers
 
-Stage 1 is designed to remove that burden without forcing dyers to change their storefront, checkout, or fulfillment workflow.
+Stage 1 is designed to remove this burden **without forcing dyers to change their storefront, checkout, or fulfillment workflow**.
 
 ---
 
 ## What Changes for the Customer
 Before Stage 1:
-- Shopify is the center of truth
-- Inventory numbers lie
+- Shopify is treated as the center of truth
 - Wholesale lives outside the system
-- Discounts are configured directly in Shopify
-- Production planning is manual and fragmented
-- Inventory reconciliation is done by hand
+- Inventory numbers are unreliable for planning
+- Production decisions are made manually
+- Reconciliation happens inconsistently, if at all
 
 After Stage 1:
 - Fibermade becomes the daily operational tool
-- Production and inventory reflect reality
-- Wholesale orders live inside a real system
-- Discount intent is managed in Fibermade
-- Dye planning is generated automatically from real orders
+- Wholesale orders live in a real system
+- Inventory reflects physical reality, not storefront counts
+- Production planning is generated from real commitments
 - Inventory reconciliation is explicit and intentional
 - Shopify remains the sales and fulfillment surface, not the brain
 
-The dyer’s workflow changes even though their storefront does not.
+The dyer’s internal workflow changes even though their storefront does not.
 
 ---
 
 ## System Boundaries (Critical)
 This stage establishes non-negotiable architectural rules:
 
-**Fibermade owns production, discount intent, planning, and inventory truth.  
+**Fibermade owns production reality, planning, wholesale logic, and inventory truth.  
 Shopify owns presentation, checkout, and fulfillment execution.**
 
-Specifically:
-- Fibermade is the system of record for:
-  - inventory truth
-  - production batches
-  - wholesale relationships and pricing
-  - discount presets and activation
-  - order intake for production planning
-  - inventory reservation and reconciliation
-  - operational statuses and reporting
-- Shopify remains responsible for:
-  - storefront presentation
-  - customer checkout
-  - payment processing
-  - shipping and fulfillment
+### Fibermade is the system of record for:
+- inventory truth
+- production batches
+- wholesale relationships and pricing
+- order intake for production planning
+- inventory reservation and reconciliation
+- operational statuses and reporting
+
+### Shopify remains responsible for:
+- storefront presentation
+- customer checkout
+- payment processing
+- shipping and fulfillment
 
 Fibermade augments Shopify; it does not compete with it in Stage 1.
 
@@ -85,22 +82,25 @@ Fibermade augments Shopify; it does not compete with it in Stage 1.
 ## Shopify Integration Principles
 - **GraphQL Admin API only** (GraphQL-first)
 - **Single location only** is supported  
-  (multi-location stores exceed Stage 1 scope)
+  (multi-location inventory exceeds Stage 1 scope)
 - Shopify is treated as a **presentation projection**
 - Fibermade IDs are stored in Shopify via **metafields**
-- Only Shopify features that are fully supported via GraphQL are used
+- Only Shopify features fully supported via GraphQL are used
 - Shopify Functions are explicitly out of scope for Stage 1
 
 ---
 
-## Core Capabilities (High Level)
+## Core Capabilities (Stage 1)
 
 ### Catalog Awareness
 - Colorways
 - Bases
 - Collections
-- Color Tags
-- Status (active, retired) (more down the road)
+- Status (active, retired)
+
+Catalog data exists to support production and wholesale planning, not merchandising.
+
+---
 
 ### Production-Aware Inventory
 - Inventory truth reflects physical reality
@@ -109,49 +109,38 @@ Fibermade augments Shopify; it does not compete with it in Stage 1.
   - inventory truth
   - inventory availability
   - inventory reconciliation
-- Inventory values pushed to Shopify represent availability, not truth
+- Inventory values pushed to Shopify represent **availability**, not truth
 
-### Wholesale Management
+Inventory is designed to support confident planning, not real-time sales accuracy.
+
+---
+
+### Wholesale Management (Primary Value)
 - Store accounts and relationships
-- Store account-level pricing or discount logic
+- Store-level pricing or terms
 - Wholesale orders tracked independently of retail
 - Order statuses reflect both business and production reality
-- Wholesale remains primarily a Fibermade concept
-- Ability to create and send invoices
-- Store accounts can track their orders
+- Ability to create and send wholesale invoices
+- Store accounts can view and track their orders
 
-### Discount Presets (Opinionated)
-Fibermade manages **discount intent** using a curated set of preset types that reflect how dyers actually sell.
+Wholesale workflows are optimized for:
+- selective relationships
+- small-batch constraints
+- reliability without industrial assumptions
 
-Discount presets are:
-- reusable
-- parameter-driven (amounts, thresholds, dates)
-- intentionally limited in shape
-- activated and managed in Fibermade
-- executed by Shopify at checkout via GraphQL-supported discount types
+---
 
-Initial supported preset types include:
-- **Order threshold free shipping**  
-  (e.g. free shipping on orders over $75)
-- **Quantity-based per-skein discount**  
-  (e.g. buy 5 skeins, save $3 per skein — “sweater discount”)
-- **Percentage-based discount**  
-  (e.g. 10% event discount, 20% customer goodwill discount)
-- **Manual free shipping code**
-- **Time-boxed sale discounts**
+### Orders and Production Planning
+Fibermade supports two order sources in Stage 1:
+- **Wholesale Orders** (created and managed in Fibermade)
+- **Retail Orders** (paid Shopify orders imported for planning)
 
-Arbitrary discount rule builders and unsupported Shopify features are intentionally excluded.
-
-### Orders and Planning
-Fibermade supports three order types in Stage 1:
-- **Wholesale Orders** (external buyers, internal execution)
-- **Retail Orders** (paid Shopify orders, imported for planning)
-- **Show Orders** (internal allocation for in-person events)
-
-All order types:
+Both order types:
 - reserve inventory
 - contribute to Dye Lists
 - participate in production planning
+
+Fibermade does not model sales channels beyond wholesale and Shopify retail in Stage 1.
 
 ---
 
@@ -163,13 +152,14 @@ All order types:
 
 Fibermade generates **Dye Lists** that:
 - aggregate required quantities by colorway and base
-- combine wholesale, retail, and show demand
+- combine wholesale and retail demand
 - support printing and batch planning
 - allow drilldown into contributing orders
-- link back to Shopify order pages for fulfillment
+- link back to Shopify orders for fulfillment
 
 Dye Lists answer one question clearly:
-“What do I need to dye next, and how much?”
+
+> “What do I need to dye next, and how much?”
 
 ---
 
@@ -183,68 +173,60 @@ Reconciliation is:
 - irreversible without a new explicit adjustment
 
 #### Wholesale Orders
-- A “Reconcile Inventory” action:
+- Reconcile Inventory:
   - consumes the full order quantities
   - updates inventory truth
   - closes the order
 
 #### Retail Orders (Shopify)
-- A “Reconcile Inventory” action:
+- Reconcile Inventory:
   - consumes the full order quantities
   - updates inventory truth
   - closes the order
-- Fulfillment and shipping continue to happen in Shopify
+- Fulfillment continues in Shopify
 
-#### Show Orders
-- Inventory is reserved before the show
-- After the show, the dyer records quantities **returned**
-- Fibermade computes quantities sold
-- Inventory truth is updated accordingly
-- The Show Order is closed
-
-Reconciliation exists to reflect reality, not predict it.
+Inventory adjustments for any other reason (loss, damage, events, corrections) must be made explicitly.
 
 ---
 
 ## Non-Goals (Explicit)
 Stage 1 does **not** attempt to:
-- Replace the Shopify storefront
+- Provide a customer-facing website
 - Handle consumer checkout
 - Process payments
-- Handle shipping labels or fulfillment
+- Manage discounts or promotions
+- Model shows, festivals, or events
 - Act as a POS system
-- Aggregate buyers or act as a marketplace
+- Perform live inventory updates
+- Handle shipping labels or fulfillment
 - Support multi-location inventory
 - Use Shopify Functions
-- Implement arbitrary discount rule builders
-- Perform live inventory updates during shows
 - Solve taxes or accounting
+- Act as a marketplace
 
-Avoiding these is intentional and necessary for focus.
+Avoiding these is intentional and required for focus.
 
 ---
 
 ## Exit Criteria (Stage 1 → Stage 2)
-Stage 1 is considered successful when:
+Stage 1 is successful when:
 - Fibermade is opened daily by active users
 - Wholesale orders are primarily managed inside Fibermade
-- Inventory decisions are made based on Fibermade data, not Shopify counts
-- Discount creation and management happens in Fibermade, not Shopify
-- Dye Lists are used for real production planning
-- Inventory reconciliation happens inside Fibermade
-- Shopify is treated as a sales and fulfillment surface, not an operational tool
+- Production decisions are made using Fibermade data
+- Dye Lists are trusted and used for real planning
+- Inventory reconciliation happens consistently
+- Shopify is treated purely as a sales and fulfillment surface
 
-Only once Fibermade is clearly the system of record should Stage 2 be considered.
+Only once Fibermade clearly owns operational truth should Stage 2 be considered.
 
 ---
 
 ## Risks to Monitor
-- Fibermade being treated as “nice to have” instead of essential
-- Shopify remaining the de facto source of truth
-- Overbuilding discount logic instead of enforcing preset boundaries
-- Order sync drift or webhook edge cases
-- Dye Lists becoming advisory instead of trusted
-- Reconciliation being skipped or misunderstood
+- Fibermade being treated as “nice to have”
+- Wholesale continuing to live outside the system
+- Inventory truth being ignored in favor of Shopify counts
+- Dye Lists being advisory instead of authoritative
+- Reconciliation being skipped during busy periods
 
 Stage 1 succeeds through discipline, not completeness.
 
@@ -253,8 +235,8 @@ Stage 1 succeeds through discipline, not completeness.
 ## Strategic Role of Stage 1
 Stage 1 earns trust.
 
-It embeds Fibermade into real workflows without forcing migration risk.
-It establishes Fibermade as the place where dyers think about production, inventory, wholesale, discounts, planning, and reconciliation.
-It generates the operational data and confidence required to safely reduce dependence on Shopify later.
+It embeds Fibermade into real workflows without migration risk.
+It establishes Fibermade as the system of record for wholesale, production, and inventory.
+It creates the operational confidence required to safely introduce a Fibermade-owned website, checkout, discounts, and show workflows in Stage 2.
 
 Nothing beyond Stage 1 works if this stage does not.

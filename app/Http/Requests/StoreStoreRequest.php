@@ -2,9 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Enums\StoreVendorStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StoreStoreRequest extends FormRequest
 {
@@ -33,14 +31,6 @@ class StoreStoreRequest extends FormRequest
             'state_region' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'string', 'max:255'],
             'country_code' => ['required', 'string', 'size:2'],
-            'discount_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'minimum_order_quantity' => ['nullable', 'integer', 'min:1'],
-            'minimum_order_value' => ['nullable', 'numeric', 'min:0'],
-            'payment_terms' => ['nullable', 'string', 'max:255'],
-            'lead_time_days' => ['nullable', 'integer', 'min:0'],
-            'allows_preorders' => ['nullable', 'boolean'],
-            'status' => ['nullable', Rule::enum(StoreVendorStatus::class)],
-            'notes' => ['nullable', 'string'],
         ];
     }
 }
