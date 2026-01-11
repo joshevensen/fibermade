@@ -38,7 +38,7 @@ class AccountFactory extends Factory
     /**
      * Indicate that the account is a store type.
      */
-    public function store(): static
+    public function storeType(): static
     {
         return $this->state(fn (array $attributes) => [
             'type' => AccountType::Store,

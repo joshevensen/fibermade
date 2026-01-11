@@ -42,6 +42,8 @@ class CustomerController extends Controller
 
     /**
      * Show the form for creating a new resource.
+     *
+     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
      */
     public function create(): Response
     {
@@ -52,9 +54,14 @@ class CustomerController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *
+     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
+     * Currently disabled via CustomerPolicy in Stage 1.
      */
     public function store(StoreCustomerRequest $request): RedirectResponse
     {
+        $this->authorize('create', Customer::class);
+
         Customer::create([
             ...$request->validated(),
             'account_id' => $request->user()->account_id,
@@ -64,9 +71,9 @@ class CustomerController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Display the specified resource (read-only view).
      */
-    public function edit(Customer $customer): Response
+    public function show(Customer $customer): Response
     {
         $this->authorize('view', $customer);
 
@@ -94,10 +101,26 @@ class CustomerController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     *
+     * TODO: In Stage 2, convert back to edit or keep both show and edit routes.
+     * Currently redirects to show for read-only viewing in Stage 1.
+     */
+    public function edit(Customer $customer): Response
+    {
+        return $this->show($customer);
+    }
+
+    /**
      * Update the specified resource in storage.
+     *
+     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
+     * Currently disabled via CustomerPolicy in Stage 1.
      */
     public function update(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
+        $this->authorize('update', $customer);
+
         $customer->update($request->validated());
 
         return redirect()->route('customers.index');
@@ -105,6 +128,9 @@ class CustomerController extends Controller
 
     /**
      * Update the notes field on the customer.
+     *
+     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
+     * Currently disabled via CustomerPolicy in Stage 1.
      */
     public function updateNotes(UpdateCustomerRequest $request, Customer $customer): RedirectResponse
     {
@@ -117,6 +143,9 @@ class CustomerController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
+     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
+     * Currently disabled via CustomerPolicy in Stage 1.
      */
     public function destroy(Customer $customer): RedirectResponse
     {

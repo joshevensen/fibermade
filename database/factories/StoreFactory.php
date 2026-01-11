@@ -17,7 +17,7 @@ class StoreFactory extends Factory
     public function definition(): array
     {
         return [
-            'account_id' => \App\Models\Account::factory()->store(),
+            'account_id' => \App\Models\Account::factory()->storeType(),
             'name' => fake()->company(),
             'email' => fake()->unique()->safeEmail(),
             'owner_name' => fake()->optional()->name(),

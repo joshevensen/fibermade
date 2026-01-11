@@ -31,7 +31,6 @@ import {
     IconPalette,
     IconShoppingBag,
     IconShoppingCart,
-    IconTag,
     IconUsers,
 } from '@tabler/icons-vue';
 
@@ -41,7 +40,6 @@ export const BusinessIconList = {
     Colorways: IconPalette,
     Customers: IconUsers,
     Dyes: IconDroplet,
-    Discounts: IconTag,
     Orders: IconShoppingCart,
     Stores: IconShoppingBag,
     Inventory: IconLayoutGrid,

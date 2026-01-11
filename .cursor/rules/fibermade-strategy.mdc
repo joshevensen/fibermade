@@ -1,0 +1,43 @@
+---
+alwaysApply: true
+---
+# Fibermade Product Strategy
+
+**CRITICAL**: Before implementing any feature or making design decisions, reference these strategy documents:
+- `ai/Strategy.md` - Product strategy, bias, target customer, growth stages
+- `ai/Personas.md` - Four customer personas (James, Stephanie, David, Laura)
+- `ai/Stage 1.md` - Current stage: Shopify augmentation, wholesale & operations
+- `ai/Stage 2.md` - Future stage: Fibermade as selling surface (NOT YET ACTIVE)
+- `ai/Stage 3.md` - Future stage: Card-present payments (NOT YET ACTIVE)
+
+## Current Stage: Stage 1
+- **DO**: Wholesale orders, production planning (Dye Lists), inventory truth, Shopify integration
+- **DON'T**: Customer website, checkout, POS, shows/events, discounts/promotions
+
+## Product Bias
+Fibermade is biased toward:
+- Small-batch dyers
+- Selective wholesale relationships
+- Production-first worldview (not ecommerce-first)
+- Reduced mental load over maximum flexibility
+
+**Primary Persona**: Stephanie (small batch, wholesale-selective)
+
+## System Boundaries
+- Fibermade owns: production reality, inventory truth, wholesale logic, planning
+- Shopify owns: presentation, checkout, fulfillment (in Stage 1)
+- Never compete with Shopify in Stage 1
+
+## Language & Terminology
+Use production-first language:
+- "Dye Lists" not "order fulfillment"
+- "inventory truth" not "stock levels"
+- "production planning" not "sales forecasting"
+- Match small-batch, selective wholesale tone
+
+## Validation Before Building
+For any feature, ask:
+1. Does this belong in Stage 1? (Check Stage 1 non-goals)
+2. Which persona benefits? (Prioritize Stephanie)
+3. Does language match production-first worldview?
+4. Does Fibermade remain the system of record?

@@ -1,19 +1,21 @@
+<!-- TODO: Restore edit functionality in Stage 2 -->
 <script setup lang="ts">
-import {
-    destroy as destroyCustomer,
-    update,
-} from '@/actions/App/Http/Controllers/CustomerController';
+// TODO: Re-enable these imports in Stage 2
+// import {
+//     destroy as destroyCustomer,
+//     update,
+// } from '@/actions/App/Http/Controllers/CustomerController';
 import { edit as editOrder } from '@/actions/App/Http/Controllers/OrderController';
-import UiButton from '@/components/ui/UiButton.vue';
+// import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDivider from '@/components/ui/UiDivider.vue';
-import UiEditor from '@/components/ui/UiEditor.vue';
-import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
-import UiFormFieldAddress from '@/components/ui/UiFormFieldAddress.vue';
-import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import { useConfirm } from '@/composables/useConfirm';
-import { useFormSubmission } from '@/composables/useFormSubmission';
+// import UiEditor from '@/components/ui/UiEditor.vue';
+// import UiForm from '@/components/ui/UiForm.vue';
+// import UiFormField from '@/components/ui/UiFormField.vue';
+// import UiFormFieldAddress from '@/components/ui/UiFormFieldAddress.vue';
+// import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+// import { useConfirm } from '@/composables/useConfirm';
+// import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { router } from '@inertiajs/vue3';
 
@@ -43,37 +45,40 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { requireDelete } = useConfirm();
+// TODO: Re-enable delete functionality in Stage 2
+// const { requireDelete } = useConfirm();
 
-const { form, onSubmit } = useFormSubmission({
-    route: () => update(props.customer.id),
-    initialValues: {
-        name: props.customer.name || '',
-        email: props.customer.email || null,
-        phone: props.customer.phone || null,
-        address_line1: props.customer.address_line1 || null,
-        address_line2: props.customer.address_line2 || null,
-        city: props.customer.city || null,
-        state_region: props.customer.state_region || null,
-        postal_code: props.customer.postal_code || null,
-        country_code: props.customer.country_code || null,
-        notes: props.customer.notes || null,
-    },
-    successMessage: 'Customer updated successfully.',
-    onSuccess: () => {
-        router.visit('/customers');
-    },
-});
+// TODO: Re-enable form submission in Stage 2
+// const { form, onSubmit } = useFormSubmission({
+//     route: () => update(props.customer.id),
+//     initialValues: {
+//         name: props.customer.name || '',
+//         email: props.customer.email || null,
+//         phone: props.customer.phone || null,
+//         address_line1: props.customer.address_line1 || null,
+//         address_line2: props.customer.address_line2 || null,
+//         city: props.customer.city || null,
+//         state_region: props.customer.state_region || null,
+//         postal_code: props.customer.postal_code || null,
+//         country_code: props.customer.country_code || null,
+//         notes: props.customer.notes || null,
+//     },
+//     successMessage: 'Customer updated successfully.',
+//     onSuccess: () => {
+//         router.visit('/customers');
+//     },
+// });
 
-function handleDelete(event: Event): void {
-    requireDelete({
-        target: event.currentTarget as HTMLElement,
-        message: `Are you sure you want to delete ${props.customer.name}?`,
-        onAccept: () => {
-            router.delete(destroyCustomer.url(props.customer.id));
-        },
-    });
-}
+// TODO: Re-enable delete handler in Stage 2
+// function handleDelete(event: Event): void {
+//     requireDelete({
+//         target: event.currentTarget as HTMLElement,
+//         message: `Are you sure you want to delete ${props.customer.name}?`,
+//         onAccept: () => {
+//             router.delete(destroyCustomer.url(props.customer.id));
+//         },
+//     });
+// }
 
 function formatDate(value: string | null | undefined): string {
     if (!value) {
@@ -104,73 +109,102 @@ function formatEnum(value: string | null | undefined): string {
 </script>
 
 <template>
-    <AppLayout page-title="Edit Customer">
+    <AppLayout page-title="Customer Details">
         <template #default>
             <UiCard>
                 <template #content>
-                    <UiForm
-                        :initial-values="{
-                            name: props.customer.name || '',
-                            email: props.customer.email || null,
-                            phone: props.customer.phone || null,
-                            address_line1: props.customer.address_line1 || null,
-                            address_line2: props.customer.address_line2 || null,
-                            city: props.customer.city || null,
-                            state_region: props.customer.state_region || null,
-                            postal_code: props.customer.postal_code || null,
-                            country_code: props.customer.country_code || null,
-                            notes: props.customer.notes || null,
-                        }"
-                        @submit="onSubmit"
-                    >
-                        <UiFormFieldInput
-                            name="name"
-                            label="Name"
-                            placeholder="Customer name"
-                            :server-error="form.errors.name"
-                            required
-                        />
+                    <div class="space-y-6">
+                        <div>
+                            <label
+                                class="mb-1 block text-sm font-medium text-surface-700"
+                            >
+                                Name
+                            </label>
+                            <p class="text-base text-surface-900">
+                                {{ props.customer.name || '—' }}
+                            </p>
+                        </div>
 
-                        <UiFormFieldInput
-                            name="email"
-                            label="Email"
-                            type="email"
-                            placeholder="customer@example.com"
-                            :server-error="form.errors.email"
-                        />
+                        <div>
+                            <label
+                                class="mb-1 block text-sm font-medium text-surface-700"
+                            >
+                                Email
+                            </label>
+                            <p class="text-base text-surface-900">
+                                {{ props.customer.email || '—' }}
+                            </p>
+                        </div>
 
-                        <UiFormFieldInput
-                            name="phone"
-                            label="Phone"
-                            placeholder="Phone number"
-                            :server-error="form.errors.phone"
-                        />
+                        <div>
+                            <label
+                                class="mb-1 block text-sm font-medium text-surface-700"
+                            >
+                                Phone
+                            </label>
+                            <p class="text-base text-surface-900">
+                                {{ props.customer.phone || '—' }}
+                            </p>
+                        </div>
 
                         <UiDivider />
 
-                        <h3 class="mb-4 text-lg font-semibold">Address</h3>
-
-                        <UiFormFieldAddress :errors="form.errors" />
+                        <div>
+                            <h3 class="mb-4 text-lg font-semibold">Address</h3>
+                            <div class="space-y-2">
+                                <p
+                                    v-if="props.customer.address_line1"
+                                    class="text-base text-surface-900"
+                                >
+                                    {{ props.customer.address_line1 }}
+                                </p>
+                                <p
+                                    v-if="props.customer.address_line2"
+                                    class="text-base text-surface-900"
+                                >
+                                    {{ props.customer.address_line2 }}
+                                </p>
+                                <p
+                                    v-if="
+                                        props.customer.city ||
+                                        props.customer.state_region ||
+                                        props.customer.postal_code
+                                    "
+                                    class="text-base text-surface-900"
+                                >
+                                    {{
+                                        [
+                                            props.customer.city,
+                                            props.customer.state_region,
+                                            props.customer.postal_code,
+                                        ]
+                                            .filter(Boolean)
+                                            .join(', ')
+                                    }}
+                                </p>
+                                <p
+                                    v-if="props.customer.country_code"
+                                    class="text-base text-surface-900"
+                                >
+                                    {{ props.customer.country_code }}
+                                </p>
+                            </div>
+                        </div>
 
                         <UiDivider />
 
-                        <UiFormField
-                            name="notes"
-                            label="Notes"
-                            :server-error="form.errors.notes"
-                        >
-                            <template #default="{ props: fieldProps }">
-                                <UiEditor
-                                    v-bind="fieldProps"
-                                    placeholder="Additional notes"
-                                />
-                            </template>
-                        </UiFormField>
-
-                        <UiButton type="submit" :loading="form.processing">
-                            Update Customer
-                        </UiButton>
-                    </UiForm>
+                        <div v-if="props.customer.notes">
+                            <label
+                                class="mb-1 block text-sm font-medium text-surface-700"
+                            >
+                                Notes
+                            </label>
+                            <div
+                                class="prose prose-sm max-w-none text-base text-surface-900"
+                                v-html="props.customer.notes"
+                            />
+                        </div>
+                    </div>
                 </template>
             </UiCard>
         </template>
@@ -231,7 +265,8 @@ function formatEnum(value: string | null | undefined): string {
                     </template>
                 </UiCard>
 
-                <UiCard>
+                <!-- TODO: Re-enable delete functionality in Stage 2 -->
+                <!-- <UiCard>
                     <template #content>
                         <div class="space-y-4">
                             <div>
@@ -252,7 +287,7 @@ function formatEnum(value: string | null | undefined): string {
                             </UiButton>
                         </div>
                     </template>
-                </UiCard>
+                </UiCard> -->
             </div>
         </template>
     </AppLayout>

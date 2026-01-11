@@ -55,7 +55,10 @@ Most existing tools treat ecommerce presentation as the center of truth.
 Fibermade intentionally inverts this.
 
 - **Fibermade owns production reality**: inventory truth, batches, availability, wholesale logic, and operational reporting.
-- **External tools own presentation (initially)**: storefronts, checkout flows, and card-present transactions.
+- **External tools own presentation initially**: storefronts, checkout flows, and card-present transactions.
+
+In Stage 1, Fibermade has **no customer-facing website or checkout**.  
+All buyer interactions remain external.
 
 This inversion is a deliberate product stance, not a temporary limitation.  
 It allows Fibermade to integrate first, then replace selectively, without forcing risky early migrations.
@@ -72,18 +75,24 @@ Each stage must:
 - Align with the operational maturity of the dyers it serves first
 - Generate evidence before expanding scope
 
+Buyer-facing features are introduced **only after** Fibermade is trusted as the system of record for operations.
+
 No stage exists solely to “complete the vision.”
 
 ---
 
 ## Stage Philosophy (High Level)
 
-### Stage 1: Augment Shopify
+### Stage 1: Augment Shopify (Wholesale & Operations)
 **Goal:** Become indispensable without disruption.
 
-- Fibermade layers wholesale and production-aware inventory on top of Shopify
-- Shopify remains the ecommerce and checkout surface
-- Fibermade becomes the daily operational tool
+- Fibermade owns wholesale management, production planning, and inventory truth
+- Shopify remains the **entire customer-facing surface**:
+  - website
+  - checkout
+  - payments
+  - fulfillment
+- Fibermade operates exclusively behind the scenes
 
 Stage 1 explicitly prioritizes small-batch dyers with selective wholesale relationships.
 
@@ -91,35 +100,36 @@ Stage 1 explicitly prioritizes small-batch dyers with selective wholesale relati
 
 ---
 
-### Stage 2: eCommerce (Replace Shopify Basic)
+### Stage 2: Fibermade as the Selling Surface
 **Goal:** Make Fibermade the primary ecommerce system.
 
-- Fibermade provides the ecommerce site, checkout, discounts, and event-aware workflows
-- Fibermade becomes the system of record for online sales
+- Fibermade introduces:
+  - a hosted website
+  - checkout and order capture
+  - discounts and promotions
+  - show and event workflows
+- Fibermade becomes the system of record for both operations **and** sales intent
 - Shopify is no longer required
 
 Even in Stage 2, Fibermade remains **production-first**, not checkout-first.
 
-Card-present transactions, if needed, are supported via optional **Stripe Terminal integration**.  
-Fibermade remains the system of record for inventory, orders, and operations.
+Discounts, promotions, and show workflows are introduced only once Fibermade owns checkout intent.
 
-**Success metric:** Customers can run their online business entirely on Fibermade without Shopify.
+**Success metric:** Customers can run their online business entirely on Fibermade.
 
 ---
 
 ### Stage 3: Card-Present Payments (Constrained)
 **Goal:** Reduce friction, not expand surface area.
 
-- Card-present support is intentionally limited in scope
+- Card-present payments are optional and intentionally limited
 - Implemented via Stripe Terminal with a single supported device (WisePOS E)
 - No native mobile app requirement
 - Payments are captured; reconciliation remains explicit and production-aware
 
-Native POS workflows are considered only if they meaningfully reduce show prep and post-event reconciliation overhead.
-
 Card-present support does not redefine Fibermade as a POS system.
 
-**Success metric:** In-person sales feel calmer and simpler than external tools, without shifting system authority.
+**Success metric:** In-person sales feel calmer and simpler without shifting system authority.
 
 ---
 

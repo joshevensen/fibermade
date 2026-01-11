@@ -22,6 +22,7 @@ const { IconList, BusinessIconList } = useIcon();
 const createMenuRef = ref();
 
 // Map page titles to drawer types
+// TODO: Re-enable customer creation in Stage 2
 const pageTitleToDrawerType: Record<
     string,
     'base' | 'collection' | 'colorway' | 'customer' | 'order' | 'show' | 'store'
@@ -29,7 +30,7 @@ const pageTitleToDrawerType: Record<
     Bases: 'base',
     Collections: 'collection',
     Colorways: 'colorway',
-    Customers: 'customer',
+    // Customers: 'customer', // Disabled in Stage 1
     Orders: 'order',
     Shows: 'show',
     Stores: 'store',
@@ -82,6 +83,7 @@ const menuToggleButtonLabel = computed(() => {
     return hasCreateDrawer.value ? undefined : 'Create';
 });
 
+// TODO: Re-enable customer creation in Stage 2
 const createMenuItems = [
     {
         label: 'Base',
@@ -104,13 +106,14 @@ const createMenuItems = [
             openDrawer('colorway');
         },
     },
-    {
-        label: 'Customer',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('customer');
-        },
-    },
+    // Customer creation disabled in Stage 1
+    // {
+    //     label: 'Customer',
+    //     icon: IconList.Plus,
+    //     command: () => {
+    //         openDrawer('customer');
+    //     },
+    // },
     {
         label: 'Order',
         icon: IconList.Plus,

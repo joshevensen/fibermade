@@ -55,7 +55,6 @@ const { IconList } = useIcon();
 const tabs = [
     { value: 'account', label: 'Account' },
     { value: 'profile', label: 'Profile' },
-    // { value: 'discounts', label: 'Discounts' },
     // { value: 'dyes', label: 'Dyes' },
 ];
 
@@ -119,15 +118,7 @@ watch(
                 </div>
             </UiTabPanel>
 
-            <!-- <UiTabPanel value="discounts">
-                <div class="space-y-4">
-                    <p class="text-surface-600 dark:text-surface-400">
-                        Discounts settings coming soon.
-                    </p>
-                </div>
-            </UiTabPanel>
-
-            <UiTabPanel value="dyes">
+            <!-- <UiTabPanel value="dyes">
                 <div class="space-y-4">
                     <DyesTab :dyes="dyes" />
                 </div>

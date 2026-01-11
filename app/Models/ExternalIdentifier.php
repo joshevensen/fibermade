@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * Represents an external identifier mapping for integration connections.
  *
- * Maps internal models (Order, Colorway, Inventory, Discount, Customer) to
+ * Maps internal models (Order, Colorway, Inventory, Customer) to
  * external system identifiers (e.g., Shopify product IDs, order IDs, etc.).
  * Each identifier is tied to a specific integration connection and can store
  * additional metadata in the data JSON column.
@@ -65,7 +65,7 @@ class ExternalIdentifier extends Model
     }
 
     /**
-     * Get the parent identifiable model (Order, Colorway, Inventory, Discount, Customer).
+     * Get the parent identifiable model (Order, Colorway, Inventory, Customer).
      */
     public function identifiable(): MorphTo
     {

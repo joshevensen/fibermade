@@ -89,14 +89,6 @@ class Account extends Model
     }
 
     /**
-     * Get the discounts for this account.
-     */
-    public function discounts(): HasMany
-    {
-        return $this->hasMany(Discount::class);
-    }
-
-    /**
      * Get the dyes for this account.
      */
     public function dyes(): HasMany
