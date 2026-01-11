@@ -23,7 +23,7 @@ class DyeController extends Controller
             ? Dye::with('account')->get()
             : ($user->account_id ? Dye::where('account_id', $user->account_id)->with('account')->get() : collect());
 
-        return Inertia::render('dyes/DyeIndexPage', [
+        return Inertia::render('creator/dyes/DyeIndexPage', [
             'dyes' => $dyes,
         ]);
     }
@@ -35,7 +35,7 @@ class DyeController extends Controller
     {
         $this->authorize('create', Dye::class);
 
-        return Inertia::render('dyes/DyeCreatePage');
+        return Inertia::render('creator/dyes/DyeCreatePage');
     }
 
     /**
@@ -58,7 +58,7 @@ class DyeController extends Controller
     {
         $this->authorize('view', $dye);
 
-        return Inertia::render('dyes/DyeEditPage', [
+        return Inertia::render('creator/dyes/DyeEditPage', [
             'dye' => $dye,
         ]);
     }

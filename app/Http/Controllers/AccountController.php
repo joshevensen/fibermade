@@ -24,7 +24,7 @@ class AccountController extends Controller
             ? Account::with('users')->get()
             : ($user->account_id ? Account::with('users')->where('id', $user->account_id)->get() : collect());
 
-        return Inertia::render('accounts/AccountIndexPage', [
+        return Inertia::render('creator/accounts/AccountIndexPage', [
             'accounts' => $accounts,
         ]);
     }
@@ -36,7 +36,7 @@ class AccountController extends Controller
     {
         $this->authorize('create', Account::class);
 
-        return Inertia::render('accounts/AccountCreatePage');
+        return Inertia::render('creator/accounts/AccountCreatePage');
     }
 
     /**
@@ -62,7 +62,7 @@ class AccountController extends Controller
     {
         $this->authorize('view', $account);
 
-        return Inertia::render('accounts/AccountEditPage', [
+        return Inertia::render('creator/accounts/AccountEditPage', [
             'account' => $account->load('users'),
         ]);
     }

@@ -31,7 +31,7 @@ class CreatorController extends Controller
             $creators = collect();
         }
 
-        return Inertia::render('creators/CreatorIndexPage', [
+        return Inertia::render('creator/creators/CreatorIndexPage', [
             'creators' => $creators,
         ]);
     }
@@ -43,7 +43,7 @@ class CreatorController extends Controller
     {
         $this->authorize('create', Creator::class);
 
-        return Inertia::render('creators/CreatorCreatePage');
+        return Inertia::render('creator/creators/CreatorCreatePage');
     }
 
     /**
@@ -70,7 +70,7 @@ class CreatorController extends Controller
 
         $creator->load('account');
 
-        return Inertia::render('creators/CreatorShowPage', [
+        return Inertia::render('creator/creators/CreatorShowPage', [
             'creator' => $creator,
         ]);
     }
@@ -82,7 +82,7 @@ class CreatorController extends Controller
     {
         $this->authorize('update', $creator);
 
-        return Inertia::render('creators/CreatorEditPage', [
+        return Inertia::render('creator/creators/CreatorEditPage', [
             'creator' => $creator,
         ]);
     }

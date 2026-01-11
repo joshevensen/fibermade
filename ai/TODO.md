@@ -1,10 +1,10 @@
-[ ] - Make customers view only
-[ ] - Make retail orders view only
-[ ] - Hide show orders
-[ ] - Hide multiple users per account
-[ ] - Change Create button to only create Colorway or Collection
+[x] - Make customers view only
+[x] - Make retail orders view only
+[x] - Hide show orders
+[x] - Hide multiple users per account
+[x] - Change Create button to only create Colorway or Collection
 [ ] - Integrate with Shopify
-[ ] - Creator Registration w/ access list
+[x] - Creator Registration w/ access list
 [ ] - Creator Onboarding
 [ ] - Invite Store workflow
 [ ] - Store Onboarding

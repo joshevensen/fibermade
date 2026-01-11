@@ -20,6 +20,9 @@ return new class extends Migration
             $table->boolean('is_admin')->default(false);
             $table->foreignId('account_id')->nullable()->constrained()->nullOnDelete();
             $table->string('role')->default('owner');
+            $table->timestamp('terms_accepted_at')->nullable();
+            $table->timestamp('privacy_accepted_at')->nullable();
+            $table->boolean('marketing_opt_in')->default(false);
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

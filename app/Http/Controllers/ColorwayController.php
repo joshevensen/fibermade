@@ -78,7 +78,7 @@ class ColorwayController extends Controller
             'value' => $collection->id,
         ])->toArray();
 
-        return Inertia::render('colorways/ColorwayIndexPage', [
+        return Inertia::render('creator/colorways/ColorwayIndexPage', [
             'colorways' => $colorways,
             'colorwayStatusOptions' => $colorwayStatusOptions,
             'techniqueOptions' => $techniqueOptions,
@@ -115,7 +115,7 @@ class ColorwayController extends Controller
             ])
             ->toArray();
 
-        return Inertia::render('colorways/ColorwayCreatePage', [
+        return Inertia::render('creator/colorways/ColorwayCreatePage', [
             'colorwayStatusOptions' => $colorwayStatusOptions,
             'techniqueOptions' => $techniqueOptions,
             'colorOptions' => $colorOptions,
@@ -202,7 +202,7 @@ class ColorwayController extends Controller
             'data' => $identifier->data,
         ])->toArray();
 
-        return Inertia::render('colorways/ColorwayEditPage', [
+        return Inertia::render('creator/colorways/ColorwayEditPage', [
             'colorway' => $colorwayArray,
             'collections' => $colorway->collections,
             'allCollections' => $allCollections,

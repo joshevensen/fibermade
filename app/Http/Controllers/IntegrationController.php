@@ -23,7 +23,7 @@ class IntegrationController extends Controller
             ? Integration::with('account')->get()
             : ($user->account_id ? Integration::where('account_id', $user->account_id)->with('account')->get() : collect());
 
-        return Inertia::render('integrations/IntegrationIndexPage', [
+        return Inertia::render('creator/integrations/IntegrationIndexPage', [
             'integrations' => $integrations,
         ]);
     }
@@ -35,7 +35,7 @@ class IntegrationController extends Controller
     {
         $this->authorize('create', Integration::class);
 
-        return Inertia::render('integrations/IntegrationCreatePage');
+        return Inertia::render('creator/integrations/IntegrationCreatePage');
     }
 
     /**
@@ -58,7 +58,7 @@ class IntegrationController extends Controller
     {
         $this->authorize('view', $integration);
 
-        return Inertia::render('integrations/IntegrationEditPage', [
+        return Inertia::render('creator/integrations/IntegrationEditPage', [
             'integration' => $integration,
         ]);
     }

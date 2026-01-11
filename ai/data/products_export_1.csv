@@ -1,0 +1,483 @@
+Handle,Title,Body (HTML),Vendor,Product Category,Type,Tags,Published,Option1 Name,Option1 Value,Option1 Linked To,Option2 Name,Option2 Value,Option2 Linked To,Option3 Name,Option3 Value,Option3 Linked To,Variant SKU,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Fulfillment Service,Variant Price,Variant Compare At Price,Variant Requires Shipping,Variant Taxable,Unit Price Total Measure,Unit Price Total Measure Unit,Unit Price Base Measure,Unit Price Base Measure Unit,Variant Barcode,Image Src,Image Position,Image Alt Text,Gift Card,SEO Title,SEO Description,Color (product.metafields.shopify.color-pattern),Fabric (product.metafields.shopify.fabric),Complementary products (product.metafields.shopify--discovery--product_recommendation.complementary_products),Related products (product.metafields.shopify--discovery--product_recommendation.related_products),Related products settings (product.metafields.shopify--discovery--product_recommendation.related_products_display),Search product boosts (product.metafields.shopify--discovery--product_search_boost.queries),Variant Image,Variant Weight Unit,Variant Tax Code,Cost per item,Status
+fruitcake,Fruitcake,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/coming-soon-2_0c6f1ffe-58ab-49b2-993c-b10ec1ed7315.png?v=1704588460,1,"",false,,,,,,,,,,g,,10.00,active
+fruitcake,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+fruitcake,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+fruitcake,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hayride,Hayride,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color, orange, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_60f19d22-d043-4840-a297-34abd27f0363.heic?v=1758314885,1,"",false,,,,,,,,,,g,,10.00,active
+hayride,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_de9d86f8-c6e6-4aa8-9f67-953fbbf89a4f.heic?v=1758314867,2,"",,,,,,,,,,,g,,10.00,
+hayride,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hayride,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+butterscotch,Butterscotch,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color, orange, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_a0fab55c-70fc-4f85-a956-d6cd639c6166.heic?v=1758314790,1,"",false,,,,,,,,,,g,,10.00,active
+butterscotch,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+butterscotch,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+butterscotch,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+kelpie-s-mane,Kelpie’s Mane,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color, orange, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_8d0dd7e8-f926-4b88-b458-c9812377d8d8.heic?v=1758296820,1,"",false,,,,,,,,,,g,,10.00,active
+kelpie-s-mane,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+kelpie-s-mane,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+kelpie-s-mane,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+i-made-it-for-the-tiger,I Made It For the Tiger,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color, orange, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_668c386e-7219-461f-8748-b9c09fee1bc2.heic?v=1758296711,1,"",false,,,,,,,,,,g,,10.00,active
+i-made-it-for-the-tiger,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+i-made-it-for-the-tiger,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+i-made-it-for-the-tiger,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+the-bird-keeps-taking-it,The Bird Keeps Taking It,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color, orange, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/Yarn.png?v=1759769215,1,"",false,,,,,,,,,,g,,10.00,active
+the-bird-keeps-taking-it,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+the-bird-keeps-taking-it,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+the-bird-keeps-taking-it,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+shadows-in-the-vineyard,Shadows in the Vineyard,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"green, multi-color, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_a0b3caca-0de7-42f8-b998-9a91443e386e.heic?v=1758296468,1,"",false,,,,,,,,,,g,,10.00,active
+shadows-in-the-vineyard,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+shadows-in-the-vineyard,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+shadows-in-the-vineyard,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+campfire-stories,Campfire Stories,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, multi-color, orange, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-9,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1754.jpg?v=1757027690,1,"",false,,,,,,,,,,g,,10.00,active
+campfire-stories,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-16,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1762.jpg?v=1757027691,2,"",,,,,,,,,,,g,,10.00,
+campfire-stories,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+campfire-stories,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+berry-cobbler,Berry Cobbler,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, blue, multi-color, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1759.jpg?v=1757027690,1,"",false,,,,,,,,,,g,,10.00,active
+berry-cobbler,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1763.jpg?v=1757027690,2,"",,,,,,,,,,,g,,10.00,
+berry-cobbler,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1760.jpg?v=1757027691,3,"",,,,,,,,,,,g,,10.00,
+berry-cobbler,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+sugar-cookie,Sugar Cookie,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, white",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1756.jpg?v=1757027690,1,"",false,,,,,,,,,,g,,10.00,active
+sugar-cookie,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1760.jpg?v=1757027691,2,"",,,,,,,,,,,g,,10.00,
+sugar-cookie,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+sugar-cookie,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+cranberries,Cranberries,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,red,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1755.jpg?v=1757027690,1,"",false,,,,,,,,,,g,,10.00,active
+cranberries,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1760.jpg?v=1757027691,2,"",,,,,,,,,,,g,,10.00,
+cranberries,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+cranberries,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+warm-apple-cider,Warm Apple Cider,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,orange,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-8,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1758.jpg?v=1757027690,1,"",false,,,,,,,,,,g,,10.00,active
+warm-apple-cider,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1760.jpg?v=1757027691,2,"",,,,,,,,,,,g,,10.00,
+warm-apple-cider,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+warm-apple-cider,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+nutmeg,Nutmeg,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,brown,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1751.jpg?v=1757027691,1,"",false,,,,,,,,,,g,,10.00,active
+nutmeg,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1762.jpg?v=1757027691,2,"",,,,,,,,,,,g,,10.00,
+nutmeg,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1760.jpg?v=1757027691,3,"",,,,,,,,,,,g,,10.00,
+nutmeg,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+sage,Sage,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"green, multi-color",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-11,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1757.jpg?v=1757027691,1,"",false,,,,,,,,,,g,,10.00,active
+sage,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1760.jpg?v=1757027691,2,"",,,,,,,,,,,g,,10.00,
+sage,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+sage,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+glory-of-texas,Glory of Texas,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"green, multi-color, pink, teal",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1499.jpg?v=1745602935,1,"",false,,,,,,,,,,g,,10.00,active
+glory-of-texas,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+glory-of-texas,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+glory-of-texas,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hill-country-in-bloom,Hill Country in Bloom,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"green, multi-color",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,9,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1496.jpg?v=1745602822,1,"",false,,,,,,,,,,g,,10.00,active
+hill-country-in-bloom,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hill-country-in-bloom,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,7,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hill-country-in-bloom,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+custom-yarn,Custom Yarn,<p>This is a custom yarn color. You'll have to contact us and discuss what you want the color to be.</p>,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/coming-soon-3.png?v=1696287129,1,"",false,,,,,,,,,,g,,10.00,draft
+custom-yarn,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+custom-yarn,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+custom-yarn,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+feminine-rage,Feminine Rage,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,teal,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_54e81292-3ccb-4486-826f-f38a8dc31d7b.jpg?v=1738984582,1,"",false,,,,,,,,,,g,,10.00,active
+feminine-rage,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+feminine-rage,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+feminine-rage,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+moo-deng,Moo Deng,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,teal,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_7d93d5bb-417d-408a-aaee-a83628c1039c.jpg?v=1738984605,1,"",false,,,,,,,,,,g,,10.00,archived
+moo-deng,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+moo-deng,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+moo-deng,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+poolside-margaritas,Poolside Margarita,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1346.jpg?v=1738548229,1,"",false,,,,,,,,,,g,,10.00,active
+poolside-margaritas,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1351_0c11b2de-18e4-4172-bee2-de250064aeaf.jpg?v=1738548229,2,"",,,,,,,,,,,g,,10.00,
+poolside-margaritas,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1354_154405df-67a9-4006-8be7-7c3a84118c35.jpg?v=1738548229,3,"",,,,,,,,,,,g,,10.00,
+poolside-margaritas,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1357_65eebec6-75e9-4240-b81c-b39857700ebd.jpg?v=1738548229,4,"",,,,,,,,,,,g,,10.00,
+peach-daiquiri,Peach Daiquiri,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,coral,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1345.jpg?v=1738548158,1,"",false,,,,,,,,,,g,,10.00,active
+peach-daiquiri,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1353_a137d547-4e6a-4cf1-b96e-8cde604354ef.jpg?v=1738548158,2,"",,,,,,,,,,,g,,10.00,
+peach-daiquiri,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1354.jpg?v=1738548158,3,"",,,,,,,,,,,g,,10.00,
+peach-daiquiri,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1359Copy_74a1e379-4ab2-4005-9bc9-22a3aa2c6930.jpg?v=1738548158,4,"",,,,,,,,,,,g,,10.00,
+peach-daiquiri,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1357_c335e1ec-b34d-49d9-b58c-a736c87174df.jpg?v=1738548158,5,"",,,,,,,,,,,,,,
+gentle-waves,Gentle Waves,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, pink, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1349.jpg?v=1738548105,1,"",false,,,,,,,,,,g,,10.00,active
+gentle-waves,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1353_c2aff6a2-c2d1-4b21-8e88-eda204277d04.jpg?v=1738548105,2,"",,,,,,,,,,,g,,10.00,
+gentle-waves,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1356_d310921c-f318-4924-bacb-97e04934617f.jpg?v=1738548105,3,"",,,,,,,,,,,g,,10.00,
+gentle-waves,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1357_c881aed7-496f-4462-9c60-14c98f9ae179.jpg?v=1738548105,4,"",,,,,,,,,,,g,,10.00,
+wanna-play-mermaid,Wanna Play Mermaids?,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, pink, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1348.jpg?v=1738548026,1,"",false,,,,,,,,,,g,,10.00,active
+wanna-play-mermaid,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1356.jpg?v=1738548026,2,"",,,,,,,,,,,g,,10.00,
+wanna-play-mermaid,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1353.jpg?v=1738548026,3,"",,,,,,,,,,,g,,10.00,
+wanna-play-mermaid,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1357_5026e676-b68a-412b-8eaa-17d21d8b8f28.jpg?v=1738548026,4,"",,,,,,,,,,,g,,10.00,
+she-sells-seashells,She Sells Seashells,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"pink, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1350.jpg?v=1738547934,1,"",false,,,,,,,,,,g,,10.00,active
+she-sells-seashells,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1351_6882b200-ea15-4240-aee0-b027801a684a.jpg?v=1738547934,2,"",,,,,,,,,,,g,,10.00,
+she-sells-seashells,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1359Copy.jpg?v=1738547934,3,"",,,,,,,,,,,g,,10.00,
+she-sells-seashells,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1357_31ed91e8-bbff-4a7a-b266-a2c463c5e365.jpg?v=1738547934,4,"",,,,,,,,,,,g,,10.00,
+sun-sand,Sun & Sand,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1347.jpg?v=1738547860,1,"",false,,,,,,,,,,g,,10.00,active
+sun-sand,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1351.jpg?v=1738547860,2,"",,,,,,,,,,,g,,10.00,
+sun-sand,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1357.jpg?v=1738547860,3,"",,,,,,,,,,,g,,10.00,
+sun-sand,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+autumn-tadpoles,Autumn Tadpoles,"",Bad Frog Yarn Co,Apparel & Accessories > Clothing > Clothing Tops > Shirts,"","",false,Base,Fingering,,,,,,,,,0.0,shopify,0,continue,manual,48.00,,true,false,,,,,,,,,false,,,,,,,,,,lb,,,archived
+autumn-tadpoles,,,,,,,,,DK,,,,,,,,,0.0,shopify,0,continue,manual,48.00,,true,false,,,,,,,,,,,,,,,,,,,lb,,,
+beetlejuice-set,Beetlejuice Set,<p>The green and purple yarn are exclusive to this set</p>,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, green, purple",false,Title,Default Title,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1158.jpg?v=1728773923,1,"",false,,,,,,,,,,g,,10.00,archived
+ghost-with-the-most,Ghost With The Most,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, green, purple",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1161.jpg?v=1728773797,1,"",false,,,,,,,,,,g,,10.00,archived
+ghost-with-the-most,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+ghost-with-the-most,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+ghost-with-the-most,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+evenfall,Evenfall,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, blue",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1103.jpg?v=1726636299,1,"",false,,,,,,,,,,g,,10.00,active
+evenfall,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-5,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+evenfall,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+evenfall,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+halloween-bracelet,Bracelet,"",Bad Frog Yarn Co,Apparel & Accessories > Jewelry > Bracelets,"","",false,Title,Default Title,,,,,,,,"",0.0,,20,deny,manual,9.00,,true,false,,,,,"",,,,false,,,,,,,,,,lb,,,active
+pride-mini-collection,Pride Mini Collection,"",Bad Frog Yarn Co,Apparel & Accessories > Clothing > Clothing Tops > Shirts,"","",false,Base,Fingering,,,,,,,,"",0.0,shopify,0,continue,manual,40.00,,true,false,,,,,"",,,,false,,,,,,,,,,lb,,,archived
+pride-mini-collection,,,,,,,,,DK,,,,,,,,"",0.0,shopify,0,continue,manual,40.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,,
+rogue-mini,Rogue Mini,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,20g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,6.00,,true,false,,,,,,,,,false,,,,,,,,,,g,,10.00,active
+rogue-mini,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,6.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+rogue-mini,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,6.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+rogue-mini,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,6.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+halloween-earrings,Earrings,"",Bad Frog Yarn Co,Uncategorized,Jewelry,"",false,Title,Default Title,,,,,,,,,0.0,,0,deny,manual,7.00,,true,false,,,,,,,,,false,,,,,,,,,,lb,,,active
+frog-stitch-markers,Stitch Markers,"",Bad Frog Yarn Co,Uncategorized,Notion,"",false,Title,Default Title,,,,,,,,,0.0,,24,continue,manual,3.00,,true,false,,,,,,,,,false,,,,,,,,,,lb,,,active
+ndlb-1,NDLB,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,,,,false,,,,,,,,,,g,,10.00,active
+ndlb-1,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+ndlb-1,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+ndlb-1,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+yarn-mop-1,Yarn Mop,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,,,,false,,,,,,,,,,g,,10.00,active
+yarn-mop-1,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+yarn-mop-1,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+yarn-mop-1,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+rogue-1,Rogue,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,3,continue,manual,28.00,,true,false,,,,,,,,,false,,,,,,,,,,g,,10.00,active
+rogue-1,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+rogue-1,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+rogue-1,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+road-runner,Road Runner,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, orange",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0849.jpg?v=1725313163,1,"",false,,,,,,,,,,g,,10.00,active
+road-runner,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+road-runner,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+road-runner,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bluebonnet-copy,Riverwalk,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"multi-color, turquoise",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,4,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0848.jpg?v=1725313105,1,"",false,,,,,,,,,,g,,10.00,active
+bluebonnet-copy,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+bluebonnet-copy,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+bluebonnet-copy,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bluebonnet,Bluebonnet,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0847.jpg?v=1725313007,1,"",false,,,,,,,,,,g,,10.00,active
+bluebonnet,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-9,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0850.jpg?v=1725313007,2,"",,,,,,,,,,,g,,10.00,
+bluebonnet,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,3,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+bluebonnet,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+violet,Spirit,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,purple,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0877.jpg?v=1725311753,1,"",false,,,,,,,,,,g,,10.00,active
+violet,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+violet,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+violet,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+serenity,Serenity,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,indigo,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0874.jpg?v=1725311705,1,"",false,,,,,,,,,,g,,10.00,active
+serenity,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+serenity,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+serenity,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+magic-and-art,Magic and Art,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,turquoise,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0875.jpg?v=1725311663,1,"",false,,,,,,,,,,g,,10.00,active
+magic-and-art,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+magic-and-art,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+magic-and-art,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+nature,Nature,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0867.jpg?v=1725311618,1,"",false,,,,,,,,,,g,,10.00,active
+nature,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+nature,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+nature,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+sunlight,Sunlight,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,yellow,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0863.jpg?v=1725311580,1,"",false,,,,,,,,,,g,,10.00,active
+sunlight,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+sunlight,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+sunlight,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+healling,Healling,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,orange,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0864.jpg?v=1725311366,1,"",false,,,,,,,,,,g,,10.00,active
+healling,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+healling,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+healling,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+life,Life,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,red,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0866.jpg?v=1725311486,1,"",false,,,,,,,,,,g,,10.00,active
+life,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0881_468e1fd8-f1e6-4728-b994-a8167a0abe9a.jpg?v=1725311486,2,"",,,,,,,,,,,g,,10.00,
+life,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+life,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+ex,$ex,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,pink,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0865.jpg?v=1725311401,1,"",false,,,,,,,,,,g,,10.00,active
+ex,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0881_72f385e1-c1b8-4de8-ac4d-c51485edfadf.jpg?v=1725311401,2,"",,,,,,,,,,,g,,10.00,
+ex,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+ex,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+demi-gods-in-outer-sp-ace,Demi-gods In Outer Sp-Ace,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0870.jpg?v=1725311278,1,"",false,,,,,,,,,,g,,10.00,active
+demi-gods-in-outer-sp-ace,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+demi-gods-in-outer-sp-ace,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+demi-gods-in-outer-sp-ace,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,-1,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+pansexu-wool,Pansexu-wool,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, pink, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0873.jpg?v=1725311161,1,"",false,,,,,,,,,,g,,10.00,active
+pansexu-wool,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+pansexu-wool,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+pansexu-wool,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+no-romo,No Romo,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, green",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0869.jpg?v=1725310191,1,"",false,,,,,,,,,,g,,10.00,active
+no-romo,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+no-romo,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+no-romo,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+poly-glamorous,Poly-glamorous,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, red, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0871.jpg?v=1725310107,1,"",false,,,,,,,,,,g,,10.00,active
+poly-glamorous,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+poly-glamorous,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+poly-glamorous,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+truly-enby-lievable,Truly Enby-lievable,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"purple, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0878.jpg?v=1725310042,1,"",false,,,,,,,,,,g,,10.00,active
+truly-enby-lievable,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+truly-enby-lievable,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+truly-enby-lievable,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+trans-cendent,Trans-cendent,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, pink",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0872.jpg?v=1725309983,1,"",false,,,,,,,,,,g,,10.00,active
+trans-cendent,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+trans-cendent,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+trans-cendent,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+cutie-bi,Cutie-Bi,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, pink, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0868.jpg?v=1725309889,1,"",false,,,,,,,,,,g,,10.00,active
+cutie-bi,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+cutie-bi,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+cutie-bi,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+lesbi-honest,Lesbi-honest,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"orange, pink",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0876.jpg?v=1725309792,1,"",false,,,,,,,,,,g,,10.00,active
+lesbi-honest,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+lesbi-honest,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+lesbi-honest,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mercury,Mercury,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,grey,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0814.jpg?v=1713491471,1,"",false,,,,,,,,,,g,,10.00,active
+mercury,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0816_5195353d-d760-4537-8cce-3a55a2ab3894.jpg?v=1713491515,2,"",,,,,,,,,,,g,,10.00,
+mercury,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0807_73accad6-5e6a-4fec-a3c7-947866c470b0.jpg?v=1713491530,3,"",,,,,,,,,,,g,,10.00,
+mercury,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0808_e7bffe6e-9e4c-499c-88ba-b66846c14d87.jpg?v=1713491530,4,"",,,,,,,,,,,g,,10.00,
+aqua-tofana,Aqua Tofana,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,teal,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0809.jpg?v=1713491424,1,"",false,,,,,,,,,,g,,10.00,active
+aqua-tofana,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0808_ddb41b14-7cbb-4420-95ff-82ec86f9cb19.jpg?v=1713491443,2,"",,,,,,,,,,,g,,10.00,
+aqua-tofana,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-5,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0811_d4013cd5-0f0d-4683-ad82-9424b24aacff.jpg?v=1713491442,3,"",,,,,,,,,,,g,,10.00,
+aqua-tofana,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0823_34227b62-e1e3-4aea-802c-2e4223fe28b6.jpg?v=1713491443,4,"",,,,,,,,,,,g,,10.00,
+crinoline,Crinoline,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,orange,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0805.jpg?v=1713491316,1,"",false,,,,,,,,,,g,,10.00,archived
+crinoline,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0807.jpg?v=1713491328,2,"",,,,,,,,,,,g,,10.00,
+crinoline,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-5,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0822_de557cd3-1a06-441f-b63d-9896624fa56c.jpg?v=1713491328,3,"",,,,,,,,,,,g,,10.00,
+crinoline,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+oleander,Oleander,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,pink,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0810.jpg?v=1713491179,1,"",false,,,,,,,,,,g,,10.00,active
+oleander,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0811.jpg?v=1713491180,2,"",,,,,,,,,,,g,,10.00,
+oleander,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0819_47a70292-ba27-4776-9adc-b3e5749f9519.jpg?v=1713491179,3,"",,,,,,,,,,,g,,10.00,
+oleander,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+foxglove,Foxglove,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,pink,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0812.jpg?v=1713491110,1,"",false,,,,,,,,,,g,,10.00,active
+foxglove,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0819_8977f118-57a0-4bcd-b852-6cf4e49bca52.jpg?v=1713491110,2,"",,,,,,,,,,,g,,10.00,
+foxglove,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0823_599dd988-5a82-474c-8a90-8b443ef6523c.jpg?v=1713491110,3,"",,,,,,,,,,,g,,10.00,
+foxglove,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+belladonna,Belladonna,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"green, purple",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0813.jpg?v=1713491052,1,"",false,,,,,,,,,,g,,10.00,active
+belladonna,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-5,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0820_5a286aa6-6c00-47dc-a5b3-11c514460b5e.jpg?v=1713491070,2,"",,,,,,,,,,,g,,10.00,
+belladonna,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0821_34773dd6-fc2b-4848-b1d5-9e954b8826bc.jpg?v=1713491070,3,"",,,,,,,,,,,g,,10.00,
+belladonna,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0816.jpg?v=1713491070,4,"",,,,,,,,,,,g,,10.00,
+belladonna,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0819.jpg?v=1713491070,5,"",,,,,,,,,,,,,,
+death-cap,Death Cap,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, green",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0799.jpg?v=1713490918,1,"",false,,,,,,,,,,g,,10.00,active
+death-cap,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0801_a31b855c-e29b-41f0-b7ef-b0534ada361b.jpg?v=1713490917,2,"",,,,,,,,,,,g,,10.00,
+death-cap,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0820.jpg?v=1713490918,3,"",,,,,,,,,,,g,,10.00,
+death-cap,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+corset,Corset,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,blue,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0806.jpg?v=1713490851,1,"",false,,,,,,,,,,g,,10.00,active
+corset,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0808.jpg?v=1713490879,2,"",,,,,,,,,,,g,,10.00,
+corset,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0823.jpg?v=1713490879,3,"",,,,,,,,,,,g,,10.00,
+corset,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+old-lace,Old Lace,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,beige,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0797.jpg?v=1713490737,1,"",false,,,,,,,,,,g,,10.00,active
+old-lace,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0800_6f128171-e82d-4ada-a4b4-a30e58d69bb3.jpg?v=1713490737,2,"",,,,,,,,,,,g,,10.00,
+old-lace,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0801_9f4021bc-4385-4917-9696-d8fcb4653f52.jpg?v=1713490737,3,"",,,,,,,,,,,g,,10.00,
+old-lace,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,-1,continue,manual,32.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0821.jpg?v=1713490737,4,"",,,,,,,,,,,g,,10.00,
+absinthe,Absinthe,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0817.jpg?v=1713490655,1,"",false,,,,,,,,,,g,,10.00,active
+absinthe,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0822.jpg?v=1713490655,2,"",,,,,,,,,,,g,,10.00,
+absinthe,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0801_3791a7b4-1e13-4d0d-969c-a7abfb76033f.jpg?v=1713490656,3,"",,,,,,,,,,,g,,10.00,
+absinthe,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+arsenic,Arsenic,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0796.jpg?v=1713490610,1,"",false,,,,,,,,,,g,,10.00,active
+arsenic,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0800.jpg?v=1713490610,2,"",,,,,,,,,,,g,,10.00,
+arsenic,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0801.jpg?v=1713490610,3,"",,,,,,,,,,,g,,10.00,
+arsenic,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,-1,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+cinnabar,Cinnabar,"<p> </p>
+<p> </p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,red,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_63bb9738-8e80-4ce2-bf57-e638477efa56.heic?v=1713488789,1,"",false,,,,,,,,,,g,,10.00,archived
+cinnabar,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_77686241-0631-4314-8392-8af88c832aac.heic?v=1713488789,2,"",,,,,,,,,,,g,,10.00,
+cinnabar,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-5,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+cinnabar,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+port-wine,Port Wine,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,"","",false,Title,Default Title,,,,,,,,"",0.0,shopify,0,deny,manual,28.00,,true,false,,,,,,,,,false,,,,,,,,,,lb,,,archived
+enchanted-glade,Enchanted Glade,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,blue,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0560.jpg?v=1711395771,1,"",false,,,,,,,,,,g,,10.00,archived
+enchanted-glade,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+enchanted-glade,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+enchanted-glade,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+regina,Regina,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0569.jpg?v=1711395682,1,"",false,,,,,,,,,,g,,10.00,active
+regina,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,-2,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+regina,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+regina,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mauveine-1,Mauveine,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0561.jpg?v=1711395645,1,"",false,,,,,,,,,,g,,10.00,archived
+mauveine-1,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+mauveine-1,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+mauveine-1,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+peony,Peony,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0565.jpg?v=1711395593,1,"",false,,,,,,,,,,g,,10.00,active
+peony,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+peony,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+peony,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+russet-silk-fancy,Russet Silk Fancy,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0568.jpg?v=1711395530,1,"",false,,,,,,,,,,g,,10.00,active
+russet-silk-fancy,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+russet-silk-fancy,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+russet-silk-fancy,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+hydrangea,Hydrangea,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0563.jpg?v=1711395469,1,"",false,,,,,,,,,,g,,10.00,active
+hydrangea,,,,,,,,,Lily Pad - DK,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hydrangea,,,,,,,,,Hopper Sock,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+hydrangea,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+drawing-room,Drawing Room,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,teal,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,8,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0556.jpg?v=1707070984,1,"",false,,,,,,,,,,g,,10.00,active
+drawing-room,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0547_8bb3375e-54e2-4c72-a042-25c82a026741.jpg?v=1707070984,2,"",,,,,,,,,,,g,,10.00,
+drawing-room,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0545_0fe31b46-b304-4e3c-8ccf-94ef859a6162.jpg?v=1707070984,3,"",,,,,,,,,,,g,,10.00,
+drawing-room,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+prussian-blue,Prussian Blue,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,blue,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,11,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0549.jpg?v=1707070942,1,"",false,,,,,,,,,,g,,10.00,active
+prussian-blue,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0547_457d0796-3dfd-4476-8319-1c8491c24152.jpg?v=1707070942,2,"",,,,,,,,,,,g,,10.00,
+prussian-blue,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0545_131b132f-9d98-4ead-83a1-542c50afda53.jpg?v=1707070942,3,"",,,,,,,,,,,g,,10.00,
+prussian-blue,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+cognac,Cognac,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,orange,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-7,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0544_9b1af35e-46b2-495a-ba06-a3f18801cac3.jpg?v=1707078351,1,"",false,,,,,,,,,,g,,10.00,active
+cognac,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0545_52ea9f1b-2e30-4af5-882e-781ebe7e0791.jpg?v=1707078352,2,"",,,,,,,,,,,g,,10.00,
+cognac,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0539_06ccf30f-dd1e-458d-aa47-1fbc949ea6a0.jpg?v=1707078351,3,"",,,,,,,,,,,g,,10.00,
+cognac,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0547.jpg?v=1707078352,4,"",,,,,,,,,,,g,,10.00,
+millinery,Millinery,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, blue, brown, orange",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0542.jpg?v=1707069709,1,"",false,,,,,,,,,,g,,10.00,archived
+millinery,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0539_7ab046bd-646a-4174-9ea7-56e7368b4087.jpg?v=1707069709,2,"",,,,,,,,,,,g,,10.00,
+millinery,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,-5,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0545.jpg?v=1707069709,3,"",,,,,,,,,,,g,,10.00,
+millinery,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+medicinal-barley-water,Medicinal Barley Water,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"beige, brown",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0537.jpg?v=1707069415,1,"",false,,,,,,,,,,g,,10.00,active
+medicinal-barley-water,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,-4,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+medicinal-barley-water,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+medicinal-barley-water,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+prussian,Delphinium,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,blue,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0535.jpg?v=1707070888,1,"",false,,,,,,,,,,g,,10.00,archived
+prussian,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+prussian,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+prussian,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mauveine,Wisteria,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,purple,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0532_f0656ec2-a1fa-45c1-8c2c-007d07ae04e8.jpg?v=1707071203,1,"",false,,,,,,,,,,g,,10.00,archived
+mauveine,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mauveine,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,-6,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mauveine,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mourning,Mourning,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,black,true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0533.jpg?v=1707069105,1,"",false,,,,,,,,,,g,,10.00,active
+mourning,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_0539.jpg?v=1707069105,2,"",,,,,,,,,,,g,,10.00,
+mourning,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mourning,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+northern-lights,Northern Lights,"",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, green, purple",false,Base,Lily Pad - Fingering,,,,,,,,,47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/coming-soon-2_0c6f1ffe-58ab-49b2-993c-b10ec1ed7315.png?v=1704588460,1,"",false,,,,,,,,,,lb,,10.00,archived
+northern-lights,,,,,,,,,Lily Pad - DK,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+northern-lights,,,,,,,,,Pollywog,,,,,,,,,47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,lb,,10.00,
+northern-lights,,,,,,,,,Hopper Sock,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+holly,Holly,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,false,Material,Lily Pad,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/29342BE0-2732-44C9-9876-4B298E355DB1_1_201_a.heic?v=1702915829,1,"",false,,,,,,,,,,g,,10.00,archived
+holly,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+but-a-scratch,Tis But a Scratch,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, grey, red",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/tisbutascratch.jpg?v=1702596341,1,"",false,,,,,,,,,,g,,10.00,archived
+but-a-scratch,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+but-a-scratch,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+but-a-scratch,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+jack-frost,Jack Frost,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,blue,false,Material,Lily Pad,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/jackfrost.jpg?v=1702596191,1,"",false,,,,,,,,,,g,,10.00,archived
+jack-frost,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+winter-forest,Winter Forest,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, brown, green",false,Material,Lily Pad,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/winterforest.jpg?v=1702596140,1,"",false,,,,,,,,,,g,,10.00,archived
+winter-forest,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+jolly,Jolly,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,red,false,Material,Lily Pad,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,true,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/jolly.jpg?v=1702596080,1,"",false,,,,,,,,,,g,,10.00,archived
+jolly,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,true,,,,,,,,,,,,,,,,,,,g,,10.00,
+the-yarn-is-lava,The Yarn is Lava,"<p>This is a our signature color and one of the most beautiful greens you'll find anywhere</p>
+<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"black, orange",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/theyarnislava.jpg?v=1702596001,1,"",false,,,,,,,,,,g,,10.00,archived
+the-yarn-is-lava,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+the-yarn-is-lava,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+the-yarn-is-lava,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+unknown-depths,Unknown Depths,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, green, yellow",true,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/unknowndepths.jpg?v=1702595945,1,"",false,,,,,,,,,,g,,10.00,active
+unknown-depths,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+unknown-depths,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,1,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+unknown-depths,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+star-field,Star. Field.,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, orange, red",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/starfield.jpg?v=1702595906,1,"",false,,,,,,,,,,g,,10.00,archived
+star-field,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+star-field,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+star-field,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mountain-sunset,Mountain Sunset,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"orange, purple, yellow",false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/mountainsunset.jpg?v=1702595838,1,"",false,,,,,,,,,,g,,10.00,archived
+mountain-sunset,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mountain-sunset,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+mountain-sunset,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+storm-cloud,Storm Cloud,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,grey,true,Base,Lily Pad - Fingering Sock,,,,,,,,,105.0,shopify,2,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1104.jpg?v=1726636243,1,"",false,,,,,,,,,,g,,10.00,active
+storm-cloud,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+storm-cloud,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,1,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+storm-cloud,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+raspberry-beret,Raspberry Beret,"<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,pink,false,Base,Lily Pad - Fingering,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/raspberryberet.jpg?v=1702595715,1,"",false,,,,,,,,,,g,,10.00,archived
+raspberry-beret,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+raspberry-beret,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+raspberry-beret,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+witching-hour,Witching Hour,"I started by speckling bright colors and then overdyeing it with dark brown and deep navy blue. The result is a yarn that is dark and mysterious with magical little areas of color peeking through,",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,multi-color,false,Material,Lily Pad,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4164.jpg?v=1698890611,1,"",false,,,,,,,,,,lb,,10.00,archived
+witching-hour,,,,,,,,,Pollywog,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4167.jpg?v=1698890611,2,"",,,,,,,,,,,lb,,10.00,
+fully-laden-swallow,Fully Laden Swallow,Apparently there is in fact a way to calculate the airspeed velocity of an unladen swallow. But what about for a fully laden swallow? This one was inspired by the colors of a barn swallow.,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"blue, orange, purple",false,Base,Lily Pad - Fingering,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/fullyladenswallow.jpg?v=1702595321,1,"",false,,,,,,,,,,lb,,10.00,archived
+fully-laden-swallow,,,,,,,,,Lily Pad - DK,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+fully-laden-swallow,,,,,,,,,Hopper Sock,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+fully-laden-swallow,,,,,,,,,Twisted Toad,,,,,,,,,47627.19885,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+swamp-witch,Swamp Witch,A bright neon green with shades of deeper green and dark gray. The shade reminded me of the time I fell in the swamp when I was a little girl.,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,false,Material,Lily Pad,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4153.jpg?v=1698885279,1,"",false,,,,,,,,,,lb,,10.00,archived
+swamp-witch,,,,,,,,,Pollywog,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+untitled-blue,Water Fae,"This was inspired by one of my favorite book characters, Aran Alis Egan from Jasmine Mas's Cruel Shifterverse series. She's funny and energetic but also has some darkness in her past. So this one is for Aran and Jasmine Mas.",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,blue,false,Base,Lily Pad - Fingering,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/waterfae.jpg?v=1702595558,1,"",false,,,,,,,,,,lb,,10.00,archived
+untitled-blue,,,,,,,,,Lily Pad - DK,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+untitled-blue,,,,,,,,,Pollywog,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+untitled-blue,,,,,,,,,Hopper Sock,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,true,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+untitled-red,Ruby Slippers,The various shades of red in this kettle-dyed beauty reminded me of the sparkle of my favorite pair of ruby slippers.,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,red,false,Material,Lily Pad,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4141.jpg?v=1698340837,1,"",false,,,,,,,,,,lb,,10.00,archived
+untitled-red,,,,,,,,,Pollywog,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+hamster,Hamster,"A kettle dyed tan. And if you didn't immediately hear ""Your mother was a hamster,"" well, now you do. Pairs nicely with Elderberry.",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,brown,false,Base,Lily Pad - Fingering,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4144.jpg?v=1698338941,1,"",false,,,,,,,,,,lb,,10.00,archived
+hamster,,,,,,,,,Lily Pad - DK,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+hamster,,,,,,,,,Hopper Sock,,,,,,,,"",47627.19885,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+hamster,,,,,,,,,Twisted Toad,,,,,,,,,47627.19885,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,lb,,10.00,
+bag-of-dice,Bag of Dice,"<p>Nobody has just one pair of dice. Everyone I know has a whole bag full of colorful math rocks, so I created a yarn for my favorite D&amp;D players. Speckle dyed so each skein is totally unique, just like you.</p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,multi-color,true,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender_fc3afafa-f0aa-4623-ade3-4cb883d958d1.heic?v=1706999601,1,"",false,,,,,,,,,,g,,10.00,active
+bag-of-dice,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/FullSizeRender.heic?v=1706999601,2,"",,,,,,,,,,,g,,10.00,
+bag-of-dice,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bag-of-dice,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+elderberry,Elderberry,"A deep cool-toned purple. And if you didn't immediately hear ""and your father stank of elderberries,"" well, now you do. Pairs nicely with hamster.",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,purple,true,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/elderberry.jpg?v=1702595282,1,"",false,,,,,,,,,,g,,10.00,active
+elderberry,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+elderberry,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+elderberry,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+your-majesty,Your Majesty,A lovely royal purple,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,purple,false,Material,Lily Pad,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4089.jpg?v=1697679986,1,"",false,,,,,,,,,,g,,10.00,archived
+your-majesty,,,,,,,,,Pollywog,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+mermaid,Mermaid,"A bright, happy turquoise, perfect for any mermaid.",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,turquoise,false,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4082.jpg?v=1697679313,1,"",false,,,,,,,,,,g,,10.00,archived
+mermaid,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+mermaid,,,,,,,,,Pollywog,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+mermaid,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+scarborough-fair,Scarborough Fair,"A tonal green of parsley, sage, rosemary and thyme.",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,false,Material,Lily Pad,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4074.jpg?v=1697679644,1,"",false,,,,,,,,,,g,,10.00,archived
+scarborough-fair,,,,,,,,,Pollywog,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4073.jpg?v=1697679644,2,"",,,,,,,,,,,g,,10.00,
+scarborough-fair,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4072.jpg?v=1697679644,3,"",,,,,,,,,,,,,,
+falling-leaves,Falling Leaves,"A warm and cozy blend of mossy green, brown, deep purple, and burnt orange that's just perfect for fall.",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"green, orange, purple",true,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,-1,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_1105.jpg?v=1726636209,1,"",false,,,,,,,,,,g,,10.00,active
+falling-leaves,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,-3,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+falling-leaves,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+falling-leaves,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+moody-mermaid,Moody Mermaid,A semi-solid blend of dark blue and deep aqua.,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,teal,false,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4078.jpg?v=1697679477,1,"",false,,,,,,,,,,g,,10.00,archived
+moody-mermaid,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/IMG_4076.jpg?v=1697679477,2,"",,,,,,,,,,,g,,10.00,
+moody-mermaid,,,,,,,,,Pollywog,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,,,,,,,,,,,,,,,g,,10.00,
+moody-mermaid,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bad-frog-gift-card,Bad Frog Gift Card,"",Bad Frog Yarn Co,Gift Cards,Gift Card,"",true,Amount,$5,,,,,,,,"",0.0,,0,deny,gift_card,5.00,,false,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/coming-soon-2_1adea510-d871-430f-a7b9-d1f292cb6563.png?v=1696287717,1,"",true,,,,,,,,,,lb,,,active
+bad-frog-gift-card,,,,,,,,,$10,,,,,,,,"",0.0,,0,deny,gift_card,10.00,,false,false,,,,,"",,,,,,,,,,,,,,lb,,,
+bad-frog-gift-card,,,,,,,,,$30,,,,,,,,"",0.0,,0,deny,gift_card,30.00,,false,false,,,,,"",,,,,,,,,,,,,,lb,,,
+bad-frog-gift-card,,,,,,,,,$60,,,,,,,,"",0.0,,-1,deny,gift_card,60.00,,false,false,,,,,"",,,,,,,,,,,,,,lb,,,
+bad-frog-gift-card,,,,,,,,,$120,,,,,,,,"",0.0,,0,deny,gift_card,120.00,,false,false,,,,,"",,,,,,,,,,,,,,lb,,,
+spicy-pumpkin,Spicy Pumpkin,The name says it all. A semi-solid spicy orange.,Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,orange,true,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/spicypumpkin.jpg?v=1702595481,1,"",false,,,,,,,,,,g,,10.00,active
+spicy-pumpkin,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+spicy-pumpkin,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+spicy-pumpkin,,,,,,,,,Pollywog,,,,,,,,,105.0,shopify,0,continue,manual,32.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+custom,Custom Color,"<meta charset=""utf-8""><span data-mce-fragment=""1"">Have you ever wanted a very specific color but can't find it anywhere? Look no further we can create the color you've been looking for.</span>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,"",false,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,0,continue,manual,50.00,,true,true,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/coming-soon-2_2d226e51-1030-4ffc-b438-9b476cd0b376.png?v=1696287722,1,"",false,,,,,,,,,,g,,10.00,archived
+custom,,,,,,,,,Pollywog,,,,,,,,"",105.0,shopify,0,continue,manual,50.00,,true,true,,,,,"",,,,,,,,,,,,,,g,,10.00,
+custom,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,50.00,,true,true,,,,,"",,,,,,,,,,,,,,g,,10.00,
+custom,,,,,,,,,Hopper,,,,,,,,"",105.0,shopify,0,continue,manual,50.00,,true,true,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bad-frog,Bad Frog Green,"<p>This is a our signature color and one of the most beautiful greens you'll find anywhere</p>
+<p> </p>
+<p><br></p>",Bad Frog Yarn Co,Arts & Entertainment > Hobbies & Creative Arts > Arts & Crafts > Art & Crafting Materials > Crafting Fibers > Yarn,100g Skein,green,false,Base,Lily Pad - Fingering,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",https://cdn.shopify.com/s/files/1/0832/1944/8116/files/badfroggreen.jpg?v=1702595226,1,"",false,,,,,,,,,,g,,10.00,archived
+bad-frog,,,,,,,,,Lily Pad - DK,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bad-frog,,,,,,,,,Hopper Sock,,,,,,,,"",105.0,shopify,0,continue,manual,28.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,
+bad-frog,,,,,,,,,Twisted Toad,,,,,,,,,105.0,shopify,0,continue,manual,30.00,,true,false,,,,,"",,,,,,,,,,,,,,g,,10.00,

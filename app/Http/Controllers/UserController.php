@@ -28,7 +28,12 @@ class UserController extends Controller
             $dyes = Dye::where('account_id', $user->account_id)->get();
         }
 
-        return Inertia::render('settings/SettingsPage', [
+        $routeName = $request->route()->getName();
+        $page = $routeName === 'store.settings'
+            ? 'store/settings/SettingsPage'
+            : 'creator/settings/SettingsPage';
+
+        return Inertia::render($page, [
             'status' => $request->session()->get('status'),
             'account' => $account,
             'dyes' => $dyes,

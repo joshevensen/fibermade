@@ -25,7 +25,7 @@ class IntegrationLogController extends Controller
                 $query->where('account_id', $user->account_id);
             })->with('integration.account')->get() : collect());
 
-        return Inertia::render('integration-logs/IntegrationLogIndexPage', [
+        return Inertia::render('creator/integration-logs/IntegrationLogIndexPage', [
             'integrationLogs' => $integrationLogs,
         ]);
     }
@@ -37,7 +37,7 @@ class IntegrationLogController extends Controller
     {
         $this->authorize('create', IntegrationLog::class);
 
-        return Inertia::render('integration-logs/IntegrationLogCreatePage');
+        return Inertia::render('creator/integration-logs/IntegrationLogCreatePage');
     }
 
     /**
@@ -57,7 +57,7 @@ class IntegrationLogController extends Controller
     {
         $this->authorize('view', $integrationLog);
 
-        return Inertia::render('integration-logs/IntegrationLogEditPage', [
+        return Inertia::render('creator/integration-logs/IntegrationLogEditPage', [
             'integrationLog' => $integrationLog->load('integration'),
         ]);
     }

@@ -38,7 +38,7 @@ class BaseController extends Controller
 
         $bases = $query->get();
 
-        return Inertia::render('bases/BaseIndexPage', [
+        return Inertia::render('creator/bases/BaseIndexPage', [
             'bases' => $bases,
             'totalBases' => $totalBases,
         ]);
@@ -71,7 +71,7 @@ class BaseController extends Controller
             })
             ->toArray();
 
-        return Inertia::render('bases/BaseCreatePage', [
+        return Inertia::render('creator/bases/BaseCreatePage', [
             'baseStatusOptions' => $baseStatusOptions,
             'weightOptions' => $weightOptions,
         ]);
@@ -120,7 +120,7 @@ class BaseController extends Controller
             })
             ->toArray();
 
-        return Inertia::render('bases/BaseEditPage', [
+        return Inertia::render('creator/bases/BaseEditPage', [
             'base' => $base,
             'baseStatusOptions' => $baseStatusOptions,
             'weightOptions' => $weightOptions,

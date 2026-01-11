@@ -35,7 +35,7 @@ class CustomerController extends Controller
             return $customerArray;
         });
 
-        return Inertia::render('customers/CustomerIndexPage', [
+        return Inertia::render('creator/customers/CustomerIndexPage', [
             'customers' => $customers,
         ]);
     }
@@ -49,7 +49,7 @@ class CustomerController extends Controller
     {
         $this->authorize('create', Customer::class);
 
-        return Inertia::render('customers/CustomerCreatePage');
+        return Inertia::render('creator/customers/CustomerCreatePage');
     }
 
     /**
@@ -86,7 +86,7 @@ class CustomerController extends Controller
             'data' => $identifier->data,
         ])->toArray();
 
-        return Inertia::render('customers/CustomerEditPage', [
+        return Inertia::render('creator/customers/CustomerEditPage', [
             'customer' => $customerArray,
             'orders' => $customer->orders->map(fn ($order) => [
                 'id' => $order->id,

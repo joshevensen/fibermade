@@ -9,6 +9,7 @@ import { computed, ref } from 'vue';
 
 interface Props {
     pageTitle?: string;
+    hideCreateButtons?: boolean;
 }
 
 const props = defineProps<Props>();
@@ -67,6 +68,9 @@ const currentPageDrawerType = computed(() => {
 });
 
 const hasCreateDrawer = computed(() => {
+    if (props.hideCreateButtons) {
+        return false;
+    }
     return currentPageDrawerType.value !== null;
 });
 
@@ -186,7 +190,10 @@ function toggleMenu(event: Event): void {
         </div>
 
         <!-- Icon Buttons (all screens) -->
-        <div class="relative ml-auto flex items-center gap-2">
+        <div
+            v-if="!hideCreateButtons"
+            class="relative ml-auto flex items-center gap-2"
+        >
             <UiButton
                 v-if="hasCreateDrawer"
                 :icon="IconList.Plus"

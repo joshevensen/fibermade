@@ -40,7 +40,12 @@ class StoreController extends Controller
             $totalStores = 0;
         }
 
-        return Inertia::render('stores/StoreIndexPage', [
+        $routeName = request()->route()->getName();
+        $page = str_starts_with($routeName, 'store.')
+            ? 'store/vendors/VendorsIndexPage'
+            : 'creator/stores/StoreIndexPage';
+
+        return Inertia::render($page, [
             'stores' => $stores,
             'totalStores' => $totalStores,
         ]);
@@ -74,7 +79,7 @@ class StoreController extends Controller
 
         $store->load(['orders.orderable']);
 
-        return Inertia::render('stores/StoreEditPage', [
+        return Inertia::render('creator/stores/StoreEditPage', [
             'store' => $store,
             'orders' => $store->orders->map(fn ($order) => [
                 'id' => $order->id,

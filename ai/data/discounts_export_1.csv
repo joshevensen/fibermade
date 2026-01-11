@@ -1,0 +1,9 @@
+Name,Value,Value Type,Type,Discount Class,Minimum Purchase Requirements,Combines with Order Discounts,Combines with Product Discounts,Combines with Shipping Discounts,Customer Selection,Context,Times Used In Total,Applies Once Per Customer,Usage Limit Per Code,Status,Start,End
+Free Shipping on Order $75+,-100.0,percentage,Free Shipping,shipping,75.0,1,1,,all,all,13,,,Active,2023-10-01 21:35:37 -0500,
+NEWSLETTER1492,-20.0,percentage,Amount Off,order,,,,1,all,all,0,1,,Active,2023-10-01 21:57:27 -0500,
+BUY5YARNSAVE3,-3.0,fixed_amount,Amount Off,product,5,,,1,all,all,20,,,Active,2025-02-07 00:00:28 -0600,
+SHIPFORFREE42,-100.0,percentage,Free Shipping,shipping,,1,1,,all,all,0,,,Expired,2025-05-01 17:19:02 -0500,2025-05-17 12:32:49 -0500
+FRIENDSAVE3,-3.0,fixed_amount,Amount Off,product,,,,,all,all,1,,,Active,2025-05-17 11:53:31 -0500,
+25%OFF1492,-25.0,percentage,Amount Off,order,,,,1,all,all,1,1,,Active,2025-09-15 11:28:24 -0500,
+FREESHIPPING1492,-100.0,percentage,Free Shipping,shipping,,,,,all,all,0,1,,Active,2025-09-15 11:29:55 -0500,
+Buy 5 Yarn save $3 each,-3.0,fixed_amount,Amount Off,product,5,,,1,all,all,0,,,Active,2025-11-19 15:47:35 -0600,

@@ -25,7 +25,7 @@ class OrderItemController extends Controller
                 $query->where('account_id', $user->account_id);
             })->with(['order.account', 'colorway', 'base'])->get() : collect());
 
-        return Inertia::render('order-items/OrderItemIndexPage', [
+        return Inertia::render('creator/order-items/OrderItemIndexPage', [
             'orderItems' => $orderItems,
         ]);
     }
@@ -37,7 +37,7 @@ class OrderItemController extends Controller
     {
         $this->authorize('create', OrderItem::class);
 
-        return Inertia::render('order-items/OrderItemCreatePage');
+        return Inertia::render('creator/order-items/OrderItemCreatePage');
     }
 
     /**
@@ -67,7 +67,7 @@ class OrderItemController extends Controller
     {
         $this->authorize('view', $orderItem);
 
-        return Inertia::render('order-items/OrderItemEditPage', [
+        return Inertia::render('creator/order-items/OrderItemEditPage', [
             'orderItem' => $orderItem->load(['order', 'colorway', 'base']),
         ]);
     }

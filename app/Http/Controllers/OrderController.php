@@ -55,7 +55,7 @@ class OrderController extends Controller
             ])
             ->toArray();
 
-        return Inertia::render('orders/OrderIndexPage', [
+        return Inertia::render('creator/orders/OrderIndexPage', [
             'orders' => $orders,
             'orderTypeOptions' => $orderTypeOptions,
             'orderStatusOptions' => $orderStatusOptions,
@@ -83,7 +83,7 @@ class OrderController extends Controller
             ])
             ->toArray();
 
-        return Inertia::render('orders/OrderCreatePage', [
+        return Inertia::render('creator/orders/OrderCreatePage', [
             'orderTypeOptions' => $orderTypeOptions,
             'orderStatusOptions' => $orderStatusOptions,
         ]);
@@ -152,7 +152,7 @@ class OrderController extends Controller
         $colorways = \App\Models\Colorway::select('id', 'name')->get();
         $bases = \App\Models\Base::select('id', 'code', 'descriptor')->get();
 
-        return Inertia::render('orders/OrderEditPage', [
+        return Inertia::render('creator/orders/OrderEditPage', [
             'order' => $orderArray,
             'orderTypeOptions' => $orderTypeOptions,
             'orderStatusOptions' => $orderStatusOptions,

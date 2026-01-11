@@ -18,7 +18,7 @@ interface NavigationItem extends Omit<NavItem, 'icon'> {
     icon?: string | Component;
 }
 
-export function useNavigation(): NavigationItem[] {
+export function useCreatorNavigation(): NavigationItem[] {
     return [
         {
             title: 'Dashboard',
@@ -71,4 +71,29 @@ export function useNavigation(): NavigationItem[] {
             icon: BusinessIconList.Settings,
         },
     ];
+}
+
+export function useStoreNavigation(): NavigationItem[] {
+    return [
+        {
+            title: 'Dashboard',
+            href: '/store/dashboard',
+            icon: BusinessIconList.Dashboard,
+        },
+        {
+            title: 'Vendors',
+            href: '/store/vendors',
+            icon: BusinessIconList.Stores,
+        },
+        {
+            title: 'Settings',
+            href: '/store/settings',
+            icon: BusinessIconList.Settings,
+        },
+    ];
+}
+
+// Backwards compatibility - export as default for existing code
+export function useNavigation(): NavigationItem[] {
+    return useCreatorNavigation();
 }

@@ -29,7 +29,7 @@ class MediaController extends Controller
                 $query->where('account_id', $user->account_id);
             })->with('mediable')->get() : collect());
 
-        return Inertia::render('media/MediaIndexPage', [
+        return Inertia::render('creator/media/MediaIndexPage', [
             'medias' => $medias,
         ]);
     }
@@ -41,7 +41,7 @@ class MediaController extends Controller
     {
         $this->authorize('create', Media::class);
 
-        return Inertia::render('media/MediaCreatePage');
+        return Inertia::render('creator/media/MediaCreatePage');
     }
 
     /**
@@ -63,7 +63,7 @@ class MediaController extends Controller
     {
         $this->authorize('view', $media);
 
-        return Inertia::render('media/MediaEditPage', [
+        return Inertia::render('creator/media/MediaEditPage', [
             'media' => $media->load('mediable'),
         ]);
     }

@@ -33,6 +33,7 @@ class UpdateUserRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'marketing_opt_in' => ['sometimes', 'boolean'],
         ];
     }
 }

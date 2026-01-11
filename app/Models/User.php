@@ -27,6 +27,9 @@ class User extends Authenticatable
         'is_admin',
         'account_id',
         'role',
+        'terms_accepted_at',
+        'privacy_accepted_at',
+        'marketing_opt_in',
     ];
 
     /**
@@ -51,6 +54,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_admin' => 'boolean',
             'role' => \App\Enums\UserRole::class,
+            'terms_accepted_at' => 'datetime',
+            'privacy_accepted_at' => 'datetime',
+            'marketing_opt_in' => 'boolean',
         ];
     }
 

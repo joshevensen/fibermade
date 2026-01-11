@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
+import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiLink from '@/components/ui/UiLink.vue';
@@ -14,8 +15,12 @@ const { form, onSubmit } = useFormSubmission({
     initialValues: {
         name: '',
         email: '',
+        business_name: '',
         password: '',
         password_confirmation: '',
+        terms_accepted: false,
+        privacy_accepted: false,
+        marketing_opt_in: false,
     },
     successMessage: 'Your account has been created successfully.',
     resetFieldsOnSuccess: ['password', 'password_confirmation'],
@@ -32,8 +37,12 @@ const { form, onSubmit } = useFormSubmission({
             :initialValues="{
                 name: '',
                 email: '',
+                business_name: '',
                 password: '',
                 password_confirmation: '',
+                terms_accepted: false,
+                privacy_accepted: false,
+                marketing_opt_in: false,
             }"
             @submit="onSubmit"
         >
@@ -58,6 +67,16 @@ const { form, onSubmit } = useFormSubmission({
                 placeholder="email@example.com"
             />
 
+            <UiFormFieldInput
+                name="business_name"
+                label="Business name"
+                :serverError="form.errors.business_name"
+                type="text"
+                required
+                autocomplete="organization"
+                placeholder="Your business name"
+            />
+
             <UiFormFieldPassword
                 name="password"
                 label="Password"
@@ -75,6 +94,28 @@ const { form, onSubmit } = useFormSubmission({
                 autocomplete="new-password"
                 placeholder="Confirm password"
             />
+
+            <div class="space-y-3">
+                <UiFormFieldCheckbox
+                    name="terms_accepted"
+                    :serverError="form.errors.terms_accepted"
+                    required
+                    label="I agree to the Terms of Service"
+                />
+
+                <UiFormFieldCheckbox
+                    name="privacy_accepted"
+                    :serverError="form.errors.privacy_accepted"
+                    required
+                    label="I agree to the Privacy Policy"
+                />
+
+                <UiFormFieldCheckbox
+                    name="marketing_opt_in"
+                    :serverError="form.errors.marketing_opt_in"
+                    label="I'd like to receive product updates and tips"
+                />
+            </div>
 
             <UiButton
                 type="submit"

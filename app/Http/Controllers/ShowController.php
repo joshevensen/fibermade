@@ -23,7 +23,7 @@ class ShowController extends Controller
             ? Show::with('account')->get()
             : ($user->account_id ? Show::where('account_id', $user->account_id)->with('account')->get() : collect());
 
-        return Inertia::render('shows/ShowIndexPage', [
+        return Inertia::render('creator/shows/ShowIndexPage', [
             'shows' => $shows,
         ]);
     }
@@ -35,7 +35,7 @@ class ShowController extends Controller
     {
         $this->authorize('create', Show::class);
 
-        return Inertia::render('shows/ShowCreatePage');
+        return Inertia::render('creator/shows/ShowCreatePage');
     }
 
     /**
@@ -58,7 +58,7 @@ class ShowController extends Controller
     {
         $this->authorize('view', $show);
 
-        return Inertia::render('shows/ShowEditPage', [
+        return Inertia::render('creator/shows/ShowEditPage', [
             'show' => $show,
         ]);
     }

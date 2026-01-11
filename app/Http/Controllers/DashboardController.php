@@ -89,7 +89,12 @@ class DashboardController extends Controller
                     ->sum('total_amount')
                 : 0);
 
-        return Inertia::render('dashboard/DashboardPage', [
+        $routeName = $request->route()->getName();
+        $page = $routeName === 'store.dashboard'
+            ? 'store/dashboard/DashboardPage'
+            : 'creator/dashboard/DashboardPage';
+
+        return Inertia::render($page, [
             'dyeList' => $dyeList,
             'upcomingShows' => $upcomingShows,
             'openOrders' => $openOrdersList,

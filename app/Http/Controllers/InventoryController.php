@@ -124,7 +124,7 @@ class InventoryController extends Controller
             'value' => $collection->id,
         ])->toArray();
 
-        return Inertia::render('inventory/InventoryIndexPage', [
+        return Inertia::render('creator/inventory/InventoryIndexPage', [
             'colorways' => $colorways,
             'colorwayStatusOptions' => $colorwayStatusOptions,
             'techniqueOptions' => $techniqueOptions,
@@ -162,7 +162,7 @@ class InventoryController extends Controller
     {
         $this->authorize('create', Inventory::class);
 
-        return Inertia::render('inventory/InventoryCreatePage');
+        return Inertia::render('creator/inventory/InventoryCreatePage');
     }
 
     /**
@@ -194,7 +194,7 @@ class InventoryController extends Controller
             'data' => $identifier->data,
         ])->toArray();
 
-        return Inertia::render('inventory/InventoryEditPage', [
+        return Inertia::render('creator/inventory/InventoryEditPage', [
             'inventory' => $inventoryArray,
         ]);
     }

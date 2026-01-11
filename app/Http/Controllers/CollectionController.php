@@ -31,7 +31,7 @@ class CollectionController extends Controller
             ['label' => 'Retired', 'value' => BaseStatus::Retired->value],
         ];
 
-        return Inertia::render('collections/CollectionIndexPage', [
+        return Inertia::render('creator/collections/CollectionIndexPage', [
             'collections' => $collections,
             'statusOptions' => $statusOptions,
         ]);
@@ -44,7 +44,7 @@ class CollectionController extends Controller
     {
         $this->authorize('create', Collection::class);
 
-        return Inertia::render('collections/CollectionCreatePage');
+        return Inertia::render('creator/collections/CollectionCreatePage');
     }
 
     /**
@@ -74,7 +74,7 @@ class CollectionController extends Controller
             ? Colorway::orderBy('name')->get()
             : ($user->account_id ? Colorway::where('account_id', $user->account_id)->orderBy('name')->get() : collect());
 
-        return Inertia::render('collections/CollectionEditPage', [
+        return Inertia::render('creator/collections/CollectionEditPage', [
             'collection' => $collection,
             'colorways' => $collection->colorways,
             'allColorways' => $allColorways,
