@@ -68,7 +68,7 @@ export function useNavigation(): NavigationItem[] {
         {
             title: 'Settings',
             href: userEdit.url(),
-            icon: IconList.Settings,
+            icon: BusinessIconList.Settings,
         },
     ];
 }

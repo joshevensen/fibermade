@@ -91,6 +91,9 @@ class OrderController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     *
+     * TODO: Re-enable when ready to work on orders.
+     * Currently disabled via OrderPolicy.
      */
     public function store(StoreOrderRequest $request): RedirectResponse
     {
@@ -160,6 +163,9 @@ class OrderController extends Controller
 
     /**
      * Update the specified resource in storage.
+     *
+     * TODO: Re-enable when ready to work on orders.
+     * Currently disabled via OrderPolicy.
      */
     public function update(UpdateOrderRequest $request, Order $order): RedirectResponse
     {
@@ -198,6 +204,9 @@ class OrderController extends Controller
 
     /**
      * Remove the specified resource from storage.
+     *
+     * TODO: Re-enable when ready to work on orders.
+     * Currently disabled via OrderPolicy.
      */
     public function destroy(Order $order): RedirectResponse
     {

@@ -23,6 +23,7 @@ const createMenuRef = ref();
 
 // Map page titles to drawer types
 // TODO: Re-enable customer creation in Stage 2
+// TODO: Re-enable order creation when ready to work on orders
 const pageTitleToDrawerType: Record<
     string,
     'base' | 'collection' | 'colorway' | 'customer' | 'order' | 'show' | 'store'
@@ -31,7 +32,7 @@ const pageTitleToDrawerType: Record<
     Collections: 'collection',
     Colorways: 'colorway',
     // Customers: 'customer', // Disabled in Stage 1
-    Orders: 'order',
+    // Orders: 'order', // Disabled - ready to work on orders
     Shows: 'show',
     Stores: 'store',
 };
@@ -114,27 +115,28 @@ const createMenuItems = [
     //         openDrawer('customer');
     //     },
     // },
-    {
-        label: 'Order',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('order');
-        },
-    },
-    {
-        label: 'Show',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('show');
-        },
-    },
-    {
-        label: 'Store',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('store');
-        },
-    },
+    // TODO: Re-enable order creation when ready to work on orders
+    // {
+    //     label: 'Order',
+    //     icon: IconList.Plus,
+    //     command: () => {
+    //         openDrawer('order');
+    //     },
+    // },
+    // {
+    //     label: 'Show',
+    //     icon: IconList.Plus,
+    //     command: () => {
+    //         openDrawer('show');
+    //     },
+    // },
+    // {
+    //     label: 'Store',
+    //     icon: IconList.Plus,
+    //     command: () => {
+    //         openDrawer('store');
+    //     },
+    // },
 ];
 
 // Menu items (filtered when on a page with a drawer)

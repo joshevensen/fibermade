@@ -25,42 +25,62 @@ class OrderPolicy
 
     /**
      * Determine whether the user can create models.
+     *
+     * TODO: Re-enable when ready to work on orders.
      */
     public function create(User $user): bool
     {
-        return $this->isAdmin($user) || $user->account_id !== null;
+        // Restore original logic below when ready
+        // return $this->isAdmin($user) || $user->account_id !== null;
+        return false;
     }
 
     /**
      * Determine whether the user can update the model.
+     *
+     * TODO: Re-enable when ready to work on orders.
      */
     public function update(User $user, Order $order): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        // Restore original logic below when ready
+        // return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        return false;
     }
 
     /**
      * Determine whether the user can delete the model.
+     *
+     * TODO: Re-enable when ready to work on orders.
      */
     public function delete(User $user, Order $order): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        // Restore original logic below when ready
+        // return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        return false;
     }
 
     /**
      * Determine whether the user can restore the model.
+     *
+     * TODO: Re-enable when ready to work on orders.
      */
     public function restore(User $user, Order $order): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        // Restore original logic below when ready
+        // return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        return false;
     }
 
     /**
      * Determine whether the user can permanently delete the model.
+     *
+     * TODO: Re-enable when ready to work on orders.
      */
     public function forceDelete(User $user, Order $order): bool
     {
-        return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        // Restore original logic below when ready
+        // return $this->isAdmin($user) || $this->belongsToAccount($user, $order->account_id);
+        return false;
     }
 
     /**

@@ -1,25 +1,27 @@
+<!-- TODO: Restore edit functionality when ready to work on orders -->
 <script setup lang="ts">
 import { edit as editCustomer } from '@/actions/App/Http/Controllers/CustomerController';
-import {
-    destroy as destroyOrder,
-    update,
-} from '@/actions/App/Http/Controllers/OrderController';
-import { destroy as destroyOrderItem } from '@/actions/App/Http/Controllers/OrderItemController';
+// TODO: Re-enable these imports when ready to work on orders
+// import {
+//     destroy as destroyOrder,
+//     update,
+// } from '@/actions/App/Http/Controllers/OrderController';
+// import { destroy as destroyOrderItem } from '@/actions/App/Http/Controllers/OrderItemController';
 import { edit as editShow } from '@/actions/App/Http/Controllers/ShowController';
 import { edit as editStore } from '@/actions/App/Http/Controllers/StoreController';
-import UiButton from '@/components/ui/UiButton.vue';
+// import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-import UiEditor from '@/components/ui/UiEditor.vue';
-import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
-import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
-import UiSelectButton from '@/components/ui/UiSelectButton.vue';
-import { useConfirm } from '@/composables/useConfirm';
-import { useFormSubmission } from '@/composables/useFormSubmission';
+// import UiEditor from '@/components/ui/UiEditor.vue';
+// import UiForm from '@/components/ui/UiForm.vue';
+// import UiFormField from '@/components/ui/UiFormField.vue';
+// import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
+// import UiSelectButton from '@/components/ui/UiSelectButton.vue';
+// import { useConfirm } from '@/composables/useConfirm';
+// import { useFormSubmission } from '@/composables/useFormSubmission';
 import AppLayout from '@/layouts/AppLayout.vue';
-import OrderItemDrawer from '@/pages/orders/components/OrderItemDrawer.vue';
-import { Link, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+// import OrderItemDrawer from '@/pages/orders/components/OrderItemDrawer.vue';
+import { Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface OrderItem {
     id: number;
@@ -84,39 +86,41 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { requireDelete } = useConfirm();
+// TODO: Re-enable delete functionality when ready to work on orders
+// const { requireDelete } = useConfirm();
 
-const showOrderItemDrawer = ref(false);
-const editingOrderItem = ref<OrderItem | null>(null);
+// TODO: Re-enable OrderItemDrawer functionality when ready to work on orders
+// const showOrderItemDrawer = ref(false);
+// const editingOrderItem = ref<OrderItem | null>(null);
 
-function openAddItemDrawer(): void {
-    editingOrderItem.value = null;
-    showOrderItemDrawer.value = true;
-}
+// function openAddItemDrawer(): void {
+//     editingOrderItem.value = null;
+//     showOrderItemDrawer.value = true;
+// }
 
-function openEditItemDrawer(item: OrderItem): void {
-    editingOrderItem.value = item;
-    showOrderItemDrawer.value = true;
-}
+// function openEditItemDrawer(item: OrderItem): void {
+//     editingOrderItem.value = item;
+//     showOrderItemDrawer.value = true;
+// }
 
-function closeOrderItemDrawer(): void {
-    showOrderItemDrawer.value = false;
-    editingOrderItem.value = null;
-}
+// function closeOrderItemDrawer(): void {
+//     showOrderItemDrawer.value = false;
+//     editingOrderItem.value = null;
+// }
 
-function handleDeleteItem(event: Event, item: OrderItem): void {
-    requireDelete({
-        target: event.currentTarget as HTMLElement,
-        message: 'Are you sure you want to delete this order item?',
-        onAccept: () => {
-            router.delete(destroyOrderItem.url(item.id), {
-                onSuccess: () => {
-                    router.reload({ only: ['order'] });
-                },
-            });
-        },
-    });
-}
+// function handleDeleteItem(event: Event, item: OrderItem): void {
+//     requireDelete({
+//         target: event.currentTarget as HTMLElement,
+//         message: 'Are you sure you want to delete this order item?',
+//         onAccept: () => {
+//             router.delete(destroyOrderItem.url(item.id), {
+//                 onSuccess: () => {
+//                     router.reload({ only: ['order'] });
+//                 },
+//             });
+//         },
+//     });
+// }
 
 const calculatedTotals = computed(() => {
     const subtotal =
@@ -145,90 +149,108 @@ function formatCurrency(amount: number): string {
     }).format(amount);
 }
 
-const { form, onSubmit } = useFormSubmission({
-    route: () => update(props.order.id),
-    initialValues: {
-        status: props.order.status || null,
-        order_date: props.order.order_date || null,
-        notes: props.order.notes || null,
-    },
-    successMessage: 'Order updated successfully.',
-    onSuccess: () => {
-        router.visit('/orders');
-    },
-});
-
-function handleDelete(event: Event): void {
-    requireDelete({
-        target: event.currentTarget as HTMLElement,
-        message: 'Are you sure you want to delete this order?',
-        onAccept: () => {
-            router.delete(destroyOrder.url(props.order.id));
-        },
-    });
+function formatDate(value: string | null | undefined): string {
+    if (!value) {
+        return '';
+    }
+    return new Date(value).toLocaleDateString();
 }
+
+function formatStatus(status: string): string {
+    return status
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+function getStatusBadgeClass(status: string): string {
+    const statusMap: Record<string, string> = {
+        draft: 'bg-gray-100 text-gray-800',
+        open: 'bg-blue-100 text-blue-800',
+        closed: 'bg-green-100 text-green-800',
+        cancelled: 'bg-red-100 text-red-800',
+    };
+    return statusMap[status.toLowerCase()] || 'bg-gray-100 text-gray-800';
+}
+
+// TODO: Re-enable form submission when ready to work on orders
+// const { form, onSubmit } = useFormSubmission({
+//     route: () => update(props.order.id),
+//     initialValues: {
+//         status: props.order.status || null,
+//         order_date: props.order.order_date || null,
+//         notes: props.order.notes || null,
+//     },
+//     successMessage: 'Order updated successfully.',
+//     onSuccess: () => {
+//         router.visit('/orders');
+//     },
+// });
+
+// TODO: Re-enable delete handler when ready to work on orders
+// function handleDelete(event: Event): void {
+//     requireDelete({
+//         target: event.currentTarget as HTMLElement,
+//         message: 'Are you sure you want to delete this order?',
+//         onAccept: () => {
+//             router.delete(destroyOrder.url(props.order.id));
+//         },
+//     });
+// }
 </script>
 
 <template>
-    <AppLayout page-title="Edit Order">
+    <AppLayout page-title="Order Details">
         <template #default>
             <div class="flex flex-col gap-4">
                 <UiCard>
                     <template #content>
-                        <UiForm @submit="onSubmit">
-                            <UiFormField
-                                name="status"
-                                label="Status"
-                                :server-error="form.errors.status"
-                                required
-                            >
-                                <template #default="{ props: fieldProps }">
-                                    <UiSelectButton
-                                        v-bind="fieldProps"
-                                        :options="orderStatusOptions"
-                                        fluid
-                                    />
-                                </template>
-                            </UiFormField>
+                        <div class="space-y-6">
+                            <div>
+                                <label
+                                    class="mb-1 block text-sm font-medium text-surface-700"
+                                >
+                                    Status
+                                </label>
+                                <span
+                                    class="inline-block rounded-full px-3 py-1 text-sm font-medium"
+                                    :class="
+                                        getStatusBadgeClass(props.order.status)
+                                    "
+                                >
+                                    {{ formatStatus(props.order.status) }}
+                                </span>
+                            </div>
 
-                            <UiFormFieldDatePicker
-                                name="order_date"
-                                label="Order Date"
-                                placeholder="Select order date"
-                                :server-error="form.errors.order_date"
-                                show-icon
-                                required
-                            />
+                            <div>
+                                <label
+                                    class="mb-1 block text-sm font-medium text-surface-700"
+                                >
+                                    Order Date
+                                </label>
+                                <p class="text-base text-surface-900">
+                                    {{ formatDate(props.order.order_date) }}
+                                </p>
+                            </div>
 
-                            <UiFormField
-                                name="notes"
-                                label="Notes"
-                                :server-error="form.errors.notes"
-                            >
-                                <template #default="{ props: fieldProps }">
-                                    <UiEditor v-bind="fieldProps" />
-                                </template>
-                            </UiFormField>
-
-                            <UiButton type="submit" :loading="form.processing">
-                                Update Order
-                            </UiButton>
-                        </UiForm>
+                            <div v-if="props.order.notes">
+                                <label
+                                    class="mb-1 block text-sm font-medium text-surface-700"
+                                >
+                                    Notes
+                                </label>
+                                <div
+                                    class="prose prose-sm max-w-none text-base text-surface-900"
+                                    v-html="props.order.notes"
+                                />
+                            </div>
+                        </div>
                     </template>
                 </UiCard>
 
                 <UiCard>
                     <template #header>
-                        <div class="flex items-center justify-between">
-                            <h3 class="text-lg font-semibold">Order Items</h3>
-                            <UiButton
-                                type="button"
-                                size="small"
-                                @click="openAddItemDrawer"
-                            >
-                                Add Item
-                            </UiButton>
-                        </div>
+                        <h3 class="text-lg font-semibold">Order Items</h3>
                     </template>
                     <template #content>
                         <div
@@ -238,7 +260,7 @@ function handleDelete(event: Event): void {
                             "
                             class="py-8 text-center text-surface-500"
                         >
-                            No order items yet. Click "Add Item" to get started.
+                            No order items
                         </div>
                         <div v-else class="overflow-x-auto">
                             <table class="w-full">
@@ -268,11 +290,6 @@ function handleDelete(event: Event): void {
                                             class="px-4 py-2 text-right text-sm font-semibold text-surface-700"
                                         >
                                             Line Total
-                                        </th>
-                                        <th
-                                            class="px-4 py-2 text-right text-sm font-semibold text-surface-700"
-                                        >
-                                            Actions
                                         </th>
                                     </tr>
                                 </thead>
@@ -314,34 +331,6 @@ function handleDelete(event: Event): void {
                                                       )
                                                     : 'N/A'
                                             }}
-                                        </td>
-                                        <td class="px-4 py-2 text-right">
-                                            <div class="flex justify-end gap-2">
-                                                <UiButton
-                                                    type="button"
-                                                    size="small"
-                                                    outlined
-                                                    @click="
-                                                        openEditItemDrawer(item)
-                                                    "
-                                                >
-                                                    Edit
-                                                </UiButton>
-                                                <UiButton
-                                                    type="button"
-                                                    size="small"
-                                                    severity="danger"
-                                                    outlined
-                                                    @click="
-                                                        handleDeleteItem(
-                                                            $event,
-                                                            item,
-                                                        )
-                                                    "
-                                                >
-                                                    Delete
-                                                </UiButton>
-                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -598,7 +587,8 @@ function handleDelete(event: Event): void {
                     </template>
                 </UiCard>
 
-                <UiCard>
+                <!-- TODO: Re-enable delete functionality when ready to work on orders -->
+                <!-- <UiCard>
                     <template #content>
                         <div class="space-y-4">
                             <div>
@@ -619,17 +609,18 @@ function handleDelete(event: Event): void {
                             </UiButton>
                         </div>
                     </template>
-                </UiCard>
+                </UiCard> -->
             </div>
         </template>
     </AppLayout>
 
-    <OrderItemDrawer
+    <!-- TODO: Re-enable OrderItemDrawer when ready to work on orders -->
+    <!-- <OrderItemDrawer
         :visible="showOrderItemDrawer"
         :order-id="order.id"
         :order-item="editingOrderItem"
         :colorways="colorways"
         :bases="bases"
         @update:visible="closeOrderItemDrawer"
-    />
+    /> -->
 </template>

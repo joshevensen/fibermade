@@ -10,7 +10,8 @@ import CollectionCreateDrawer from '@/pages/collections/CollectionCreateDrawer.v
 import ColorwayCreateDrawer from '@/pages/colorways/ColorwayCreateDrawer.vue';
 // TODO: Re-enable CustomerCreateDrawer in Stage 2
 // import CustomerCreateDrawer from '@/pages/customers/CustomerCreateDrawer.vue';
-import OrderCreateDrawer from '@/pages/orders/OrderCreateDrawer.vue';
+// TODO: Re-enable OrderCreateDrawer when ready to work on orders
+// import OrderCreateDrawer from '@/pages/orders/OrderCreateDrawer.vue';
 import ShowCreateDrawer from '@/pages/shows/ShowCreateDrawer.vue';
 import StoreCreateDrawer from '@/pages/stores/StoreCreateDrawer.vue';
 import type { BreadcrumbItemType } from '@/types';
@@ -39,7 +40,8 @@ const collectionDrawerVisible = computed(
 const colorwayDrawerVisible = computed(() => activeDrawer.value === 'colorway');
 // TODO: Re-enable CustomerCreateDrawer in Stage 2
 // const customerDrawerVisible = computed(() => activeDrawer.value === 'customer');
-const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
+// TODO: Re-enable OrderCreateDrawer when ready to work on orders
+// const orderDrawerVisible = computed(() => activeDrawer.value === 'order');
 const showDrawerVisible = computed(() => activeDrawer.value === 'show');
 const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
 </script>
@@ -124,14 +126,15 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
             }
         "
     /> -->
-    <OrderCreateDrawer
+    <!-- TODO: Re-enable OrderCreateDrawer when ready to work on orders -->
+    <!-- <OrderCreateDrawer
         :visible="orderDrawerVisible"
         @update:visible="
             (value) => {
                 if (!value) closeDrawer();
             }
         "
-    />
+    /> -->
     <ShowCreateDrawer
         :visible="showDrawerVisible"
         @update:visible="

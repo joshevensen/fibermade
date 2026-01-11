@@ -29,6 +29,7 @@ import {
     IconFolder,
     IconLayoutGrid,
     IconPalette,
+    IconSettings,
     IconShoppingBag,
     IconShoppingCart,
     IconUsers,
@@ -45,6 +46,7 @@ export const BusinessIconList = {
     Inventory: IconLayoutGrid,
     Dashboard: IconDashboard,
     Shows: IconCalendarEvent,
+    Settings: IconSettings,
 } as const;
 
 export function useIcon() {
