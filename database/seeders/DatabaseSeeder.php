@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             FoundationSeeder::class,
-            CatalogSeeder::class,
-            OrdersSeeder::class,
+            // CatalogSeeder::class,
+            // OrdersSeeder::class,
         ]);
     }
 

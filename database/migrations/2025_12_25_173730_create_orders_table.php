@@ -23,6 +23,12 @@ return new class extends Migration
             $table->decimal('shipping_amount', 10, 2)->nullable();
             $table->decimal('discount_amount', 10, 2)->nullable();
             $table->decimal('tax_amount', 10, 2)->nullable();
+            $table->string('payment_method')->nullable();
+            $table->string('payment_id')->nullable();
+            $table->string('source')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->decimal('refunded_amount', 10, 2)->nullable();
+            $table->json('taxes')->nullable();
             $table->decimal('total_amount', 10, 2)->nullable();
             $table->text('notes')->nullable();
             $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();

@@ -7,6 +7,7 @@ import { router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import AccountForm from './components/AccountForm.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
+import ImportTab from './components/ImportTab.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
 
@@ -51,8 +52,9 @@ const dyes =
 const { IconList } = useIcon();
 
 const tabs = [
-    { value: 'account', label: 'Account' },
     { value: 'profile', label: 'Profile' },
+    { value: 'account', label: 'Account' },
+    { value: 'import', label: 'Import' },
     // { value: 'dyes', label: 'Dyes' },
 ];
 
@@ -98,6 +100,13 @@ watch(
 <template>
     <CreatorLayout page-title="Settings">
         <UiTabs :value="activeTab" :tabs="tabs" @update:value="handleTabChange">
+            <UiTabPanel value="profile">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <ProfileForm :user="user" />
+                    <PasswordForm />
+                </div>
+            </UiTabPanel>
+
             <UiTabPanel value="account">
                 <div class="space-y-4">
                     <AccountForm v-if="account" :account="account" />
@@ -109,11 +118,8 @@ watch(
                 </div>
             </UiTabPanel>
 
-            <UiTabPanel value="profile">
-                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    <ProfileForm :user="user" />
-                    <PasswordForm />
-                </div>
+            <UiTabPanel value="import">
+                <ImportTab />
             </UiTabPanel>
 
             <!-- <UiTabPanel value="dyes">

@@ -1,201 +1,156 @@
 # Fibermade Strategy
 
 ## Purpose
-Fibermade exists to become the **operational spine** for hand-dyed yarn businesses.
+Fibermade exists to be the **operational system of record** for hand-dyed yarn businesses.
 
-Not a generic ecommerce platform.  
-Not a marketplace first.  
-Not a POS company.
+Not a plugin.
+Not an add-on.
+Not a marketing tool.
 
-Fibermade is built to understand how hand-dyed yarn is actually produced, sold, and managed, and to reduce the cognitive, operational, and financial overhead that dyers currently absorb through spreadsheets, workarounds, and mismatched tools.
-
-Fibermade initially focuses on small-batch dyers who sell wholesale selectively and want reliability without becoming industrial.
+Fibermade understands production reality first, and everything else flows from that truth.
 
 ---
 
-## Product Bias (Intentional)
-Fibermade is not neutral software.
+## Core Belief: Production Reality Beats Presentation
+Most ecommerce tools treat storefronts, checkout, and marketing as the center of truth.
 
-Its defaults, language, and workflows are intentionally biased toward dyers who:
-- Work in small batches
-- Sell wholesale selectively
-- Balance creativity with reliability
-- Value reduced mental load over maximum flexibility
+Fibermade deliberately inverts this.
 
-Other dyers are supported, but not all workflows are optimized for them at launch.  
-This bias is intentional and will evolve only through validated use.
+- **Production reality is the center**: inventory truth, commitments, reconciliation, and dye work.
+- **Sales surfaces are projections**: online storefronts, wholesale orders, in-person sales.
+- **Communication reflects facts**: emails are triggered by real events, not intent.
+
+This inversion reduces mistakes, anxiety, and overcommitment for small-batch dyers.
 
 ---
 
-## Target Customer (Explicit)
+## Launch Philosophy
+Fibermade launches as a **complete system**, not a partial one.
 
-Fibermade is built **exclusively** for the hand-dyed yarn segment of the fiber community.
+From day one, Fibermade owns:
+- Catalog
+- Inventory truth
+- Orders (retail, wholesale, in-person)
+- Customers
+- Payments
+- Transactional communication
+- Production commitments
+
+There is no period where authority is split across systems.
+
+External tools are optional migration sources, not dependencies.
+
+---
+
+## Scope Discipline
+Fibermade is intentionally opinionated.
+
+It prioritizes:
+- Reduced mental load
+- Operational clarity
+- Explicit actions over automation illusions
+- Trustworthy numbers over real-time theatrics
+
+It avoids:
+- Feature parity with generic ecommerce platforms
+- Marketing-first tooling
+- Over-configurability
+- Silent background “sync” that hides responsibility
+
+Clarity is treated as a feature.
+
+---
+
+## Target Customer
+
+Fibermade is built exclusively for the **hand-dyed yarn segment of the fiber community**, and it is intentionally biased toward how dyers actually operate.
+
+Personas are defined by *how work gets done*, not by size, revenue, or years in business.
 
 ### Primary Fit
-Fibermade is built first for dyers who:
-- Operate solo or in very small teams
-- Dye in variable, batch-based workflows
-- Sell wholesale selectively to trusted stores
-- Struggle with overpromising, planning, and operational clarity
-- Want systems that reduce decisions rather than add options
 
-### Secondary Fit
-Fibermade also supports dyers who:
-- Sell primarily at shows, festivals, and pop-ups
-- Operate at larger production scales
-- Require more elastic inventory and planning workflows
+Fibermade is built first for dyers like **Stephanie**:
 
-Fibermade does not attempt to serve general craft sellers or generic ecommerce merchants.
+- Small-batch producers
+- Wholesale-selective, relationship-driven
+- Balancing creativity with reliability
+- Actively trying to avoid overcommitting
+- Feeling constant pressure to “keep it all straight”
 
----
+For this persona, Fibermade’s value is:
+- Clear wholesale workflows without industrial assumptions
+- Inventory truth they can trust
+- Production commitments that reduce anxiety
+- Systems that help them decide what to dye next without locking them in
 
-## Core Insight: Production Reality vs Presentation
-Most existing tools treat ecommerce presentation as the center of truth.
-
-Fibermade intentionally inverts this.
-
-- **Fibermade owns production reality**: inventory truth, batches, availability, wholesale logic, and operational reporting.
-- **External tools own presentation initially**: storefronts, checkout flows, and card-present transactions.
-
-In Stage 1, Fibermade has **no customer-facing website or checkout**.  
-All buyer interactions remain external.
-
-This inversion is a deliberate product stance, not a temporary limitation.  
-It allows Fibermade to integrate first, then replace selectively, without forcing risky early migrations.
+This persona defines Fibermade’s defaults, language, and workflow bias.
 
 ---
 
-## Growth Strategy Overview
-Fibermade is released in **earned stages**, not as a monolithic replacement.
+### Supported (but Not Optimized First)
 
-Each stage must:
-- Solve a real, daily operational pain
-- Reduce reliance on external tools
-- Deepen Fibermade’s role as the system of record
-- Align with the operational maturity of the dyers it serves first
-- Generate evidence before expanding scope
+Fibermade also supports other operating styles, with intentional tradeoffs:
 
-Buyer-facing features are introduced **only after** Fibermade is trusted as the system of record for operations.
+**James — Small Batch · Show-First**
+- Values flexibility and speed over structure
+- Uses Fibermade for order capture, inventory awareness, and reconciliation
+- Will benefit more as show features expand post-launch
 
-No stage exists solely to “complete the vision.”
+**David — Production Scale · Wholesale-First**
+- Values predictability and accuracy
+- Uses Fibermade for wholesale management, inventory truth, and production planning
+- Will benefit from subscriptions and advanced reporting later
 
----
+**Laura — Production Scale · Show-Heavy**
+- Comfortable with complexity
+- Uses Fibermade to manage inventory across channels and reconcile after chaos
+- Will benefit from deeper show and POS tooling over time
 
-## Stage Philosophy (High Level)
-
-### Stage 1: Augment Shopify (Wholesale & Operations)
-**Goal:** Become indispensable without disruption.
-
-- Fibermade owns wholesale management, production planning, and inventory truth
-- Shopify remains the **entire customer-facing surface**:
-  - website
-  - checkout
-  - payments
-  - fulfillment
-- Fibermade operates exclusively behind the scenes
-
-Stage 1 explicitly prioritizes small-batch dyers with selective wholesale relationships.
-
-**Success metric:** Fibermade is opened daily; Shopify becomes incidental.
+Fibermade cannot optimize for all personas equally at launch.
+That choice is deliberate.
 
 ---
 
-### Stage 2: Fibermade as the Selling Surface
-**Goal:** Make Fibermade the primary ecommerce system.
+### Explicit Non-Target
 
-- Fibermade introduces:
-  - a hosted website
-  - checkout and order capture
-  - discounts and promotions
-  - show and event workflows
-- Fibermade becomes the system of record for both operations **and** sales intent
-- Shopify is no longer required
+Fibermade does not aim to serve:
+- Generic ecommerce sellers
+- The broader craft world
+- Sellers who want maximum customization over clarity
+- Businesses that prioritize marketing optimization over production reality
 
-Even in Stage 2, Fibermade remains **production-first**, not checkout-first.
-
-Discounts, promotions, and show workflows are introduced only once Fibermade owns checkout intent.
-
-**Success metric:** Customers can run their online business entirely on Fibermade.
+Focus is a feature.
 
 ---
 
-### Stage 3: Card-Present Payments (Constrained)
-**Goal:** Reduce friction, not expand surface area.
+## Migration, Not Integration
+Fibermade does not embed itself inside other platforms or rely on app store approvals.
 
-- Card-present payments are optional and intentionally limited
-- Implemented via Stripe Terminal with a single supported device (WisePOS E)
-- No native mobile app requirement
-- Payments are captured; reconciliation remains explicit and production-aware
+Migration is handled through:
+- Explicit imports (catalog, inventory, orders)
+- Explicit exports (orders, inventory)
+- Clear ownership of data once imported
 
-Card-present support does not redefine Fibermade as a POS system.
-
-**Success metric:** In-person sales feel calmer and simpler without shifting system authority.
+This avoids sync illusions and makes responsibility visible and auditable.
 
 ---
 
-### Stage 4: Marketplace (Conditional)
-**Goal:** Enable shared buyer access without stealing ownership.
+## What Fibermade Is Not
+Fibermade does not aim to:
+- Be a general ecommerce platform
+- Be a POS-first system
+- Be a marketing automation tool
+- Compete feature-for-feature with Shopify or Square
+- Hide operational complexity behind “magic”
 
-- Marketplace participation is optional
-- Store pages act as gateways, not replacements
-- Buyer aggregation is earned through normalized catalogs and trust
-
-Marketplace functionality is explicitly not required for Fibermade to succeed.
-
-**Success metric:** Dyers actively want shared buyer access.
-
----
-
-## Pricing Philosophy
-Fibermade does not compete by being cheaper.
-
-It competes by:
-- Matching existing spend
-- Eliminating tool sprawl
-- Reducing cognitive load
-
-Customers should feel they are paying the same to manage less.
-
----
-
-## Integration Philosophy
-Integrations are not features; they are boundaries.
-
-Rules:
-- Fibermade is always the system of record for production and inventory
-- External systems are treated as inputs or outputs, never authorities
-- Integrations must reduce work, not add reconciliation
-
----
-
-## Validation and Gating
-No stage automatically unlocks the next.
-
-Each expansion requires:
-- Clear customer demand
-- Observable usage patterns
-- Evidence that Fibermade already owns the relevant workflows
-
-Unvalidated ambition is treated as a hypothesis, not a roadmap.
-
----
-
-## Non-Goals (Global)
-Fibermade explicitly does not aim to:
-- Be a generic ecommerce platform
-- Compete head-on with Shopify, Square, or POS-first tools
-- Serve the entire craft world
-- Optimize for edge cases at the expense of clarity
-- Build features solely to check boxes
-
-Focus is a competitive advantage.
+Fibermade prefers honesty over automation.
 
 ---
 
 ## Long-Term Positioning
-If Fibermade succeeds, customers should eventually say:
+If Fibermade succeeds, customers should say:
 
-“Shopify sells things.  
-Fibermade understands my business.”
+> “Other tools help me sell yarn.  
+> Fibermade helps me run my business.”
 
 That distinction is the strategy.

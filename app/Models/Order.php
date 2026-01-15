@@ -60,6 +60,12 @@ class Order extends Model
         'shipping_amount',
         'discount_amount',
         'tax_amount',
+        'payment_method',
+        'payment_id',
+        'source',
+        'cancelled_at',
+        'refunded_amount',
+        'taxes',
         'total_amount',
         'notes',
         'orderable_id',
@@ -83,6 +89,9 @@ class Order extends Model
             'shipping_amount' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'tax_amount' => 'decimal:2',
+            'cancelled_at' => 'datetime',
+            'refunded_amount' => 'decimal:2',
+            'taxes' => 'array',
             'total_amount' => 'decimal:2',
         ];
     }

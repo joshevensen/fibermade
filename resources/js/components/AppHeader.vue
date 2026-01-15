@@ -2,10 +2,9 @@
 import AppLogo from '@/components/AppLogo.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiIcon from '@/components/ui/UiIcon.vue';
-import UiMenu from '@/components/ui/UiMenu.vue';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useIcon } from '@/composables/useIcon';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 interface Props {
     pageTitle?: string;
@@ -20,7 +19,6 @@ const emit = defineEmits<{
 
 const { openDrawer } = useCreateDrawer();
 const { IconList, BusinessIconList } = useIcon();
-const createMenuRef = ref();
 
 // Map page titles to drawer types
 // TODO: Re-enable customer creation in Stage 2
@@ -83,85 +81,10 @@ const createButtonLabel = computed(() => {
     return `Create ${props.pageTitle.slice(0, -1)}`;
 });
 
-// Label for the menu toggle button
-const menuToggleButtonLabel = computed(() => {
-    return hasCreateDrawer.value ? undefined : 'Create';
-});
-
-// TODO: Re-enable customer creation in Stage 2
-const createMenuItems = [
-    {
-        label: 'Base',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('base');
-        },
-    },
-    {
-        label: 'Collection',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('collection');
-        },
-    },
-    {
-        label: 'Colorway',
-        icon: IconList.Plus,
-        command: () => {
-            openDrawer('colorway');
-        },
-    },
-    // Customer creation disabled in Stage 1
-    // {
-    //     label: 'Customer',
-    //     icon: IconList.Plus,
-    //     command: () => {
-    //         openDrawer('customer');
-    //     },
-    // },
-    // TODO: Re-enable order creation when ready to work on orders
-    // {
-    //     label: 'Order',
-    //     icon: IconList.Plus,
-    //     command: () => {
-    //         openDrawer('order');
-    //     },
-    // },
-    // {
-    //     label: 'Show',
-    //     icon: IconList.Plus,
-    //     command: () => {
-    //         openDrawer('show');
-    //     },
-    // },
-    // {
-    //     label: 'Store',
-    //     icon: IconList.Plus,
-    //     command: () => {
-    //         openDrawer('store');
-    //     },
-    // },
-];
-
-// Menu items (filtered when on a page with a drawer)
-const menuItems = computed(() => {
-    if (!currentPageDrawerType.value) {
-        return createMenuItems;
-    }
-    return createMenuItems.filter((item) => {
-        const drawerType = pageTitleToDrawerType[item.label];
-        return drawerType !== currentPageDrawerType.value;
-    });
-});
-
 function handleCreateClick(): void {
     if (currentPageDrawerType.value) {
         openDrawer(currentPageDrawerType.value);
     }
-}
-
-function toggleMenu(event: Event): void {
-    createMenuRef.value?.toggle(event);
 }
 </script>
 
@@ -201,19 +124,6 @@ function toggleMenu(event: Event): void {
                 :label="createButtonLabel"
                 aria-label="Create"
                 @click="handleCreateClick"
-            />
-            <UiButton
-                :icon="IconList.Plus"
-                size="small"
-                :label="menuToggleButtonLabel"
-                :aria-label="hasCreateDrawer ? 'More create options' : 'Create'"
-                @click="toggleMenu"
-            />
-            <UiMenu
-                ref="createMenuRef"
-                :model="menuItems"
-                popup
-                append-to="body"
             />
         </div>
     </header>

@@ -7,6 +7,7 @@ use App\Http\Controllers\ColorwayController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DyeController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
@@ -29,6 +30,11 @@ Route::prefix('creator')->middleware(['auth', 'verified'])->group(function () {
     Route::delete('settings/profile', [UserController::class, 'destroy'])->name('user.destroy');
     Route::delete('settings/account', [UserController::class, 'destroyAccount'])->name('account.destroy');
     Route::patch('settings/account', [AccountController::class, 'update'])->name('account.update');
+
+    // Import routes
+    Route::post('settings/import/products', [ImportController::class, 'importProducts'])->name('import.products');
+    Route::post('settings/import/orders', [ImportController::class, 'importOrders'])->name('import.orders');
+    Route::post('settings/import/customers', [ImportController::class, 'importCustomers'])->name('import.customers');
 
     // Colorways routes
     Route::patch('colorways/{colorway}/collections', [ColorwayController::class, 'updateCollections'])->name('colorways.collections.update');
