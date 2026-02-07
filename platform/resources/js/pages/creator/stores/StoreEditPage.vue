@@ -1,0 +1,454 @@
+<script setup lang="ts">
+import { edit as editOrder } from '@/actions/App/Http/Controllers/OrderController';
+import {
+    destroy as destroyStore,
+    update,
+} from '@/actions/App/Http/Controllers/StoreController';
+import UiButton from '@/components/ui/UiButton.vue';
+import UiCard from '@/components/ui/UiCard.vue';
+import UiForm from '@/components/ui/UiForm.vue';
+import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
+import UiInputGroup from '@/components/ui/UiInputGroup.vue';
+import UiInputGroupAddon from '@/components/ui/UiInputGroupAddon.vue';
+import UiInputNumber from '@/components/ui/UiInputNumber.vue';
+import UiSelectButton from '@/components/ui/UiSelectButton.vue';
+import { useConfirm } from '@/composables/useConfirm';
+import { useFormSubmission } from '@/composables/useFormSubmission';
+import { useToast } from '@/composables/useToast';
+import CreatorLayout from '@/layouts/CreatorLayout.vue';
+import { router } from '@inertiajs/vue3';
+
+interface Props {
+    store: {
+        id: number;
+        name: string;
+        email: string;
+        owner_name?: string | null;
+        address_line1: string;
+        address_line2?: string | null;
+        city: string;
+        state_region: string;
+        postal_code: string;
+        country_code: string;
+        discount_rate?: number | null;
+        minimum_order_quantity?: number | null;
+        minimum_order_value?: number | null;
+        payment_terms?: string | null;
+        lead_time_days?: number | null;
+        allows_preorders: boolean;
+        status: string;
+        notes?: string | null;
+    };
+    statusOptions: Array<{ label: string; value: string }>;
+    orders: Array<{
+        id: number;
+        order_date: string;
+        status: string;
+        total_amount?: number | null;
+        orderable?: {
+            name: string;
+        } | null;
+    }>;
+}
+
+const props = defineProps<Props>();
+const { requireDelete } = useConfirm();
+const { showSuccess } = useToast();
+
+const initialFormValues = {
+    name: props.store.name || '',
+    email: props.store.email || '',
+    owner_name: props.store.owner_name || null,
+    address_line1: props.store.address_line1 || '',
+    address_line2: props.store.address_line2 || null,
+    city: props.store.city || '',
+    state_region: props.store.state_region || '',
+    postal_code: props.store.postal_code || '',
+    country_code: props.store.country_code || '',
+    discount_rate: props.store.discount_rate || null,
+    minimum_order_quantity: props.store.minimum_order_quantity || null,
+    minimum_order_value: props.store.minimum_order_value || null,
+    payment_terms: props.store.payment_terms || null,
+    lead_time_days: props.store.lead_time_days || null,
+    allows_preorders: props.store.allows_preorders || false,
+    status: props.store.status || null,
+    notes: props.store.notes || null,
+};
+
+const { form: vendorForm } = useFormSubmission({
+    route: () => update(props.store.id),
+    initialValues: initialFormValues,
+    successMessage: 'Store settings updated successfully.',
+    onSuccess: () => {
+        router.visit('/stores');
+    },
+});
+
+function onVendorSubmit({
+    valid,
+    values,
+}: {
+    valid: boolean;
+    values: Record<string, any>;
+}): void {
+    if (!valid) {
+        return;
+    }
+
+    // Merge vendor settings with all other store fields
+    const allValues = {
+        ...initialFormValues,
+        ...values,
+    };
+
+    // Assign all values to form
+    Object.assign(vendorForm, allValues);
+
+    // Submit form
+    vendorForm.submit(update(props.store.id), {
+        onSuccess: () => {
+            showSuccess('Store settings updated successfully.');
+            router.visit('/stores');
+        },
+    });
+}
+
+function handleDelete(event: Event): void {
+    requireDelete({
+        target: event.currentTarget as HTMLElement,
+        message: `Are you sure you want to delete ${props.store.name}?`,
+        onAccept: () => {
+            router.delete(destroyStore.url(props.store.id));
+        },
+    });
+}
+
+function formatDate(value: string | null | undefined): string {
+    if (!value) {
+        return '';
+    }
+    return new Date(value).toLocaleDateString();
+}
+
+function formatCurrency(value: number | null | undefined): string {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+    }).format(value);
+}
+
+function formatEnum(value: string | null | undefined): string {
+    if (!value) {
+        return '';
+    }
+    return value
+        .split('_')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+}
+
+function formatAddress(): string {
+    const parts = [
+        props.store.address_line1,
+        props.store.address_line2,
+        [props.store.city, props.store.state_region].filter(Boolean).join(', '),
+        props.store.postal_code,
+        props.store.country_code,
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join('\n') : '—';
+}
+</script>
+
+<template>
+    <CreatorLayout page-title="Store Details">
+        <template #default>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #title>
+                        <h3 class="text-lg font-semibold">Store Information</h3>
+                    </template>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <label
+                                    class="text-sm font-medium text-surface-600"
+                                >
+                                    Store Name
+                                </label>
+                                <p class="mt-1 text-surface-900">
+                                    {{ props.store.name || '—' }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label
+                                    class="text-sm font-medium text-surface-600"
+                                >
+                                    Email
+                                </label>
+                                <p class="mt-1 text-surface-900">
+                                    {{ props.store.email || '—' }}
+                                </p>
+                            </div>
+
+                            <div v-if="props.store.owner_name">
+                                <label
+                                    class="text-sm font-medium text-surface-600"
+                                >
+                                    Owner Name
+                                </label>
+                                <p class="mt-1 text-surface-900">
+                                    {{ props.store.owner_name }}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label
+                                    class="text-sm font-medium text-surface-600"
+                                >
+                                    Location
+                                </label>
+                                <p
+                                    class="mt-1 whitespace-pre-line text-surface-900"
+                                >
+                                    {{ formatAddress() }}
+                                </p>
+                            </div>
+
+                            <div v-if="props.store.notes">
+                                <label
+                                    class="text-sm font-medium text-surface-600"
+                                >
+                                    Notes
+                                </label>
+                                <div
+                                    class="mt-1 text-surface-900"
+                                    v-html="props.store.notes"
+                                />
+                            </div>
+                        </div>
+                    </template>
+                </UiCard>
+
+                <UiCard>
+                    <template #title>
+                        <h3 class="text-lg font-semibold">
+                            Wholesale Settings
+                        </h3>
+                    </template>
+                    <template #content>
+                        <UiForm
+                            :initial-values="initialFormValues"
+                            @submit="onVendorSubmit"
+                        >
+                            <UiFormField
+                                name="status"
+                                label="Status"
+                                :server-error="vendorForm.errors.status"
+                            >
+                                <template #default="{ props: fieldProps }">
+                                    <UiSelectButton
+                                        v-bind="fieldProps"
+                                        :options="statusOptions"
+                                        size="small"
+                                        fluid
+                                    />
+                                </template>
+                            </UiFormField>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <UiFormField
+                                    name="discount_rate"
+                                    label="Discount Rate (%)"
+                                    :server-error="
+                                        vendorForm.errors.discount_rate
+                                    "
+                                >
+                                    <template #default="{ props: fieldProps }">
+                                        <UiInputGroup>
+                                            <UiInputNumber
+                                                v-bind="fieldProps"
+                                                :min="0"
+                                                :max="100"
+                                                :step="0.01"
+                                            />
+                                            <UiInputGroupAddon
+                                                >%</UiInputGroupAddon
+                                            >
+                                        </UiInputGroup>
+                                    </template>
+                                </UiFormField>
+
+                                <UiFormFieldInput
+                                    name="payment_terms"
+                                    label="Deposit"
+                                    placeholder="e.g., Net 30, Net 60"
+                                    :server-error="
+                                        vendorForm.errors.payment_terms
+                                    "
+                                />
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <UiFormFieldInputNumber
+                                    name="minimum_order_quantity"
+                                    label="Min Quantity"
+                                    :min="1"
+                                    :server-error="
+                                        vendorForm.errors.minimum_order_quantity
+                                    "
+                                />
+
+                                <UiFormField
+                                    name="minimum_order_value"
+                                    label="Min Value"
+                                    :server-error="
+                                        vendorForm.errors.minimum_order_value
+                                    "
+                                >
+                                    <template #default="{ props: fieldProps }">
+                                        <UiInputGroup>
+                                            <UiInputGroupAddon
+                                                >$</UiInputGroupAddon
+                                            >
+                                            <UiInputNumber
+                                                v-bind="fieldProps"
+                                                :min="0"
+                                                :max="99999999.99"
+                                                :step="0.01"
+                                            />
+                                        </UiInputGroup>
+                                    </template>
+                                </UiFormField>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <UiFormFieldInputNumber
+                                    name="lead_time_days"
+                                    label="Lead Time"
+                                    :min="0"
+                                    :server-error="
+                                        vendorForm.errors.lead_time_days
+                                    "
+                                />
+
+                                <UiFormField
+                                    name="allows_preorders"
+                                    label="Allow Preorder"
+                                    :server-error="
+                                        vendorForm.errors.allows_preorders
+                                    "
+                                >
+                                    <template #default="{ props: fieldProps }">
+                                        <UiSelectButton
+                                            v-bind="fieldProps"
+                                            :options="[
+                                                { label: 'Yes', value: true },
+                                                { label: 'No', value: false },
+                                            ]"
+                                            size="small"
+                                            fluid
+                                        />
+                                    </template>
+                                </UiFormField>
+                            </div>
+
+                            <UiButton
+                                type="submit"
+                                :loading="vendorForm.processing"
+                            >
+                                Update Settings
+                            </UiButton>
+                        </UiForm>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
+
+        <template #side>
+            <div class="flex flex-col gap-4">
+                <UiCard>
+                    <template #title>
+                        <h3 class="text-lg font-semibold">Orders</h3>
+                    </template>
+                    <template #content>
+                        <div v-if="props.orders.length === 0" class="py-8">
+                            <p class="text-center text-surface-500">
+                                No orders found
+                            </p>
+                        </div>
+                        <ul v-else class="space-y-2">
+                            <li
+                                v-for="order in props.orders"
+                                :key="order.id"
+                                class="flex items-center justify-between gap-4 rounded-lg border border-surface-200 p-3 transition-colors hover:bg-surface-50"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <button
+                                        class="flex-1 text-left font-medium text-surface-700 hover:text-primary-600"
+                                        @click="
+                                            router.visit(
+                                                editOrder.url(order.id),
+                                            )
+                                        "
+                                    >
+                                        {{ formatDate(order.order_date) }}
+                                    </button>
+                                    <span
+                                        class="rounded-full px-2 py-1 text-xs font-medium"
+                                        :class="{
+                                            'bg-green-100 text-green-800':
+                                                order.status === 'completed',
+                                            'bg-yellow-100 text-yellow-800':
+                                                order.status === 'pending',
+                                            'bg-blue-100 text-blue-800':
+                                                order.status === 'processing',
+                                            'bg-red-100 text-red-800':
+                                                order.status === 'cancelled',
+                                        }"
+                                    >
+                                        {{ formatEnum(order.status) }}
+                                    </span>
+                                </div>
+                                <span
+                                    v-if="order.total_amount"
+                                    class="text-sm font-medium text-surface-700"
+                                >
+                                    {{ formatCurrency(order.total_amount) }}
+                                </span>
+                            </li>
+                        </ul>
+                    </template>
+                </UiCard>
+
+                <UiCard>
+                    <template #content>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm text-surface-600">
+                                    Deleting this store will permanently remove
+                                    all associated data. This action cannot be
+                                    undone.
+                                </p>
+                            </div>
+                            <UiButton
+                                type="button"
+                                severity="danger"
+                                outlined
+                                class="w-full"
+                                @click="handleDelete($event)"
+                            >
+                                Delete Store
+                            </UiButton>
+                        </div>
+                    </template>
+                </UiCard>
+            </div>
+        </template>
+    </CreatorLayout>
+</template>

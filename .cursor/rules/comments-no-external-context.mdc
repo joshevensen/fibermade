@@ -1,0 +1,26 @@
+---
+description: Comments must not reference external context (stories, epics, tickets)
+alwaysApply: true
+---
+
+# Comments: Code-Only Context
+
+Do **not** add comments that reference context outside the codebase:
+
+- Story names, epic names, prompt numbers, ticket IDs (e.g. "Story 0.2", "Prompt 1")
+- Planning docs, roadmap references, "will be added later in X"
+
+Comments **should** describe the code itself:
+
+- What the code does or why this implementation choice
+- Non-obvious behavior, invariants, or constraints that the code enforces
+
+**Example**
+
+```php
+// ❌ BAD — references external planning
+// API routes (Story 0.2) will use the default api middleware group with auth:sanctum.
+
+// ✅ GOOD — describes the code
+// We do not call statefulApi() so the API is token-only (stateless).
+```

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php artisan test:*)",
+      "Bash(npm run format:*)",
+      "Bash(ls:*)",
+      "Bash(php artisan wayfinder:generate:*)",
+      "Bash(vendor/bin/pint:*)"
+    ]
+  }
+}

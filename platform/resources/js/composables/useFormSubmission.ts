@@ -1,0 +1,94 @@
+import { useForm, UseFormReturn } from '@inertiajs/vue3';
+import { useToast } from './useToast';
+
+interface FormSubmissionOptions {
+    route: () => { url: string; method: string };
+    initialValues: Record<string, any>;
+    onSuccess?: (form: UseFormReturn<any>) => void;
+    onError?: (form: UseFormReturn<any>) => void;
+    successMessage?: string;
+    resetFieldsOnSuccess?: string[];
+    resetFieldsOnError?: string[];
+    transform?: (values: Record<string, any>) => Record<string, any>;
+    preserveScroll?: boolean;
+}
+
+export function useFormSubmission(options: FormSubmissionOptions) {
+    const { showSuccess } = useToast();
+    const form = useForm(options.initialValues);
+
+    function onSubmit({
+        valid,
+        values,
+    }: {
+        valid: boolean;
+        values: Record<string, any>;
+    }): void {
+        if (!valid) {
+            return;
+        }
+
+        // Apply transform if provided
+        const dataToSubmit = options.transform
+            ? options.transform(values)
+            : values;
+
+        // Assign values to form
+        Object.assign(form, dataToSubmit);
+
+        // Build submit options
+        const submitOptions: {
+            onSuccess?: () => void;
+            onError?: () => void;
+            preserveScroll?: boolean;
+        } = {};
+
+        // Handle success
+        submitOptions.onSuccess = () => {
+            // Reset specified fields on success
+            if (options.resetFieldsOnSuccess) {
+                options.resetFieldsOnSuccess.forEach((field) => {
+                    form.reset(field);
+                });
+            }
+
+            // Show success message
+            if (options.successMessage) {
+                showSuccess(options.successMessage);
+            }
+
+            // Call custom onSuccess callback
+            if (options.onSuccess) {
+                options.onSuccess(form);
+            }
+        };
+
+        // Handle error
+        submitOptions.onError = () => {
+            // Reset specified fields on error
+            if (options.resetFieldsOnError) {
+                options.resetFieldsOnError.forEach((field) => {
+                    form.reset(field);
+                });
+            }
+
+            // Call custom onError callback
+            if (options.onError) {
+                options.onError(form);
+            }
+        };
+
+        // Preserve scroll if specified
+        if (options.preserveScroll) {
+            submitOptions.preserveScroll = true;
+        }
+
+        // Submit form
+        form.submit(options.route(), submitOptions);
+    }
+
+    return {
+        form,
+        onSubmit,
+    };
+}

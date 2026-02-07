@@ -1,0 +1,23 @@
+---
+globs: platform/**
+---
+
+<project-guidelines>
+=== project rules ===
+
+# Project-Specific Guidelines
+
+These guidelines are specific to this project and should be followed when working on this codebase.
+
+## UI Components
+
+- Always use `@resources/js/components/ui/` components if available before creating new components or using third-party components directly.
+- Check the UI components directory (`resources/js/components/ui/`) for existing components that match your needs.
+- These components provide a consistent API and styling across the application.
+
+## Code Formatting
+
+- You must run `npm run format` in addition to running `vendor/bin/pint --dirty` before finalizing changes to ensure both PHP and frontend code matches the project's expected style.
+- Run formatting commands after making code changes to ensure consistency.
+
+</project-guidelines>
