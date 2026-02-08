@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('health', fn () => response()->json(['status' => 'ok']));
-
-    // Resource API routes will be registered here.
+    Route::apiResource('colorways', \App\Http\Controllers\Api\V1\ColorwayController::class)
+        ->names('api.v1.colorways');
 
     if (app()->environment('testing')) {
         Route::get('_test/success', [ApiControllerTestController::class, 'success']);

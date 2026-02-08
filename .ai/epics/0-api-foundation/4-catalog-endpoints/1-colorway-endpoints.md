@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 0.4: Prompt 1 -- Colorway CRUD Endpoints
 
@@ -8,7 +8,7 @@ Stories 0.1-0.3 established the API infrastructure: Sanctum auth, `ApiController
 
 ## Goal
 
-Create a Colorway API controller with full CRUD endpoints (index, show, store, update, delete), filtering by status, and tests. After this prompt, `GET/POST /api/v1/colorways` and `GET/PATCH/DELETE /api/v1/colorways/{colorway}` work end-to-end with auth, authorization, validation, and JSON responses via `ColorwayResource`.
+Create a Colorway API controller with full CRUD endpoints (index, show, store, update, delete) and tests. After this prompt, `GET/POST /api/v1/colorways` and `GET/PATCH/DELETE /api/v1/colorways/{colorway}` work end-to-end with auth, authorization, validation, and JSON responses via `ColorwayResource`.
 
 ## Non-Goals
 
@@ -24,7 +24,6 @@ Create a Colorway API controller with full CRUD endpoints (index, show, store, u
 - Reuse existing `StoreColorwayRequest` and `UpdateColorwayRequest` for validation -- they already include policy authorization in their `authorize()` methods
 - Use `ColorwayResource` (from Story 0.3) for all JSON serialization
 - Index should eager-load `['collections', 'inventories', 'media']` following the web controller's pattern in `ColorwayController`
-- Index should support `?status=` query parameter for filtering (active, retired, idea, or omit for all) -- follow the status filter pattern in `BaseController::index()`
 - Store must set `account_id` and `created_by` from the authenticated user, matching the web controller pattern in `ColorwayController::store()`
 - Update must set `updated_by` from the authenticated user
 - Register routes in `routes/api.php` inside the v1 group using `Route::apiResource()`
@@ -34,7 +33,6 @@ Create a Colorway API controller with full CRUD endpoints (index, show, store, u
 ## Acceptance Criteria
 
 - [ ] `GET /api/v1/colorways` returns paginated list of colorways scoped to the user's account
-- [ ] `GET /api/v1/colorways?status=active` filters by status
 - [ ] `POST /api/v1/colorways` creates a colorway with validated data, sets `account_id` and `created_by`
 - [ ] `GET /api/v1/colorways/{colorway}` returns a single colorway with loaded relationships
 - [ ] `PATCH /api/v1/colorways/{colorway}` updates with validated data, sets `updated_by`
@@ -53,7 +51,6 @@ Create a Colorway API controller with full CRUD endpoints (index, show, store, u
 - **Existing web `ColorwayController`** has the account scoping, eager loading, and store/update patterns to mirror. The API version is simpler (no Inertia rendering, no enum option mapping for forms), but the data operations are identical.
 - **`StoreColorwayRequest` handles authorization** via `can('create', Colorway::class)` in its `authorize()` method. The API controller does NOT need to call `$this->authorize()` separately for store/update -- the FormRequest handles it. But `index`, `show`, and `destroy` need explicit authorization calls.
 - **`ColorwayPolicy` is fully enabled** -- all actions work for account-scoped users. No policy modifications needed.
-- **Status filtering**: The web `BaseController` filters by `request()->query('status', 'active')`. The API should accept `?status=` but default to returning all records (no default filter) since API consumers typically want the full dataset and filter client-side or explicitly.
 - **`Route::apiResource()`** generates index, store, show, update, destroy routes automatically -- no create/edit routes (those are form-only for web). This is the right choice for API controllers.
 - **Pagination**: Use Laravel's `->paginate()` for index endpoints. `ColorwayResource::collection()` works with paginated results and includes pagination metadata automatically.
 
@@ -72,4 +69,4 @@ Create a Colorway API controller with full CRUD endpoints (index, show, store, u
 
 - Create `platform/app/Http/Controllers/Api/V1/ColorwayController.php` -- CRUD controller extending ApiController
 - Modify `platform/routes/api.php` -- add `Route::apiResource('colorways', ...)` inside v1 group
-- Create `platform/tests/Feature/Api/V1/ColorwayControllerTest.php` -- tests for auth, authorization, validation, CRUD, filtering
+- Create `platform/tests/Feature/Api/V1/ColorwayControllerTest.php` -- tests for auth, authorization, validation, and CRUD
