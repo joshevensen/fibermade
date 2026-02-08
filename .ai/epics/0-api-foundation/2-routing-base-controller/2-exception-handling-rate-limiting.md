@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 0.2: Prompt 2 -- API Exception Handling & Rate Limiting
 

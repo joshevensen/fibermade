@@ -45,7 +45,12 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function getApiToken(\App\Models\User $user): string
 {
-    // ..
+    return $user->createToken('test')->plainTextToken;
+}
+
+function withBearer(string $token): array
+{
+    return ['Authorization' => 'Bearer '.$token];
 }

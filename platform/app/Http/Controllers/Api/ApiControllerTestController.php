@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Base;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -44,5 +45,29 @@ class ApiControllerTestController extends ApiController
         $count = $scoped->count();
 
         return $this->successResponse(['count' => $count]);
+    }
+
+    public function validateFail(Request $request): JsonResponse
+    {
+        $request->validate(['required_field' => 'required']);
+
+        return $this->successResponse([]);
+    }
+
+    public function modelNotFound(Base $base): JsonResponse
+    {
+        return $this->successResponse(['id' => $base->id]);
+    }
+
+    public function authorizeFail(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', Base::class);
+
+        return $this->successResponse([]);
+    }
+
+    public function serverError(Request $request): never
+    {
+        throw new Exception('test');
     }
 }

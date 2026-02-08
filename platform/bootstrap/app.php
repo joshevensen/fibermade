@@ -2,10 +2,15 @@
 
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -27,5 +32,38 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->shouldRenderJsonWhen(fn (Request $request) => $request->is('api/*'));
+
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json([
+                    'message' => $e->getMessage(),
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+        });
+
+        $exceptions->render(function (AccessDeniedHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'Forbidden.'], 403);
+            }
+        });
+
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                return response()->json(['message' => 'Resource not found.'], 404);
+            }
+        });
+
+        $exceptions->render(function (\Throwable $e, Request $request) {
+            if ($request->is('api/*') && ! config('app.debug')) {
+                return response()->json(['message' => 'Server error.'], 500);
+            }
+        });
     })->create();

@@ -4,16 +4,6 @@ use App\Models\Account;
 use App\Models\Base;
 use App\Models\User;
 
-function getApiToken(User $user): string
-{
-    return $user->createToken('test')->plainTextToken;
-}
-
-function withBearer(string $token): array
-{
-    return ['Authorization' => 'Bearer '.$token];
-}
-
 test('successResponse returns 200 with data envelope', function () {
     $user = User::factory()->create();
     $token = getApiToken($user);
