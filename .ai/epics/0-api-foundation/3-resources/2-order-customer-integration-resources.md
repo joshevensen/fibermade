@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 0.3: Prompt 2 -- Order, Customer, Integration & ExternalIdentifier Resources
 

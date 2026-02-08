@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 0.3: Prompt 1 -- Catalog Resources (Colorway, Base, Collection, Inventory)
 
