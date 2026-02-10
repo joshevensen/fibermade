@@ -32,3 +32,11 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model FibermadeConnection {
+  id                    Int      @id @default(autoincrement())
+  shop                  String   @unique
+  fibermadeApiToken     String
+  fibermadeIntegrationId Int
+  connectedAt           DateTime @default(now())
+}
