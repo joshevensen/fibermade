@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 0.6: Prompt 2 -- OrderItem Nested Endpoints
 

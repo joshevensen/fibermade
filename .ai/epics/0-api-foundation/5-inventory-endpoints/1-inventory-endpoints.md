@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 0.5: Prompt 1 -- Inventory CRUD & Quantity Update Endpoints
 
