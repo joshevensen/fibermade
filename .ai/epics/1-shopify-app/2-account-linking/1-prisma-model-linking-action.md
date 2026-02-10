@@ -6,8 +6,6 @@ status: pending
 
 Story 1.1 created the `FibermadeClient` service with full CRUD methods for all platform API resources, including `createIntegration()`, `healthCheck()`, and typed error handling. The Shopify app has no way to store per-shop Fibermade credentials or know which Integration record belongs to which shop. The `Session` model stores Shopify OAuth data (shop domain, access token) but has no Fibermade-related fields. After Shopify OAuth completes, the merchant lands on the app dashboard (`/app`) with no linking flow.
 
-**Prerequisite:** Story 0.7 (Customer & Integration API endpoints) must be completed on the platform side before this story can function end-to-end. The `POST /api/v1/integrations` endpoint is needed to create the Integration record.
-
 ## Goal
 
 Create a Prisma model to store the Fibermade connection state per shop, and build the server-side action that handles the account linking flow: verify credentials against the Fibermade API, create an Integration record, and persist the connection locally. After this prompt, the backend logic for linking is complete -- Prompt 2 adds the UI.
