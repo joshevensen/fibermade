@@ -15,6 +15,16 @@ class StoreCustomerRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation. For API requests, account_id is set from the authenticated user.
+     */
+    protected function prepareForValidation(): void
+    {
+        if (! $this->has('account_id') && $this->user()?->account_id !== null) {
+            $this->merge(['account_id' => $this->user()->account_id]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>

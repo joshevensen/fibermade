@@ -25,62 +25,42 @@ class CustomerPolicy
 
     /**
      * Determine whether the user can create models.
-     *
-     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
      */
     public function create(User $user): bool
     {
-        // Stage 2: Restore original logic below
-        // return $this->isAdmin($user) || $user->account_id !== null;
-        return false;
+        return $this->isAdmin($user) || $user->account_id !== null;
     }
 
     /**
      * Determine whether the user can update the model.
-     *
-     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
      */
     public function update(User $user, Customer $customer): bool
     {
-        // Stage 2: Restore original logic below
-        // return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
     }
 
     /**
      * Determine whether the user can delete the model.
-     *
-     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
      */
     public function delete(User $user, Customer $customer): bool
     {
-        // Stage 2: Restore original logic below
-        // return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
     }
 
     /**
      * Determine whether the user can restore the model.
-     *
-     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
      */
     public function restore(User $user, Customer $customer): bool
     {
-        // Stage 2: Restore original logic below
-        // return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
     }
 
     /**
      * Determine whether the user can permanently delete the model.
-     *
-     * TODO: Re-enable in Stage 2 when Fibermade becomes the selling surface.
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        // Stage 2: Restore original logic below
-        // return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
-        return false;
+        return $this->isAdmin($user) || $this->belongsToAccount($user, $customer->account_id);
     }
 
     /**

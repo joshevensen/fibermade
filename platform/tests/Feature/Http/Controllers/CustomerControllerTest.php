@@ -4,8 +4,6 @@ use App\Models\Account;
 use App\Models\Customer;
 use App\Models\User;
 
-// TODO: Update tests in Stage 2 when customer write operations are re-enabled
-
 test('user can view customers index', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
@@ -41,7 +39,7 @@ test('user can view a specific customer', function () {
     );
 });
 
-test('user cannot create a customer', function () {
+test('user can create a customer', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
 
@@ -50,14 +48,15 @@ test('user cannot create a customer', function () {
         'email' => 'customer@example.com',
     ]);
 
-    $response->assertForbidden();
-    $this->assertDatabaseMissing('customers', [
+    $response->assertRedirect(route('customers.index'));
+    $this->assertDatabaseHas('customers', [
+        'account_id' => $account->id,
         'name' => 'New Customer',
         'email' => 'customer@example.com',
     ]);
 });
 
-test('user cannot update a customer', function () {
+test('user can update a customer', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
 
@@ -71,14 +70,14 @@ test('user cannot update a customer', function () {
         'email' => $customer->email,
     ]);
 
-    $response->assertForbidden();
+    $response->assertRedirect(route('customers.index'));
     $this->assertDatabaseHas('customers', [
         'id' => $customer->id,
-        'name' => 'Original Name',
+        'name' => 'Updated Name',
     ]);
 });
 
-test('user cannot delete a customer', function () {
+test('user can delete a customer', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
 
@@ -86,13 +85,11 @@ test('user cannot delete a customer', function () {
 
     $response = $this->actingAs($user)->delete(route('customers.destroy', $customer));
 
-    $response->assertForbidden();
-    $this->assertDatabaseHas('customers', [
-        'id' => $customer->id,
-    ]);
+    $response->assertRedirect(route('customers.index'));
+    $this->assertSoftDeleted('customers', ['id' => $customer->id]);
 });
 
-test('user cannot update customer notes', function () {
+test('user can update customer notes', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
 
@@ -105,14 +102,14 @@ test('user cannot update customer notes', function () {
         'notes' => 'Updated notes',
     ]);
 
-    $response->assertForbidden();
+    $response->assertRedirect(route('customers.index'));
     $this->assertDatabaseHas('customers', [
         'id' => $customer->id,
-        'notes' => 'Original notes',
+        'notes' => 'Updated notes',
     ]);
 });
 
-test('admin cannot create, update, or delete customers in Stage 1', function () {
+test('admin can update and delete customers', function () {
     $admin = User::factory()->create(['is_admin' => true]);
     $account = Account::factory()->create();
     $customer = Customer::factory()->create([
@@ -120,26 +117,17 @@ test('admin cannot create, update, or delete customers in Stage 1', function () 
         'name' => 'Test Customer',
     ]);
 
-    // Test create
-    $createResponse = $this->actingAs($admin)->post(route('customers.store'), [
-        'name' => 'New Customer',
-    ]);
-    $createResponse->assertForbidden();
-
-    // Test update
     $updateResponse = $this->actingAs($admin)->put(route('customers.update', $customer), [
         'name' => 'Updated Customer',
         'email' => $customer->email,
     ]);
-    $updateResponse->assertForbidden();
-
-    // Test delete
-    $deleteResponse = $this->actingAs($admin)->delete(route('customers.destroy', $customer));
-    $deleteResponse->assertForbidden();
-
-    // Verify nothing changed
+    $updateResponse->assertRedirect(route('customers.index'));
     $this->assertDatabaseHas('customers', [
         'id' => $customer->id,
-        'name' => 'Test Customer',
+        'name' => 'Updated Customer',
     ]);
+
+    $deleteResponse = $this->actingAs($admin)->delete(route('customers.destroy', $customer));
+    $deleteResponse->assertRedirect(route('customers.index'));
+    $this->assertSoftDeleted('customers', ['id' => $customer->id]);
 });
