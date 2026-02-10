@@ -16,6 +16,25 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         ->name('api.v1.inventory.quantity');
     Route::apiResource('inventory', \App\Http\Controllers\Api\V1\InventoryController::class)
         ->names('api.v1.inventory');
+    Route::apiResource('customers', \App\Http\Controllers\Api\V1\CustomerController::class)
+        ->parameters(['customers' => 'customer'])
+        ->names('api.v1.customers');
+    Route::apiResource('integrations', \App\Http\Controllers\Api\V1\IntegrationController::class)
+        ->parameters(['integrations' => 'integration'])
+        ->names('api.v1.integrations');
+    Route::apiResource('orders', \App\Http\Controllers\Api\V1\OrderController::class)
+        ->parameters(['orders' => 'order'])
+        ->names('api.v1.orders');
+    Route::get('orders/{order}/items', [\App\Http\Controllers\Api\V1\OrderItemController::class, 'index'])
+        ->name('api.v1.orders.items.index');
+    Route::post('orders/{order}/items', [\App\Http\Controllers\Api\V1\OrderItemController::class, 'store'])
+        ->name('api.v1.orders.items.store');
+    Route::get('orders/{order}/items/{orderItem}', [\App\Http\Controllers\Api\V1\OrderItemController::class, 'show'])
+        ->name('api.v1.orders.items.show');
+    Route::patch('orders/{order}/items/{orderItem}', [\App\Http\Controllers\Api\V1\OrderItemController::class, 'update'])
+        ->name('api.v1.orders.items.update');
+    Route::delete('orders/{order}/items/{orderItem}', [\App\Http\Controllers\Api\V1\OrderItemController::class, 'destroy'])
+        ->name('api.v1.orders.items.destroy');
 
     if (app()->environment('testing')) {
         Route::get('_test/success', [ApiControllerTestController::class, 'success']);

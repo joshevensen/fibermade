@@ -19,6 +19,17 @@ class StoreOrderItemRequest extends FormRequest
     }
 
     /**
+     * Prepare the data for validation. For nested API routes, order_id comes from the URL.
+     */
+    protected function prepareForValidation(): void
+    {
+        $order = $this->route('order');
+        if ($order !== null) {
+            $this->merge(['order_id' => $order->id]);
+        }
+    }
+
+    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
