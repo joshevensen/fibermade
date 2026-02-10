@@ -8,7 +8,7 @@ Stories 0.4-0.5 created API controllers for catalog and inventory resources. Ord
 
 ## Goal
 
-Re-enable the `OrderPolicy` write actions and create an Order API controller with full CRUD endpoints, filtering by type and status. After this prompt, `GET/POST /api/v1/orders` and `GET/PATCH/DELETE /api/v1/orders/{order}` work end-to-end.
+Re-enable the `OrderPolicy` write actions and create an Order API controller with full CRUD endpoints. After this prompt, `GET/POST /api/v1/orders` and `GET/PATCH/DELETE /api/v1/orders/{order}` work end-to-end.
 
 ## Non-Goals
 
@@ -21,7 +21,7 @@ Re-enable the `OrderPolicy` write actions and create an Order API controller wit
 
 - Follow the API controller pattern from Story 0.4
 - Re-enable `OrderPolicy` by uncommenting the original logic for `create`, `update`, `delete`, `restore`, and `forceDelete` -- the commented-out code on lines 34, 46, 58, 70, 82 has the correct logic
-- Index should eager-load `['orderItems', 'orderable']` and support `?type=` (wholesale, retail, show) and `?status=` (draft, open, closed, cancelled) query parameter filters
+- Index should eager-load `['orderItems', 'orderable']`
 - Show should eager-load `['orderItems.colorway', 'orderItems.base', 'orderable']` for detailed view
 - Store must set `account_id`, `created_by` from authenticated user, and resolve `orderable_type` based on the `type` field following the web controller pattern: wholesale → `Store::class`, retail → `Customer::class`, show → `Show::class`
 - Update must set `updated_by` from authenticated user
@@ -32,14 +32,11 @@ Re-enable the `OrderPolicy` write actions and create an Order API controller wit
 
 - [ ] `OrderPolicy` create/update/delete/restore/forceDelete methods return standard account-scoped logic (no longer `return false`)
 - [ ] `GET /api/v1/orders` returns paginated orders scoped to user's account
-- [ ] `GET /api/v1/orders?type=wholesale` filters by order type
-- [ ] `GET /api/v1/orders?status=open` filters by order status
-- [ ] `GET /api/v1/orders?type=wholesale&status=open` combines filters
 - [ ] `POST /api/v1/orders` creates an order with `account_id`, `created_by`, and resolved `orderable_type`
 - [ ] `GET /api/v1/orders/{order}` returns order with items and orderable loaded
 - [ ] `PATCH /api/v1/orders/{order}` updates order and sets `updated_by`
 - [ ] `DELETE /api/v1/orders/{order}` soft-deletes the order
-- [ ] Tests cover auth, authorization, validation, CRUD, and filtering
+- [ ] Tests cover auth, authorization, validation, and CRUD
 - [ ] All existing tests still pass (especially any existing order-related tests)
 
 ---
@@ -50,8 +47,6 @@ Re-enable the `OrderPolicy` write actions and create an Order API controller wit
 - **`orderable_type` resolution** is a key piece of logic in the web `OrderController::store()`. The `type` field determines which model the order belongs to: `OrderType::Wholesale` → `Store::class`, `OrderType::Retail` → `Customer::class`, `OrderType::Show` → `Show::class`. The API controller needs this same mapping.
 - **`StoreOrderRequest` validation** is complex: `orderable_id` uses conditional exists rules based on `type`. The wholesale type expects a Store ID, retail expects a Customer ID, show expects a Show ID. This is already handled in the FormRequest -- the API controller just passes through validated data.
 - **Order has many decimal fields** -- all handled by the model's casts and the `OrderResource`. No special formatting needed in the controller.
-- **Filtering by type and status**: Both are enum-backed string fields. Filter with `->when($request->query('type'), fn ($q, $type) => $q->where('type', $type))` pattern.
-
 ## References
 
 - `platform/app/Policies/OrderPolicy.php` -- re-enable write actions (uncomment lines 34, 46, 58, 70, 82)
@@ -66,6 +61,6 @@ Re-enable the `OrderPolicy` write actions and create an Order API controller wit
 ## Files
 
 - Modify `platform/app/Policies/OrderPolicy.php` -- uncomment original logic for create, update, delete, restore, forceDelete
-- Create `platform/app/Http/Controllers/Api/V1/OrderController.php` -- CRUD with type/status filtering and orderable_type resolution
+- Create `platform/app/Http/Controllers/Api/V1/OrderController.php` -- CRUD with orderable_type resolution
 - Modify `platform/routes/api.php` -- add apiResource for orders
-- Create `platform/tests/Feature/Api/V1/OrderControllerTest.php` -- tests for CRUD, filtering, orderable resolution, policy re-enablement
+- Create `platform/tests/Feature/Api/V1/OrderControllerTest.php` -- tests for CRUD, orderable resolution, policy re-enablement

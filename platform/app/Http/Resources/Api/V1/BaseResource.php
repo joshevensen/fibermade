@@ -35,6 +35,7 @@ class BaseResource extends JsonResource
             'linen_percent' => $this->formatDecimal($this->linen_percent),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'inventories' => $this->whenLoaded('inventories', fn () => InventoryResource::collection($this->inventories)),
         ];
     }
 

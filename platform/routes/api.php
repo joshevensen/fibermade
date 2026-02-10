@@ -7,6 +7,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::get('health', fn () => response()->json(['status' => 'ok']));
     Route::apiResource('colorways', \App\Http\Controllers\Api\V1\ColorwayController::class)
         ->names('api.v1.colorways');
+    Route::apiResource('bases', \App\Http\Controllers\Api\V1\BaseController::class)
+        ->parameters(['bases' => 'base'])
+        ->names('api.v1.bases');
+    Route::apiResource('collections', \App\Http\Controllers\Api\V1\CollectionController::class)
+        ->names('api.v1.collections');
 
     if (app()->environment('testing')) {
         Route::get('_test/success', [ApiControllerTestController::class, 'success']);

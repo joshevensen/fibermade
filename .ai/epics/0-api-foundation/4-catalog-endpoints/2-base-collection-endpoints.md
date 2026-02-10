@@ -1,10 +1,10 @@
-status: pending
+status: done
 
 # Story 0.4: Prompt 2 -- Base & Collection CRUD Endpoints
 
 ## Context
 
-Prompt 1 created the Colorway API controller with full CRUD, establishing the API controller pattern: extend `ApiController`, use `scopeToAccount()`, reuse existing FormRequests for validation+authorization, return responses via API Resources, register with `Route::apiResource()`. The Colorway controller includes status filtering and pagination. Base and Collection endpoints follow the same pattern.
+Prompt 1 created the Colorway API controller with full CRUD, establishing the API controller pattern: extend `ApiController`, use `scopeToAccount()`, reuse existing FormRequests for validation+authorization, return responses via API Resources, register with `Route::apiResource()`. The Colorway controller includes pagination. Base and Collection endpoints follow the same pattern.
 
 ## Goal
 
@@ -19,8 +19,8 @@ Create API controllers for Base and Collection with full CRUD endpoints, followi
 ## Constraints
 
 - Follow the exact pattern from `ColorwayController` (Prompt 1): same namespace, same base class, same response helper usage, same test structure
-- Base controller: eager-load `['inventories']` on show, support `?status=` and `?weight=` query parameter filters
-- Collection controller: eager-load `['colorways']` on show, use `withCount('colorways')` on index, support `?status=` filter
+- Base controller: eager-load `['inventories']` on show
+- Collection controller: eager-load `['colorways']` on show, use `withCount('colorways')` on index
 - Base route parameter must be explicitly set: `Route::apiResource('bases', ...)->parameters(['bases' => 'base'])` -- matching the web route in `creator.php` line 46
 - Reuse existing FormRequests: `StoreBaseRequest`/`UpdateBaseRequest` and `StoreCollectionRequest`/`UpdateCollectionRequest`
 - Use `BaseResource` and `CollectionResource` from Story 0.3
@@ -30,10 +30,8 @@ Create API controllers for Base and Collection with full CRUD endpoints, followi
 ## Acceptance Criteria
 
 - [ ] `GET/POST /api/v1/bases` and `GET/PATCH/DELETE /api/v1/bases/{base}` work with auth, authorization, validation
-- [ ] `GET /api/v1/bases?status=active` and `GET /api/v1/bases?weight=worsted` filter correctly
 - [ ] `GET/POST /api/v1/collections` and `GET/PATCH/DELETE /api/v1/collections/{collection}` work with auth, authorization, validation
 - [ ] `GET /api/v1/collections` includes `colorways_count` in each resource
-- [ ] `GET /api/v1/collections?status=active` filters correctly
 - [ ] All responses use the correct API Resource for serialization
 - [ ] Tests cover auth (401), authorization (403), validation (422), and CRUD operations for both resources
 - [ ] All existing tests still pass
@@ -52,7 +50,7 @@ Create API controllers for Base and Collection with full CRUD endpoints, followi
 ## References
 
 - `platform/app/Http/Controllers/Api/V1/ColorwayController.php` -- pattern to follow exactly (created in Prompt 1)
-- `platform/app/Http/Controllers/BaseController.php` -- web controller: status filtering pattern (lines 27-39), store pattern
+- `platform/app/Http/Controllers/BaseController.php` -- web controller: store pattern
 - `platform/app/Http/Controllers/CollectionController.php` -- web controller: withCount pattern, eager loading
 - `platform/app/Http/Requests/StoreBaseRequest.php` -- validation rules
 - `platform/app/Http/Requests/StoreCollectionRequest.php` -- validation rules
@@ -62,8 +60,8 @@ Create API controllers for Base and Collection with full CRUD endpoints, followi
 
 ## Files
 
-- Create `platform/app/Http/Controllers/Api/V1/BaseController.php` -- CRUD with status and weight filtering
-- Create `platform/app/Http/Controllers/Api/V1/CollectionController.php` -- CRUD with colorways_count and status filtering
+- Create `platform/app/Http/Controllers/Api/V1/BaseController.php` -- CRUD
+- Create `platform/app/Http/Controllers/Api/V1/CollectionController.php` -- CRUD with colorways_count
 - Modify `platform/routes/api.php` -- add apiResource routes for bases and collections
-- Create `platform/tests/Feature/Api/V1/BaseControllerTest.php` -- CRUD and filter tests
-- Create `platform/tests/Feature/Api/V1/CollectionControllerTest.php` -- CRUD and filter tests
+- Create `platform/tests/Feature/Api/V1/BaseControllerTest.php` -- CRUD tests
+- Create `platform/tests/Feature/Api/V1/CollectionControllerTest.php` -- CRUD tests

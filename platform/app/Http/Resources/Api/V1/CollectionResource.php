@@ -21,6 +21,7 @@ class CollectionResource extends JsonResource
             'status' => $this->status->value,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            'colorways_count' => $this->when(isset($this->colorways_count), $this->colorways_count),
             'colorways' => $this->whenLoaded('colorways', fn () => ColorwayResource::collection($this->colorways)),
         ];
     }

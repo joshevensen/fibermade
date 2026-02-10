@@ -24,7 +24,6 @@ Re-enable `CustomerPolicy` write actions and create API controllers for Customer
 - Customer index: no special eager loading needed (simple model), no filtering required for now
 - Customer show: eager-load `['orders']` for customer detail view
 - Customer store: must set `account_id` from authenticated user. Note that `StoreCustomerRequest` has `account_id` as a required field -- for the API, merge it from the authenticated user before validation (similar to the OrderItem pattern)
-- Integration index: support `?type=` filter (currently only `shopify` but designed for future types) and `?active=` filter (boolean)
 - Integration show: eager-load `['logs']` for detail view (latest logs)
 - Integration store: must set `account_id` from authenticated user
 - Integration `credentials` field is stored encrypted -- the controller should accept it in the store/update request but `IntegrationResource` (Story 0.3) already excludes it from responses
@@ -36,8 +35,6 @@ Re-enable `CustomerPolicy` write actions and create API controllers for Customer
 - [ ] `GET/POST /api/v1/customers` and `GET/PATCH/DELETE /api/v1/customers/{customer}` work with auth, authorization, validation
 - [ ] `GET /api/v1/customers/{customer}` includes orders relationship
 - [ ] `GET/POST /api/v1/integrations` and `GET/PATCH/DELETE /api/v1/integrations/{integration}` work with auth, authorization, validation
-- [ ] `GET /api/v1/integrations?type=shopify` filters by type
-- [ ] `GET /api/v1/integrations?active=true` filters by active status
 - [ ] Integration responses never include `credentials`
 - [ ] Tests cover auth, authorization, validation, CRUD for both resources
 - [ ] Tests verify credentials are excluded from integration responses
@@ -51,7 +48,6 @@ Re-enable `CustomerPolicy` write actions and create API controllers for Customer
 - **`StoreCustomerRequest` requires `account_id`** as a validated field (`required, exists:accounts,id`). The web controller presumably passes this from the form. For the API, merge `account_id` from `$request->user()->account_id` before validation -- same pattern as OrderItem's `order_id` merge.
 - **Integration `credentials`** field is sensitive (encrypted API keys/secrets). The `StoreIntegrationRequest` has it as `required, string`. The API accepts it for creation but `IntegrationResource` excludes it from responses. This is the correct pattern -- write-only field.
 - **Customer has no special casts or complex fields** -- all strings. Straightforward CRUD.
-- **Integration filtering**: `type` is an IntegrationType enum (currently only `shopify`), `active` is a boolean. Both are simple where clauses.
 - **Both models use SoftDeletes** -- DELETE soft-deletes.
 
 ## References
@@ -69,7 +65,7 @@ Re-enable `CustomerPolicy` write actions and create API controllers for Customer
 
 - Modify `platform/app/Policies/CustomerPolicy.php` -- uncomment original logic for write actions
 - Create `platform/app/Http/Controllers/Api/V1/CustomerController.php` -- CRUD
-- Create `platform/app/Http/Controllers/Api/V1/IntegrationController.php` -- CRUD with type/active filtering
+- Create `platform/app/Http/Controllers/Api/V1/IntegrationController.php` -- CRUD
 - Modify `platform/routes/api.php` -- add apiResource routes for customers and integrations
 - Create `platform/tests/Feature/Api/V1/CustomerControllerTest.php` -- CRUD tests
 - Create `platform/tests/Feature/Api/V1/IntegrationControllerTest.php` -- CRUD tests, credentials exclusion verification

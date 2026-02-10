@@ -8,7 +8,7 @@ Story 0.4 created API controllers for Colorways, Bases, and Collections followin
 
 ## Goal
 
-Create an Inventory API controller with full CRUD plus a dedicated `PATCH /api/v1/inventory/{inventory}/quantity` endpoint for quantity updates. Support filtering by `colorway_id` and/or `base_id`. After this prompt, the API can manage inventory records and update quantities for specific colorway+base combinations.
+Create an Inventory API controller with full CRUD plus a dedicated `PATCH /api/v1/inventory/{inventory}/quantity` endpoint for quantity updates. After this prompt, the API can manage inventory records and update quantities for specific colorway+base combinations.
 
 ## Non-Goals
 
@@ -19,7 +19,7 @@ Create an Inventory API controller with full CRUD plus a dedicated `PATCH /api/v
 ## Constraints
 
 - Follow the controller pattern from Story 0.4 (namespace `Api\V1`, extend `ApiController`, reuse FormRequests, return via `InventoryResource`)
-- Index should eager-load `['colorway', 'base']` and support `?colorway_id=` and `?base_id=` query parameter filters
+- Index should eager-load `['colorway', 'base']`
 - The dedicated quantity endpoint (`PATCH /inventory/{inventory}/quantity`) mirrors the web route at `creator.php` line 66: it accepts `colorway_id`, `base_id`, and `quantity`, then uses `updateOrCreate` on the composite key `[account_id, colorway_id, base_id]`
 - Reuse `StoreInventoryRequest`, `UpdateInventoryRequest`, and `UpdateInventoryQuantityRequest` for validation
 - The quantity endpoint should use `UpdateInventoryQuantityRequest` which validates `colorway_id`, `base_id`, and `quantity`
@@ -29,15 +29,12 @@ Create an Inventory API controller with full CRUD plus a dedicated `PATCH /api/v
 ## Acceptance Criteria
 
 - [ ] `GET /api/v1/inventory` returns paginated inventory scoped to the user's account with colorway and base loaded
-- [ ] `GET /api/v1/inventory?colorway_id=1` filters by colorway
-- [ ] `GET /api/v1/inventory?base_id=2` filters by base
-- [ ] `GET /api/v1/inventory?colorway_id=1&base_id=2` filters by both
 - [ ] `POST /api/v1/inventory` creates an inventory record with `account_id` set
 - [ ] `GET /api/v1/inventory/{inventory}` returns a single record with relationships
 - [ ] `PATCH /api/v1/inventory/{inventory}` updates an inventory record
 - [ ] `DELETE /api/v1/inventory/{inventory}` deletes an inventory record
 - [ ] `PATCH /api/v1/inventory/{inventory}/quantity` updates quantity using `updateOrCreate` on the composite key
-- [ ] Tests cover auth, authorization, validation, CRUD, quantity update, and filtering
+- [ ] Tests cover auth, authorization, validation, CRUD, and quantity update
 - [ ] All existing tests still pass
 
 ---
@@ -48,7 +45,6 @@ Create an Inventory API controller with full CRUD plus a dedicated `PATCH /api/v
 - **The `updateOrCreate` pattern** in the web `InventoryController::updateQuantity()` uses `Inventory::updateOrCreate(['account_id' => ..., 'colorway_id' => ..., 'base_id' => ...], ['quantity' => ...])`. This means the quantity endpoint can both create and update -- if the combination doesn't exist, it creates it. The API endpoint should preserve this behavior.
 - **`UpdateInventoryQuantityRequest`** validates `colorway_id` (required, exists), `base_id` (required, exists), `quantity` (required, integer, min:0). It authorizes via `can('create', Inventory::class)` since it might create a new record.
 - **Inventory has a unique constraint** on `[account_id, colorway_id, base_id]`. The store endpoint should handle the case where a duplicate is attempted -- Laravel will throw a `QueryException` with a unique violation. Either catch it and return a 422, or let the unique constraint speak for itself.
-- **Filtering is straightforward** -- just `where('colorway_id', ...)` and `where('base_id', ...)` conditionally applied to the query.
 - **The custom route** for quantity update needs to be registered separately from `apiResource`. Place it before the resource route so it doesn't conflict: `Route::patch('inventory/{inventory}/quantity', ...)`.
 
 ## References
@@ -65,4 +61,4 @@ Create an Inventory API controller with full CRUD plus a dedicated `PATCH /api/v
 
 - Create `platform/app/Http/Controllers/Api/V1/InventoryController.php` -- CRUD + quantity update endpoint
 - Modify `platform/routes/api.php` -- add apiResource for inventory plus custom quantity route
-- Create `platform/tests/Feature/Api/V1/InventoryControllerTest.php` -- tests for CRUD, quantity update, filtering
+- Create `platform/tests/Feature/Api/V1/InventoryControllerTest.php` -- tests for CRUD, quantity update
