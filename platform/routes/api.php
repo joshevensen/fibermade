@@ -22,6 +22,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('integrations', \App\Http\Controllers\Api\V1\IntegrationController::class)
         ->parameters(['integrations' => 'integration'])
         ->names('api.v1.integrations');
+    Route::get('integrations/{integration}/logs', [\App\Http\Controllers\Api\V1\IntegrationLogController::class, 'index'])
+        ->name('api.v1.integrations.logs.index');
+    Route::get('external-identifiers', [\App\Http\Controllers\Api\V1\ExternalIdentifierController::class, 'index'])
+        ->name('api.v1.external-identifiers.index');
+    Route::post('external-identifiers', [\App\Http\Controllers\Api\V1\ExternalIdentifierController::class, 'store'])
+        ->name('api.v1.external-identifiers.store');
     Route::apiResource('orders', \App\Http\Controllers\Api\V1\OrderController::class)
         ->parameters(['orders' => 'order'])
         ->names('api.v1.orders');

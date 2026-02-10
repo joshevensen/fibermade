@@ -17,7 +17,13 @@ class IntegrationLogFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'integration_id' => \App\Models\Integration::factory(),
+            'loggable_type' => \App\Models\Order::class,
+            'loggable_id' => 1,
+            'status' => \App\Enums\IntegrationLogStatus::Success,
+            'message' => fake()->sentence(),
+            'metadata' => null,
+            'synced_at' => now(),
         ];
     }
 }
