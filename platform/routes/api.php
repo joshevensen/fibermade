@@ -12,6 +12,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         ->names('api.v1.bases');
     Route::apiResource('collections', \App\Http\Controllers\Api\V1\CollectionController::class)
         ->names('api.v1.collections');
+    Route::patch('inventory/{inventory}/quantity', [\App\Http\Controllers\Api\V1\InventoryController::class, 'updateQuantity'])
+        ->name('api.v1.inventory.quantity');
+    Route::apiResource('inventory', \App\Http\Controllers\Api\V1\InventoryController::class)
+        ->names('api.v1.inventory');
 
     if (app()->environment('testing')) {
         Route::get('_test/success', [ApiControllerTestController::class, 'success']);
