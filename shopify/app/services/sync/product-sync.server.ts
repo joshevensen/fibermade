@@ -7,7 +7,12 @@ import type {
 import { EXTERNAL_TYPES, IDENTIFIABLE_TYPES } from "./constants";
 import type { ShopifyGraphqlRunner } from "./metafields.server";
 import { setProductAndVariantMetafields } from "./metafields.server";
-import { createMapping, findFibermadeIdByShopifyGid, mappingExists } from "./mapping.server";
+import {
+  createMapping,
+  findFibermadeIdByShopifyGid,
+  findShopifyGidByFibermadeId,
+  mappingExists,
+} from "./mapping.server";
 import type { ProductSyncResult, ShopifyProduct, ShopifyVariant } from "./types";
 import { getVariants } from "./types";
 
@@ -116,6 +121,144 @@ export class ProductSyncService {
     private readonly shopDomain: string,
     private readonly shopifyGraphql?: ShopifyGraphqlRunner
   ) {}
+
+  async updateProduct(product: ShopifyProduct): Promise<void> {
+    const result = await findFibermadeIdByShopifyGid(
+      this.client,
+      this.integrationId,
+      EXTERNAL_TYPES.SHOPIFY_PRODUCT,
+      product.id
+    );
+    if (!result || result.identifiableType !== IDENTIFIABLE_TYPES.COLORWAY) {
+      await this.importProduct(product);
+      return;
+    }
+
+    const colorwayId = result.identifiableId;
+    await this.client.updateColorway(
+      colorwayId,
+      mapProductToColorwayPayload(product)
+    );
+
+    const colorway = await this.client.getColorway(colorwayId);
+    const inventories = colorway.inventories ?? [];
+    const payloadVariantIds = new Set(
+      getVariants(product).map((v) => v.id)
+    );
+    const candidateBases = await fetchAllBases(this.client);
+    const variantMetafieldInputs: { variantGid: string; baseId: number }[] = [];
+    const productNumericIdForVariant = parseNumericIdFromGid(product.id);
+
+    for (const inv of inventories) {
+      const variantGid = await findShopifyGidByFibermadeId(
+        this.client,
+        this.integrationId,
+        IDENTIFIABLE_TYPES.INVENTORY,
+        inv.id,
+        EXTERNAL_TYPES.SHOPIFY_VARIANT
+      );
+      if (variantGid && !payloadVariantIds.has(variantGid)) {
+        await this.client.updateBase(inv.base_id, { status: "retired" });
+      }
+    }
+
+    for (const variant of getVariants(product)) {
+      const variantResult = await findFibermadeIdByShopifyGid(
+        this.client,
+        this.integrationId,
+        EXTERNAL_TYPES.SHOPIFY_VARIANT,
+        variant.id
+      );
+      if (
+        variantResult &&
+        variantResult.identifiableType === IDENTIFIABLE_TYPES.INVENTORY
+      ) {
+        const inventory = await this.client.getInventory(
+          variantResult.identifiableId
+        );
+        const basePayload = mapVariantToBasePayload(
+          variant,
+          product.title ?? ""
+        );
+        const retailPrice =
+          variant.price?.trim() !== ""
+            ? parseFloat(variant.price)
+            : undefined;
+        await this.client.updateBase(inventory.base_id, {
+          descriptor: basePayload.descriptor,
+          retail_price: basePayload.retail_price ?? undefined,
+        });
+      } else {
+        try {
+          const basePayload = mapVariantToBasePayload(
+            variant,
+            product.title ?? ""
+          );
+          const retailPrice =
+            variant.price?.trim() !== ""
+              ? parseFloat(variant.price)
+              : undefined;
+          let baseId: number;
+          const existing = findExistingBase(
+            candidateBases,
+            basePayload.descriptor,
+            retailPrice ?? null
+          );
+          if (existing) {
+            baseId = existing.id;
+          } else {
+            const base = await this.client.createBase(basePayload);
+            baseId = base.id;
+            candidateBases.push(base);
+          }
+          variantMetafieldInputs.push({ variantGid: variant.id, baseId });
+
+          const inventory = await this.client.createInventory({
+            colorway_id: colorwayId,
+            base_id: baseId,
+            quantity: 0,
+          });
+
+          const variantNumericId = parseNumericIdFromGid(variant.id);
+          await createMapping(
+            this.client,
+            this.integrationId,
+            IDENTIFIABLE_TYPES.INVENTORY,
+            inventory.id,
+            EXTERNAL_TYPES.SHOPIFY_VARIANT,
+            variant.id,
+            {
+              admin_url: `https://${this.shopDomain}/admin/products/${productNumericIdForVariant}/variants/${variantNumericId}`,
+            }
+          );
+        } catch (err) {
+          console.error(
+            `ProductSyncService.updateProduct: failed to sync variant ${variant.id}:`,
+            err instanceof Error ? err.message : String(err)
+          );
+        }
+      }
+    }
+
+    if (this.shopifyGraphql && variantMetafieldInputs.length > 0) {
+      await setProductAndVariantMetafields(
+        this.shopifyGraphql,
+        product.id,
+        colorwayId,
+        variantMetafieldInputs
+      );
+    }
+
+    const productName = product.title?.trim() || "Untitled";
+    const message = `Updated Shopify product '${productName}' (Colorway #${colorwayId})`;
+    await this.logIntegration(
+      product.id,
+      "success",
+      message,
+      { shopify_gid: product.id },
+      colorwayId
+    );
+  }
 
   async importProduct(product: ShopifyProduct): Promise<ProductSyncResult> {
     const exists = await mappingExists(
