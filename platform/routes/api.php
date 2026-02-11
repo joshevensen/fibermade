@@ -34,6 +34,8 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         ->names('api.v1.integrations');
     Route::get('integrations/{integration}/logs', [IntegrationLogController::class, 'index'])
         ->name('api.v1.integrations.logs.index');
+    Route::post('integrations/{integration}/logs', [IntegrationLogController::class, 'store'])
+        ->name('api.v1.integrations.logs.store');
     Route::get('external-identifiers', [ExternalIdentifierController::class, 'index'])
         ->name('api.v1.external-identifiers.index');
     Route::post('external-identifiers', [ExternalIdentifierController::class, 'store'])

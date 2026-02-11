@@ -9,6 +9,7 @@ import type {
   CreateColorwayPayload,
   CreateCustomerPayload,
   CreateExternalIdentifierPayload,
+  CreateIntegrationLogPayload,
   CreateIntegrationPayload,
   CreateInventoryPayload,
   CreateOrderItemPayload,
@@ -61,6 +62,7 @@ export type {
   CreateColorwayPayload,
   CreateCustomerPayload,
   CreateExternalIdentifierPayload,
+  CreateIntegrationLogPayload,
   CreateIntegrationPayload,
   CreateInventoryPayload,
   CreateOrderItemPayload,
@@ -346,6 +348,16 @@ export class FibermadeClient {
   ): Promise<PaginatedResponse<IntegrationLogData>> {
     return this.get<PaginatedResponse<IntegrationLogData>>(
       `/api/v1/integrations/${integrationId}/logs${this.buildQuery(params)}`
+    );
+  }
+
+  async createIntegrationLog(
+    integrationId: number,
+    data: CreateIntegrationLogPayload
+  ): Promise<IntegrationLogData> {
+    return this.postResource<IntegrationLogData>(
+      `/api/v1/integrations/${integrationId}/logs`,
+      data
     );
   }
 

@@ -5,6 +5,8 @@ import type {
   CreateBasePayload,
 } from "../fibermade-client.types";
 import { EXTERNAL_TYPES, IDENTIFIABLE_TYPES } from "./constants";
+import type { ShopifyGraphqlRunner } from "./metafields.server";
+import { setProductAndVariantMetafields } from "./metafields.server";
 import { createMapping, findFibermadeIdByShopifyGid, mappingExists } from "./mapping.server";
 import type { ProductSyncResult, ShopifyProduct, ShopifyVariant } from "./types";
 import { getVariants } from "./types";
@@ -111,7 +113,8 @@ export class ProductSyncService {
   constructor(
     private readonly client: FibermadeClient,
     private readonly integrationId: number,
-    private readonly shopDomain: string
+    private readonly shopDomain: string,
+    private readonly shopifyGraphql?: ShopifyGraphqlRunner
   ) {}
 
   async importProduct(product: ShopifyProduct): Promise<ProductSyncResult> {
@@ -125,9 +128,28 @@ export class ProductSyncService {
       return this.buildSkippedResult(product.id);
     }
 
+    try {
+      return await this.runImport(product);
+    } catch (err) {
+      await this.logIntegration(
+        product.id,
+        "error",
+        err instanceof Error ? err.message : String(err),
+        { shopify_gid: product.id }
+      );
+      throw err;
+    }
+  }
+
+  private async runImport(product: ShopifyProduct): Promise<ProductSyncResult> {
     const colorwayPayload = mapProductToColorwayPayload(product);
     const colorway = await this.client.createColorway(colorwayPayload);
     const colorwayId = colorway.id;
+
+    const primaryImageUrl = product.featuredImage?.url ?? null;
+    if (primaryImageUrl) {
+      // TODO: Create Media record when platform exposes a Media create endpoint (file_path = CDN URL, metadata = { source: "shopify", original_url }).
+    }
 
     const productNumericId = parseNumericIdFromGid(product.id);
     await createMapping(
@@ -147,6 +169,8 @@ export class ProductSyncService {
     const variants = getVariants(product);
     const bases: { id: number }[] = [];
     const inventoryRecords: { id: number; base_id: number }[] = [];
+    const variantMetafieldInputs: { variantGid: string; baseId: number }[] = [];
+    let variantFailures = 0;
 
     const productNumericIdForVariant = parseNumericIdFromGid(product.id);
     for (const variant of variants) {
@@ -170,6 +194,7 @@ export class ProductSyncService {
           candidateBases.push(base);
         }
         bases.push({ id: baseId });
+        variantMetafieldInputs.push({ variantGid: variant.id, baseId });
 
         const inventory = await this.client.createInventory({
           colorway_id: colorwayId,
@@ -194,6 +219,7 @@ export class ProductSyncService {
           }
         );
       } catch (err) {
+        variantFailures += 1;
         console.error(
           `ProductSyncService: failed to sync variant ${variant.id}:`,
           err instanceof Error ? err.message : String(err)
@@ -201,11 +227,68 @@ export class ProductSyncService {
       }
     }
 
+    if (this.shopifyGraphql && variantMetafieldInputs.length > 0) {
+      await setProductAndVariantMetafields(
+        this.shopifyGraphql,
+        product.id,
+        colorwayId,
+        variantMetafieldInputs
+      );
+    }
+
+    const status =
+      variantFailures > 0 && bases.length > 0
+        ? "warning"
+        : variantFailures > 0
+          ? "error"
+          : "success";
+    const productName = product.title?.trim() || "Untitled";
+    const message =
+      status === "success"
+        ? `Imported Shopify product '${productName}' as Colorway #${colorwayId} with ${variants.length} variant(s)`
+        : status === "warning"
+          ? `Partial import: ${variantFailures} variant(s) failed for '${productName}' (Colorway #${colorwayId})`
+          : `Import failed for '${productName}': ${variantFailures} variant(s) failed`;
+    const metadata: Record<string, unknown> = {
+      shopify_gid: product.id,
+      variant_count: variants.length,
+      bases_created: bases.map((b) => b.id),
+      inventory_created: inventoryRecords.map((r) => r.id),
+    };
+    if (primaryImageUrl) {
+      metadata.primary_image_url = primaryImageUrl;
+    }
+    await this.logIntegration(
+      product.id,
+      status,
+      message,
+      metadata,
+      colorwayId
+    );
+
     return {
       colorwayId,
       bases,
       inventoryRecords,
     };
+  }
+
+  private async logIntegration(
+    _productGid: string,
+    status: "success" | "error" | "warning",
+    message: string,
+    metadata: Record<string, unknown>,
+    loggableId?: number
+  ): Promise<void> {
+    const colorwayId = loggableId ?? 0;
+    await this.client.createIntegrationLog(this.integrationId, {
+      loggable_type: IDENTIFIABLE_TYPES.COLORWAY,
+      loggable_id: colorwayId,
+      status,
+      message,
+      metadata,
+      synced_at: new Date().toISOString(),
+    });
   }
 
   private async buildSkippedResult(productGid: string): Promise<ProductSyncResult> {

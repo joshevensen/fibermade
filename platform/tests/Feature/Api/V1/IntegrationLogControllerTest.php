@@ -110,3 +110,59 @@ test('logs for non-existent integration returns 404', function () {
 
     $response->assertNotFound();
 });
+
+test('POST creates integration log and returns 201 with correct payload', function () {
+    $account = Account::factory()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+    $integration = Integration::factory()->create(['account_id' => $account->id]);
+    $token = getApiToken($user);
+
+    $payload = [
+        'loggable_type' => 'App\\Models\\Colorway',
+        'loggable_id' => 42,
+        'status' => 'success',
+        'message' => 'Imported Shopify product as Colorway #42 with 3 variants',
+        'metadata' => [
+            'shopify_gid' => 'gid://shopify/Product/123',
+            'variant_count' => 3,
+            'bases_created' => [1, 2, 3],
+        ],
+        'synced_at' => '2026-02-09T12:00:00Z',
+    ];
+
+    $response = $this->postJson(
+        "/api/v1/integrations/{$integration->id}/logs",
+        $payload,
+        withBearer($token)
+    );
+
+    $response->assertStatus(201);
+    $response->assertJsonPath('data.integration_id', $integration->id);
+    $response->assertJsonPath('data.loggable_type', 'App\\Models\\Colorway');
+    $response->assertJsonPath('data.loggable_id', 42);
+    $response->assertJsonPath('data.status', 'success');
+    $response->assertJsonPath('data.message', $payload['message']);
+    $response->assertJsonPath('data.metadata.shopify_gid', 'gid://shopify/Product/123');
+    $response->assertJsonPath('data.metadata.variant_count', 3);
+    $response->assertJsonStructure([
+        'data' => [
+            'id',
+            'integration_id',
+            'loggable_type',
+            'loggable_id',
+            'status',
+            'message',
+            'metadata',
+            'synced_at',
+            'created_at',
+            'updated_at',
+        ],
+    ]);
+
+    $this->assertDatabaseHas(IntegrationLog::class, [
+        'integration_id' => $integration->id,
+        'loggable_type' => 'App\\Models\\Colorway',
+        'loggable_id' => 42,
+        'message' => $payload['message'],
+    ]);
+});

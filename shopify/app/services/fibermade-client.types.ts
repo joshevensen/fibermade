@@ -174,6 +174,15 @@ export interface IntegrationLogData {
   updated_at: string;
 }
 
+export interface CreateIntegrationLogPayload {
+  loggable_type: string;
+  loggable_id: number;
+  status: "success" | "error" | "warning";
+  message: string;
+  metadata?: Record<string, unknown> | null;
+  synced_at?: string | null;
+}
+
 // ---------------------------------------------------------------------------
 // External Identifier
 // ---------------------------------------------------------------------------

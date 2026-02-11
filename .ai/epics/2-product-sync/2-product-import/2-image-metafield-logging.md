@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 2.2: Prompt 2 -- Image Sync, Metafield Writes & Integration Logging
 

@@ -197,6 +197,7 @@ describe("ProductSyncService#importProduct", () => {
     createColorway: ReturnType<typeof vi.fn>;
     createBase: ReturnType<typeof vi.fn>;
     createInventory: ReturnType<typeof vi.fn>;
+    createIntegrationLog: ReturnType<typeof vi.fn>;
     getColorway: ReturnType<typeof vi.fn>;
     listBases: ReturnType<typeof vi.fn>;
   };
@@ -256,6 +257,7 @@ describe("ProductSyncService#importProduct", () => {
             quantity: 0,
           })
         ),
+      createIntegrationLog: vi.fn().mockResolvedValue({}),
       getColorway: vi.fn().mockResolvedValue({
         id: 10,
         name: "Merino DK",
@@ -296,6 +298,18 @@ describe("ProductSyncService#importProduct", () => {
     expect(mockClient.createBase).toHaveBeenCalledTimes(2);
     expect(mockClient.createInventory).toHaveBeenCalledTimes(2);
     expect(createMapping).toHaveBeenCalledTimes(3);
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledTimes(1);
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+      integrationId,
+      expect.objectContaining({
+        status: "success",
+        message: expect.stringContaining("Merino DK"),
+        metadata: expect.objectContaining({
+          shopify_gid: "gid://shopify/Product/100",
+          variant_count: 2,
+        }),
+      })
+    );
   });
 
   it("multi-variant product creates multiple Bases and Inventory records", async () => {
@@ -444,5 +458,46 @@ describe("ProductSyncService#importProduct", () => {
       ]),
     });
     expect(result.inventoryRecords.length).toBe(result.bases.length);
+  });
+
+  it("on failed import (createColorway throws) creates integration log with status error", async () => {
+    mockClient.createColorway.mockRejectedValueOnce(new Error("API unavailable"));
+    const service = new ProductSyncService(client, integrationId, shopDomain);
+
+    await expect(service.importProduct(standardProduct())).rejects.toThrow("API unavailable");
+
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledTimes(1);
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+      integrationId,
+      expect.objectContaining({
+        status: "error",
+        message: "API unavailable",
+        metadata: expect.objectContaining({ shopify_gid: "gid://shopify/Product/100" }),
+      })
+    );
+  });
+
+  it("on partial failure (one variant fails) creates integration log with status warning", async () => {
+    mockClient.createBase
+      .mockRejectedValueOnce(new Error("Base create failed"))
+      .mockResolvedValueOnce({ id: 21, descriptor: "Fingering" });
+    const service = new ProductSyncService(client, integrationId, shopDomain);
+
+    const result = await service.importProduct(standardProduct());
+
+    expect(result.bases).toHaveLength(1);
+    expect(result.inventoryRecords).toHaveLength(1);
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledTimes(1);
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+      integrationId,
+      expect.objectContaining({
+        status: "warning",
+        message: expect.stringMatching(/Partial import.*1.*variant.*failed/),
+        metadata: expect.objectContaining({
+          shopify_gid: "gid://shopify/Product/100",
+          variant_count: 2,
+        }),
+      })
+    );
   });
 });

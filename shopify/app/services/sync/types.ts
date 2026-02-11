@@ -25,6 +25,7 @@ export interface ShopifyProduct {
   descriptionHtml?: string | null;
   status: ShopifyProductStatus;
   handle?: string | null;
+  featuredImage?: { url: string } | null;
   variants?: {
     edges?: ShopifyProductVariantEdge[];
   };
