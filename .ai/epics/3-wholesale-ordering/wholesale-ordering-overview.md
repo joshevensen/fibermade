@@ -26,7 +26,7 @@ By the end of this epic:
 ## What This Epic Does NOT Do
 
 - No creator-facing order management (that's Epic 4)
-- No order processing workflow (accept, fulfill, complete -- that's Epic 4)
+- No order processing workflow (accept, fulfill, deliver -- that's Epic 4)
 - No email notifications for new orders (that's Epic 6)
 - No payment processing or invoicing
 - No store self-registration -- stores are invited by creators only
@@ -39,7 +39,7 @@ Full-width list of Creator Cards -- one card per creator the store has a relatio
 
 Each Creator Card shows:
 - Creator name and basic info
-- Order counts: draft orders, open orders, closed orders
+- Order counts: draft orders, open orders, delivered orders
 - Two buttons: **View Orders** and **New Order**
 
 "New Order" always starts a fresh order. Draft orders are resumed from the orders page.
@@ -49,7 +49,7 @@ Each Creator Card shows:
 List of all orders for this store+creator. Each row shows:
 - Order date
 - Total amount
-- Current status (draft, open, closed, cancelled)
+- Current status (draft, open, accepted, fulfilled, delivered, cancelled)
 - Skein count (total quantity across all line items)
 - Colorway count (number of distinct colorways)
 - **View Order** button (for non-draft orders) / **Continue Order** button (for drafts)
@@ -102,7 +102,7 @@ At the bottom:
 
 Build the store home page with creator cards and the per-creator order list page.
 
-- Rework the store home page (`/store`) to show creator cards with order counts (draft, active, completed) and "View Orders" / "New Order" buttons
+- Rework the store home page (`/store`) to show creator cards with order counts (draft, active, delivered) and "View Orders" / "New Order" buttons
 - Create the orders page at `/store/{creator}/orders` with order list showing date, total, status, skein count, colorway count
 - Filter by status
 - Draft orders show a "Continue Order" button, others show "View Order"
@@ -144,4 +144,4 @@ Build the read-only order detail view.
 - Same layout as step 2 but read-only: colorways with base rows showing quantities, unit prices, line totals
 - Pricing summary: subtotal, shipping, discount, tax, total
 - Order notes
-- Status progression indicator (draft → open → closed or cancelled)
+- Status progression indicator (draft → open → accepted → fulfilled → delivered, or cancelled)

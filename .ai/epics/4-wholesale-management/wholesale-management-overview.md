@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build the creator-facing wholesale order management. End state: a creator can view incoming wholesale orders from stores, process them through a workflow (accept → fulfill → complete), and manage their store relationships.
+Build the creator-facing wholesale order management. End state: a creator can view incoming wholesale orders from stores, process them through a workflow (accept → fulfill → deliver), and manage their store relationships.
 
 ## Current State
 
@@ -11,13 +11,13 @@ Build the creator-facing wholesale order management. End state: a creator can vi
 - **Order management is partially built.** `OrderController` has index/show/edit/destroy actions. The web routes exist but write operations (store, update, delete) are disabled via `OrderPolicy` -- those were re-enabled in Epic 0 Story 0.6 for the API. The web-side policy was re-enabled there too.
 - **Store management exists.** `StoreController::index()` shows stores and pending invites. Creators can invite stores via `InviteController`. The `creator_store` pivot stores wholesale terms (discount_rate, minimums, payment_terms, lead_time_days, etc.).
 - **Order index page exists** but likely needs enhancement for wholesale-specific features (filtering by type, status actions, store info).
-- **What's missing:** Order processing workflow (accept/fulfill/complete), wholesale-specific order views, enhanced store relationship management.
+- **What's missing:** Order processing workflow (accept/fulfill/deliver), wholesale-specific order views, enhanced store relationship management.
 
 ## What This Epic Delivers
 
 By the end of this epic:
 - Creators see incoming wholesale orders in their orders dashboard
-- Creators can process orders through a workflow: open → accepted → fulfilled → closed
+- Creators can process orders through a workflow: open → accepted → fulfilled → delivered
 - Creators can view order details with store info, line items, and totals
 - Creators can manage store relationships (view active stores, manage terms, pause/end relationships)
 - The wholesale order lifecycle is complete from both sides
@@ -37,20 +37,20 @@ By the end of this epic:
 Enhance the creator's order view to surface wholesale orders and their status.
 
 - Filter orders by type: wholesale, retail, show (or all)
-- Filter by status: open, accepted, fulfilled, closed, cancelled
+- Filter by status: open, accepted, fulfilled, delivered, cancelled
 - Each order row shows: order date, store name, item count, total amount, status
 - Sort by most recent first
 - Quick status indicator (color-coded badges)
-- Note: the `OrderStatus` enum has draft, open, closed, cancelled. This epic may need to add `accepted` and `fulfilled` statuses, or use a different mechanism (e.g., a separate `fulfillment_status` field) to track the processing workflow without changing the core order status
+- The `OrderStatus` enum has: draft, open, accepted, fulfilled, delivered, cancelled
 
 ### Story 4.2: Order Processing Workflow
 
 Build the workflow actions that move an order through its lifecycle.
 
-- Accept: creator acknowledges the order (open → accepted/in-progress)
-- Fulfill: creator marks the order as shipped/complete (accepted → fulfilled)
-- Close: order is done (fulfilled → closed)
-- Cancel: creator or store can cancel an open order (any status → cancelled)
+- Accept: creator acknowledges the order and commits to dyeing (open → accepted)
+- Fulfill: creator marks all skeins as dyed, wound, and ready to deliver (accepted → fulfilled)
+- Deliver: creator marks the order as shipped/delivered to the store (fulfilled → delivered)
+- Cancel: creator or store can cancel an order (any active status → cancelled)
 - Each action updates the order status and records who performed it (`updated_by`)
 - Add notes when changing status (e.g., tracking number on fulfillment)
 - Guard transitions: only valid status changes are allowed (can't go from cancelled to fulfilled)
@@ -64,7 +64,7 @@ Enhanced order detail page for creators with wholesale-specific information.
 - Line items: colorway name, base descriptor, quantity, unit price, line total
 - Order totals: subtotal, shipping, discount, tax, total
 - Status history / timeline (if tracking status changes)
-- Action buttons for the current workflow step (accept, fulfill, close, cancel)
+- Action buttons for the current workflow step (accept, fulfill, deliver, cancel)
 
 ### Story 4.4: Store Relationship Management
 

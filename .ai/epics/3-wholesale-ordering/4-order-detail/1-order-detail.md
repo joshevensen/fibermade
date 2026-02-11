@@ -23,7 +23,7 @@ Build the read-only order detail page for stores at `/store/orders/{order}`. It 
 - Authorization: the order must belong to the authenticated store (orderable_type = Store, orderable_id = store.id). Use the existing `OrderPolicy::view()` or add custom authorization in the controller.
 - Load order with: orderItems (with colorway and base), orderable
 - Group order items by colorway for display (matching the step 2 layout where each colorway has a row of bases)
-- Status progression indicator shows the order's journey: draft → open → closed (or cancelled). Highlight the current status.
+- Status progression indicator shows the order's journey: draft → open → accepted → fulfilled → delivered (or cancelled). Highlight the current status.
 - Follow the same visual patterns as `OrderReviewPage.vue` (from Story 3.3) for consistency
 - The page is purely read-only -- no forms, no inputs, no action buttons
 
@@ -41,8 +41,8 @@ Build the read-only order detail page for stores at `/store/orders/{order}`. It 
   - `creator_name` (from the order's account → creator relationship or passed separately)
   - `items_by_colorway`: array of `{ colorway: { id, name, primary_image_url }, bases: [{ id, descriptor, weight, quantity, unit_price, line_total }] }`
 - [ ] Vue page `store/orders/OrderDetailPage.vue`:
-  - **Status banner** at the top: prominent status tag (draft/open/closed/cancelled) with color coding
-  - **Status progression indicator**: horizontal steps showing draft → open → closed, with the current step highlighted. If cancelled, show that state distinctly.
+  - **Status banner** at the top: prominent status tag (draft/open/accepted/fulfilled/delivered/cancelled) with color coding
+  - **Status progression indicator**: horizontal steps showing draft → open → accepted → fulfilled → delivered, with the current step highlighted. If cancelled, show that state distinctly.
   - **Order metadata**: order date, creator name
   - **Colorway list** (full-width): same layout as step 2 review page but read-only
     - Each colorway shows: name, primary image
@@ -64,10 +64,12 @@ Build the read-only order detail page for stores at `/store/orders/{order}`. It 
   1. Modify `OrderPolicy::view()` to also check if the order's orderable is the user's store
   2. Handle authorization directly in the controller: check `$order->orderable_type === Store::class && $order->orderable_id === $store->id`
   **Recommendation**: Add a check in the controller. The policy handles creator-side authorization; the controller handles store-side authorization for this specific route.
-- **Status progression**: The OrderStatus enum has Draft, Open, Closed, Cancelled. The progression is linear: Draft → Open → Closed. Cancelled can happen from Open. The Vue component should render this as a step indicator:
-  - Step 1: Draft (completed if status is open, closed, or cancelled)
-  - Step 2: Open (completed if status is closed; active if current status is open)
-  - Step 3: Closed (active if current status is closed)
+- **Status progression**: The OrderStatus enum has Draft, Open, Accepted, Fulfilled, Delivered, Cancelled. The progression is linear: Draft → Open → Accepted → Fulfilled → Delivered. Cancelled can happen from any active status. The Vue component should render this as a step indicator:
+  - Step 1: Draft (completed if status is beyond draft)
+  - Step 2: Open (completed if status is accepted or beyond; active if current)
+  - Step 3: Accepted (completed if status is fulfilled or beyond; active if current)
+  - Step 4: Fulfilled (completed if status is delivered; active if current)
+  - Step 5: Delivered (active if current status is delivered)
   - If cancelled: show a "Cancelled" badge instead of the step indicator, or cross out remaining steps
 - **Creator name**: The order's `account_id` links to an Account, which has a `creator()` HasOne relationship. Load `$order->account->creator->name` or pass the creator name from the controller.
 - **Primary image URL**: Colorway's `primary_image_url` accessor. Load `orderItems.colorway.media` to ensure the accessor has data.
@@ -84,7 +86,7 @@ Build the read-only order detail page for stores at `/store/orders/{order}`. It 
 - `platform/app/Models/Base.php` -- descriptor, weight fields
 - `platform/app/Models/Account.php` -- `creator()` HasOne relationship
 - `platform/app/Policies/OrderPolicy.php` -- existing view authorization (may not cover store-side access)
-- `platform/app/Enums/OrderStatus.php` -- Draft, Open, Closed, Cancelled
+- `platform/app/Enums/OrderStatus.php` -- Draft, Open, Accepted, Fulfilled, Delivered, Cancelled
 - `platform/resources/js/pages/store/orders/OrderReviewPage.vue` -- step 2 layout to match (from Story 3.3)
 - `platform/resources/js/pages/creator/orders/OrderEditPage.vue` -- creator-side order detail for reference
 - `platform/resources/js/layouts/StoreLayout.vue` -- layout component

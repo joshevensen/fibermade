@@ -8,7 +8,7 @@ The store home page (`/store`) exists with a `StoreController::home()` method th
 
 ## Goal
 
-Rework the store home page to show draft/open/closed order counts per creator, and build the per-creator orders page at `/store/{creator}/orders` with a filterable list showing order date, total, status, skein count, colorway count, and appropriate action buttons. After this prompt, stores can see their orders per creator and navigate to drafts or submitted orders.
+Rework the store home page to show draft/open/delivered order counts per creator, and build the per-creator orders page at `/store/{creator}/orders` with a filterable list showing order date, total, status, skein count, colorway count, and appropriate action buttons. After this prompt, stores can see their orders per creator and navigate to drafts or submitted orders.
 
 ## Non-Goals
 
@@ -33,9 +33,9 @@ Rework the store home page to show draft/open/closed order counts per creator, a
 - [ ] `StoreController::home()` updated to include order counts per creator:
   - `draft_count`: number of draft orders for this store+creator
   - `open_count`: number of open orders
-  - `closed_count`: number of closed orders
+  - `delivered_count`: number of delivered orders
 - [ ] `HomePage.vue` updated to display order counts instead of "current order" and "past orders" info:
-  - Each creator card shows: draft count, open count, closed count
+  - Each creator card shows: draft count, open count, delivered count
   - Buttons remain "View Orders" and "New Order"
 - [ ] New route: `GET /store/{creator}/orders` renders the order list page
 - [ ] New controller action returns orders for the authenticated store + specified creator:
@@ -46,7 +46,7 @@ Rework the store home page to show draft/open/closed order counts per creator, a
 - [ ] New Vue page `store/orders/OrderListPage.vue`:
   - Shows creator name in header
   - List of orders with: order date, total amount, status tag, skein count, colorway count
-  - Status filter dropdown (All, Draft, Open, Closed, Cancelled)
+  - Status filter dropdown (All, Draft, Open, Accepted, Fulfilled, Delivered, Cancelled)
   - Draft orders show "Continue Order" button, all others show "View Order" button
   - Empty state when no orders exist
 - [ ] "New Order" button on both pages links to `/store/{creator}/order` (route created in Story 3.2 -- can be a dead link for now)
@@ -57,7 +57,7 @@ Rework the store home page to show draft/open/closed order counts per creator, a
 ## Tech Analysis
 
 - **Existing `transformCreatorsForHome`** (StoreController lines 139-183) queries orders per creator and computes `current_order` and `past_order_count`. Replace this with order count breakdowns. The query pattern stays the same: `Order::query()->where('type', OrderType::Wholesale)->where('orderable_type', Store::class)->where('orderable_id', $store->id)->where('account_id', $creator->account_id)`.
-- **Order counts** can use `->where('status', OrderStatus::Draft)->count()` for each status, or more efficiently use `->selectRaw("status, count(*) as count")->groupBy('status')` and then map the results. The simpler approach (3 count queries per creator) is fine for the expected volume (few creators per store).
+- **Order counts** can use `->where('status', OrderStatus::Draft)->count()` for each status, or more efficiently use `->selectRaw("status, count(*) as count")->groupBy('status')` and then map the results. The simpler approach (count queries per creator) is fine for the expected volume (few creators per store).
 - **Skein count**: `$order->orderItems->sum('quantity')` -- the orderItems relationship is already loaded in the existing query pattern.
 - **Colorway count**: `$order->orderItems->pluck('colorway_id')->unique()->count()` -- distinct colorway IDs across all items.
 - **Creator-store authorization**: The controller needs to verify the store has a relationship with the requested creator. Use `$store->creators()->where('creator_id', $creator->id)->exists()` or check the pivot. If no relationship exists, abort with 403.
@@ -70,7 +70,7 @@ Rework the store home page to show draft/open/closed order counts per creator, a
 - `platform/app/Http/Controllers/StoreController.php` -- existing `home()` method and `transformCreatorsForHome()` to modify
 - `platform/resources/js/pages/store/HomePage.vue` -- existing template to update (creator card layout, order info section)
 - `platform/routes/store.php` -- add new route
-- `platform/app/Models/Order.php` -- OrderType, OrderStatus enums, orderItems relationship
+- `platform/app/Models/Order.php` -- OrderType, OrderStatus enums (Draft, Open, Accepted, Fulfilled, Delivered, Cancelled), orderItems relationship
 - `platform/app/Models/OrderItem.php` -- quantity, colorway_id fields
 - `platform/app/Models/Store.php` -- `creators()` BelongsToMany relationship
 - `platform/app/Models/Creator.php` -- `account_id` field for scoping orders

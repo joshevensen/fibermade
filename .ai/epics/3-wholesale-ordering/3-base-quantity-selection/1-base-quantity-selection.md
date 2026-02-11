@@ -108,7 +108,7 @@ Build the backend for step 2 of the order flow: the review route that loads colo
 - `platform/app/Http/Requests/StoreOrderRequest.php` -- existing validation (reference, may not reuse directly)
 - `platform/app/Policies/OrderPolicy.php` -- existing authorization (controller handles store-side auth separately)
 - `platform/app/Enums/OrderType.php` -- Wholesale
-- `platform/app/Enums/OrderStatus.php` -- Draft, Open
+- `platform/app/Enums/OrderStatus.php` -- Draft, Open, Accepted, Fulfilled, Delivered, Cancelled
 
 ## Files
 
