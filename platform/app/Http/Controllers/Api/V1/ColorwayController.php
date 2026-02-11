@@ -16,7 +16,7 @@ class ColorwayController extends ApiController
         $this->authorize('viewAny', Colorway::class);
 
         $query = Colorway::query()
-            ->with(['collections', 'inventories', 'media']);
+            ->with(['collections', 'inventories.base', 'media']);
         $colorways = $this->scopeToAccount($query)->paginate();
 
         return $this->successResponse(ColorwayResource::collection($colorways));
@@ -26,7 +26,7 @@ class ColorwayController extends ApiController
     {
         $this->authorize('view', $colorway);
 
-        $colorway->load(['collections', 'inventories', 'media']);
+        $colorway->load(['collections', 'inventories.base', 'media']);
 
         return $this->successResponse(new ColorwayResource($colorway));
     }
@@ -48,7 +48,7 @@ class ColorwayController extends ApiController
             'updated_by' => $request->user()->id,
         ]));
 
-        return $this->successResponse(new ColorwayResource($colorway->load(['collections', 'inventories', 'media'])));
+        return $this->successResponse(new ColorwayResource($colorway->load(['collections', 'inventories.base', 'media'])));
     }
 
     public function destroy(Colorway $colorway): JsonResponse

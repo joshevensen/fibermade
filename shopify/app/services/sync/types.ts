@@ -47,6 +47,14 @@ export interface ProductSyncResultSkipped extends ProductSyncResultBase {
 
 export type ProductSyncResult = ProductSyncResultCreated | ProductSyncResultSkipped;
 
+/** Result shape for pushing a Fibermade Colorway to Shopify. */
+export interface ProductPushResult {
+  shopifyProductGid: string;
+  colorwayId: number;
+  variantMappings: { variantGid: string; inventoryId: number }[];
+  skipped?: boolean;
+}
+
 /** Progress/result shape for bulk import; stored in DB as JSON string and returned from runImport. */
 export interface BulkImportProgress {
   total: number;

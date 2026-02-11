@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 2.5: Prompt 1 -- Fibermade → Shopify Product Push
 
