@@ -44,6 +44,7 @@ describe("app._index", () => {
         request: createRequest({ intent: "disconnect" }),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       expect(result).toEqual({ success: true });
@@ -64,6 +65,7 @@ describe("app._index", () => {
         request: createRequest({ intent: "disconnect" }),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       expect(result).toEqual({ success: true });
@@ -77,6 +79,7 @@ describe("app._index", () => {
         request: createRequest({ method: "GET" }),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       expect(result).toEqual({ success: false, error: "Method not allowed" });
@@ -87,6 +90,7 @@ describe("app._index", () => {
         request: createRequest({ intent: "other" }),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       expect(result).toEqual({ success: false, error: "Invalid intent" });
@@ -101,6 +105,7 @@ describe("app._index", () => {
         request: new Request("http://localhost"),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       expect(result).toEqual({ connected: false });
@@ -123,6 +128,7 @@ describe("app._index", () => {
         request: new Request("http://localhost"),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       process.env.FIBERMADE_API_URL = originalEnv;
@@ -159,6 +165,7 @@ describe("app._index", () => {
         request: new Request("http://localhost"),
         params: {},
         context: {},
+        unstable_pattern: "/",
       });
 
       process.env.FIBERMADE_API_URL = originalEnv;
