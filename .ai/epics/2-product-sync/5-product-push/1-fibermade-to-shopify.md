@@ -13,7 +13,7 @@ Build a product push flow that creates Shopify products from Fibermade Colorways
 ## Non-Goals
 
 - Do not build automatic push (polling Fibermade for new Colorways) -- manual trigger only for Stage 1
-- Do not push images from Fibermade to Shopify (image upload via GraphQL is complex; defer to later)
+- Do not push images from Fibermade to Shopify (handled in Prompt 2)
 - Do not handle product updates from Fibermade to Shopify (push is create-only for Stage 1)
 - Do not build a selection UI for choosing which Colorways to push (push all unpushed, or push by ID)
 - Do not modify the platform API
