@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 1.3: Prompt 2 -- Disconnect/Unlink Option
 

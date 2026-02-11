@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 1.2: Prompt 2 -- Account Linking UI
 

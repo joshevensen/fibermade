@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 1.1: Prompt 2 -- Resource CRUD Methods
 
