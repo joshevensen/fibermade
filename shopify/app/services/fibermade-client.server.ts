@@ -367,6 +367,20 @@ export class FibermadeClient {
     );
   }
 
+  async lookupExternalIdentifierByIdentifiable(
+    integrationId: number,
+    identifiableType: string,
+    identifiableId: number
+  ): Promise<PaginatedResponse<ExternalIdentifierData>> {
+    return this.get<PaginatedResponse<ExternalIdentifierData>>(
+      `/api/v1/external-identifiers${this.buildQuery({
+        integration_id: integrationId,
+        identifiable_type: identifiableType,
+        identifiable_id: identifiableId,
+      })}`
+    );
+  }
+
   // -------------------------------------------------------------------------
   // Colorways
   // -------------------------------------------------------------------------
