@@ -58,4 +58,11 @@ export default defineConfig({
   optimizeDeps: {
     include: ["@shopify/app-bridge-react"],
   },
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./app/test/setup.ts"],
+    include: ["app/**/*.{test,spec}.{ts,tsx}"],
+    exclude: ["node_modules", "extensions", "**/*.d.ts"],
+  },
 }) satisfies UserConfig;

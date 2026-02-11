@@ -10,6 +10,7 @@ import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import { FibermadeClient } from "../services/fibermade-client.server";
 import { FibermadeAuthError, FibermadeNotFoundError } from "../services/fibermade-client.types";
+import { formatConnectedAt } from "../utils/date";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 
 export type ConnectionStatus = {
@@ -20,13 +21,6 @@ export type ConnectionStatus = {
 };
 
 export type DisconnectActionData = { success: true } | { success: false; error: string };
-
-function formatConnectedAt(date: Date): string {
-  return new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(date);
-}
 
 export const action = async ({
   request,
