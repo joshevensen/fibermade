@@ -137,6 +137,8 @@ describe("app._index", () => {
         connected: true,
         shop: "test.myshopify.com",
         connectedAt: "2024-01-15T10:00:00.000Z",
+        initialImportStatus: undefined,
+        initialImportProgress: { total: 0, imported: 0, failed: 0 },
       });
     });
 

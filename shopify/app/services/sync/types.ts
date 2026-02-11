@@ -47,6 +47,16 @@ export interface ProductSyncResultSkipped extends ProductSyncResultBase {
 
 export type ProductSyncResult = ProductSyncResultCreated | ProductSyncResultSkipped;
 
+/** Progress/result shape for bulk import; stored in DB as JSON string and returned from runImport. */
+export interface BulkImportProgress {
+  total: number;
+  imported: number;
+  failed: number;
+  errors?: Array<{ productId?: string; message: string }>;
+}
+
+export type BulkImportResult = BulkImportProgress;
+
 export function getVariants(product: ShopifyProduct): ShopifyVariant[] {
   return product.variants?.edges?.map((e) => e.node) ?? [];
 }

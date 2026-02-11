@@ -128,6 +128,7 @@ export const action = async ({
       fibermadeApiToken: apiToken.trim(),
       fibermadeIntegrationId: integration.id,
       connectedAt: new Date(),
+      initialImportStatus: "pending",
     },
   });
 

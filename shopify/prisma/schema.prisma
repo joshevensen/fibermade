@@ -34,9 +34,13 @@ model Session {
 }
 
 model FibermadeConnection {
-  id                    Int      @id @default(autoincrement())
-  shop                  String   @unique
-  fibermadeApiToken     String
+  id                     Int      @id @default(autoincrement())
+  shop                   String   @unique
+  fibermadeApiToken      String
   fibermadeIntegrationId Int
-  connectedAt           DateTime @default(now())
+  connectedAt            DateTime @default(now())
+  /// Tracks bulk import lifecycle: pending | in_progress | complete | failed
+  initialImportStatus    String   @default("pending")
+  /// JSON string (total, imported, failed, errors[]); parsed in app code. SQLite has no native JSON.
+  initialImportProgress  String?
 }

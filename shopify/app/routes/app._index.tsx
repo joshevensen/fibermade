@@ -10,14 +10,32 @@ import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import { FibermadeClient } from "../services/fibermade-client.server";
 import { FibermadeAuthError, FibermadeNotFoundError } from "../services/fibermade-client.types";
+import type { BulkImportProgress } from "../services/sync/types";
 import { formatConnectedAt } from "../utils/date";
 import { boundary } from "@shopify/shopify-app-react-router/server";
+
+function parseImportProgress(json: string | null): BulkImportProgress {
+  if (!json?.trim()) return { total: 0, imported: 0, failed: 0 };
+  try {
+    const parsed = JSON.parse(json) as BulkImportProgress;
+    return {
+      total: Number(parsed.total) || 0,
+      imported: Number(parsed.imported) || 0,
+      failed: Number(parsed.failed) || 0,
+      errors: Array.isArray(parsed.errors) ? parsed.errors : undefined,
+    };
+  } catch {
+    return { total: 0, imported: 0, failed: 0 };
+  }
+}
 
 export type ConnectionStatus = {
   connected: boolean;
   connectionError?: "integration_inactive" | "token_invalid";
   shop?: string;
   connectedAt?: string;
+  initialImportStatus?: string;
+  initialImportProgress?: BulkImportProgress;
 };
 
 export type DisconnectActionData = { success: true } | { success: false; error: string };
@@ -79,12 +97,16 @@ export const loader = async ({
   }
 
   const baseUrl = process.env.FIBERMADE_API_URL;
+  const connectionPayload = {
+    connected: true as const,
+    shop: connection.shop,
+    connectedAt: connection.connectedAt.toISOString(),
+    initialImportStatus: connection.initialImportStatus,
+    initialImportProgress: parseImportProgress(connection.initialImportProgress),
+  };
+
   if (!baseUrl?.trim()) {
-    return {
-      connected: true,
-      shop: connection.shop,
-      connectedAt: connection.connectedAt.toISOString(),
-    };
+    return connectionPayload;
   }
 
   try {
@@ -99,11 +121,7 @@ export const loader = async ({
         connectedAt: connection.connectedAt.toISOString(),
       };
     }
-    return {
-      connected: true,
-      shop: connection.shop,
-      connectedAt: connection.connectedAt.toISOString(),
-    };
+    return connectionPayload;
   } catch (e) {
     if (e instanceof FibermadeAuthError) {
       return {
@@ -121,18 +139,21 @@ export const loader = async ({
         connectedAt: connection.connectedAt.toISOString(),
       };
     }
-    return {
-      connected: true,
-      shop: connection.shop,
-      connectedAt: connection.connectedAt.toISOString(),
-    };
+    return connectionPayload;
   }
 };
 
 export default function Index() {
-  const { connected, connectionError, shop, connectedAt } =
-    useLoaderData<typeof loader>();
+  const {
+    connected,
+    connectionError,
+    shop,
+    connectedAt,
+    initialImportStatus,
+    initialImportProgress,
+  } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<DisconnectActionData>();
+  const importFetcher = useFetcher<{ error?: string }>();
   const navigate = useNavigate();
   const shopify = useAppBridge();
 
@@ -152,6 +173,8 @@ export default function Index() {
   const isDisconnecting =
     (fetcher.state === "loading" || fetcher.state === "submitting") &&
     fetcher.formMethod === "POST";
+  const isImporting =
+    importFetcher.state === "loading" || importFetcher.state === "submitting";
 
   const handleDisconnect = () => {
     fetcher.submit({ intent: "disconnect" }, { method: "POST" });
@@ -159,6 +182,85 @@ export default function Index() {
 
   return (
     <s-page heading="Home">
+      {!showDisconnected &&
+        initialImportStatus === "pending" &&
+        connected && (
+          <s-section heading="Import your products">
+            <s-paragraph>
+              Import your existing Shopify products into Fibermade.
+            </s-paragraph>
+            {importFetcher.data?.error && (
+              <s-banner tone="critical" slot="aside">
+                {importFetcher.data.error}
+              </s-banner>
+            )}
+            <importFetcher.Form method="post" action="/app/import">
+              <s-button
+                type="submit"
+                variant="primary"
+                disabled={isImporting}
+                loading={isImporting}
+              >
+                {isImporting ? "Importing…" : "Import your products"}
+              </s-button>
+            </importFetcher.Form>
+          </s-section>
+        )}
+
+      {!showDisconnected &&
+        initialImportStatus === "in_progress" &&
+        connected &&
+        initialImportProgress && (
+          <s-section heading="Import in progress">
+            <s-paragraph>
+              {initialImportProgress.imported + initialImportProgress.failed} of{" "}
+              {initialImportProgress.total} products processed (
+              {initialImportProgress.imported} imported,{" "}
+              {initialImportProgress.failed} failed).
+            </s-paragraph>
+          </s-section>
+        )}
+
+      {!showDisconnected &&
+        initialImportStatus === "complete" &&
+        connected &&
+        initialImportProgress && (
+          <s-section heading="Import complete">
+            <s-paragraph>
+              {initialImportProgress.imported} products imported
+              {initialImportProgress.failed > 0 &&
+                `, ${initialImportProgress.failed} failed`}
+              .
+            </s-paragraph>
+          </s-section>
+        )}
+
+      {!showDisconnected &&
+        initialImportStatus === "failed" &&
+        connected && (
+          <s-section heading="Import failed">
+            <s-paragraph>
+              The import did not complete. You can retry; already-imported
+              products will be skipped.
+            </s-paragraph>
+            {importFetcher.data?.error && (
+              <s-banner tone="critical" slot="aside">
+                {importFetcher.data.error}
+              </s-banner>
+            )}
+            <importFetcher.Form method="post" action="/app/import">
+              <s-button
+                type="submit"
+                variant="primary"
+                disabled={isImporting}
+                loading={isImporting}
+              >
+                {isImporting ? "Retrying…" : "Retry import"}
+              </s-button>
+            </importFetcher.Form>
+          </s-section>
+        )}
+
       {showDisconnected && (
         <s-banner
           heading={
