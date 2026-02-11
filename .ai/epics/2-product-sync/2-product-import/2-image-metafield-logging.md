@@ -44,6 +44,17 @@ Complete the product import pipeline by adding: (1) image sync from Shopify prod
 - [ ] **FibermadeClient additions** (if needed):
   - Add `createIntegrationLog(data)` method if not already present (POST /api/v1/integrations/{id}/logs or similar endpoint)
 - [ ] Error handling: metafield write failures should not fail the entire import. Log the error and continue. The product data is already in Fibermade -- the metafield is a convenience backreference.
+- [ ] Tests in `shopify/app/services/sync/metafields.server.test.ts`:
+  - Test metafield write helper calls GraphQL `metafieldsSet` mutation with correct variables (ownerId, namespace, key, value, type)
+  - Test batching: product and variant metafields are written in a single mutation call
+  - Test metafield write failure does not throw (logs error, continues)
+  - Test metafield write with correct namespace (`fibermade`) and keys (`colorway_id`, `base_id`)
+  - Mock the Shopify Admin GraphQL client using `vi.fn()`
+- [ ] Tests for integration logging in `shopify/app/services/sync/product-sync.server.test.ts` (extend existing):
+  - Test successful import creates a log entry with status "success" and correct metadata
+  - Test failed import creates a log entry with status "error" and error details
+  - Test partial success creates a log entry with status "warning"
+  - Mock `client.createIntegrationLog` using `vi.fn()`
 
 ---
 
@@ -108,5 +119,7 @@ Complete the product import pipeline by adding: (1) image sync from Shopify prod
 
 - Modify `shopify/app/services/sync/product-sync.server.ts` -- add image handling, metafield writes, and integration logging to importProduct flow
 - Create `shopify/app/services/sync/metafields.server.ts` -- helper for writing metafields to Shopify products/variants via GraphQL
+- Create `shopify/app/services/sync/metafields.server.test.ts` -- tests for metafield write helper
+- Modify `shopify/app/services/sync/product-sync.server.test.ts` -- add tests for integration logging (success, error, warning)
 - Modify `shopify/app/services/fibermade-client.server.ts` -- add createIntegrationLog method if not already present
 - Modify `shopify/app/services/fibermade-client.types.ts` -- add IntegrationLog types if not already present

@@ -61,6 +61,16 @@ Create the `ProductSyncService` that takes a Shopify product (from GraphQL) and 
   - `ProductSyncResult` -- result of a product import (colorwayId, bases[], inventoryRecords[], mappings[])
   - `FieldMappingResult` -- intermediate type for mapped fields
 - [ ] Graceful error handling: if Base creation fails for one variant, log the error and continue with remaining variants (partial success is acceptable)
+- [ ] Tests in `shopify/app/services/sync/product-sync.server.test.ts`:
+  - Test `importProduct` creates Colorway, Base(s), Inventory records, and ExternalIdentifier mappings for a standard product
+  - Test field mapping: Shopify `title` → `name`, `descriptionHtml` → `description`, status mapping (ACTIVE→active, DRAFT→idea, ARCHIVED→retired), `per_pan` defaults to 1
+  - Test variant mapping: `title` → `descriptor` (with "Default Title" fallback), `sku` → `code`, `price` → `retail_price`, `weight` → null
+  - Test multi-variant product creates multiple Bases and Inventory records
+  - Test single-variant product with "Default Title" uses product title as descriptor
+  - Test `importProduct` skips if product is already mapped (returns existing mapping)
+  - Test partial failure: one variant failing doesn't prevent other variants from being created
+  - Test `ProductSyncResult` contains correct IDs for all created records
+  - Mock `FibermadeClient` methods and mapping utilities using `vi.mock()` and `vi.fn()`
 
 ---
 
@@ -128,4 +138,5 @@ Create the `ProductSyncService` that takes a Shopify product (from GraphQL) and 
 ## Files
 
 - Create `shopify/app/services/sync/product-sync.server.ts` -- ProductSyncService class with importProduct method
+- Create `shopify/app/services/sync/product-sync.server.test.ts` -- tests for importProduct, field mapping, skip logic, partial failure
 - Create `shopify/app/services/sync/types.ts` -- TypeScript interfaces for Shopify product types and sync results

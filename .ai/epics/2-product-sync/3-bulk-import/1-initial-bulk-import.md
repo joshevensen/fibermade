@@ -67,6 +67,16 @@ Build an initial bulk import flow that fetches all existing Shopify products via
 - [ ] After successful import, the dashboard transitions to the connected/idle state
 - [ ] The connect action (Story 1.2) sets `initialImportStatus` to "pending" when creating the connection
 - [ ] Products already imported (ExternalIdentifier exists) are skipped without error
+- [ ] Tests in `shopify/app/services/sync/bulk-import.server.test.ts`:
+  - Test `runImport` fetches products using cursor-based pagination and processes each through `ProductSyncService.importProduct()`
+  - Test pagination: handles `hasNextPage: true` with correct cursor, stops when `hasNextPage: false`
+  - Test progress tracking: `initialImportProgress` is updated after each batch with correct counts
+  - Test completion: `initialImportStatus` set to "complete" after all products processed
+  - Test failure handling: single product failure increments failed count but does not abort the import
+  - Test critical failure: GraphQL pagination error sets `initialImportStatus` to "failed"
+  - Test resumability: already-imported products are skipped (via `mappingExists` in ProductSyncService)
+  - Test empty store: handles zero products gracefully (status set to "complete")
+  - Mock GraphQL client, `ProductSyncService`, and Prisma `FibermadeConnection` updates using `vi.mock()` and `vi.fn()`
 
 ---
 
@@ -100,6 +110,7 @@ Build an initial bulk import flow that fetches all existing Shopify products via
 - Modify `shopify/prisma/schema.prisma` -- add initialImportStatus and initialImportProgress fields to FibermadeConnection
 - Create `shopify/prisma/migrations/<timestamp>_add_import_tracking/migration.sql` -- via prisma migrate dev
 - Create `shopify/app/services/sync/bulk-import.server.ts` -- BulkImportService class
+- Create `shopify/app/services/sync/bulk-import.server.test.ts` -- tests for pagination, progress tracking, failure handling, resumability
 - Create `shopify/app/routes/app.import.tsx` -- import route with action and loader
 - Modify `shopify/app/routes/app._index.tsx` -- show import status/trigger on dashboard
 - Modify `shopify/app/routes/app.connect.tsx` -- set initialImportStatus to "pending" on connect

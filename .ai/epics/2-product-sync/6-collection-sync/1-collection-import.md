@@ -51,6 +51,15 @@ Build collection import: fetch Shopify collections (custom and smart), create co
 - [ ] Integration with bulk import: `BulkImportService.runImport()` calls `collectionSyncService.importAllCollections()` after product import completes
 - [ ] ExternalIdentifier records created for each imported collection
 - [ ] Integration logging for collection import operations
+- [ ] Tests in `shopify/app/services/sync/collection-sync.server.test.ts`:
+  - Test `importCollection` creates Collection, ExternalIdentifier mapping, and associates Colorways
+  - Test field mapping: `title` → `name`, `descriptionHtml` → `description`, status defaults to "active"
+  - Test skip: collection already mapped is skipped
+  - Test membership: collection products are looked up via ExternalIdentifier and associated with Collection
+  - Test collection with no mapped products: Collection created but with no Colorway associations
+  - Test `importAllCollections` paginates through all collections and imports each one
+  - Test integration logging on success and failure
+  - Mock `FibermadeClient`, GraphQL client, and mapping utilities using `vi.mock()` and `vi.fn()`
 
 ---
 
@@ -103,5 +112,6 @@ Build collection import: fetch Shopify collections (custom and smart), create co
 ## Files
 
 - Create `shopify/app/services/sync/collection-sync.server.ts` -- CollectionSyncService class
+- Create `shopify/app/services/sync/collection-sync.server.test.ts` -- tests for importCollection, importAllCollections, membership mapping
 - Modify `shopify/app/services/sync/types.ts` -- add ShopifyCollection type and CollectionSyncResult
 - Modify `shopify/app/services/sync/bulk-import.server.ts` -- call collection import after product import

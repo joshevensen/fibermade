@@ -67,6 +67,21 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
   6. Return 200
 - [ ] Webhook adapter extended to handle collection REST payloads
 - [ ] All handlers are idempotent and return 200 regardless of errors
+- [ ] Tests for webhook adapter extension in `shopify/app/services/sync/webhook-adapter.server.test.ts` (extend existing):
+  - Test `convertRestCollection` converts REST payload to `ShopifyCollection` type: numeric `id` → GID, `body_html` → `descriptionHtml`
+  - Test edge cases: missing `body_html`, null fields
+- [ ] Tests for collections/create handler in `shopify/app/routes/webhooks.collections.create.test.ts`:
+  - Test successful import: loads FibermadeConnection, converts payload, calls `importCollection`
+  - Test idempotency: collection already mapped is skipped
+  - Test no FibermadeConnection: silently returns 200
+- [ ] Tests for collections/update handler in `shopify/app/routes/webhooks.collections.update.test.ts`:
+  - Test field update: existing Collection fields are updated via `updateCollection`
+  - Test membership sync: products added/removed are reflected in Colorway associations
+  - Test collection not found: treats as create
+- [ ] Tests for collections/delete handler in `shopify/app/routes/webhooks.collections.delete.test.ts`:
+  - Test successful delete: Collection status set to "retired", ExternalIdentifier records preserved
+  - Test collection not found: silently returns 200
+  - Mock `authenticate.webhook`, `db.fibermadeConnection`, `FibermadeClient`, `CollectionSyncService`
 
 ---
 
@@ -109,7 +124,11 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
 
 - Modify `shopify/shopify.app.toml` -- add collections/create, collections/update, collections/delete webhook subscriptions
 - Create `shopify/app/routes/webhooks.collections.create.tsx` -- collections/create webhook handler
+- Create `shopify/app/routes/webhooks.collections.create.test.ts` -- tests for collections/create handler
 - Create `shopify/app/routes/webhooks.collections.update.tsx` -- collections/update webhook handler
+- Create `shopify/app/routes/webhooks.collections.update.test.ts` -- tests for collections/update handler
 - Create `shopify/app/routes/webhooks.collections.delete.tsx` -- collections/delete webhook handler
+- Create `shopify/app/routes/webhooks.collections.delete.test.ts` -- tests for collections/delete handler
 - Modify `shopify/app/services/sync/webhook-adapter.server.ts` -- add collection REST payload adapter
+- Modify `shopify/app/services/sync/webhook-adapter.server.test.ts` -- add tests for collection REST conversion
 - Modify `shopify/app/services/sync/collection-sync.server.ts` -- add `updateCollection()` method for handling updates

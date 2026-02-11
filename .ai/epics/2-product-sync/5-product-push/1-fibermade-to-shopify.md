@@ -78,6 +78,18 @@ Build a product push flow that creates Shopify products from Fibermade Colorways
   - This is intentionally minimal -- Epic 5 adds a proper product selection UI
 - [ ] ExternalIdentifier records created for the Shopify product and each variant
 - [ ] IntegrationLog entry created for the push operation
+- [ ] Tests in `shopify/app/services/sync/product-push.server.test.ts`:
+  - Test `pushColorway` fetches Colorway from API, maps fields to Shopify input, and calls `productCreate` mutation
+  - Test field mapping: `name` → `title`, `description` → `descriptionHtml`, status mapping (active→ACTIVE, idea→DRAFT, retired→ARCHIVED)
+  - Test variant mapping: Base `descriptor` → option value, `code` → `sku`, `retail_price` → `price`
+  - Test metafields included in mutation input: `fibermade.colorway_id` on product, `fibermade.base_id` on each variant
+  - Test ExternalIdentifier records created for product GID and each variant GID after successful push
+  - Test skip: Colorway already has Shopify mapping, returns without creating
+  - Test zero Inventory: Colorway with no Bases creates product with single default variant
+  - Test multi-variant: Colorway with multiple Bases creates product with multiple variants and "Base" product option
+  - Test GraphQL `userErrors` returned: throws or returns error result
+  - Test IntegrationLog created on success and on failure
+  - Mock `FibermadeClient`, GraphQL client, and mapping utilities using `vi.mock()` and `vi.fn()`
 
 ---
 
@@ -142,5 +154,6 @@ Build a product push flow that creates Shopify products from Fibermade Colorways
 ## Files
 
 - Create `shopify/app/services/sync/product-push.server.ts` -- ProductPushService class
+- Create `shopify/app/services/sync/product-push.server.test.ts` -- tests for pushColorway, field mapping, skip logic, variant handling
 - Create `shopify/app/routes/app.push.tsx` -- route with action for triggering push, simple UI
 - Modify `shopify/app/services/sync/types.ts` -- add ProductPushResult type

@@ -40,6 +40,13 @@ Create the foundational mapping layer: constants for external identifier types a
   - `mappingExists(client, integrationId, externalType, shopifyGid)` -- checks if a mapping already exists. Returns `boolean`
 - [ ] All functions are typed with proper return types
 - [ ] All functions handle API errors gracefully (catch and re-throw with context)
+- [ ] Tests in `shopify/app/services/sync/mapping.server.test.ts`:
+  - Test `findFibermadeIdByShopifyGid` returns correct result when mapping exists, returns null when not found
+  - Test `findShopifyGidByFibermadeId` returns GID string when mapping exists, returns null when not found
+  - Test `createMapping` calls `client.createExternalIdentifier` with correct payload and returns the created record
+  - Test `mappingExists` returns true when mapping exists, false when not found
+  - Test error handling: functions throw with context when API call fails
+  - Mock `FibermadeClient` methods using `vi.fn()`
 
 ---
 
@@ -56,7 +63,7 @@ Create the foundational mapping layer: constants for external identifier types a
 - **Laravel polymorphic types** use fully qualified class names by default (e.g., `App\Models\Colorway`). In JSON, the backslash must be escaped as `\\`. The `identifiable_type` field stores these strings.
 - **The `data` field** on ExternalIdentifier is JSON. Use it to store useful metadata like the Shopify admin URL for easy linking: `{ admin_url: "https://{shop}/admin/products/{id}" }`.
 - **File organization**: Create a `shopify/app/services/sync/` directory for all sync-related code. This keeps sync logic separate from the core `FibermadeClient` and connection management.
-- **No tests in the Shopify app** currently. The app uses no test framework yet. These utilities are pure functions wrapping API calls, so they're testable but we won't add tests in this story.
+- **Testing setup**: The Shopify app uses Vitest with `vi.mock()` and `vi.fn()` for mocking. Test files are co-located with source files (e.g., `mapping.server.test.ts` next to `mapping.server.ts`). Mock the `FibermadeClient` methods to test utilities in isolation without real API calls. See `fibermade-client.server.test.ts` for the established mocking pattern.
 
 ## References
 
@@ -70,3 +77,4 @@ Create the foundational mapping layer: constants for external identifier types a
 
 - Create `shopify/app/services/sync/constants.ts` -- external type constants, identifiable type constants, metafield namespace/keys
 - Create `shopify/app/services/sync/mapping.server.ts` -- mapping utility functions wrapping ExternalIdentifier API
+- Create `shopify/app/services/sync/mapping.server.test.ts` -- tests for all mapping utility functions

@@ -80,6 +80,25 @@ Register and handle Shopify product webhooks (`products/create`, `products/updat
   - REST `images` is a flat array, not edges/nodes
 - [ ] All handlers return `new Response()` (200) even on errors (logged, not thrown)
 - [ ] All handlers are idempotent (safe to receive duplicate webhooks)
+- [ ] Tests for webhook adapter in `shopify/app/services/sync/webhook-adapter.server.test.ts`:
+  - Test REST-to-GraphQL product conversion: numeric `id` → GID, `body_html` → `descriptionHtml`, lowercase `status` → uppercase, flat `variants` array → edges/nodes, flat `images` array → edges/nodes
+  - Test edge cases: missing fields, null values, empty variants array
+- [ ] Tests for products/create handler in `shopify/app/routes/webhooks.products.create.test.ts`:
+  - Test successful import: loads FibermadeConnection, converts payload, calls `importProduct`
+  - Test idempotency: product already mapped is skipped
+  - Test no FibermadeConnection: silently returns 200
+  - Test always returns 200 even on errors
+  - Mock `authenticate.webhook`, `db.fibermadeConnection`, `ProductSyncService`, and mapping utilities
+- [ ] Tests for products/update handler in `shopify/app/routes/webhooks.products.update.test.ts`:
+  - Test field update: existing Colorway fields are updated via `updateColorway`
+  - Test new variant: variant without mapping creates new Base + Inventory + mapping
+  - Test removed variant: variant in Fibermade but not in payload marks Base as "retired"
+  - Test product not found: treats as create (imports the product)
+  - Test idempotency: duplicate webhook produces same result
+- [ ] Tests for products/delete handler in `shopify/app/routes/webhooks.products.delete.test.ts`:
+  - Test successful delete: Colorway status set to "retired", ExternalIdentifier records preserved
+  - Test product not found: silently returns 200
+  - Mock `authenticate.webhook`, `db.fibermadeConnection`, `FibermadeClient`
 
 ---
 
@@ -152,4 +171,8 @@ Register and handle Shopify product webhooks (`products/create`, `products/updat
 - Create `shopify/app/routes/webhooks.products.update.tsx` -- products/update webhook handler
 - Create `shopify/app/routes/webhooks.products.delete.tsx` -- products/delete webhook handler
 - Create `shopify/app/services/sync/webhook-adapter.server.ts` -- converts REST webhook payloads to ShopifyProduct type
+- Create `shopify/app/services/sync/webhook-adapter.server.test.ts` -- tests for REST-to-GraphQL payload conversion
+- Create `shopify/app/routes/webhooks.products.create.test.ts` -- tests for products/create webhook handler
+- Create `shopify/app/routes/webhooks.products.update.test.ts` -- tests for products/update webhook handler
+- Create `shopify/app/routes/webhooks.products.delete.test.ts` -- tests for products/delete webhook handler
 - Modify `shopify/app/services/sync/product-sync.server.ts` -- add `updateProduct()` method for handling product updates (field changes, variant add/update/remove)
