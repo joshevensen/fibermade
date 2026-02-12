@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FibermadeClient } from "../fibermade-client.server";
 import type { BaseData } from "../fibermade-client.types";
+import type { ShopifyGraphqlRunner } from "./metafields.server";
 import { ProductPushService } from "./product-push.server";
 
 vi.mock("./mapping.server", () => ({
@@ -41,7 +42,7 @@ function baseData(overrides?: Partial<BaseData>): BaseData {
 function colorwayWithBases(
   colorwayId: number,
   bases: BaseData[],
-  overrides?: { name?: string; description?: string | null; status?: string }
+  overrides?: { name?: string; description?: string | null; status?: string; primary_image_url?: string | null }
 ) {
   const inventories = bases.map((base, i) => ({
     id: 100 + i,
@@ -63,6 +64,7 @@ function colorwayWithBases(
     created_at: "",
     updated_at: "",
     inventories,
+    primary_image_url: overrides?.primary_image_url ?? undefined,
   };
 }
 
@@ -76,6 +78,7 @@ describe("ProductPushService#pushColorway", () => {
     createIntegrationLog: ReturnType<typeof vi.fn>;
   };
   let mockGraphql: ReturnType<typeof vi.fn>;
+  let graphqlRunner: ShopifyGraphqlRunner;
   let client: FibermadeClient;
 
   beforeEach(() => {
@@ -106,6 +109,7 @@ describe("ProductPushService#pushColorway", () => {
         },
       },
     });
+    graphqlRunner = mockGraphql as ShopifyGraphqlRunner;
   });
 
   afterEach(() => {
@@ -125,7 +129,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     const result = await service.pushColorway(42);
 
@@ -163,7 +167,7 @@ describe("ProductPushService#pushColorway", () => {
         client,
         integrationId,
         shopDomain,
-        mockGraphql
+        graphqlRunner
       );
       await service.pushColorway(10);
 
@@ -182,7 +186,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     await service.pushColorway(42);
 
@@ -206,7 +210,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     await service.pushColorway(42);
 
@@ -236,7 +240,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     await service.pushColorway(42);
 
@@ -285,7 +289,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     const result = await service.pushColorway(42);
 
@@ -327,7 +331,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     const result = await service.pushColorway(42);
 
@@ -353,7 +357,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     await service.pushColorway(10);
 
@@ -383,7 +387,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
 
     await expect(service.pushColorway(42)).rejects.toThrow(
@@ -419,7 +423,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     await service.pushColorway(42);
 
@@ -447,7 +451,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
 
     await expect(service.pushColorway(999)).rejects.toThrow("Colorway not found");
@@ -496,7 +500,7 @@ describe("ProductPushService#pushColorway", () => {
       client,
       integrationId,
       shopDomain,
-      mockGraphql
+      graphqlRunner
     );
     await service.pushColorway(42);
 
@@ -505,6 +509,557 @@ describe("ProductPushService#pushColorway", () => {
     expect(product.variants[0]).toMatchObject({
       sku: "DK",
       price: "26.00",
+    });
+  });
+
+  describe("image push", () => {
+    const originalEnv = process.env.FIBERMADE_API_URL;
+
+    afterEach(() => {
+      process.env.FIBERMADE_API_URL = originalEnv;
+    });
+
+    it("pushes image after successful product creation when primary_image_url is present and URL is valid", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/colorways/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [
+                {
+                  id: "gid://shopify/MediaImage/123",
+                  image: { url: "https://cdn.shopify.com/image.jpg" },
+                },
+              ],
+              mediaUserErrors: [],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(mockGraphql).toHaveBeenCalledTimes(2);
+      const [, mediaVars] = mockGraphql.mock.calls[1];
+      expect(mediaVars).toEqual({
+        productId: "gid://shopify/Product/999",
+        media: [
+          {
+            originalSource: "https://platform.test/storage/colorways/image.jpg",
+            mediaContentType: "IMAGE",
+          },
+        ],
+      });
+      expect(result.imageGid).toBe("gid://shopify/MediaImage/123");
+      expect(result.imageError).toBeUndefined();
+    });
+
+    it("does not push image when primary_image_url is null", async () => {
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, { primary_image_url: null })
+      );
+      mockGraphql.mockResolvedValue({
+        data: {
+          productCreate: {
+            product: {
+              id: "gid://shopify/Product/999",
+              handle: "red-merino-yarn",
+              variants: {
+                edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+              },
+            },
+            userErrors: [],
+          },
+        },
+      });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(mockGraphql).toHaveBeenCalledTimes(1);
+      expect(result.imageGid).toBeUndefined();
+      expect(result.imageError).toBeUndefined();
+    });
+
+    it("skips image push and logs warning when URL is localhost", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "http://localhost/storage/image.jpg",
+        })
+      );
+      mockGraphql.mockResolvedValue({
+        data: {
+          productCreate: {
+            product: {
+              id: "gid://shopify/Product/999",
+              handle: "red-merino-yarn",
+              variants: {
+                edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+              },
+            },
+            userErrors: [],
+          },
+        },
+      });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(mockGraphql).toHaveBeenCalledTimes(1);
+      expect(result.imageError).toBe("Image URL not publicly accessible (localhost)");
+      expect(result.imageGid).toBeUndefined();
+      expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+        integrationId,
+        expect.objectContaining({
+          status: "warning",
+          message: expect.stringContaining("Image URL is not publicly accessible"),
+        })
+      );
+    });
+
+    it("skips image push when URL contains private IP range 10.x.x.x", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "http://10.0.0.1/storage/image.jpg",
+        })
+      );
+      mockGraphql.mockResolvedValue({
+        data: {
+          productCreate: {
+            product: {
+              id: "gid://shopify/Product/999",
+              handle: "red-merino-yarn",
+              variants: {
+                edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+              },
+            },
+            userErrors: [],
+          },
+        },
+      });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(mockGraphql).toHaveBeenCalledTimes(1);
+      expect(result.imageError).toBe("Image URL not publicly accessible (localhost)");
+    });
+
+    it("skips image push when URL contains private IP range 192.168.x.x", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "http://192.168.1.1/storage/image.jpg",
+        })
+      );
+      mockGraphql.mockResolvedValue({
+        data: {
+          productCreate: {
+            product: {
+              id: "gid://shopify/Product/999",
+              handle: "red-merino-yarn",
+              variants: {
+                edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+              },
+            },
+            userErrors: [],
+          },
+        },
+      });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(mockGraphql).toHaveBeenCalledTimes(1);
+      expect(result.imageError).toBe("Image URL not publicly accessible (localhost)");
+    });
+
+    it("allows image push when URL matches Fibermade platform domain", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/colorways/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [{ id: "gid://shopify/MediaImage/123", image: { url: "https://cdn.shopify.com/image.jpg" } }],
+              mediaUserErrors: [],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(mockGraphql).toHaveBeenCalledTimes(2);
+      expect(result.imageGid).toBe("gid://shopify/MediaImage/123");
+    });
+
+    it("productCreateMedia mutation receives correct productId and originalSource", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [{ id: "gid://shopify/MediaImage/123", image: { url: "https://cdn.shopify.com/image.jpg" } }],
+              mediaUserErrors: [],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      await service.pushColorway(42);
+
+      const [, mediaVars] = mockGraphql.mock.calls[1];
+      expect(mediaVars.productId).toBe("gid://shopify/Product/999");
+      expect(mediaVars.media[0].originalSource).toBe("https://platform.test/storage/image.jpg");
+      expect(mediaVars.media[0].mediaContentType).toBe("IMAGE");
+    });
+
+    it("image push failure does not fail overall product push", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [],
+              mediaUserErrors: [
+                {
+                  field: ["media"],
+                  message: "Invalid image URL",
+                  code: "INVALID_URL",
+                },
+              ],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(result.shopifyProductGid).toBe("gid://shopify/Product/999");
+      expect(result.colorwayId).toBe(42);
+      expect(result.variantMappings).toHaveLength(1);
+      expect(result.imageError).toBe("Shopify error: INVALID_URL - Invalid image URL");
+      expect(result.imageGid).toBeUndefined();
+    });
+
+    it("captures mediaUserErrors with structured format", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [],
+              mediaUserErrors: [
+                {
+                  field: ["media"],
+                  message: "Image format not supported",
+                  code: "INVALID_FORMAT",
+                },
+                {
+                  field: ["media"],
+                  message: "File too large",
+                  code: "FILE_TOO_LARGE",
+                },
+              ],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(result.imageError).toBe(
+        "Shopify error: INVALID_FORMAT - Image format not supported; Shopify error: FILE_TOO_LARGE - File too large"
+      );
+    });
+
+    it("includes nested image_result in IntegrationLog metadata", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [{ id: "gid://shopify/MediaImage/123", image: { url: "https://cdn.shopify.com/image.jpg" } }],
+              mediaUserErrors: [],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      await service.pushColorway(42);
+
+      expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+        integrationId,
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            shopify_gid: "gid://shopify/Product/999",
+            variant_count: 1,
+            image_result: {
+              success: true,
+              media_gid: "gid://shopify/MediaImage/123",
+            },
+          }),
+        })
+      );
+    });
+
+    it("includes image_error in IntegrationLog metadata when image push fails", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [],
+              mediaUserErrors: [
+                {
+                  field: ["media"],
+                  message: "Invalid URL",
+                  code: "INVALID_URL",
+                },
+              ],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      await service.pushColorway(42);
+
+      expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+        integrationId,
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            image_result: {
+              success: false,
+              error: "Shopify error: INVALID_URL - Invalid URL",
+            },
+          }),
+        })
+      );
+    });
+
+    it("extracts media GID from media[0].id", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          data: {
+            productCreateMedia: {
+              media: [{ id: "gid://shopify/MediaImage/456", image: { url: "https://cdn.shopify.com/image.jpg" } }],
+              mediaUserErrors: [],
+              product: { id: "gid://shopify/Product/999" },
+            },
+          },
+        });
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(result.imageGid).toBe("gid://shopify/MediaImage/456");
+    });
+
+    it("handles network errors gracefully", async () => {
+      process.env.FIBERMADE_API_URL = "https://platform.test";
+      const bases = [baseData()];
+      mockClient.getColorway.mockResolvedValue(
+        colorwayWithBases(42, bases, {
+          primary_image_url: "https://platform.test/storage/image.jpg",
+        })
+      );
+      mockGraphql
+        .mockResolvedValueOnce({
+          data: {
+            productCreate: {
+              product: {
+                id: "gid://shopify/Product/999",
+                handle: "red-merino-yarn",
+                variants: {
+                  edges: [{ node: { id: "gid://shopify/ProductVariant/1001" } }],
+                },
+              },
+              userErrors: [],
+            },
+          },
+        })
+        .mockRejectedValueOnce(new Error("Network timeout"));
+
+      const service = new ProductPushService(client, integrationId, shopDomain, graphqlRunner);
+      const result = await service.pushColorway(42);
+
+      expect(result.shopifyProductGid).toBe("gid://shopify/Product/999");
+      expect(result.imageError).toBe("Network timeout");
+      expect(result.imageGid).toBeUndefined();
     });
   });
 });

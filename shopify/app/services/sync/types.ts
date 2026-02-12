@@ -47,12 +47,19 @@ export interface ProductSyncResultSkipped extends ProductSyncResultBase {
 
 export type ProductSyncResult = ProductSyncResultCreated | ProductSyncResultSkipped;
 
+/** Result shape for image push operation. */
+export type ProductImageResult =
+  | { success: true; mediaGid: string }
+  | { success: false; error: string };
+
 /** Result shape for pushing a Fibermade Colorway to Shopify. */
 export interface ProductPushResult {
   shopifyProductGid: string;
   colorwayId: number;
   variantMappings: { variantGid: string; inventoryId: number }[];
   skipped?: boolean;
+  imageGid?: string;
+  imageError?: string;
 }
 
 /** Progress/result shape for bulk import; stored in DB as JSON string and returned from runImport. */

@@ -12,7 +12,7 @@ import {
   findShopifyGidByFibermadeId,
 } from "./mapping.server";
 import { parseNumericIdFromGid } from "./product-sync.server";
-import type { ProductPushResult } from "./types";
+import type { ProductImageResult, ProductPushResult } from "./types";
 
 const STATUS_MAP: Record<string, "ACTIVE" | "DRAFT" | "ARCHIVED"> = {
   active: "ACTIVE",
@@ -42,6 +42,29 @@ const PRODUCT_CREATE_MUTATION = `
   }
 `;
 
+const PRODUCT_CREATE_MEDIA_MUTATION = `
+  mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
+    productCreateMedia(productId: $productId, media: $media) {
+      media {
+        ... on MediaImage {
+          id
+          image {
+            url
+          }
+        }
+      }
+      mediaUserErrors {
+        field
+        message
+        code
+      }
+      product {
+        id
+      }
+    }
+  }
+`;
+
 interface ProductCreateVariantInput {
   optionValues?: { optionName: string; name: string }[];
   sku?: string;
@@ -58,8 +81,66 @@ interface ProductCreateInput {
   variants?: ProductCreateVariantInput[];
 }
 
+interface CreateMediaInput {
+  originalSource: string;
+  mediaContentType: "IMAGE";
+}
+
 function mapStatus(status: string): "ACTIVE" | "DRAFT" | "ARCHIVED" {
   return status in STATUS_MAP ? STATUS_MAP[status] : "ACTIVE";
+}
+
+function isPubliclyAccessibleUrl(url: string): boolean {
+  try {
+    const imageUrl = new URL(url);
+    const hostname = imageUrl.hostname.toLowerCase();
+
+    // Reject localhost variants
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname === "::1" ||
+      hostname.startsWith("127.")
+    ) {
+      return false;
+    }
+
+    // Reject private IP ranges
+    if (hostname.startsWith("10.")) {
+      return false;
+    }
+    if (hostname.startsWith("192.168.")) {
+      return false;
+    }
+    if (hostname.startsWith("172.")) {
+      const parts = hostname.split(".");
+      if (parts.length >= 2) {
+        const secondOctet = parseInt(parts[1], 10);
+        if (secondOctet >= 16 && secondOctet <= 31) {
+          return false;
+        }
+      }
+    }
+
+    // Allow URLs matching Fibermade platform domain
+    const fibermadeApiUrl = process.env.FIBERMADE_API_URL;
+    if (fibermadeApiUrl) {
+      try {
+        const fibermadeUrl = new URL(fibermadeApiUrl);
+        if (hostname === fibermadeUrl.hostname.toLowerCase()) {
+          return true;
+        }
+      } catch {
+        // Invalid FIBERMADE_API_URL, continue with other checks
+      }
+    }
+
+    // If it's not localhost/private IP and has a valid domain, allow it
+    return true;
+  } catch {
+    // Invalid URL format
+    return false;
+  }
 }
 
 function buildProductInput(colorway: ColorwayData, inventories: { inventoryId: number; base: BaseData }[]): ProductCreateInput {
@@ -220,18 +301,120 @@ export class ProductPushService {
       }
     }
 
+    // Push image if available
+    let imageGid: string | undefined;
+    let imageError: string | undefined;
+
+    if (colorway.primary_image_url) {
+      const imagePushResult = await this.pushImage(product.id, colorway.primary_image_url);
+      if (imagePushResult.success) {
+        imageGid = imagePushResult.mediaGid;
+      } else {
+        imageError = imagePushResult.error;
+        // If URL validation failed, log a warning
+        if (imagePushResult.error === "Image URL not publicly accessible (localhost)") {
+          await this.logIntegration(
+            colorwayId,
+            "warning",
+            `Image URL is not publicly accessible (localhost detected). Skipping image push.`,
+            {
+              colorway_id: colorwayId,
+              shopify_gid: product.id,
+              image_error: imagePushResult.error,
+            }
+          );
+        }
+      }
+    }
+
     const productName = colorway.name?.trim() || "Untitled";
     const message = `Pushed Colorway '${productName}' (#${colorwayId}) to Shopify as product ${product.id}`;
-    await this.logIntegration(colorwayId, "success", message, {
+    const metadata: Record<string, unknown> = {
       shopify_gid: product.id,
       variant_count: variantMappings.length,
-    });
+    };
+
+    // Include image result in metadata if image push was attempted
+    if (colorway.primary_image_url) {
+      metadata.image_result = {
+        success: imageGid !== undefined,
+        ...(imageGid && { media_gid: imageGid }),
+        ...(imageError && { error: imageError }),
+      };
+    }
+
+    await this.logIntegration(colorwayId, "success", message, metadata);
 
     return {
       shopifyProductGid: product.id,
       colorwayId,
       variantMappings,
+      ...(imageGid && { imageGid }),
+      ...(imageError && { imageError }),
     };
+  }
+
+  private async pushImage(productGid: string, imageUrl: string): Promise<ProductImageResult> {
+    // Validate URL is publicly accessible
+    if (!isPubliclyAccessibleUrl(imageUrl)) {
+      return {
+        success: false,
+        error: "Image URL not publicly accessible (localhost)",
+      };
+    }
+
+    try {
+      const result = await this.graphql(PRODUCT_CREATE_MEDIA_MUTATION, {
+        productId: productGid,
+        media: [{ originalSource: imageUrl, mediaContentType: "IMAGE" }],
+      });
+
+      const productCreateMedia = (result.data as {
+        productCreateMedia?: {
+          media?: Array<{ id: string; image?: { url: string } }>;
+          mediaUserErrors?: Array<{ field?: string[]; message: string; code?: string }>;
+          product?: { id: string };
+        };
+      })?.productCreateMedia;
+
+      const mediaUserErrors = productCreateMedia?.mediaUserErrors ?? [];
+      if (mediaUserErrors.length > 0) {
+        const errorMessages = mediaUserErrors.map(
+          (e) => `Shopify error: ${e.code ?? "UNKNOWN"} - ${e.message}`
+        );
+        return {
+          success: false,
+          error: errorMessages.join("; "),
+        };
+      }
+
+      const media = productCreateMedia?.media;
+      if (!media || media.length === 0) {
+        return {
+          success: false,
+          error: "productCreateMedia returned no media",
+        };
+      }
+
+      const mediaGid = media[0]?.id;
+      if (!mediaGid) {
+        return {
+          success: false,
+          error: "productCreateMedia returned media without id",
+        };
+      }
+
+      return {
+        success: true,
+        mediaGid,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
   }
 
   private async logIntegration(
