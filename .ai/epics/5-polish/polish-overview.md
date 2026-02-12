@@ -32,43 +32,32 @@ By the end of this epic:
 
 ## Stories
 
-### Story 5.1: Shopify Embedded App UI
+### Story 5.1: Shopify Embedded App UI (4 prompts)
 
 Build the merchant-facing UI within the Shopify Admin embedded app.
 
-- **Connection status page:** Show linked Fibermade account, Shopify store domain, integration status (active/inactive), last sync timestamp
-- **Manual sync triggers:** Button to re-import all products, button to force-sync a specific product
-- **Sync history:** Surface IntegrationLog data -- recent sync operations with status (success/error/warning), message, and timestamp. Filter by status.
-- **Settings:** Sync preferences (e.g., which collections to sync, auto-sync on/off). Store these in the Integration's `settings` JSON field.
-- Remove the demo/template pages (`app.additional.tsx`, demo product creation)
+- `1-shopify-embedded-ui/1-connection-status-cleanup.md` -- Remove demo pages, update nav, add connection status dashboard to home page
+- `1-shopify-embedded-ui/2-manual-sync-triggers.md` -- Re-sync all products button and single product sync form on home page
+- `1-shopify-embedded-ui/3-sync-history.md` -- New sync history page surfacing IntegrationLog data with status filtering
+- `1-shopify-embedded-ui/4-settings-page.md` -- Settings page for sync preferences (auto-sync toggle, collection selection)
 
-### Story 5.2: Transactional Emails
+### Story 5.2: Transactional Emails (3 prompts)
 
 Set up an email provider and build the mailables needed for wholesale operations.
 
-- **Email provider setup:** Configure a third-party email service (Postmark, Resend, or similar) in the Laravel platform
-- **Wholesale order confirmation:** Email to store when their order is submitted (includes order summary, creator info)
-- **Wholesale order status updates:** Email to store when order status changes (accepted, fulfilled, closed, cancelled)
-- **Store invite email:** Email to store when a creator invites them (may partially exist via the invite system). Include link to accept invite.
-- **Creator new order notification:** Email to creator when a store submits a new wholesale order
-- Use Laravel Mailables and queued delivery
+- `2-transactional-emails/1-email-provider-base-layout.md` -- Install Resend, create shared email layout, migrate existing invite email
+- `2-transactional-emails/2-wholesale-order-emails.md` -- Order confirmation, new order notification, and status update emails
+- `2-transactional-emails/3-invite-notification-emails.md` -- Invite accepted notification to creator, polish existing invite email
 
-### Story 5.3: Auth Page Polish
+### Story 5.3: Auth Page Polish (2 prompts)
 
 Finalize the authentication pages for production readiness.
 
-- **Registration page:** Finalize design, remove or expand the email whitelist for beta launch, add account type selection (creator)
-- **Password reset flow:** Ensure the full flow works: request reset → email with link → reset form → confirmation
-- **Email verification flow:** Ensure verification email sends, verify link works, unverified users are blocked from core features
-- **Login page:** Polish design, error messaging
-- These pages use Inertia + Vue -- ensure they match the app's design system
+- `3-auth-page-polish/1-registration-polish.md` -- Polish registration page, env-based whitelist, inline errors, loading states
+- `3-auth-page-polish/2-login-password-reset-verification.md` -- Polish login, forgot/reset password, email verification pages, shared auth layout
 
-### Story 5.4: Landing Page
+### Story 5.4: Landing Page (1 prompt)
 
 Create a landing page so something exists at the domain for beta launch.
 
-- Replace the current `/` route with a proper landing page
-- Messaging: what Fibermade is, who it's for (yarn dyers), what problems it solves (wholesale ordering, production planning)
-- Email signup form for early access / waitlist
-- Basic branding and visual design
-- This is a static page -- no complex interactivity needed
+- `4-landing-page/1-landing-page.md` -- Polish landing page, implement email signup backend (Subscriber model), wire up form
