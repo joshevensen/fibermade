@@ -643,3 +643,212 @@ describe("CollectionSyncService#importAllCollections", () => {
     );
   });
 });
+
+describe("CollectionSyncService#updateCollection", () => {
+  const integrationId = 1;
+  const shopDomain = "test.myshopify.com";
+
+  let mockClient: {
+    createCollection: ReturnType<typeof vi.fn>;
+    getCollection: ReturnType<typeof vi.fn>;
+    updateCollection: ReturnType<typeof vi.fn>;
+    updateCollectionColorways: ReturnType<typeof vi.fn>;
+    createIntegrationLog: ReturnType<typeof vi.fn>;
+  };
+  let mockGraphql: ReturnType<typeof vi.fn>;
+  let graphqlRunner: ShopifyGraphqlRunner;
+  let client: FibermadeClient;
+
+  beforeEach(() => {
+    vi.mocked(mappingExists).mockResolvedValue(false);
+    vi.mocked(findFibermadeIdByShopifyGid).mockResolvedValue(null);
+    vi.mocked(createMapping).mockResolvedValue({} as never);
+
+    mockClient = {
+      createCollection: vi.fn().mockResolvedValue(collectionData({ id: 1 })),
+      getCollection: vi.fn().mockResolvedValue(collectionData({ id: 1 })),
+      updateCollection: vi.fn().mockResolvedValue(collectionData({ id: 1 })),
+      updateCollectionColorways: vi.fn().mockResolvedValue(undefined),
+      createIntegrationLog: vi.fn().mockResolvedValue({}),
+    };
+    client = mockClient as unknown as FibermadeClient;
+
+    mockGraphql = vi.fn().mockResolvedValue({
+      data: {
+        collection: {
+          products: {
+            edges: [
+              { node: { id: "gid://shopify/Product/1" } },
+              { node: { id: "gid://shopify/Product/2" } },
+            ],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      },
+    });
+    graphqlRunner = mockGraphql as ShopifyGraphqlRunner;
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("calls importCollection when mapping not found", async () => {
+    vi.mocked(findFibermadeIdByShopifyGid).mockResolvedValue(null);
+    vi.mocked(findFibermadeIdByShopifyGid).mockImplementation(
+      (_client, _integrationId, externalType, gid) => {
+        if (externalType === "shopify_collection" && gid === "gid://shopify/Collection/123") {
+          return Promise.resolve(null);
+        }
+        if (externalType === "shopify_product" && gid === "gid://shopify/Product/1") {
+          return Promise.resolve({ identifiableType: "App\\Models\\Colorway", identifiableId: 10 });
+        }
+        if (externalType === "shopify_product" && gid === "gid://shopify/Product/2") {
+          return Promise.resolve({ identifiableType: "App\\Models\\Colorway", identifiableId: 20 });
+        }
+        return Promise.resolve(null);
+      }
+    );
+
+    const service = new CollectionSyncService(
+      client,
+      integrationId,
+      shopDomain,
+      graphqlRunner
+    );
+    const result = await service.updateCollection(shopifyCollection());
+
+    expect(mockClient.createCollection).toHaveBeenCalled();
+    expect(mockClient.updateCollection).not.toHaveBeenCalled();
+    expect(result.collectionId).toBe(1);
+  });
+
+  it("updates collection fields when mapping exists", async () => {
+    vi.mocked(findFibermadeIdByShopifyGid).mockResolvedValue({
+      identifiableType: "App\\Models\\Collection",
+      identifiableId: 5,
+    });
+    mockGraphql.mockResolvedValue({
+      data: {
+        collection: {
+          products: {
+            edges: [],
+            pageInfo: { hasNextPage: false, endCursor: null },
+          },
+        },
+      },
+    });
+
+    const service = new CollectionSyncService(
+      client,
+      integrationId,
+      shopDomain,
+      graphqlRunner
+    );
+    const collection = shopifyCollection({
+      title: "Updated Title",
+      descriptionHtml: "<p>New description</p>",
+    });
+    await service.updateCollection(collection);
+
+    expect(mockClient.updateCollection).toHaveBeenCalledWith(5, {
+      name: "Updated Title",
+      description: "<p>New description</p>",
+    });
+  });
+
+  it("syncs membership via updateCollectionColorways when graphql present", async () => {
+    vi.mocked(findFibermadeIdByShopifyGid).mockImplementation(
+      (_client, _integrationId, externalType, gid) => {
+        if (externalType === "shopify_collection" && gid === "gid://shopify/Collection/123") {
+          return Promise.resolve({
+            identifiableType: "App\\Models\\Collection",
+            identifiableId: 5,
+          });
+        }
+        if (externalType === "shopify_product" && gid === "gid://shopify/Product/1") {
+          return Promise.resolve({ identifiableType: "App\\Models\\Colorway", identifiableId: 10 });
+        }
+        if (externalType === "shopify_product" && gid === "gid://shopify/Product/2") {
+          return Promise.resolve({ identifiableType: "App\\Models\\Colorway", identifiableId: 20 });
+        }
+        return Promise.resolve(null);
+      }
+    );
+
+    const service = new CollectionSyncService(
+      client,
+      integrationId,
+      shopDomain,
+      graphqlRunner
+    );
+    await service.updateCollection(shopifyCollection());
+
+    expect(mockClient.updateCollectionColorways).toHaveBeenCalledWith(5, [10, 20]);
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+      integrationId,
+      expect.objectContaining({
+        status: "success",
+        message: expect.stringContaining("Updated Collection #5"),
+      })
+    );
+  });
+
+  it("logs warning and continues when updateCollectionColorways fails", async () => {
+    vi.mocked(findFibermadeIdByShopifyGid).mockImplementation(
+      (_client, _integrationId, externalType, gid) => {
+        if (externalType === "shopify_collection" && gid === "gid://shopify/Collection/123") {
+          return Promise.resolve({
+            identifiableType: "App\\Models\\Collection",
+            identifiableId: 5,
+          });
+        }
+        if (externalType === "shopify_product" && gid === "gid://shopify/Product/1") {
+          return Promise.resolve({ identifiableType: "App\\Models\\Colorway", identifiableId: 10 });
+        }
+        return Promise.resolve(null);
+      }
+    );
+    mockClient.updateCollectionColorways.mockRejectedValue(new Error("API error"));
+
+    const service = new CollectionSyncService(
+      client,
+      integrationId,
+      shopDomain,
+      graphqlRunner
+    );
+    const result = await service.updateCollection(shopifyCollection());
+
+    expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
+      integrationId,
+      expect.objectContaining({
+        status: "warning",
+        message: expect.stringContaining("updateCollectionColorways failed"),
+      })
+    );
+    expect(result.collectionId).toBe(5);
+    expect(result.colorwayCount).toBe(0);
+  });
+
+  it("skips membership sync when graphql is undefined", async () => {
+    vi.mocked(findFibermadeIdByShopifyGid).mockResolvedValue({
+      identifiableType: "App\\Models\\Collection",
+      identifiableId: 5,
+    });
+
+    const service = new CollectionSyncService(
+      client,
+      integrationId,
+      shopDomain,
+      undefined
+    );
+    await service.updateCollection(shopifyCollection());
+
+    expect(mockClient.updateCollection).toHaveBeenCalledWith(5, {
+      name: "Test Collection",
+      description: "<p>Test description</p>",
+    });
+    expect(mockClient.updateCollectionColorways).not.toHaveBeenCalled();
+    expect(mockGraphql).not.toHaveBeenCalled();
+  });
+});

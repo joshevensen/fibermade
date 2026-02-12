@@ -63,7 +63,7 @@ export class CollectionSyncService {
     private readonly client: FibermadeClient,
     private readonly integrationId: number,
     private readonly shopDomain: string,
-    private readonly graphql: ShopifyGraphqlRunner
+    private readonly graphql: ShopifyGraphqlRunner | undefined
   ) {}
 
   async importCollection(shopifyCollection: ShopifyCollection): Promise<CollectionSyncResult> {
@@ -141,6 +141,96 @@ export class CollectionSyncService {
     }
 
     return results;
+  }
+
+  async updateCollection(shopifyCollection: ShopifyCollection): Promise<CollectionSyncResult> {
+    const result = await findFibermadeIdByShopifyGid(
+      this.client,
+      this.integrationId,
+      EXTERNAL_TYPES.SHOPIFY_COLLECTION,
+      shopifyCollection.id
+    );
+
+    if (!result || result.identifiableType !== IDENTIFIABLE_TYPES.COLLECTION) {
+      return this.importCollection(shopifyCollection);
+    }
+
+    const collectionId = result.identifiableId;
+    const name = shopifyCollection.title?.trim() || "Untitled";
+    const description = shopifyCollection.descriptionHtml?.trim() || null;
+
+    await this.client.updateCollection(collectionId, { name, description });
+
+    let colorwayCount = 0;
+    if (this.graphql) {
+      const colorwayIds: number[] = [];
+      let productCursor: string | null = null;
+      let hasMoreProducts = true;
+
+      while (hasMoreProducts) {
+        const productsResult = await this.fetchCollectionProducts(
+          shopifyCollection.id,
+          productCursor
+        );
+        if (!productsResult) {
+          break;
+        }
+
+        const { products, nextCursor, hasNext } = productsResult;
+        const productNodes = products?.edges?.map((e) => e.node) ?? [];
+
+        for (const productNode of productNodes) {
+          const productGid = String(productNode.id ?? "");
+          if (!productGid) continue;
+
+          const colorwayResult = await findFibermadeIdByShopifyGid(
+            this.client,
+            this.integrationId,
+            EXTERNAL_TYPES.SHOPIFY_PRODUCT,
+            productGid
+          );
+          if (
+            colorwayResult &&
+            colorwayResult.identifiableType === IDENTIFIABLE_TYPES.COLORWAY
+          ) {
+            colorwayIds.push(colorwayResult.identifiableId);
+          }
+        }
+
+        productCursor = nextCursor;
+        hasMoreProducts = hasNext;
+      }
+
+      try {
+        await this.client.updateCollectionColorways(collectionId, colorwayIds);
+        colorwayCount = colorwayIds.length;
+      } catch (err) {
+        await this.logIntegration(
+          shopifyCollection.id,
+          "warning",
+          `updateCollectionColorways failed: ${err instanceof Error ? err.message : String(err)}`,
+          { shopify_gid: shopifyCollection.id, collection_id: collectionId },
+          collectionId
+        );
+      }
+    }
+
+    await this.logIntegration(
+      shopifyCollection.id,
+      "success",
+      `Updated Collection #${collectionId} (${colorwayCount} colorway(s))`,
+      {
+        shopify_gid: shopifyCollection.id,
+        collection_id: collectionId,
+        colorway_count: colorwayCount,
+      },
+      collectionId
+    );
+
+    return {
+      collectionId,
+      colorwayCount,
+    };
   }
 
   private async runImport(shopifyCollection: ShopifyCollection): Promise<CollectionSyncResult> {
@@ -233,50 +323,6 @@ export class CollectionSyncService {
     };
   }
 
-  private async fetchCollectionsPage(
-    cursor: string | null
-  ): Promise<{
-    collections: { edges: Array<{ node: unknown; cursor: string }>; pageInfo: { hasNextPage: boolean; endCursor: string | null } };
-    nextCursor: string | null;
-    hasNext: boolean;
-  } | null> {
-    const variables = cursor ? { first: COLLECTIONS_PAGE_SIZE, after: cursor } : { first: COLLECTIONS_PAGE_SIZE };
-    let lastErr: unknown;
-
-    for (let attempt = 0; attempt <= RATE_LIMIT_RETRIES; attempt++) {
-      if (attempt > 0) {
-        await this.sleep(RATE_LIMIT_BACKOFF_MS[attempt - 1]);
-      }
-      try {
-        const result = await this.graphql(COLLECTIONS_QUERY, variables);
-        const data = result.data as {
-          collections?: {
-            edges: Array<{ node: unknown; cursor: string }>;
-            pageInfo: { hasNextPage: boolean; endCursor: string | null };
-          };
-        } | null;
-        const collections = data?.collections;
-        if (!collections) {
-          return null;
-        }
-        const pageInfo = collections.pageInfo ?? { hasNextPage: false, endCursor: null };
-        return {
-          collections,
-          nextCursor: pageInfo.endCursor ?? null,
-          hasNext: pageInfo.hasNextPage ?? false,
-        };
-      } catch (e) {
-        lastErr = e;
-        const status = (e as { status?: number }).status;
-        if (status === 429 && attempt < RATE_LIMIT_RETRIES) {
-          continue;
-        }
-        throw e;
-      }
-    }
-    throw lastErr;
-  }
-
   private async fetchCollectionProducts(
     collectionId: string,
     cursor: string | null
@@ -285,6 +331,8 @@ export class CollectionSyncService {
     nextCursor: string | null;
     hasNext: boolean;
   } | null> {
+    if (!this.graphql) return null;
+
     const variables = cursor
       ? { id: collectionId, first: PRODUCTS_PAGE_SIZE, after: cursor }
       : { id: collectionId, first: PRODUCTS_PAGE_SIZE };
@@ -311,6 +359,52 @@ export class CollectionSyncService {
         const pageInfo = products.pageInfo ?? { hasNextPage: false, endCursor: null };
         return {
           products,
+          nextCursor: pageInfo.endCursor ?? null,
+          hasNext: pageInfo.hasNextPage ?? false,
+        };
+      } catch (e) {
+        lastErr = e;
+        const status = (e as { status?: number }).status;
+        if (status === 429 && attempt < RATE_LIMIT_RETRIES) {
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw lastErr;
+  }
+
+  private async fetchCollectionsPage(
+    cursor: string | null
+  ): Promise<{
+    collections: { edges: Array<{ node: unknown; cursor: string }>; pageInfo: { hasNextPage: boolean; endCursor: string | null } };
+    nextCursor: string | null;
+    hasNext: boolean;
+  } | null> {
+    if (!this.graphql) return null;
+
+    const variables = cursor ? { first: COLLECTIONS_PAGE_SIZE, after: cursor } : { first: COLLECTIONS_PAGE_SIZE };
+    let lastErr: unknown;
+
+    for (let attempt = 0; attempt <= RATE_LIMIT_RETRIES; attempt++) {
+      if (attempt > 0) {
+        await this.sleep(RATE_LIMIT_BACKOFF_MS[attempt - 1]);
+      }
+      try {
+        const result = await this.graphql!(COLLECTIONS_QUERY, variables);
+        const data = result.data as {
+          collections?: {
+            edges: Array<{ node: unknown; cursor: string }>;
+            pageInfo: { hasNextPage: boolean; endCursor: string | null };
+          };
+        } | null;
+        const collections = data?.collections;
+        if (!collections) {
+          return null;
+        }
+        const pageInfo = collections.pageInfo ?? { hasNextPage: false, endCursor: null };
+        return {
+          collections,
           nextCursor: pageInfo.endCursor ?? null,
           hasNext: pageInfo.hasNextPage ?? false,
         };

@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 2.6: Prompt 2 -- Collection Webhook Handlers
 
@@ -21,7 +21,7 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
 
 - Follow the webhook handler pattern from Story 2.4 (file naming, authentication, error handling, idempotency)
 - Register webhook subscriptions in `shopify.app.toml`
-- Collection webhooks require the `read_products` scope (already included via `write_products`)
+- Collection webhooks require the `read_products` scope; the app's `write_products` scope already satisfies this (no additional scopes needed)
 - The webhook payload is REST format -- use/extend the webhook adapter from Story 2.4
 - Collection update must handle: field changes and membership changes (products added/removed)
 - Collection delete should mark the Fibermade Collection as "retired" (status change), not delete it
@@ -52,12 +52,10 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
 - [ ] **collections/update handler** (`shopify/app/routes/webhooks.collections.update.tsx`):
   1. Authenticate webhook
   2. Load FibermadeConnection for the shop
-  3. Look up existing Collection via ExternalIdentifier
-  4. If not found: treat as a create
-  5. If found: update Collection fields via `client.updateCollection(id, mappedFields)`
-  6. Sync membership changes: fetch current collection products from Shopify, compare with Fibermade associations, add/remove as needed
-  7. Log the operation
-  8. Return 200
+  3. Obtain GraphQL runner via `getWebhookGraphqlRunner(admin)` (required for membership sync)
+  4. Convert REST payload to `ShopifyCollection` format
+  5. Call `collectionSyncService.updateCollection(shopifyCollection)` (service handles lookup, field updates, membership sync)
+  6. Return 200
 - [ ] **collections/delete handler** (`shopify/app/routes/webhooks.collections.delete.tsx`):
   1. Authenticate webhook
   2. Load FibermadeConnection for the shop
@@ -65,6 +63,13 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
   4. If found: update Collection status to "retired" via `client.updateCollection(id, { status: "retired" })`
   5. Log the operation
   6. Return 200
+- [ ] **CollectionSyncService.updateCollection()** (`shopify/app/services/sync/collection-sync.server.ts`):
+  1. Look up existing Collection via ExternalIdentifier
+  2. If not found: treat as create, call `importCollection()`
+  3. If found: update Collection fields via `client.updateCollection(id, { name, description })`
+  4. Sync membership: fetch current collection products from Shopify (GraphQL), resolve to Colorway IDs, call `client.updateCollectionColorways(id, colorwayIds)`
+  5. If `updateCollectionColorways` fails: log warning and continue (graceful degradation); still return 200
+  6. Log the operation
 - [ ] Webhook adapter extended to handle collection REST payloads
 - [ ] All handlers are idempotent and return 200 regardless of errors
 - [ ] Tests for webhook adapter extension in `shopify/app/services/sync/webhook-adapter.server.test.ts` (extend existing):
@@ -78,6 +83,7 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
   - Test field update: existing Collection fields are updated via `updateCollection`
   - Test membership sync: products added/removed are reflected in Colorway associations
   - Test collection not found: treats as create
+  - Test GraphQL failure during membership sync: handler still returns 200 (idempotency)
 - [ ] Tests for collections/delete handler in `shopify/app/routes/webhooks.collections.delete.test.ts`:
   - Test successful delete: Collection status set to "retired", ExternalIdentifier records preserved
   - Test collection not found: silently returns 200
@@ -105,17 +111,19 @@ Register and handle Shopify collection webhooks (`collections/create`, `collecti
   2. Look up which Colorways those products map to
   3. Compare against the current Colorway associations in Fibermade
   4. Add new associations, remove old ones
-  This requires the platform to support association management (the gap identified in Prompt 1). If no association API exists, skip membership updates and log a warning.
+  The platform's `updateCollectionColorways` endpoint (from Prompt 1) handles association sync. If the call fails (e.g. API error), log a warning and still return 200 (graceful degradation).
 - **GID conversion**: Same as product webhooks -- convert numeric `id` to `gid://shopify/Collection/${id}`.
-- **Scope requirements**: Collection webhooks don't require additional scopes beyond `write_products` / `read_products`.
+- **Scope requirements**: Collection webhooks require `read_products`, which is already satisfied by the app's `write_products` scope. No additional scopes need to be added to `shopify.app.toml`.
 - **Collection update frequency**: Collection updates fire when collection metadata changes OR when products are added/removed. The same handler covers both cases.
 - **Webhook adapter extension**: Add a `convertRestCollection(payload)` function to `webhook-adapter.server.ts` that normalizes the REST payload to the `ShopifyCollection` type.
 
 ## References
 
 - `shopify/app/routes/webhooks.products.create.tsx` -- webhook handler pattern to follow
+- `shopify/app/routes/webhooks.products.update.tsx` -- update handler pattern (delegates to service, uses GraphQL runner)
 - `shopify/app/services/sync/collection-sync.server.ts` -- CollectionSyncService from Prompt 1
 - `shopify/app/services/sync/webhook-adapter.server.ts` -- REST to typed adapter (from Story 2.4)
+- `shopify/app/services/sync/webhook-context.server.ts` -- getWebhookGraphqlRunner for membership sync
 - `shopify/app/services/sync/mapping.server.ts` -- ExternalIdentifier lookup utilities
 - `shopify/app/services/fibermade-client.server.ts` -- updateCollection method
 - `shopify/shopify.app.toml` -- webhook subscription configuration

@@ -77,9 +77,22 @@ describe("BulkImportService", () => {
 
   it("fetches products with cursor-based pagination and processes each through ProductSyncService", async () => {
     const node1 = makeProductNode("1", "Product 1");
-    mockGraphql = vi.fn().mockResolvedValue(
-      makeProductsResponse([node1], false, null)
-    );
+    mockGraphql = vi.fn().mockImplementation((query: string) => {
+      if (query.includes("products(first:")) {
+        return Promise.resolve(makeProductsResponse([node1], false, null));
+      }
+      if (query.includes("collections(first:")) {
+        return Promise.resolve({
+          data: {
+            collections: {
+              edges: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
+    });
 
     const service = new BulkImportService(
       mockClient,
@@ -90,7 +103,7 @@ describe("BulkImportService", () => {
     );
     const result = await service.runImport();
 
-    expect(mockGraphql).toHaveBeenCalledTimes(1);
+    expect(mockGraphql).toHaveBeenCalledTimes(2);
     expect(mockGraphql).toHaveBeenCalledWith(
       expect.stringContaining("products(first:"),
       {}
@@ -110,14 +123,27 @@ describe("BulkImportService", () => {
   it("handles pagination: passes cursor when hasNextPage is true and stops when false", async () => {
     const node1 = makeProductNode("1", "P1");
     const node2 = makeProductNode("2", "P2");
-    mockGraphql = vi
-      .fn()
-      .mockResolvedValueOnce(
-        makeProductsResponse([node1], true, "cursor-page-1")
-      )
-      .mockResolvedValueOnce(
-        makeProductsResponse([node2], false, null)
-      );
+    let productCallCount = 0;
+    mockGraphql = vi.fn().mockImplementation((query: string, _variables?: Record<string, unknown>) => {
+      if (query.includes("products(first:")) {
+        productCallCount++;
+        if (productCallCount === 1) {
+          return Promise.resolve(makeProductsResponse([node1], true, "cursor-page-1"));
+        }
+        return Promise.resolve(makeProductsResponse([node2], false, null));
+      }
+      if (query.includes("collections(first:")) {
+        return Promise.resolve({
+          data: {
+            collections: {
+              edges: [],
+              pageInfo: { hasNextPage: false, endCursor: null },
+            },
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
+    });
 
     const service = new BulkImportService(
       mockClient,
@@ -128,11 +154,12 @@ describe("BulkImportService", () => {
     );
     const result = await service.runImport();
 
-    expect(mockGraphql).toHaveBeenCalledTimes(2);
+    expect(mockGraphql).toHaveBeenCalledTimes(3);
     expect(mockGraphql).toHaveBeenNthCalledWith(1, expect.any(String), {});
     expect(mockGraphql).toHaveBeenNthCalledWith(2, expect.any(String), {
       cursor: "cursor-page-1",
     });
+    expect(mockGraphql).toHaveBeenNthCalledWith(3, expect.stringContaining("collections(first:"), expect.anything());
     expect(mockImportProduct).toHaveBeenCalledTimes(2);
     expect(result.total).toBe(2);
     expect(result.imported).toBe(2);

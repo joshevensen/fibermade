@@ -1,4 +1,10 @@
-import type { ShopifyProduct, ShopifyProductStatus, ShopifyVariant, ShopifyWeightUnit } from "./types";
+import type {
+  ShopifyCollection,
+  ShopifyProduct,
+  ShopifyProductStatus,
+  ShopifyVariant,
+  ShopifyWeightUnit,
+} from "./types";
 
 const REST_STATUS_MAP: Record<string, ShopifyProductStatus> = {
   active: "ACTIVE",
@@ -21,6 +27,11 @@ function toProductGid(id: unknown): string {
 function toVariantGid(id: unknown): string {
   if (id == null || id === "") return "";
   return `gid://shopify/ProductVariant/${id}`;
+}
+
+function toCollectionGid(id: unknown): string {
+  if (id == null || id === "") return "";
+  return `gid://shopify/Collection/${id}`;
 }
 
 function mapRestStatus(status: unknown): ShopifyProductStatus {
@@ -79,5 +90,17 @@ export function restProductToShopifyProduct(payload: Record<string, unknown>): S
     variants: {
       edges: variants.map((node) => ({ node })),
     },
+  };
+}
+
+/**
+ * Converts a Shopify REST webhook payload to the ShopifyCollection type used by CollectionSyncService.
+ */
+export function convertRestCollection(payload: Record<string, unknown>): ShopifyCollection {
+  return {
+    id: toCollectionGid(payload.id),
+    title: typeof payload.title === "string" ? payload.title : "",
+    descriptionHtml: payload.body_html != null ? String(payload.body_html) : null,
+    handle: payload.handle != null && payload.handle !== "" ? String(payload.handle) : null,
   };
 }

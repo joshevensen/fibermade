@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { restProductToShopifyProduct } from "./webhook-adapter.server";
+import { convertRestCollection, restProductToShopifyProduct } from "./webhook-adapter.server";
 
 describe("restProductToShopifyProduct", () => {
   it("converts numeric id to GID", () => {
@@ -150,5 +150,68 @@ describe("restProductToShopifyProduct", () => {
       variants: "not-an-array",
     } as Record<string, unknown>);
     expect(result.variants?.edges).toEqual([]);
+  });
+});
+
+describe("convertRestCollection", () => {
+  it("converts numeric id to GID", () => {
+    const result = convertRestCollection({
+      id: 5678901234,
+      title: "Summer Collection",
+    } as Record<string, unknown>);
+    expect(result.id).toBe("gid://shopify/Collection/5678901234");
+  });
+
+  it("maps body_html to descriptionHtml", () => {
+    const result = convertRestCollection({
+      id: 1,
+      title: "T",
+      body_html: "<p>Our summer yarn colors</p>",
+    } as Record<string, unknown>);
+    expect(result.descriptionHtml).toBe("<p>Our summer yarn colors</p>");
+  });
+
+  it("returns null for missing body_html", () => {
+    const result = convertRestCollection({
+      id: 1,
+      title: "T",
+    } as Record<string, unknown>);
+    expect(result.descriptionHtml).toBeNull();
+  });
+
+  it("returns null for missing handle", () => {
+    const result = convertRestCollection({
+      id: 1,
+      title: "T",
+    } as Record<string, unknown>);
+    expect(result.handle).toBeNull();
+  });
+
+  it("preserves handle when present", () => {
+    const result = convertRestCollection({
+      id: 1,
+      title: "T",
+      handle: "summer-collection",
+    } as Record<string, unknown>);
+    expect(result.handle).toBe("summer-collection");
+  });
+
+  it("handles null values", () => {
+    const result = convertRestCollection({
+      id: 1,
+      title: "T",
+      body_html: null,
+      handle: null,
+    } as Record<string, unknown>);
+    expect(result.descriptionHtml).toBeNull();
+    expect(result.handle).toBeNull();
+  });
+
+  it("handles empty payload with defaults", () => {
+    const result = convertRestCollection({} as Record<string, unknown>);
+    expect(result.id).toBe("");
+    expect(result.title).toBe("");
+    expect(result.descriptionHtml).toBeNull();
+    expect(result.handle).toBeNull();
   });
 });
