@@ -903,7 +903,7 @@ class ImportService
     private function mapOrderStatus(string $financialStatus, string $fulfillmentStatus): OrderStatus
     {
         if (strtolower($financialStatus) === 'paid' && strtolower($fulfillmentStatus) === 'fulfilled') {
-            return OrderStatus::Closed;
+            return OrderStatus::Delivered;
         }
 
         if (strtolower($financialStatus) === 'paid') {

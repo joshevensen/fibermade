@@ -8,14 +8,6 @@ import StoreLayout from '@/layouts/StoreLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-interface CurrentOrder {
-    id: number;
-    order_date: string;
-    status: string;
-    skein_count: number;
-    total_amount: number | null;
-}
-
 interface Creator {
     id: number;
     list_key: string;
@@ -24,8 +16,9 @@ interface Creator {
     city: string | null;
     state_region: string | null;
     status: string;
-    current_order: CurrentOrder | null;
-    past_order_count: number;
+    draft_count: number;
+    open_count: number;
+    delivered_count: number;
 }
 
 interface Props {
@@ -91,48 +84,12 @@ function getStatusSeverity(
     }
 }
 
-function getOrderStatusSeverity(
-    status: string,
-): 'success' | 'info' | 'secondary' | 'warn' | 'danger' | 'contrast' {
-    switch (status) {
-        case 'draft':
-            return 'secondary';
-        case 'open':
-            return 'info';
-        case 'closed':
-            return 'success';
-        case 'cancelled':
-            return 'danger';
-        default:
-            return 'secondary';
-    }
-}
-
-function formatDate(value: string | null | undefined): string {
-    if (!value) {
-        return '';
-    }
-    return new Date(value).toLocaleDateString();
-}
-
-function formatCurrency(value: number | null | undefined): string {
-    if (value === null || value === undefined) {
-        return '';
-    }
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(value);
-}
-
 function handleOrderHistory(creator: Creator): void {
-    // TODO: Navigate to order history page when implemented
-    router.visit(`/store/creators/${creator.id}/orders`);
+    router.visit(`/store/${creator.id}/orders`);
 }
 
 function handleNewOrder(creator: Creator): void {
-    // TODO: Navigate to new order page when implemented
-    router.visit(`/store/creators/${creator.id}/orders/new`);
+    router.visit(`/store/${creator.id}/order`);
 }
 </script>
 
@@ -211,83 +168,23 @@ function handleNewOrder(creator: Creator): void {
                         <div
                             class="mt-4 flex items-center justify-between border-t border-surface-100 pt-4"
                         >
-                            <!-- Order Info -->
-                            <div class="flex gap-2">
-                                <!-- Current Order -->
-                                <div
-                                    v-if="creator.current_order"
-                                    class="mb-2 flex flex-wrap items-center gap-2 text-sm"
-                                >
-                                    <span class="font-medium text-surface-700">
-                                        Current Order:
-                                    </span>
-                                    <span class="text-surface-600">
-                                        {{
-                                            formatDate(
-                                                creator.current_order
-                                                    .order_date,
-                                            )
-                                        }}
-                                    </span>
-                                    <UiTag
-                                        :severity="
-                                            getOrderStatusSeverity(
-                                                creator.current_order.status,
-                                            )
-                                        "
-                                        :value="
-                                            formatEnum(
-                                                creator.current_order.status,
-                                            )
-                                        "
-                                        class="text-xs"
-                                    />
-                                    <span
-                                        v-if="
-                                            creator.current_order.skein_count >
-                                            0
-                                        "
-                                        class="text-surface-500"
-                                    >
-                                        {{ creator.current_order.skein_count }}
-                                        {{
-                                            creator.current_order
-                                                .skein_count === 1
-                                                ? 'skein'
-                                                : 'skeins'
-                                        }}
-                                    </span>
-                                    <span
-                                        v-if="
-                                            creator.current_order
-                                                .total_amount != null
-                                        "
-                                        class="font-medium text-surface-700"
-                                    >
-                                        {{
-                                            formatCurrency(
-                                                creator.current_order
-                                                    .total_amount,
-                                            )
-                                        }}
-                                    </span>
-                                </div>
-
-                                <!-- Past Orders Count -->
-                                <p class="text-sm text-surface-500">
-                                    <template
-                                        v-if="creator.past_order_count > 0"
-                                    >
-                                        {{ creator.past_order_count }} past
-                                        {{
-                                            creator.past_order_count === 1
-                                                ? 'order'
-                                                : 'orders'
-                                        }}
-                                    </template>
-                                    <template v-else> No past orders </template>
-                                </p>
-                            </div>
+                            <!-- Order counts -->
+                            <p class="text-sm text-surface-600">
+                                <span class="font-medium">{{
+                                    creator.draft_count
+                                }}</span>
+                                draft
+                                <span class="mx-1">·</span>
+                                <span class="font-medium">{{
+                                    creator.open_count
+                                }}</span>
+                                open
+                                <span class="mx-1">·</span>
+                                <span class="font-medium">{{
+                                    creator.delivered_count
+                                }}</span>
+                                delivered
+                            </p>
 
                             <!-- Action Buttons -->
                             <div class="flex gap-2">

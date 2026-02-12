@@ -329,9 +329,9 @@ class OrdersSeeder extends Seeder
         $integration = Integration::where('account_id', $account->id)->first();
 
         // Create orders with specific status distribution:
-        // 124 closed, 12 cancelled, 10 open, 4 draft
+        // 124 delivered, 12 cancelled, 10 open, 4 draft
         $statusDistribution = [
-            [OrderStatus::Closed, 124],
+            [OrderStatus::Delivered, 124],
             [OrderStatus::Cancelled, 12],
             [OrderStatus::Open, 10],
             [OrderStatus::Draft, 4],

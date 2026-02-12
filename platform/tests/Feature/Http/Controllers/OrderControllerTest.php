@@ -71,14 +71,14 @@ test('user can update an order', function () {
     ]);
 
     $response = $this->actingAs($user)->put(route('orders.update', $order), [
-        'status' => \App\Enums\OrderStatus::Closed->value,
+        'status' => \App\Enums\OrderStatus::Delivered->value,
         'order_date' => $order->order_date->toDateString(),
     ]);
 
     $response->assertRedirect(route('orders.index'));
     $this->assertDatabaseHas('orders', [
         'id' => $order->id,
-        'status' => \App\Enums\OrderStatus::Closed->value,
+        'status' => \App\Enums\OrderStatus::Delivered->value,
         'updated_by' => $user->id,
     ]);
 });
@@ -118,13 +118,13 @@ test('admin can create, update, and delete orders', function () {
     ]);
 
     $updateResponse = $this->actingAs($admin)->put(route('orders.update', $order), [
-        'status' => \App\Enums\OrderStatus::Closed->value,
+        'status' => \App\Enums\OrderStatus::Delivered->value,
         'order_date' => $order->order_date->toDateString(),
     ]);
     $updateResponse->assertRedirect(route('orders.index'));
     $this->assertDatabaseHas('orders', [
         'id' => $order->id,
-        'status' => \App\Enums\OrderStatus::Closed->value,
+        'status' => \App\Enums\OrderStatus::Delivered->value,
     ]);
 
     $deleteResponse = $this->actingAs($admin)->delete(route('orders.destroy', $order));

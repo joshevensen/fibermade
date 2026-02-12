@@ -236,7 +236,7 @@ test('update for another account order returns 403', function () {
     $token = getApiToken($userB);
 
     $response = $this->patchJson("/api/v1/orders/{$orderA->id}", [
-        'status' => OrderStatus::Closed->value,
+        'status' => OrderStatus::Delivered->value,
     ], withBearer($token));
 
     $response->assertForbidden();

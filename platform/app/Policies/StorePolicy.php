@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\AccountType;
+use App\Models\Creator;
 use App\Models\Store;
 use App\Models\User;
 
@@ -101,5 +102,13 @@ class StorePolicy
     {
         // Only admins can permanently delete
         return $user->is_admin;
+    }
+
+    /**
+     * Determine whether the store can view the creator's orders (order list page).
+     */
+    public function viewCreatorOrders(User $user, Store $store, Creator $creator): bool
+    {
+        return $store->creators()->where('creator_id', $creator->id)->exists();
     }
 }

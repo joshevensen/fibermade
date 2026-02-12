@@ -6,6 +6,8 @@ enum OrderStatus: string
 {
     case Draft = 'draft';
     case Open = 'open';
-    case Closed = 'closed';
+    case Accepted = 'accepted';
+    case Fulfilled = 'fulfilled';
+    case Delivered = 'delivered';
     case Cancelled = 'cancelled';
 }

@@ -12,6 +12,9 @@ Route::prefix('store')->middleware(['auth', 'verified'])->group(function () {
     Route::get('settings', [UserController::class, 'edit'])
         ->name('store.settings');
 
+    Route::get('{creator}/orders', [StoreController::class, 'orders'])
+        ->name('store.creator.orders');
+
     // Import routes
     Route::post('settings/import/products', [ImportController::class, 'importProducts'])->name('store.import.products');
 });

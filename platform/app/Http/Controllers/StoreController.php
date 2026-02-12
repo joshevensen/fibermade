@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateStoreRequest;
 use App\Models\Creator;
 use App\Models\Invite;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Store;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
@@ -123,7 +124,18 @@ class StoreController extends Controller
         $totalCreators = $store->creators()->count();
         $filteredCount = $creators->count();
 
-        $creatorsData = $this->transformCreatorsForHome($creators, $store);
+        $countsByAccount = Order::query()
+            ->where('type', OrderType::Wholesale)
+            ->where('orderable_type', Store::class)
+            ->where('orderable_id', $store->id)
+            ->selectRaw('account_id, status, count(*) as count')
+            ->groupBy('account_id', 'status')
+            ->get()
+            ->groupBy('account_id')
+            ->map(fn ($rows) => $rows->mapWithKeys(fn ($row) => [$row->status->value => (int) $row->count])->all())
+            ->all();
+
+        $creatorsData = $this->transformCreatorsForHome($creators, $store, $countsByAccount);
 
         return Inertia::render('store/HomePage', [
             'creators' => $creatorsData,
@@ -134,32 +146,16 @@ class StoreController extends Controller
 
     /**
      * @param  Collection<int, \App\Models\Creator>  $creators
+     * @param  array<int, array<string, int>>  $countsByAccount  account_id => [status => count]
      * @return array<int, array<string, mixed>>
      */
-    private function transformCreatorsForHome(Collection $creators, Store $store): array
+    private function transformCreatorsForHome(Collection $creators, Store $store, array $countsByAccount): array
     {
         $items = [];
 
         foreach ($creators as $creator) {
             $pivot = $creator->pivot;
-
-            // Get orders for this creator
-            $orders = Order::query()
-                ->where('type', OrderType::Wholesale)
-                ->where('orderable_type', Store::class)
-                ->where('orderable_id', $store->id)
-                ->where('account_id', $creator->account_id)
-                ->with(['orderItems'])
-                ->orderByDesc('order_date')
-                ->get();
-
-            $outstandingStatuses = [OrderStatus::Draft, OrderStatus::Open];
-            $currentOrder = $orders->first(
-                fn (Order $o) => in_array($o->status, $outstandingStatuses, true),
-            );
-            $pastOrderCount = $orders->filter(
-                fn (Order $o) => ! in_array($o->status, $outstandingStatuses, true),
-            )->count();
+            $counts = $countsByAccount[$creator->account_id] ?? [];
 
             $items[] = [
                 'id' => $creator->id,
@@ -169,18 +165,72 @@ class StoreController extends Controller
                 'city' => $creator->city,
                 'state_region' => $creator->state_region,
                 'status' => $pivot?->status ?? 'active',
-                'current_order' => $currentOrder ? [
-                    'id' => $currentOrder->id,
-                    'order_date' => $currentOrder->order_date->toDateString(),
-                    'status' => $currentOrder->status->value,
-                    'skein_count' => $currentOrder->orderItems->sum('quantity'),
-                    'total_amount' => $currentOrder->total_amount,
-                ] : null,
-                'past_order_count' => $pastOrderCount,
+                'draft_count' => $counts['draft'] ?? 0,
+                'open_count' => $counts['open'] ?? 0,
+                'delivered_count' => $counts['delivered'] ?? 0,
             ];
         }
 
         return $items;
+    }
+
+    /**
+     * Display the order list for a creator (store's view).
+     */
+    public function orders(Creator $creator): Response|RedirectResponse
+    {
+        $this->authorize('viewAny', Store::class);
+
+        $user = auth()->user();
+        if ($user->account?->type !== AccountType::Store || ! $user->account->store) {
+            return redirect()->route('store.home');
+        }
+
+        $store = $user->account->store;
+        $this->authorize('viewCreatorOrders', [$store, $creator]);
+
+        $status = request()->query('status', 'all');
+        $validStatuses = ['all', ...array_map(fn (OrderStatus $case) => $case->value, OrderStatus::cases())];
+        if (! in_array($status, $validStatuses, true)) {
+            $status = 'all';
+        }
+
+        $query = Order::query()
+            ->where('type', OrderType::Wholesale)
+            ->where('orderable_type', Store::class)
+            ->where('orderable_id', $store->id)
+            ->where('account_id', $creator->account_id)
+            ->withSum('orderItems as skein_count', 'quantity')
+            ->addSelect([
+                'colorway_count' => OrderItem::query()
+                    ->selectRaw('count(distinct colorway_id)')
+                    ->whereColumn('order_items.order_id', 'orders.id'),
+            ])
+            ->orderByDesc('order_date');
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $orders = $query->get()->map(fn (Order $order) => [
+            'id' => $order->id,
+            'order_date' => $order->order_date->toDateString(),
+            'status' => $order->status->value,
+            'total_amount' => $order->total_amount !== null ? (float) $order->total_amount : null,
+            'skein_count' => (int) ($order->skein_count ?? 0),
+            'colorway_count' => (int) ($order->colorway_count ?? 0),
+        ])->all();
+
+        $orderStatusOptions = collect(OrderStatus::cases())->map(fn (OrderStatus $case) => [
+            'label' => ucfirst($case->value),
+            'value' => $case->value,
+        ])->all();
+
+        return Inertia::render('store/orders/OrderListPage', [
+            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'orders' => $orders,
+            'orderStatusOptions' => $orderStatusOptions,
+        ]);
     }
 
     /**
