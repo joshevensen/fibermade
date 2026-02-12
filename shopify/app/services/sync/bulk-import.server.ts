@@ -1,5 +1,6 @@
 import type { FibermadeClient } from "../fibermade-client.server";
 import type { ShopifyGraphqlRunner } from "./metafields.server";
+import { CollectionSyncService } from "./collection-sync.server";
 import { ProductSyncService } from "./product-sync.server";
 import type {
   BulkImportProgress,
@@ -152,6 +153,32 @@ export class BulkImportService {
       }
 
       if (hasNextPage === false) {
+        await this.updateConnection({
+          initialImportStatus: "in_progress",
+          initialImportProgress: JSON.stringify({
+            ...progress,
+            importingCollections: true,
+          }),
+        });
+
+        try {
+          const collectionSync = new CollectionSyncService(
+            this.client,
+            this.integrationId,
+            this.shopDomain,
+            this.graphql
+          );
+          await collectionSync.importAllCollections();
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          const list = progress.errors ?? [];
+          list.push({ message: `Collection import failed: ${message}` });
+          if (list.length > MAX_ERRORS_STORED) {
+            list.shift();
+          }
+          progress.errors = list;
+        }
+
         await this.updateConnection({
           initialImportStatus: "complete",
           initialImportProgress: JSON.stringify(progress),

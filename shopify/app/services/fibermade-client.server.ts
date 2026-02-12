@@ -469,6 +469,12 @@ export class FibermadeClient {
     await this.delete(`/api/v1/collections/${id}`);
   }
 
+  async updateCollectionColorways(id: number, colorwayIds: number[]): Promise<void> {
+    await this.post(`/api/v1/collections/${id}/colorways`, {
+      colorway_ids: colorwayIds,
+    });
+  }
+
   // -------------------------------------------------------------------------
   // Inventory
   // -------------------------------------------------------------------------

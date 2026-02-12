@@ -75,3 +75,16 @@ export type BulkImportResult = BulkImportProgress;
 export function getVariants(product: ShopifyProduct): ShopifyVariant[] {
   return product.variants?.edges?.map((e) => e.node) ?? [];
 }
+
+export interface ShopifyCollection {
+  id: string;
+  title: string;
+  descriptionHtml?: string | null;
+  handle?: string | null;
+}
+
+export interface CollectionSyncResult {
+  collectionId: number;
+  colorwayCount: number;
+  skipped?: boolean;
+}

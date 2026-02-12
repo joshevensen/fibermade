@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 2.6: Prompt 1 -- Shopify → Fibermade Collection Import
 
@@ -15,19 +15,19 @@ Build collection import: fetch Shopify collections (custom and smart), create co
 - Do not handle collection webhooks (that's Prompt 2)
 - Do not push Fibermade Collections to Shopify (one-directional for Stage 1)
 - Do not handle smart collection rules/conditions (import smart collections as static membership at time of sync)
-- Do not modify the platform API
 - Do not add UI for collection management
 
 ## Constraints
 
 - Create a `CollectionSyncService` in `shopify/app/services/sync/collection-sync.server.ts`
 - Use GraphQL to fetch Shopify collections and their product memberships
-- Map Shopify collection fields to Fibermade Collection fields: `title` → `name`, `descriptionHtml` → `description`, status defaults to "active"
-- After creating a Collection, associate it with the Colorways that are mapped to the products in that collection. This requires looking up ExternalIdentifier records for each product GID.
-- Create ExternalIdentifier records for collection mappings (`external_type: "shopify_collection"`)
+- Map Shopify collection fields to Fibermade Collection fields: `title` → `name`, `descriptionHtml` → `description`, status always set to "active"
+- Fetch collection metadata first, then fetch products per collection separately to avoid high GraphQL query costs
+- After creating a Collection, associate it with the Colorways that are mapped to the products in that collection via API endpoint `POST /api/v1/collections/{id}/colorways` with `{ colorway_ids: number[] }`
+- Create ExternalIdentifier records for collection mappings (`external_type: "shopify_collection"`) with collection handle stored in `data` metadata
 - Collections should be imported after products (during bulk import) since collection membership depends on product mappings existing
-- If a collection has no products that are mapped in Fibermade, still create the Collection (it will have no Colorway associations)
-- The platform Collection API needs a way to set Colorway associations. Check if the existing API supports this (likely not -- may need a platform endpoint or a workaround).
+- If a collection has no products that are mapped in Fibermade, still create the Collection (it will have no Colorway associations) and log a warning/metric for tracking sync completeness
+- Add rate limiting retries (similar to `BulkImportService`) for GraphQL requests, especially when fetching products per collection
 
 ## Acceptance Criteria
 
@@ -37,27 +37,30 @@ Build collection import: fetch Shopify collections (custom and smart), create co
   - `importAllCollections(): Promise<CollectionSyncResult[]>` -- fetches and imports all collections with pagination
 - [ ] `importCollection()` method:
   1. Checks if collection is already mapped (skip if so)
-  2. Maps fields: `title` → `name`, `descriptionHtml` (or `body_html`) → `description`, `status` = "active"
+  2. Maps fields: `title` → `name`, `descriptionHtml` → `description`, `status` = "active"
   3. Creates Fibermade Collection via `client.createCollection()`
-  4. Creates ExternalIdentifier mapping (shopify_collection → Collection)
-  5. Fetches the collection's products (product GIDs)
+  4. Creates ExternalIdentifier mapping (shopify_collection → Collection) with collection handle stored in `data` metadata
+  5. Fetches the collection's products (product GIDs) with pagination and rate limiting retries
   6. For each product GID: looks up the Fibermade Colorway via ExternalIdentifier
-  7. Associates found Colorways with the Collection (mechanism TBD based on API capabilities)
-  8. Returns result with Collection ID and associated Colorway count
-- [ ] GraphQL queries:
-  - Fetch collections with pagination: `collections(first: 50, after: $cursor) { edges { node { id, title, descriptionHtml, sortOrder } }, pageInfo { hasNextPage, endCursor } }`
-  - Fetch collection products: `collection(id: $id) { products(first: 100) { edges { node { id } }, pageInfo { hasNextPage, endCursor } } }`
+  7. Associates found Colorways with the Collection via `POST /api/v1/collections/{id}/colorways` endpoint
+  8. If no products are mapped to Colorways, logs a warning/metric for tracking sync completeness
+  9. Returns result with Collection ID and associated Colorway count
+- [ ] GraphQL queries (two-step approach):
+  - Step 1: Fetch collections metadata with pagination: `collections(first: 50, after: $cursor) { edges { node { id, title, descriptionHtml, handle } }, pageInfo { hasNextPage, endCursor } }`
+  - Step 2: For each collection, fetch products separately: `collection(id: $id) { products(first: 100, after: $cursor) { edges { node { id } }, pageInfo { hasNextPage, endCursor } } }`
+  - Both queries include rate limiting retries on 429 errors with exponential backoff
 - [ ] `ShopifyCollection` type defined in `shopify/app/services/sync/types.ts`
 - [ ] Integration with bulk import: `BulkImportService.runImport()` calls `collectionSyncService.importAllCollections()` after product import completes
 - [ ] ExternalIdentifier records created for each imported collection
 - [ ] Integration logging for collection import operations
 - [ ] Tests in `shopify/app/services/sync/collection-sync.server.test.ts`:
-  - Test `importCollection` creates Collection, ExternalIdentifier mapping, and associates Colorways
-  - Test field mapping: `title` → `name`, `descriptionHtml` → `description`, status defaults to "active"
+  - Test `importCollection` creates Collection, ExternalIdentifier mapping (with handle in metadata), and associates Colorways via API endpoint
+  - Test field mapping: `title` → `name`, `descriptionHtml` → `description`, status always "active"
   - Test skip: collection already mapped is skipped
-  - Test membership: collection products are looked up via ExternalIdentifier and associated with Collection
-  - Test collection with no mapped products: Collection created but with no Colorway associations
+  - Test membership: collection products are looked up via ExternalIdentifier and associated with Collection via API endpoint
+  - Test collection with no mapped products: Collection created but with no Colorway associations, warning logged
   - Test `importAllCollections` paginates through all collections and imports each one
+  - Test rate limiting: retries on 429 errors with exponential backoff
   - Test integration logging on success and failure
   - Mock `FibermadeClient`, GraphQL client, and mapping utilities using `vi.mock()` and `vi.fn()`
 
@@ -66,34 +69,39 @@ Build collection import: fetch Shopify collections (custom and smart), create co
 ## Tech Analysis
 
 - **Shopify collection types**: Shopify has two collection types: `CustomCollection` (manually curated) and `SmartCollection` (rule-based). The GraphQL API provides a unified `Collection` type that covers both. Query `collections(first: 50)` returns all collections.
-- **Collection GraphQL query**:
-  ```graphql
-  query collections($first: Int!, $after: String) {
-    collections(first: $first, after: $after) {
-      edges {
-        node {
-          id
-          title
-          descriptionHtml
-          sortOrder
-          productsCount
-          products(first: 100) {
-            edges { node { id } }
-            pageInfo { hasNextPage, endCursor }
-          }
-        }
-      }
-      pageInfo { hasNextPage, endCursor }
-    }
-  }
-  ```
-  Note: Nesting `products` inside the collections query may be expensive (high query cost). Consider fetching collection metadata first, then fetching products per collection separately.
-- **Collection-Colorway association**: The Fibermade platform has a `colorway_collection` pivot table with a many-to-many relationship. The Collection API (Story 0.4) has standard CRUD but likely doesn't have an endpoint for managing pivot associations. Options:
-  1. **If the platform has an association endpoint** (e.g., `POST /api/v1/collections/{id}/colorways`): use it
-  2. **If not**: Either add a platform endpoint (breaks "no platform changes" constraint) or use a workaround -- update the Collection with a `colorway_ids` field if the UpdateCollectionRequest supports it
-  3. **Pragmatic approach for Stage 1**: Note this as a gap. Create the Collection and ExternalIdentifier records. The Colorway association can be managed through the platform UI or a future API endpoint. Log a warning that associations couldn't be set via API.
-  Check the `UpdateCollectionRequest` and Collection controller for association support.
-- **Collection product pagination**: A collection can have many products. Use cursor-based pagination to fetch all product GIDs. For large collections (100+ products), make multiple requests.
+- **Collection GraphQL query strategy**: Use a two-step approach to avoid high query costs:
+  1. **Step 1**: Fetch collection metadata only (without products):
+     ```graphql
+     query collections($first: Int!, $after: String) {
+       collections(first: $first, after: $after) {
+         edges {
+           node {
+             id
+             title
+             descriptionHtml
+             handle
+           }
+         }
+         pageInfo { hasNextPage, endCursor }
+       }
+     }
+     ```
+  2. **Step 2**: For each collection, fetch products separately with pagination:
+     ```graphql
+     query collectionProducts($id: ID!, $first: Int!, $after: String) {
+       collection(id: $id) {
+         products(first: $first, after: $after) {
+           edges { node { id } }
+           pageInfo { hasNextPage, endCursor }
+         }
+       }
+     }
+     ```
+  This approach avoids expensive nested queries and allows better rate limiting control.
+- **Collection-Colorway association**: The Fibermade platform has a `colorway_collection` pivot table with a many-to-many relationship. Add API endpoint `POST /api/v1/collections/{id}/colorways` that accepts `{ colorway_ids: number[] }` and uses Laravel's `sync()` method to associate colorways. This endpoint will be added to the platform API as part of this story.
+- **Collection product pagination**: A collection can have many products. Use cursor-based pagination to fetch all product GIDs. For large collections (100+ products), make multiple requests with rate limiting retries.
+- **Rate limiting**: Add rate limiting retries similar to `BulkImportService`: retry on 429 errors with exponential backoff (1000ms, 2000ms, 3000ms delays). Apply to both collection metadata queries and per-collection product queries.
+- **Collection handle storage**: Store the Shopify collection `handle` field in the ExternalIdentifier `data` metadata (similar to how product handles are stored) for future reference and potential URL generation.
 - **Bulk import integration**: After all products are imported in `BulkImportService.runImport()`, call `collectionSyncService.importAllCollections()`. This ordering ensures product→Colorway ExternalIdentifier mappings exist when we try to look up collection memberships.
 - **REST webhook payload format** (for Prompt 2): Collection webhooks use REST format. The adapter pattern from Story 2.4 (`webhook-adapter.server.ts`) should be extended for collections.
 
@@ -104,9 +112,10 @@ Build collection import: fetch Shopify collections (custom and smart), create co
 - `shopify/app/services/sync/constants.ts` -- EXTERNAL_TYPES.SHOPIFY_COLLECTION constant
 - `shopify/app/services/sync/bulk-import.server.ts` -- BulkImportService to integrate with
 - `shopify/app/services/fibermade-client.server.ts` -- createCollection, lookupExternalIdentifier methods
-- `platform/app/Http/Controllers/Api/V1/CollectionController.php` -- Collection API controller (check for association endpoints)
+- `platform/app/Http/Controllers/Api/V1/CollectionController.php` -- Collection API controller (add `updateColorways` endpoint)
 - `platform/app/Http/Requests/StoreCollectionRequest.php` -- required: name, status. Optional: description
-- `platform/app/Http/Requests/UpdateCollectionRequest.php` -- check for colorway_ids or association fields
+- `platform/app/Http/Requests/UpdateCollectionRequest.php` -- standard update fields
+- `platform/app/Http/Requests/UpdateCollectionColorwaysRequest.php` -- request validation for colorway associations (create if needed)
 - `platform/app/Models/Collection.php` -- colorways() BelongsToMany relationship
 
 ## Files
@@ -115,3 +124,6 @@ Build collection import: fetch Shopify collections (custom and smart), create co
 - Create `shopify/app/services/sync/collection-sync.server.test.ts` -- tests for importCollection, importAllCollections, membership mapping
 - Modify `shopify/app/services/sync/types.ts` -- add ShopifyCollection type and CollectionSyncResult
 - Modify `shopify/app/services/sync/bulk-import.server.ts` -- call collection import after product import
+- Modify `shopify/app/services/fibermade-client.server.ts` -- add `updateCollectionColorways(id: number, colorwayIds: number[]): Promise<void>` method
+- Modify `platform/app/Http/Controllers/Api/V1/CollectionController.php` -- add `updateColorways` method
+- Create `platform/app/Http/Requests/UpdateCollectionColorwaysRequest.php` -- validation for colorway_ids array (if doesn't exist)

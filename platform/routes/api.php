@@ -20,6 +20,8 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
     Route::apiResource('bases', BaseController::class)
         ->parameters(['bases' => 'base'])
         ->names('api.v1.bases');
+    Route::post('collections/{collection}/colorways', [CollectionController::class, 'updateColorways'])
+        ->name('api.v1.collections.colorways.update');
     Route::apiResource('collections', CollectionController::class)
         ->names('api.v1.collections');
     Route::patch('inventory/{inventory}/quantity', [InventoryController::class, 'updateQuantity'])

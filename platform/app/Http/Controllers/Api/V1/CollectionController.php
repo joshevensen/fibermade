@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\StoreCollectionRequest;
+use App\Http\Requests\UpdateCollectionColorwaysRequest;
 use App\Http\Requests\UpdateCollectionRequest;
 use App\Http\Resources\Api\V1\CollectionResource;
 use App\Models\Collection;
@@ -43,6 +44,15 @@ class CollectionController extends ApiController
     public function update(UpdateCollectionRequest $request, Collection $collection): JsonResponse
     {
         $collection->update($request->validated());
+
+        return $this->successResponse(new CollectionResource($collection->load(['colorways'])));
+    }
+
+    public function updateColorways(UpdateCollectionColorwaysRequest $request, Collection $collection): JsonResponse
+    {
+        $this->authorize('update', $collection);
+
+        $collection->colorways()->sync($request->validated()['colorway_ids']);
 
         return $this->successResponse(new CollectionResource($collection->load(['colorways'])));
     }
