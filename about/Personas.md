@@ -1,11 +1,18 @@
-# Fibermade Dyer Personas
+# Fibermade Personas
 
-Personas are defined by how dyers operate and sell, not by years in business.
-Online sales are assumed for all personas and are not a differentiator.
+Personas represent the different types of people who use Fibermade.
+They are defined by how they operate, not by years in business or scale.
 
 ---
 
-## James  
+# Creators
+
+Creators are the makers — dyers, spinners, and fiber artists who produce and sell yarn.
+Online sales are assumed for all creator personas and are not a differentiator.
+
+---
+
+## James (Creator - Dyer)
 **Small Batch · Show-First**
 
 ### How James operates
@@ -33,7 +40,7 @@ James values freedom and responsiveness over optimization. Selling out feels lik
 
 ---
 
-## Stephanie  
+## Stephanie (Creator - Dyer)
 **Small Batch · Wholesale-Selective**
 
 ### How Stephanie operates
@@ -61,7 +68,7 @@ Stephanie lives in the tension between creativity and reliability. She wants to 
 
 ---
 
-## David  
+## David (Creator - Dyer)
 **Production Scale · Wholesale-First**
 
 ### How David operates
@@ -89,7 +96,7 @@ David values predictability and accuracy. He is willing to sacrifice spontaneity
 
 ---
 
-## Laura  
+## Laura (Creator - Dyer)
 **Production Scale · Show-Heavy**
 
 ### How Laura operates
@@ -117,15 +124,54 @@ Laura is comfortable with complexity as long as the system bends instead of brea
 
 ---
 
+# Stores
+
+Store owners are the buyers — they run yarn shops and purchase wholesale from creators.
+They use Fibermade to discover, order, and manage their relationships with the creators they carry.
+
+---
+
+## Katherine (Store - Owner)
+**Independent Yarn Shop · Multi-Creator**
+
+### How Katherine operates
+Katherine owns a small independent yarn shop. She carries yarn from several indie dyers and values the personal relationships she has with each one. She places wholesale orders a few times a year per creator, usually around seasonal shifts or when stock runs low.
+
+Katherine juggles ordering from multiple creators, each with different terms, minimums, and lead times. She tracks most of this in spreadsheets or email threads and wishes it were simpler.
+
+### What Katherine is looking for in a tool
+- A single place to browse and order from the creators she works with
+- Clear visibility into order status and expected delivery
+- Easy access to each creator's terms and catalog
+- A process that feels personal, not like a generic wholesale portal
+
+### Features Katherine wants
+- Browse a creator's catalog and place orders without back-and-forth emails
+- See her order history and current order status at a glance
+- Understand each creator's wholesale terms upfront (minimums, lead time, pricing)
+- Receive clear communication when orders are accepted, fulfilled, or shipped
+
+### Features Katherine does NOT want
+- Having to create separate accounts for every creator
+- Opaque ordering processes where she doesn't know what's happening
+- Systems that feel designed for large retailers
+- Pressure to commit to volumes that don't match her shop's pace
+
+---
+
 ## Key Takeaway
 
-Fibermade cannot optimize for all four personas equally at all times.
+Fibermade cannot optimize for all personas equally at all times.
 Each persona represents a different set of tradeoffs:
 
+**Creators:**
 - James trades predictability for freedom
 - Stephanie trades growth speed for sustainability
 - David trades flexibility for stability
 - Laura trades simplicity for adaptability
+
+**Stores:**
+- Katherine trades volume leverage for relationship depth
 
 Product defaults, language, and onboarding will inevitably favor some of these tradeoffs over others.
 That choice should be intentional.

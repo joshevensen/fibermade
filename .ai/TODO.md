@@ -1,34 +1,34 @@
-# Stage 1
+# Fibermade TODO
 
-[x] - Make customers view only
-[x] - Make retail orders view only
-[x] - Hide show orders
-[x] - Hide multiple users per account
-[x] - Change Create button to only create Colorway or Collection
-[x] - Creator Registration w/ access list
-[x] - Invite Store workflow
-[ ] - Store Catalog
-[ ] - Wholesale Order
-[ ] - Creator Onboarding
-[ ] - Store Onboarding
-[ ] - Marketing Website
-[ ] - Billing
+Technical and operational tasks that don't map to user stories.
+For user-facing goals, see [User-Stories.md](../about/User-Stories.md).
 
-## Detail Work
-[ ] - Transactional Emails
-[ ] - Password Reset
+---
 
+## Stage 1
 
-# Stage 2 
+### Onboarding
+- [ ] Creator onboarding flow
+- [ ] Store onboarding flow
 
-[ ] - Add Shows
-[ ] - Creator Brand Settings
-[ ] - Add Website
-[ ] - Add Discounts
-[ ] - Reporting
+### Infrastructure
+- [ ] Password reset
+- [ ] Billing
 
-## Safety
-[ ] Add rate limiting
-[ ] Add IP ban list
-[ ] Add way to shutdown account 
-[ ] Add notifications for extreme behavior like signups, emails sent, cards processed, etc. 
+### Launch
+- [ ] Marketing website
+
+---
+
+## Stage 2
+
+### Features
+- [ ] Creator brand settings
+- [ ] Discounts
+- [ ] Reporting
+
+### Safety
+- [ ] Rate limiting
+- [ ] IP ban list
+- [ ] Account shutdown mechanism
+- [ ] Notifications for extreme behavior (signups, emails sent, cards processed, etc.)
