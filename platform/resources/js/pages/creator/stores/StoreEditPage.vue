@@ -3,6 +3,7 @@ import { edit as editOrder } from '@/actions/App/Http/Controllers/OrderControlle
 import {
     destroy as destroyStore,
     update,
+    updateStatus,
 } from '@/actions/App/Http/Controllers/StoreController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
@@ -18,6 +19,8 @@ import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import { useToast } from '@/composables/useToast';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
+import { orderStatusBadgeClass } from '@/utils/orderStatusBadge';
+import { relationshipStatusBadgeClass } from '@/utils/relationshipStatusBadge';
 import { router } from '@inertiajs/vue3';
 
 interface Props {
@@ -41,24 +44,21 @@ interface Props {
         status: string;
         notes?: string | null;
     };
-    statusOptions: Array<{ label: string; value: string }>;
     orders: Array<{
         id: number;
         order_date: string;
         status: string;
         total_amount?: number | null;
-        orderable?: {
-            name: string;
-        } | null;
+        skein_count: number;
     }>;
+    ordersTruncated?: boolean;
 }
 
 const props = defineProps<Props>();
-const { requireDelete } = useConfirm();
+const { require, requireDelete } = useConfirm();
 const { showSuccess } = useToast();
 
 const pivotFieldKeys = [
-    'status',
     'discount_rate',
     'payment_terms',
     'minimum_order_quantity',
@@ -69,7 +69,6 @@ const pivotFieldKeys = [
 ] as const;
 
 const initialFormValues: Record<(typeof pivotFieldKeys)[number], unknown> = {
-    status: props.store.status || null,
     discount_rate: props.store.discount_rate ?? null,
     payment_terms: props.store.payment_terms ?? null,
     minimum_order_quantity: props.store.minimum_order_quantity ?? null,
@@ -78,6 +77,31 @@ const initialFormValues: Record<(typeof pivotFieldKeys)[number], unknown> = {
     allows_preorders: props.store.allows_preorders ?? false,
     notes: props.store.notes ?? null,
 };
+
+function submitStatus(newStatus: string): void {
+    router.patch(updateStatus.url(props.store.id), { status: newStatus });
+}
+
+function handlePause(event: Event): void {
+    require({
+        target: event.currentTarget as HTMLElement,
+        message:
+            'Pausing will prevent the store from placing new orders. Continue?',
+        acceptLabel: 'Pause',
+        accept: () => submitStatus('paused'),
+    });
+}
+
+function handleEndRelationship(event: Event): void {
+    require({
+        target: event.currentTarget as HTMLElement,
+        message:
+            'Ending this relationship is permanent. The store will lose access to your catalog. Continue?',
+        acceptLabel: 'End relationship',
+        acceptSeverity: 'danger',
+        accept: () => submitStatus('ended'),
+    });
+}
 
 const { form: vendorForm } = useFormSubmission({
     route: () => update(props.store.id),
@@ -228,136 +252,195 @@ function formatAddress(): string {
                         </h3>
                     </template>
                     <template #content>
-                        <UiForm
-                            :initial-values="initialFormValues"
-                            @submit="onVendorSubmit"
-                        >
-                            <UiFormField
-                                name="status"
-                                label="Status"
-                                :server-error="vendorForm.errors.status"
-                            >
-                                <template #default="{ props: fieldProps }">
-                                    <UiSelectButton
-                                        v-bind="fieldProps"
-                                        :options="statusOptions"
-                                        size="small"
-                                        fluid
-                                    />
-                                </template>
-                            </UiFormField>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <UiFormField
-                                    name="discount_rate"
-                                    label="Discount Rate (%)"
-                                    :server-error="
-                                        vendorForm.errors.discount_rate
-                                    "
+                        <div class="space-y-4">
+                            <div>
+                                <label
+                                    class="text-sm font-medium text-surface-600"
                                 >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                                :step="0.01"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
+                                    Relationship status
+                                </label>
+                                <div
+                                    class="mt-2 flex flex-wrap items-center gap-2"
+                                >
+                                    <span
+                                        class="rounded-full px-2 py-1 text-xs font-medium"
+                                        :class="
+                                            relationshipStatusBadgeClass(
+                                                props.store.status,
+                                            )
+                                        "
+                                    >
+                                        {{ formatEnum(props.store.status) }}
+                                    </span>
+                                    <template
+                                        v-if="props.store.status === 'active'"
+                                    >
+                                        <UiButton
+                                            type="button"
+                                            size="small"
+                                            outlined
+                                            @click="handlePause($event)"
+                                        >
+                                            Pause Relationship
+                                        </UiButton>
                                     </template>
-                                </UiFormField>
+                                    <template
+                                        v-else-if="
+                                            props.store.status === 'paused'
+                                        "
+                                    >
+                                        <UiButton
+                                            type="button"
+                                            size="small"
+                                            @click="submitStatus('active')"
+                                        >
+                                            Reactivate
+                                        </UiButton>
+                                        <UiButton
+                                            type="button"
+                                            size="small"
+                                            severity="danger"
+                                            outlined
+                                            @click="
+                                                handleEndRelationship($event)
+                                            "
+                                        >
+                                            End Relationship
+                                        </UiButton>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <UiForm
+                                :initial-values="initialFormValues"
+                                @submit="onVendorSubmit"
+                            >
+                                <div class="grid grid-cols-2 gap-4">
+                                    <UiFormField
+                                        name="discount_rate"
+                                        label="Discount Rate (%)"
+                                        :server-error="
+                                            vendorForm.errors.discount_rate
+                                        "
+                                    >
+                                        <template
+                                            #default="{ props: fieldProps }"
+                                        >
+                                            <UiInputGroup>
+                                                <UiInputNumber
+                                                    v-bind="fieldProps"
+                                                    :min="0"
+                                                    :max="100"
+                                                    :step="0.01"
+                                                />
+                                                <UiInputGroupAddon
+                                                    >%</UiInputGroupAddon
+                                                >
+                                            </UiInputGroup>
+                                        </template>
+                                    </UiFormField>
+
+                                    <UiFormFieldInput
+                                        name="payment_terms"
+                                        label="Deposit"
+                                        placeholder="e.g., Net 30, Net 60"
+                                        :server-error="
+                                            vendorForm.errors.payment_terms
+                                        "
+                                    />
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <UiFormFieldInputNumber
+                                        name="minimum_order_quantity"
+                                        label="Min Quantity"
+                                        :min="1"
+                                        :server-error="
+                                            vendorForm.errors
+                                                .minimum_order_quantity
+                                        "
+                                    />
+
+                                    <UiFormField
+                                        name="minimum_order_value"
+                                        label="Min Value"
+                                        :server-error="
+                                            vendorForm.errors
+                                                .minimum_order_value
+                                        "
+                                    >
+                                        <template
+                                            #default="{ props: fieldProps }"
+                                        >
+                                            <UiInputGroup>
+                                                <UiInputGroupAddon
+                                                    >$</UiInputGroupAddon
+                                                >
+                                                <UiInputNumber
+                                                    v-bind="fieldProps"
+                                                    :min="0"
+                                                    :max="99999999.99"
+                                                    :step="0.01"
+                                                />
+                                            </UiInputGroup>
+                                        </template>
+                                    </UiFormField>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <UiFormFieldInputNumber
+                                        name="lead_time_days"
+                                        label="Lead Time"
+                                        :min="0"
+                                        :server-error="
+                                            vendorForm.errors.lead_time_days
+                                        "
+                                    />
+
+                                    <UiFormField
+                                        name="allows_preorders"
+                                        label="Allow Preorder"
+                                        :server-error="
+                                            vendorForm.errors.allows_preorders
+                                        "
+                                    >
+                                        <template
+                                            #default="{ props: fieldProps }"
+                                        >
+                                            <UiSelectButton
+                                                v-bind="fieldProps"
+                                                :options="[
+                                                    {
+                                                        label: 'Yes',
+                                                        value: true,
+                                                    },
+                                                    {
+                                                        label: 'No',
+                                                        value: false,
+                                                    },
+                                                ]"
+                                                size="small"
+                                                fluid
+                                            />
+                                        </template>
+                                    </UiFormField>
+                                </div>
 
                                 <UiFormFieldInput
-                                    name="payment_terms"
-                                    label="Deposit"
-                                    placeholder="e.g., Net 30, Net 60"
-                                    :server-error="
-                                        vendorForm.errors.payment_terms
-                                    "
-                                />
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <UiFormFieldInputNumber
-                                    name="minimum_order_quantity"
-                                    label="Min Quantity"
-                                    :min="1"
-                                    :server-error="
-                                        vendorForm.errors.minimum_order_quantity
-                                    "
+                                    name="notes"
+                                    label="Notes"
+                                    placeholder="Internal notes about this store"
+                                    :server-error="vendorForm.errors.notes"
                                 />
 
-                                <UiFormField
-                                    name="minimum_order_value"
-                                    label="Min Value"
-                                    :server-error="
-                                        vendorForm.errors.minimum_order_value
-                                    "
+                                <UiButton
+                                    type="submit"
+                                    :loading="vendorForm.processing"
                                 >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputGroupAddon
-                                                >$</UiInputGroupAddon
-                                            >
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="99999999.99"
-                                                :step="0.01"
-                                            />
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-4">
-                                <UiFormFieldInputNumber
-                                    name="lead_time_days"
-                                    label="Lead Time"
-                                    :min="0"
-                                    :server-error="
-                                        vendorForm.errors.lead_time_days
-                                    "
-                                />
-
-                                <UiFormField
-                                    name="allows_preorders"
-                                    label="Allow Preorder"
-                                    :server-error="
-                                        vendorForm.errors.allows_preorders
-                                    "
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiSelectButton
-                                            v-bind="fieldProps"
-                                            :options="[
-                                                { label: 'Yes', value: true },
-                                                { label: 'No', value: false },
-                                            ]"
-                                            size="small"
-                                            fluid
-                                        />
-                                    </template>
-                                </UiFormField>
-                            </div>
-
-                            <UiFormFieldInput
-                                name="notes"
-                                label="Notes"
-                                placeholder="Internal notes about this store"
-                                :server-error="vendorForm.errors.notes"
-                            />
-
-                            <UiButton
-                                type="submit"
-                                :loading="vendorForm.processing"
-                            >
-                                Update Settings
-                            </UiButton>
-                        </UiForm>
+                                    Update Settings
+                                </UiButton>
+                            </UiForm>
+                        </div>
                     </template>
                 </UiCard>
             </div>
@@ -370,9 +453,15 @@ function formatAddress(): string {
                         <h3 class="text-lg font-semibold">Orders</h3>
                     </template>
                     <template #content>
+                        <p
+                            v-if="ordersTruncated"
+                            class="mb-2 text-xs text-surface-500"
+                        >
+                            Showing 100 most recent orders
+                        </p>
                         <div v-if="props.orders.length === 0" class="py-8">
                             <p class="text-center text-surface-500">
-                                No orders found
+                                No orders yet
                             </p>
                         </div>
                         <ul v-else class="space-y-2">
@@ -381,9 +470,9 @@ function formatAddress(): string {
                                 :key="order.id"
                                 class="flex items-center justify-between gap-4 rounded-lg border border-surface-200 p-3 transition-colors hover:bg-surface-50"
                             >
-                                <div class="flex items-center gap-3">
+                                <div class="flex flex-1 flex-col gap-1">
                                     <button
-                                        class="flex-1 text-left font-medium text-surface-700 hover:text-primary-600"
+                                        class="text-left font-medium text-surface-700 hover:text-primary-600"
                                         @click="
                                             router.visit(
                                                 editOrder.url(order.id),
@@ -392,24 +481,26 @@ function formatAddress(): string {
                                     >
                                         {{ formatDate(order.order_date) }}
                                     </button>
-                                    <span
-                                        class="rounded-full px-2 py-1 text-xs font-medium"
-                                        :class="{
-                                            'bg-green-100 text-green-800':
-                                                order.status === 'completed',
-                                            'bg-yellow-100 text-yellow-800':
-                                                order.status === 'pending',
-                                            'bg-blue-100 text-blue-800':
-                                                order.status === 'processing',
-                                            'bg-red-100 text-red-800':
-                                                order.status === 'cancelled',
-                                        }"
+                                    <div
+                                        class="flex flex-wrap items-center gap-2"
                                     >
-                                        {{ formatEnum(order.status) }}
-                                    </span>
+                                        <span
+                                            class="rounded-full px-2 py-1 text-xs font-medium"
+                                            :class="
+                                                orderStatusBadgeClass(
+                                                    order.status,
+                                                )
+                                            "
+                                        >
+                                            {{ formatEnum(order.status) }}
+                                        </span>
+                                        <span class="text-xs text-surface-600">
+                                            {{ order.skein_count }} skeins
+                                        </span>
+                                    </div>
                                 </div>
                                 <span
-                                    v-if="order.total_amount"
+                                    v-if="order.total_amount != null"
                                     class="text-sm font-medium text-surface-700"
                                 >
                                     {{ formatCurrency(order.total_amount) }}

@@ -11,6 +11,7 @@ use App\Enums\OrderType;
 use App\Http\Requests\StoreOrderBuilderRequest;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\UpdateStoreRequest;
+use App\Http\Requests\UpdateStoreStatusRequest;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Creator;
@@ -944,16 +945,12 @@ class StoreController extends Controller
 
         $this->authorize('view', $store);
 
-        $store->load(['orders.orderable']);
-
-        $statusOptions = [
-            ['label' => 'Active', 'value' => 'active'],
-            ['label' => 'Paused', 'value' => 'paused'],
-            ['label' => 'Ended', 'value' => 'ended'],
-        ];
+        $orders = [];
+        $ordersTruncated = false;
 
         if ($user->account?->type === AccountType::Creator && $user->account->creator) {
-            $storeWithPivot = $user->account->creator->stores()->where('stores.id', $store->id)->first();
+            $creator = $user->account->creator;
+            $storeWithPivot = $creator->stores()->where('stores.id', $store->id)->first();
             $pivot = $storeWithPivot->pivot;
             $storeData = [
                 'id' => $store->id,
@@ -975,6 +972,24 @@ class StoreController extends Controller
                 'status' => $pivot->status ?? 'active',
                 'notes' => $pivot->notes,
             ];
+
+            $ordersQuery = Order::query()
+                ->where('type', OrderType::Wholesale)
+                ->where('account_id', $creator->account_id)
+                ->where('orderable_type', Store::class)
+                ->where('orderable_id', $store->id)
+                ->with('orderItems')
+                ->orderByDesc('order_date')
+                ->limit(100);
+            $ordersCollection = $ordersQuery->get();
+            $ordersTruncated = $ordersCollection->count() === 100;
+            $orders = $ordersCollection->map(fn (Order $order) => [
+                'id' => $order->id,
+                'order_date' => $order->order_date->toDateString(),
+                'status' => $order->status->value,
+                'total_amount' => $order->total_amount,
+                'skein_count' => $order->orderItems->sum('quantity'),
+            ])->all();
         } else {
             $storeData = array_merge($store->only([
                 'id', 'name', 'email', 'owner_name', 'address_line1', 'address_line2',
@@ -993,17 +1008,39 @@ class StoreController extends Controller
 
         return Inertia::render('creator/stores/StoreEditPage', [
             'store' => $storeData,
-            'statusOptions' => $statusOptions,
-            'orders' => $store->orders->map(fn ($order) => [
-                'id' => $order->id,
-                'order_date' => $order->order_date->toDateString(),
-                'status' => $order->status->value,
-                'total_amount' => $order->total_amount,
-                'orderable' => $order->orderable ? [
-                    'name' => $order->orderable->name,
-                ] : null,
-            ]),
+            'orders' => $orders,
+            'ordersTruncated' => $ordersTruncated,
         ]);
+    }
+
+    /**
+     * Update the creator-store relationship status (active, paused, ended).
+     */
+    public function updateStatus(UpdateStoreStatusRequest $request, Store $store): RedirectResponse
+    {
+        $user = $request->user();
+        $creator = $user->account?->creator;
+        if (! $creator) {
+            abort(404);
+        }
+
+        $storeWithPivot = $creator->stores()->where('stores.id', $store->id)->first();
+        if ($storeWithPivot === null) {
+            abort(404);
+        }
+
+        $currentStatus = $storeWithPivot->pivot->status ?? 'active';
+        if ($currentStatus === 'ended') {
+            throw ValidationException::withMessages([
+                'status' => ['Cannot change status from ended.'],
+            ]);
+        }
+
+        $creator->stores()->updateExistingPivot($store->id, [
+            'status' => $request->validated('status'),
+        ]);
+
+        return redirect()->route('stores.edit', $store);
     }
 
     /**

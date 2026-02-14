@@ -32,7 +32,6 @@ class UpdateStoreRequest extends FormRequest
                 'payment_terms' => ['sometimes', 'nullable', 'string'],
                 'lead_time_days' => ['sometimes', 'nullable', 'integer', 'min:0'],
                 'allows_preorders' => ['sometimes', 'boolean'],
-                'status' => ['sometimes', 'string', Rule::in(['active', 'paused', 'ended'])],
                 'notes' => ['sometimes', 'nullable', 'string'],
             ];
         }

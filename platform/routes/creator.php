@@ -66,6 +66,7 @@ Route::prefix('creator')->middleware(['auth', 'verified'])->group(function () {
     Route::patch('inventory/quantity', [InventoryController::class, 'updateQuantity'])->name('inventory.updateQuantity');
 
     // Stores routes
+    Route::patch('stores/{store}/status', [StoreController::class, 'updateStatus'])->name('stores.status');
     Route::resource('stores', StoreController::class)->except(['create']);
 
     // Invites routes

@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 4.4: Prompt 2 -- Relationship Status & Order History
 
@@ -31,32 +31,42 @@ Enhance the store relationship management with: (1) proper order history scoped 
 - Follow the existing `useConfirm` composable pattern for confirmations
 - Status change should be a separate action from the terms update form -- don't mix term editing with status changes in the same submit
 
+## Decisions
+
+- **Status only via action buttons**: Remove `status` from the wholesale settings form and from `UpdateStoreRequest` so relationship status can only be changed via the new Pause / Reactivate / End actions.
+- **Status endpoint validation**: Use a dedicated Form Request (e.g. `UpdateStoreStatusRequest`) for the status endpoint; include validation and "ended is terminal" guard there or in controller.
+- **Status route name**: `stores.status` for `PATCH /creator/stores/{store}/status`.
+- **Order sidebar empty state**: Use "No orders yet" (not "No orders found").
+- **Order list cap**: Limit to 100 most recent orders; optionally show "Showing 100 most recent orders" in the UI when the list is truncated.
+- **Relationship status badge**: Add a shared utility (e.g. `relationshipStatusBadgeClass(status)`) for active/paused/ended styling; use existing `orderStatusBadgeClass()` for order status badges in the sidebar.
+
 ## Acceptance Criteria
 
 - [ ] `StoreController::edit()` filters orders to the creator's account:
   - Only wholesale orders (`type: wholesale`)
   - Only orders for the creator's account (`account_id: $creator->account_id`)
-  - Ordered by `order_date` descending
+  - Ordered by `order_date` descending, limited to 100 most recent
   - Each order includes: id, order_date, status, total_amount, skein_count (sum of order item quantities)
 - [ ] `StoreEditPage.vue` order history sidebar:
-  - Shows order date, status badge (color-coded), skein count, and total amount
+  - Shows order date, status badge (color-coded via `orderStatusBadgeClass()`), skein count, and total amount
   - Each order is clickable (links to the order edit page)
   - Empty state: "No orders yet"
   - Orders sorted most recent first
+  - When list is truncated: optionally show "Showing 100 most recent orders"
 - [ ] Status management in `StoreEditPage.vue`:
-  - Current status displayed as a badge
+  - Current status displayed as a badge (styling via `relationshipStatusBadgeClass()` utility)
   - Action buttons based on current status:
     - Active: "Pause Relationship" button
     - Paused: "Reactivate" and "End Relationship" buttons
     - Ended: no action buttons (read-only badge showing "Ended")
   - Pause confirmation dialog via `useConfirm`
   - End confirmation dialog via `useConfirm`
-- [ ] Separate route for status changes: `PATCH /creator/stores/{store}/status` with `status` field
-  - Validates status is one of: active, paused, ended
+- [ ] Separate route for status changes: `PATCH /creator/stores/{store}/status` (route name: `stores.status`) with `status` field
+  - Validation via dedicated Form Request (e.g. `UpdateStoreStatusRequest`): status one of active, paused, ended
   - Guards: cannot go from ended to any other status
   - Updates the `creator_store` pivot status
   - Returns redirect to `stores.edit`
-- [ ] Remove the status select button from the wholesale settings form (replaced by action buttons)
+- [ ] Remove the status select button and `status` field from the wholesale settings form (replaced by action buttons); remove `status` from `UpdateStoreRequest`
 - [ ] Tests:
   - Order history is scoped to the creator's account
   - Status change route validates transitions (ended is terminal)
@@ -68,37 +78,36 @@ Enhance the store relationship management with: (1) proper order history scoped 
 
 ## Tech Analysis
 
-- **Scoped order history**: Currently `StoreController::edit()` loads `$store->orders` which returns ALL orders for that store (from any creator). For a creator viewing the page, we need `Order::where('type', OrderType::Wholesale)->where('account_id', $creator->account_id)->where('orderable_type', Store::class)->where('orderable_id', $store->id)->orderByDesc('order_date')->get()`. Load `orderItems` to calculate skein count.
+- **Scoped order history**: Currently `StoreController::edit()` loads `$store->orders` which returns ALL orders for that store (from any creator). For a creator viewing the page, query `Order::where('type', OrderType::Wholesale)->where('account_id', $creator->account_id)->where('orderable_type', Store::class)->where('orderable_id', $store->id)->orderByDesc('order_date')->limit(100)`. Eager load `orderItems` to calculate skein count.
 - **Skein count**: Use `$order->orderItems->sum('quantity')` for each order. This is already loaded -- just calculate and include in the mapped array.
-- **Status action route**: Add a dedicated `PATCH /creator/stores/{store}/status` route that maps to `StoreController::updateStatus()`. This keeps status changes separate from the terms update form. The method:
-  1. Gets the creator from `auth()->user()->account->creator`
-  2. Validates the requested status
-  3. Checks the current pivot status allows the transition (ended → anything is blocked)
-  4. Updates the pivot: `$creator->stores()->updateExistingPivot($store->id, ['status' => $status])`
-  5. Redirects back
+- **Status action route**: Add `PATCH /creator/stores/{store}/status` (route name: `stores.status`) mapping to `StoreController::updateStatus()`. Use a dedicated Form Request (e.g. `UpdateStoreStatusRequest`) for validation. The method: (1) get creator from `auth()->user()->account->creator`, (2) validate via request (status in active/paused/ended; optionally enforce "ended is terminal" in request or controller), (3) update pivot `$creator->stores()->updateExistingPivot($store->id, ['status' => $status])`, (4) redirect to `stores.edit`. Remove `status` from `UpdateStoreRequest` so the terms form cannot change status.
 - **Status transitions**: Simple rules:
   - `active` → `paused`, `ended`
   - `paused` → `active`, `ended`
   - `ended` → nothing (terminal)
   These are simple enough that a conditional check in the controller suffices -- no need for a state machine.
-- **Replacing status select button**: The current form has a `UiSelectButton` for status with options (active, paused, ended). Replace this with: a status badge showing the current state, plus contextual action buttons below it. This makes the state changes more intentional and allows for confirmation dialogs.
-- **Order item click navigation**: Each order in the sidebar should link to `/creator/orders/{orderId}` (the order edit/detail page). Use the existing `editOrder.url(order.id)` action URL helper.
+- **Replacing status select button**: The current form has a `UiSelectButton` for status. Replace with a status badge (using `relationshipStatusBadgeClass(status)` utility for active/paused/ended) plus contextual action buttons. Remove `status` from the form payload and from `pivotFieldKeys`.
+- **Order status badges in sidebar**: Use `orderStatusBadgeClass(status)` from `platform/resources/js/utils/orderStatusBadge.ts` for order status badge styling (consistent with OrderIndexPage/OrderEditPage).
+- **Order item click navigation**: Each order in the sidebar should link to the order edit page. Use the existing `editOrder.url(order.id)` action URL helper.
 
 ## References
 
 - `platform/app/Http/Controllers/StoreController.php` -- `edit()` order loading, add `updateStatus()` action
 - `platform/resources/js/pages/creator/stores/StoreEditPage.vue` -- order sidebar, status management
-- `platform/routes/creator.php` -- add status change route
+- `platform/routes/creator.php` -- add status change route (name: `stores.status`)
 - `platform/app/Models/Order.php` -- scoping query
 - `platform/app/Enums/OrderType.php` -- `Wholesale` case
 - `platform/app/Enums/OrderStatus.php` -- status badge coloring reference
-- `platform/resources/js/composables/useConfirm.ts` -- confirmation composable
-- `platform/resources/js/pages/creator/orders/OrderEditPage.vue` -- `getStatusBadgeClass()` pattern for order status badges
+- `platform/resources/js/composables/useConfirm.ts` -- use `require()` for Pause/End confirmations
+- `platform/resources/js/utils/orderStatusBadge.ts` -- `orderStatusBadgeClass()` for order status badges in sidebar
 - `platform/tests/Feature/Http/Controllers/StoreControllerTest.php` -- existing tests to extend
 
 ## Files
 
-- Modify `platform/app/Http/Controllers/StoreController.php` -- scope order history in `edit()`, add `updateStatus()` action
-- Modify `platform/routes/creator.php` -- add `PATCH stores/{store}/status` route
-- Modify `platform/resources/js/pages/creator/stores/StoreEditPage.vue` -- enhanced order history sidebar, replace status select with action buttons + confirmations
-- Modify `platform/tests/Feature/Http/Controllers/StoreControllerTest.php` -- tests for scoped order history, status transitions, terminal state guard
+- Modify `platform/app/Http/Controllers/StoreController.php` -- scope order history in `edit()` (limit 100, eager load orderItems), add `updateStatus()` action
+- Create `platform/app/Http/Requests/UpdateStoreStatusRequest.php` -- validate status, optional "ended is terminal" guard
+- Modify `platform/app/Http/Requests/UpdateStoreRequest.php` -- remove `status` from rules (creator branch)
+- Modify `platform/routes/creator.php` -- add `PATCH stores/{store}/status` route named `stores.status`
+- Create `platform/resources/js/utils/relationshipStatusBadge.ts` -- `relationshipStatusBadgeClass(status)` for active/paused/ended
+- Modify `platform/resources/js/pages/creator/stores/StoreEditPage.vue` -- enhanced order history sidebar (orderStatusBadgeClass, "No orders yet", optional truncation message), replace status select with badge + action buttons + confirmations, remove status from form
+- Modify `platform/tests/Feature/Http/Controllers/StoreControllerTest.php` -- tests for scoped order history, status route (transitions, 403, pivot update), update existing creator update test to not send status
