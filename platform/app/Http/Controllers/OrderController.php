@@ -161,6 +161,7 @@ class OrderController extends Controller
             'orderStatusOptions' => $orderStatusOptions,
             'colorways' => $colorways,
             'bases' => $bases,
+            'allowedTransitions' => $order->getAllowedTransitions(),
         ]);
     }
 

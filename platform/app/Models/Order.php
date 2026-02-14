@@ -207,6 +207,18 @@ class Order extends Model
     }
 
     /**
+     * Get the list of status values this order can transition to.
+     *
+     * @return list<string>
+     */
+    public function getAllowedTransitions(): array
+    {
+        $allowed = self::$transitions[$this->status->value] ?? [];
+
+        return array_map(fn (OrderStatus $s) => $s->value, $allowed);
+    }
+
+    /**
      * Transition the order to the given status. Throws InvalidOrderTransitionException if invalid.
      */
     public function transitionTo(OrderStatus $status, ?int $userId = null, ?string $note = null): void

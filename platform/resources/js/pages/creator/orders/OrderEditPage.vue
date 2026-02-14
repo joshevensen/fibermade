@@ -1,28 +1,23 @@
-<!-- TODO: Restore edit functionality when ready to work on orders -->
 <script setup lang="ts">
 import { edit as editCustomer } from '@/actions/App/Http/Controllers/CustomerController';
-// TODO: Re-enable these imports when ready to work on orders
-// import {
-//     destroy as destroyOrder,
-//     update,
-// } from '@/actions/App/Http/Controllers/OrderController';
-// import { destroy as destroyOrderItem } from '@/actions/App/Http/Controllers/OrderItemController';
+import {
+    accept,
+    cancel,
+    deliver,
+    fulfill,
+} from '@/actions/App/Http/Controllers/OrderController';
 import { edit as editShow } from '@/actions/App/Http/Controllers/ShowController';
 import { edit as editStore } from '@/actions/App/Http/Controllers/StoreController';
-// import UiButton from '@/components/ui/UiButton.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-// import UiEditor from '@/components/ui/UiEditor.vue';
-// import UiForm from '@/components/ui/UiForm.vue';
-// import UiFormField from '@/components/ui/UiFormField.vue';
-// import UiFormFieldDatePicker from '@/components/ui/UiFormFieldDatePicker.vue';
-// import UiSelectButton from '@/components/ui/UiSelectButton.vue';
-// import { useConfirm } from '@/composables/useConfirm';
-// import { useFormSubmission } from '@/composables/useFormSubmission';
+import UiDialog from '@/components/ui/UiDialog.vue';
+import UiTextarea from '@/components/ui/UiTextarea.vue';
+import { useConfirm } from '@/composables/useConfirm';
+import { useToast } from '@/composables/useToast';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
-// import OrderItemDrawer from '@/pages/creator/orders/components/OrderItemDrawer.vue';
 import { orderStatusBadgeClass } from '@/utils/orderStatusBadge';
-import { Link } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Link, router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 
 interface OrderItem {
     id: number;
@@ -67,6 +62,20 @@ interface OrderableCustomer {
     state_region?: string | null;
 }
 
+const TRANSITION_LABELS: Record<string, string> = {
+    accepted: 'Accept Order',
+    fulfilled: 'Mark as Fulfilled',
+    delivered: 'Mark as Delivered',
+    cancelled: 'Cancel Order',
+};
+
+const WORKFLOW_STEPS = [
+    { key: 'open', label: 'Open' },
+    { key: 'accepted', label: 'Accepted' },
+    { key: 'fulfilled', label: 'Fulfilled' },
+    { key: 'delivered', label: 'Delivered' },
+] as const;
+
 interface Props {
     order: {
         id: number;
@@ -84,44 +93,122 @@ interface Props {
     orderStatusOptions: Array<{ label: string; value: string }>;
     colorways: Array<{ id: number; name: string }>;
     bases: Array<{ id: number; code: string; descriptor: string }>;
+    allowedTransitions: string[];
 }
 
 const props = defineProps<Props>();
-// TODO: Re-enable delete functionality when ready to work on orders
-// const { requireDelete } = useConfirm();
+const { require: requireConfirm } = useConfirm();
+const { showError } = useToast();
 
-// TODO: Re-enable OrderItemDrawer functionality when ready to work on orders
-// const showOrderItemDrawer = ref(false);
-// const editingOrderItem = ref<OrderItem | null>(null);
+const showTransitionDialog = ref(false);
+const pendingTransition = ref<string | null>(null);
+const transitionNote = ref('');
+const isTransitioning = ref(false);
 
-// function openAddItemDrawer(): void {
-//     editingOrderItem.value = null;
-//     showOrderItemDrawer.value = true;
-// }
+const primaryTransition = computed(
+    () => props.allowedTransitions.find((t) => t !== 'cancelled') ?? null,
+);
+const canCancel = computed(() =>
+    props.allowedTransitions.includes('cancelled'),
+);
+const transitionDialogTitle = computed(() => {
+    const t = pendingTransition.value;
+    if (!t || !TRANSITION_LABELS[t]) return 'Confirm';
+    return `${TRANSITION_LABELS[t]}?`;
+});
 
-// function openEditItemDrawer(item: OrderItem): void {
-//     editingOrderItem.value = item;
-//     showOrderItemDrawer.value = true;
-// }
+const currentStepIndex = computed(() => {
+    const idx = WORKFLOW_STEPS.findIndex((s) => s.key === props.order.status);
+    return idx >= 0 ? idx : 0;
+});
 
-// function closeOrderItemDrawer(): void {
-//     showOrderItemDrawer.value = false;
-//     editingOrderItem.value = null;
-// }
+function openTransitionDialog(transition: string): void {
+    pendingTransition.value = transition;
+    transitionNote.value = '';
+    showTransitionDialog.value = true;
+}
 
-// function handleDeleteItem(event: Event, item: OrderItem): void {
-//     requireDelete({
-//         target: event.currentTarget as HTMLElement,
-//         message: 'Are you sure you want to delete this order item?',
-//         onAccept: () => {
-//             router.delete(destroyOrderItem.url(item.id), {
-//                 onSuccess: () => {
-//                     router.reload({ only: ['order'] });
-//                 },
-//             });
-//         },
-//     });
-// }
+function closeTransitionDialog(): void {
+    showTransitionDialog.value = false;
+    pendingTransition.value = null;
+    transitionNote.value = '';
+}
+
+function getTransitionUrl(transition: string): string {
+    const id = props.order.id;
+    if (transition === 'accepted') return accept.url(id);
+    if (transition === 'fulfilled') return fulfill.url(id);
+    if (transition === 'delivered') return deliver.url(id);
+    return '';
+}
+
+function submitTransition(): void {
+    const transition = pendingTransition.value;
+    if (!transition || transition === 'cancelled') return;
+    const url = getTransitionUrl(transition);
+    if (!url) return;
+    isTransitioning.value = true;
+    router.patch(
+        url,
+        { note: transitionNote.value },
+        {
+            onSuccess: () => {
+                closeTransitionDialog();
+                isTransitioning.value = false;
+            },
+            onError: (errors) => {
+                const message =
+                    typeof errors === 'object' && errors && 'message' in errors
+                        ? String((errors as { message: string }).message)
+                        : 'The transition could not be completed.';
+                showError(message);
+                closeTransitionDialog();
+                isTransitioning.value = false;
+            },
+        },
+    );
+}
+
+function handleCancelOrder(event: Event): void {
+    requireConfirm({
+        target: event.currentTarget as HTMLElement,
+        message:
+            'Cancel this order? The customer will no longer be able to use it for fulfillment.',
+        header: 'Cancel Order',
+        acceptLabel: 'Cancel Order',
+        acceptSeverity: 'danger',
+        accept: () => {
+            isTransitioning.value = true;
+            router.patch(
+                cancel.url(props.order.id),
+                {},
+                {
+                    onSuccess: () => {
+                        isTransitioning.value = false;
+                    },
+                    onError: (errors) => {
+                        const message =
+                            typeof errors === 'object' &&
+                            errors &&
+                            'message' in errors
+                                ? String(
+                                      (errors as { message: string }).message,
+                                  )
+                                : 'The order could not be cancelled.';
+                        showError(message);
+                        isTransitioning.value = false;
+                    },
+                },
+            );
+        },
+    });
+}
+
+function stepStatus(stepIndex: number): 'completed' | 'current' | 'upcoming' {
+    if (stepIndex < currentStepIndex.value) return 'completed';
+    if (stepIndex === currentStepIndex.value) return 'current';
+    return 'upcoming';
+}
 
 const calculatedTotals = computed(() => {
     const subtotal =
@@ -163,31 +250,6 @@ function formatStatus(status: string): string {
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
 }
-
-// TODO: Re-enable form submission when ready to work on orders
-// const { form, onSubmit } = useFormSubmission({
-//     route: () => update(props.order.id),
-//     initialValues: {
-//         status: props.order.status || null,
-//         order_date: props.order.order_date || null,
-//         notes: props.order.notes || null,
-//     },
-//     successMessage: 'Order updated successfully.',
-//     onSuccess: () => {
-//         router.visit('/orders');
-//     },
-// });
-
-// TODO: Re-enable delete handler when ready to work on orders
-// function handleDelete(event: Event): void {
-//     requireDelete({
-//         target: event.currentTarget as HTMLElement,
-//         message: 'Are you sure you want to delete this order?',
-//         onAccept: () => {
-//             router.delete(destroyOrder.url(props.order.id));
-//         },
-//     });
-// }
 </script>
 
 <template>
@@ -237,9 +299,159 @@ function formatStatus(status: string): string {
                                     v-html="props.order.notes"
                                 />
                             </div>
+
+                            <div
+                                v-if="
+                                    props.order.status !== 'draft' &&
+                                    props.order.status !== 'cancelled'
+                                "
+                                class="pt-4"
+                            >
+                                <label
+                                    class="mb-2 block text-sm font-medium text-surface-700"
+                                >
+                                    Progress
+                                </label>
+                                <div
+                                    class="flex flex-wrap items-center gap-2 sm:gap-4"
+                                >
+                                    <template
+                                        v-for="(step, index) in WORKFLOW_STEPS"
+                                        :key="step.key"
+                                    >
+                                        <div
+                                            v-if="index > 0"
+                                            class="h-px w-4 shrink-0 bg-surface-300 sm:w-6"
+                                            aria-hidden="true"
+                                        />
+                                        <div
+                                            class="flex items-center gap-2"
+                                            :class="{
+                                                'text-surface-500':
+                                                    stepStatus(index) ===
+                                                    'upcoming',
+                                                'font-medium text-surface-700':
+                                                    stepStatus(index) ===
+                                                    'current',
+                                                'text-surface-600':
+                                                    stepStatus(index) ===
+                                                    'completed',
+                                            }"
+                                        >
+                                            <span
+                                                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs"
+                                                :class="{
+                                                    'bg-primary text-primary-contrast':
+                                                        stepStatus(index) ===
+                                                        'current',
+                                                    'bg-surface-200 text-surface-600':
+                                                        stepStatus(index) ===
+                                                        'upcoming',
+                                                    'bg-surface-200 text-surface-700':
+                                                        stepStatus(index) ===
+                                                        'completed',
+                                                }"
+                                            >
+                                                <template
+                                                    v-if="
+                                                        stepStatus(index) ===
+                                                        'completed'
+                                                    "
+                                                    >✓</template
+                                                >
+                                                <template v-else>{{
+                                                    index + 1
+                                                }}</template>
+                                            </span>
+                                            <span class="text-sm">{{
+                                                step.label
+                                            }}</span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="
+                                    props.order.status === 'cancelled' &&
+                                    props.order.status !== 'draft'
+                                "
+                                class="pt-4"
+                            >
+                                <span
+                                    class="inline-block rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-800"
+                                >
+                                    Cancelled
+                                </span>
+                            </div>
+
+                            <div
+                                v-if="
+                                    props.allowedTransitions &&
+                                    props.allowedTransitions.length > 0
+                                "
+                                class="flex flex-wrap gap-2 pt-4"
+                            >
+                                <UiButton
+                                    v-if="primaryTransition"
+                                    :label="
+                                        TRANSITION_LABELS[primaryTransition]
+                                    "
+                                    :disabled="isTransitioning"
+                                    @click="
+                                        openTransitionDialog(primaryTransition)
+                                    "
+                                />
+                                <UiButton
+                                    v-if="canCancel"
+                                    label="Cancel Order"
+                                    severity="danger"
+                                    :disabled="isTransitioning"
+                                    outlined
+                                    @click="handleCancelOrder"
+                                />
+                            </div>
                         </div>
                     </template>
                 </UiCard>
+
+                <UiDialog
+                    :visible="showTransitionDialog"
+                    modal
+                    :header="transitionDialogTitle"
+                    :closable="true"
+                    :show-header="true"
+                    @update:visible="
+                        (v) => {
+                            if (!v) closeTransitionDialog();
+                        }
+                    "
+                >
+                    <div class="space-y-4">
+                        <p class="text-surface-700">
+                            Add an optional note for this status change.
+                        </p>
+                        <UiTextarea
+                            v-model="transitionNote"
+                            placeholder="Optional note (max 1000 characters)"
+                            :auto-resize="true"
+                            maxlength="1000"
+                        />
+                    </div>
+                    <template #footer>
+                        <UiButton
+                            label="Cancel"
+                            severity="secondary"
+                            outlined
+                            @click="closeTransitionDialog"
+                        />
+                        <UiButton
+                            label="Confirm"
+                            :disabled="isTransitioning"
+                            @click="submitTransition"
+                        />
+                    </template>
+                </UiDialog>
 
                 <UiCard>
                     <template #header>

@@ -21,7 +21,7 @@ See [Personas.md](Personas.md) for details.
 
 - **CI-1:** As a creator, I want to see all my colorways in one place so that I have a clear view of what I offer.
 - **CI-2:** As a creator, I want to organize colorways into collections so that my catalog is easy to browse for both me and my stores.
-- **CI-3:** As a creator, I want to manage which bases are available for each colorway so that stores only order combinations I actually produce.
+- **CI-3:** As a creator, I want to manage which bases are available so that stores only order bases I support.
 - **CI-4:** As a creator, I want to see current inventory levels so that I know what's in stock and what needs to be dyed.
 
 ---
@@ -70,7 +70,7 @@ See [Personas.md](Personas.md) for details.
 
 ## Production Planning
 
-- **PP-1:** As a creator, I want to see what needs to be produced based on my open orders so that I can plan my work.
+- **PP-1:** As a creator, I want to see a dye list of what needs to be produced based on my open orders so that I can plan my work.
 - **PP-2:** As a creator, I want production commitments aggregated across wholesale and retail so that I have one view of everything I owe.
 - **PP-3:** As a creator, I want to drill into which orders are driving a production commitment so that I can prioritize.
 
@@ -78,28 +78,6 @@ See [Personas.md](Personas.md) for details.
 
 ## Communication
 
-- **CO-1:** As a creator, I want customers and stores to receive automatic emails when order status changes so that I don't have to send updates manually.
-- **CO-2:** As a store owner, I want to receive an email when my order is accepted, fulfilled, or shipped so that I know what's happening without checking Fibermade.
+- **CO-1:** As a creator, I want stores to receive automatic emails when order status changes so that I don't have to send updates manually.
+- **CO-2:** As a store owner, I want to receive an email when my order is accepted, fulfilled, or delivered so that I know what's happening without checking Fibermade.
 
----
-
-## Retail Sales
-
-- **RS-1:** As a creator, I want to sell directly to customers through Fibermade so that I don't need a separate storefront.
-- **RS-2:** As a creator, I want customers to check out and pay on my Fibermade store so that I can handle retail in one place.
-- **RS-3:** As a customer, I want to browse a creator's products and place an order so that I can buy directly from them.
-
----
-
-## Shipping & Fulfillment
-
-- **SF-1:** As a creator, I want to track shipping on orders so that customers and stores know when to expect delivery.
-- **SF-2:** As a creator, I want to mark orders as shipped with tracking info so that fulfillment status is clear.
-
----
-
-## Shows & Events
-
-- **SE-1:** As a creator, I want to allocate inventory to a show so that I know what to bring and what stays available online.
-- **SE-2:** As a creator, I want to capture sales at a show so that my inventory and records stay current.
-- **SE-3:** As a creator, I want to reconcile inventory after a show so that I can account for what sold, was damaged, or came back.
