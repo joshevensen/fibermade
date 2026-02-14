@@ -1,6 +1,6 @@
-name: shopify
+name: fibermade
 version: 1
-description: Shopify app workflow for React Router v7 + Prisma + TypeScript changes
+description: Fibermade workflow for platform (Laravel/Inertia) and shopify (React Router/Prisma) changes
 artifacts:
   - id: proposal
     generates: proposal.md
@@ -170,12 +170,11 @@ artifacts:
       - **Goals / Non-Goals**: What this design achieves and explicitly excludes
 
       - **Decisions**: Key technical choices with rationale (why X over Y?).
-      Include alternatives considered for each decision. Common decision areas:
-        - React Router route structure (file-based routing, loaders vs actions)
-        - Prisma schema changes and migration strategy
-        - Shopify API integration (GraphQL queries, webhook handling, OAuth scopes)
-        - FibermadeClient API contract (new endpoints, payload shapes)
-        - Sub-project boundaries (shopify calling platform API endpoints)
+      Include alternatives considered for each decision. Common decision areas
+      depending on which sub-project is affected:
+        - platform: Route structure, middleware, Eloquent models/relationships/migrations, authorization (policies, gates, form requests), Inertia page props and shared data contracts
+        - shopify: React Router route structure (loaders vs actions), Prisma schema and migrations, Shopify API integration (GraphQL, webhooks, OAuth scopes), FibermadeClient API contract
+        - cross-project: Sub-project boundaries, API contracts between platform and shopify, shared data models
 
       - **Risks / Trade-offs**: Known limitations, things that could go wrong.
       Format: [Risk] → Mitigation
@@ -217,49 +216,49 @@ artifacts:
 
       - Order tasks by dependency (what must be done first?)
 
-      - Use natural groupings for React Router / Prisma work:
-        1. Database — Prisma schema changes, migrations
-        2. Services — sync services, FibermadeClient methods, types
-        3. Routes — loaders, actions, React components
-        4. Tests — Vitest unit and integration tests
+      - Group by sub-project first, then by layer within each:
+        - platform: Database (migrations, models) → Backend (controllers, form requests, policies, routes) → Frontend (Vue pages, components, Inertia props) → Tests (feature, unit)
+        - shopify: Database (Prisma schema, migrations) → Services (sync services, FibermadeClient, types) → Routes (loaders, actions, components) → Tests (Vitest)
 
 
       Example:
 
       ```
 
-      ## 1. Database
+      ## 1. Platform — Database
 
 
-      - [ ] 1.1 Add SyncLog model to Prisma schema
+      - [ ] 1.1 Create orders migration with status and total columns
 
-      - [ ] 1.2 Run prisma migrate dev to create migration
-
-
-      ## 2. Services
+      - [ ] 1.2 Add Order model with store/creator relationships
 
 
-      - [ ] 2.1 Add syncProducts method to FibermadeClient
-
-      - [ ] 2.2 Create product-sync.server.ts service with retry logic
+      ## 2. Platform — Backend
 
 
-      ## 3. Routes
+      - [ ] 2.1 Add StoreOrderController with index and store actions
+
+      - [ ] 2.2 Create StoreOrderRequest for validation
+
+      - [ ] 2.3 Register routes in store.php
 
 
-      - [ ] 3.1 Create app.sync.tsx route with loader and action
-
-      - [ ] 3.2 Add sync status UI with Polaris components
+      ## 3. Platform — Frontend
 
 
-      ## 4. Tests
+      - [ ] 3.1 Create OrderFormPage.vue with Inertia form handling
 
 
-      - [ ] 4.1 Write Vitest tests for product-sync service
+      ## 4. Platform — Tests
 
-      - [ ] 4.2 Write route tests mocking Shopify auth and db
+
+      - [ ] 4.1 Write feature tests for order creation flow
 
       ```
+
+
+      For single-project changes, you can omit the project prefix from group
+      headings (e.g., just "Database" instead of "Platform — Database").
 
 
       Reference specs for what needs to be built, design for how to build it.
@@ -277,8 +276,7 @@ apply:
     Work through pending tasks in order, marking each complete as you go.
 
     After completing each task group, verify your work:
-    - Run `npm run test:run` from shopify/ to confirm Vitest tests pass
-    - Run `npm run typecheck` from shopify/ to confirm TypeScript compiles
-    - Ensure Prisma schema is valid with `npx prisma validate`
+    - platform: Run `php artisan test` to confirm tests pass
+    - shopify: Run `npm run test:run` from shopify/ and `npm run typecheck`
 
     Pause if you hit blockers or need clarification.
