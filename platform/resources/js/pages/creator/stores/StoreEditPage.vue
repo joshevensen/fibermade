@@ -57,24 +57,26 @@ const props = defineProps<Props>();
 const { requireDelete } = useConfirm();
 const { showSuccess } = useToast();
 
-const initialFormValues = {
-    name: props.store.name || '',
-    email: props.store.email || '',
-    owner_name: props.store.owner_name || null,
-    address_line1: props.store.address_line1 || '',
-    address_line2: props.store.address_line2 || null,
-    city: props.store.city || '',
-    state_region: props.store.state_region || '',
-    postal_code: props.store.postal_code || '',
-    country_code: props.store.country_code || '',
-    discount_rate: props.store.discount_rate || null,
-    minimum_order_quantity: props.store.minimum_order_quantity || null,
-    minimum_order_value: props.store.minimum_order_value || null,
-    payment_terms: props.store.payment_terms || null,
-    lead_time_days: props.store.lead_time_days || null,
-    allows_preorders: props.store.allows_preorders || false,
+const pivotFieldKeys = [
+    'status',
+    'discount_rate',
+    'payment_terms',
+    'minimum_order_quantity',
+    'minimum_order_value',
+    'lead_time_days',
+    'allows_preorders',
+    'notes',
+] as const;
+
+const initialFormValues: Record<(typeof pivotFieldKeys)[number], unknown> = {
     status: props.store.status || null,
-    notes: props.store.notes || null,
+    discount_rate: props.store.discount_rate ?? null,
+    payment_terms: props.store.payment_terms ?? null,
+    minimum_order_quantity: props.store.minimum_order_quantity ?? null,
+    minimum_order_value: props.store.minimum_order_value ?? null,
+    lead_time_days: props.store.lead_time_days ?? null,
+    allows_preorders: props.store.allows_preorders ?? false,
+    notes: props.store.notes ?? null,
 };
 
 const { form: vendorForm } = useFormSubmission({
@@ -97,16 +99,12 @@ function onVendorSubmit({
         return;
     }
 
-    // Merge vendor settings with all other store fields
-    const allValues = {
-        ...initialFormValues,
-        ...values,
-    };
+    const pivotPayload: Record<string, unknown> = {};
+    for (const key of pivotFieldKeys) {
+        pivotPayload[key] = values[key] ?? initialFormValues[key];
+    }
+    Object.assign(vendorForm, pivotPayload);
 
-    // Assign all values to form
-    Object.assign(vendorForm, allValues);
-
-    // Submit form
     vendorForm.submit(update(props.store.id), {
         onSuccess: () => {
             showSuccess('Store settings updated successfully.');
@@ -218,18 +216,6 @@ function formatAddress(): string {
                                 >
                                     {{ formatAddress() }}
                                 </p>
-                            </div>
-
-                            <div v-if="props.store.notes">
-                                <label
-                                    class="text-sm font-medium text-surface-600"
-                                >
-                                    Notes
-                                </label>
-                                <div
-                                    class="mt-1 text-surface-900"
-                                    v-html="props.store.notes"
-                                />
                             </div>
                         </div>
                     </template>
@@ -357,6 +343,13 @@ function formatAddress(): string {
                                     </template>
                                 </UiFormField>
                             </div>
+
+                            <UiFormFieldInput
+                                name="notes"
+                                label="Notes"
+                                placeholder="Internal notes about this store"
+                                :server-error="vendorForm.errors.notes"
+                            />
 
                             <UiButton
                                 type="submit"

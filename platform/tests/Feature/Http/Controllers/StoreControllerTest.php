@@ -135,3 +135,99 @@ test('creator index stores have list_key and discriminator', function () {
     expect($stores[0])->toHaveKey('list_key', 'invite-'.$invite->id);
     expect($stores[1])->toHaveKey('list_key', 'store-'.$store->id);
 });
+
+test('creator edit loads pivot data and statusOptions', function () {
+    $creator = Creator::factory()->create();
+    $user = User::factory()->create(['account_id' => $creator->account_id]);
+    $store = Store::factory()->create(['name' => 'Test Store']);
+    $creator->stores()->attach($store->id, [
+        'status' => 'paused',
+        'discount_rate' => 15.5,
+        'payment_terms' => 'Net 30',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('stores.edit', ['store' => $store->id]));
+
+    $response->assertSuccessful();
+    $response->assertInertia(fn ($page) => $page
+        ->component('creator/stores/StoreEditPage')
+        ->where('store.id', $store->id)
+        ->where('store.name', 'Test Store')
+        ->where('store.status', 'paused')
+        ->where('store.discount_rate', 15.5)
+        ->where('store.payment_terms', 'Net 30')
+        ->has('statusOptions', 3)
+        ->where('statusOptions.0.value', 'active')
+        ->where('statusOptions.1.value', 'paused')
+        ->where('statusOptions.2.value', 'ended')
+    );
+});
+
+test('creator edit returns 404 when creator has no relationship with store', function () {
+    $creator = Creator::factory()->create();
+    $user = User::factory()->create(['account_id' => $creator->account_id]);
+    $store = Store::factory()->create();
+    // Do not attach store to creator
+
+    $response = $this->actingAs($user)->get(route('stores.edit', ['store' => $store->id]));
+
+    $response->assertNotFound();
+});
+
+test('creator update saves to pivot only and does not change store model', function () {
+    $creator = Creator::factory()->create();
+    $user = User::factory()->create(['account_id' => $creator->account_id]);
+    $store = Store::factory()->create(['name' => 'Original Name', 'email' => 'store@example.com']);
+    $creator->stores()->attach($store->id, [
+        'status' => 'active',
+        'discount_rate' => 10,
+    ]);
+
+    $response = $this->actingAs($user)->patch(route('stores.update', ['store' => $store->id]), [
+        'status' => 'paused',
+        'discount_rate' => 20,
+        'payment_terms' => 'Net 60',
+        'minimum_order_quantity' => 12,
+        'minimum_order_value' => 100,
+        'lead_time_days' => 14,
+        'allows_preorders' => true,
+        'notes' => 'Wholesale notes',
+    ]);
+
+    $response->assertRedirect(route('stores.index'));
+
+    $store->refresh();
+    expect($store->name)->toBe('Original Name');
+    expect($store->email)->toBe('store@example.com');
+
+    $pivot = $creator->stores()->where('stores.id', $store->id)->first()->pivot;
+    expect($pivot->status)->toBe('paused');
+    expect((float) $pivot->discount_rate)->toBe(20.0);
+    expect($pivot->payment_terms)->toBe('Net 60');
+    expect((int) $pivot->minimum_order_quantity)->toBe(12);
+    expect((float) $pivot->minimum_order_value)->toBe(100.0);
+    expect((int) $pivot->lead_time_days)->toBe(14);
+    expect((bool) $pivot->allows_preorders)->toBeTrue();
+    expect($pivot->notes)->toBe('Wholesale notes');
+});
+
+test('creator index includes discount_rate and payment_terms in store items', function () {
+    $creator = Creator::factory()->create();
+    $user = User::factory()->create(['account_id' => $creator->account_id]);
+    $store = Store::factory()->create();
+    $creator->stores()->attach($store->id, [
+        'status' => 'active',
+        'discount_rate' => 25,
+        'payment_terms' => 'Net 45',
+    ]);
+
+    $response = $this->actingAs($user)->get(route('stores.index', ['status' => 'active']));
+
+    $response->assertSuccessful();
+    $response->assertSuccessful();
+    $stores = $response->inertiaProps('stores');
+    expect($stores)->toHaveCount(1);
+    expect($stores[0]['id'])->toBe($store->id);
+    expect($stores[0]['payment_terms'])->toBe('Net 45');
+    expect($stores[0]['discount_rate'])->toBeIn([25, 25.0]);
+});

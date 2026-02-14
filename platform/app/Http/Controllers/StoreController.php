@@ -868,6 +868,8 @@ class StoreController extends Controller
                 'status' => $pivot->status ?? 'active',
                 'is_invited' => false,
                 'invite_id' => null,
+                'discount_rate' => $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : null,
+                'payment_terms' => $pivot?->payment_terms,
             ]);
         }
 
@@ -900,6 +902,8 @@ class StoreController extends Controller
                 'status' => $pivot?->status ?? 'active',
                 'is_invited' => false,
                 'invite_id' => null,
+                'discount_rate' => $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : null,
+                'payment_terms' => $pivot?->payment_terms,
             ];
         }
 
@@ -930,12 +934,66 @@ class StoreController extends Controller
      */
     public function edit(Store $store): Response
     {
+        $user = auth()->user();
+        if ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            $storeWithPivot = $user->account->creator->stores()->where('stores.id', $store->id)->first();
+            if ($storeWithPivot === null) {
+                abort(404);
+            }
+        }
+
         $this->authorize('view', $store);
 
         $store->load(['orders.orderable']);
 
+        $statusOptions = [
+            ['label' => 'Active', 'value' => 'active'],
+            ['label' => 'Paused', 'value' => 'paused'],
+            ['label' => 'Ended', 'value' => 'ended'],
+        ];
+
+        if ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            $storeWithPivot = $user->account->creator->stores()->where('stores.id', $store->id)->first();
+            $pivot = $storeWithPivot->pivot;
+            $storeData = [
+                'id' => $store->id,
+                'name' => $store->name,
+                'email' => $store->email,
+                'owner_name' => $store->owner_name,
+                'address_line1' => $store->address_line1,
+                'address_line2' => $store->address_line2,
+                'city' => $store->city,
+                'state_region' => $store->state_region,
+                'postal_code' => $store->postal_code,
+                'country_code' => $store->country_code,
+                'discount_rate' => $pivot->discount_rate !== null ? (float) $pivot->discount_rate : null,
+                'minimum_order_quantity' => $pivot->minimum_order_quantity !== null ? (int) $pivot->minimum_order_quantity : null,
+                'minimum_order_value' => $pivot->minimum_order_value !== null ? (float) $pivot->minimum_order_value : null,
+                'payment_terms' => $pivot->payment_terms,
+                'lead_time_days' => $pivot->lead_time_days !== null ? (int) $pivot->lead_time_days : null,
+                'allows_preorders' => (bool) $pivot->allows_preorders,
+                'status' => $pivot->status ?? 'active',
+                'notes' => $pivot->notes,
+            ];
+        } else {
+            $storeData = array_merge($store->only([
+                'id', 'name', 'email', 'owner_name', 'address_line1', 'address_line2',
+                'city', 'state_region', 'postal_code', 'country_code',
+            ]), [
+                'discount_rate' => null,
+                'minimum_order_quantity' => null,
+                'minimum_order_value' => null,
+                'payment_terms' => null,
+                'lead_time_days' => null,
+                'allows_preorders' => false,
+                'status' => 'active',
+                'notes' => null,
+            ]);
+        }
+
         return Inertia::render('creator/stores/StoreEditPage', [
-            'store' => $store,
+            'store' => $storeData,
+            'statusOptions' => $statusOptions,
             'orders' => $store->orders->map(fn ($order) => [
                 'id' => $order->id,
                 'order_date' => $order->order_date->toDateString(),
@@ -953,7 +1011,12 @@ class StoreController extends Controller
      */
     public function update(UpdateStoreRequest $request, Store $store): RedirectResponse
     {
-        $store->update($request->validated());
+        $user = $request->user();
+        if ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            $user->account->creator->stores()->updateExistingPivot($store->id, $request->validated());
+        } else {
+            $store->update($request->validated());
+        }
 
         return redirect()->route('stores.index');
     }

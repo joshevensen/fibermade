@@ -30,6 +30,8 @@ interface StoreOrInviteItem {
     status: string;
     is_invited: boolean;
     invite_id: number | null;
+    discount_rate?: number | null;
+    payment_terms?: string | null;
 }
 
 interface Props {
@@ -146,6 +148,18 @@ function getGridItemProps(item: StoreOrInviteItem) {
         metadata.push({
             label: 'Location',
             value: `${item.city}, ${item.state_region}`,
+        });
+    }
+    if (item.item_type === 'store' && item.discount_rate != null) {
+        metadata.push({
+            label: 'Discount',
+            value: `${Number(item.discount_rate)}%`,
+        });
+    }
+    if (item.item_type === 'store' && item.payment_terms) {
+        metadata.push({
+            label: 'Terms',
+            value: item.payment_terms,
         });
     }
 

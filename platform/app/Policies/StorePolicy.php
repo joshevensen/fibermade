@@ -66,7 +66,16 @@ class StorePolicy
         }
 
         // Store accounts can update their own store
-        return $user->account_id === $store->account_id;
+        if ($user->account_id === $store->account_id) {
+            return true;
+        }
+
+        // Creators can update wholesale terms (pivot) for stores they have relationships with
+        if ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            return $user->account->creator->stores()->where('stores.id', $store->id)->exists();
+        }
+
+        return false;
     }
 
     /**

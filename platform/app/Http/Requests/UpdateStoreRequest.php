@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AccountType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -22,6 +23,20 @@ class UpdateStoreRequest extends FormRequest
      */
     public function rules(): array
     {
+        $user = $this->user();
+        if ($user->account?->type === AccountType::Creator && $user->account->creator) {
+            return [
+                'discount_rate' => ['sometimes', 'nullable', 'numeric', 'min:0', 'max:100'],
+                'minimum_order_quantity' => ['sometimes', 'nullable', 'integer', 'min:1'],
+                'minimum_order_value' => ['sometimes', 'nullable', 'numeric', 'min:0'],
+                'payment_terms' => ['sometimes', 'nullable', 'string'],
+                'lead_time_days' => ['sometimes', 'nullable', 'integer', 'min:0'],
+                'allows_preorders' => ['sometimes', 'boolean'],
+                'status' => ['sometimes', 'string', Rule::in(['active', 'paused', 'ended'])],
+                'notes' => ['sometimes', 'nullable', 'string'],
+            ];
+        }
+
         return [
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('stores')->ignore($this->route('store'))],
