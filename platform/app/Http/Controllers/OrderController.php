@@ -25,9 +25,10 @@ class OrderController extends Controller
         $this->authorize('viewAny', Order::class);
 
         $user = auth()->user();
-        $orders = $user->is_admin
-            ? Order::with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration'])->get()
-            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration'])->get() : collect());
+        $query = $user->is_admin
+            ? Order::with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration'])
+            : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration']) : null);
+        $orders = $query ? $query->orderByDesc('order_date')->get() : collect();
 
         $orders = $orders->map(function ($order) {
             $orderArray = $order->toArray();

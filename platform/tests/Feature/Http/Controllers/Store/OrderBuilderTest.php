@@ -595,7 +595,7 @@ test('submit accepts when minimums met', function () {
         'items' => [],
     ]);
 
-    $response->assertRedirect(route('store.creator.orders', ['creator' => $creator->id]));
+    $response->assertRedirect(route('store.orders.show', ['order' => $order->id]));
     $response->assertSessionHas('success', 'Order submitted successfully');
 
     $order->refresh();

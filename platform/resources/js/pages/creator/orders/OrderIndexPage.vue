@@ -5,6 +5,7 @@ import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
+import { orderStatusBadgeClass } from '@/utils/orderStatusBadge';
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -128,7 +129,6 @@ const columns = computed(() => [
         header: 'Status',
         sortable: true,
         columnKey: 'status',
-        bodyTemplate: (data: Props['orders'][0]) => formatEnum(data.status),
     },
     {
         field: 'order_date',
@@ -216,6 +216,14 @@ const columns = computed(() => [
                         >
                             {{ getOrderableName(data) || '—' }}
                         </button>
+                    </template>
+                    <template #status="{ data }">
+                        <span
+                            class="inline-block rounded-full px-3 py-1 text-sm font-medium"
+                            :class="orderStatusBadgeClass(data.status)"
+                        >
+                            {{ formatEnum(data.status) }}
+                        </span>
                     </template>
                 </UiDataTable>
             </template>

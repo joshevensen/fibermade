@@ -175,6 +175,8 @@ class StoreController extends Controller
                 'status' => $pivot?->status ?? 'active',
                 'draft_count' => $counts['draft'] ?? 0,
                 'open_count' => $counts['open'] ?? 0,
+                'accepted_count' => $counts['accepted'] ?? 0,
+                'fulfilled_count' => $counts['fulfilled'] ?? 0,
                 'delivered_count' => $counts['delivered'] ?? 0,
             ];
         }
@@ -238,6 +240,81 @@ class StoreController extends Controller
             'creator' => ['id' => $creator->id, 'name' => $creator->name],
             'orders' => $orders,
             'orderStatusOptions' => $orderStatusOptions,
+        ]);
+    }
+
+    /**
+     * Display the order detail page for the authenticated store.
+     */
+    public function showOrder(Order $order): Response|RedirectResponse
+    {
+        $this->authorize('viewAny', Store::class);
+
+        $user = auth()->user();
+        if ($user->account?->type !== AccountType::Store || ! $user->account->store) {
+            return redirect()->route('store.home');
+        }
+
+        $store = $user->account->store;
+
+        if ($order->orderable_type !== Store::class || $order->orderable_id !== $store->id) {
+            abort(403);
+        }
+
+        $order->load([
+            'orderItems.colorway.media',
+            'orderItems.base',
+            'orderable',
+            'account.creator',
+        ]);
+
+        $creator = $order->account->creator;
+        if (! $creator) {
+            abort(404);
+        }
+
+        $itemsByColorway = $order->orderItems
+            ->groupBy('colorway_id')
+            ->map(function (SupportCollection $items, $colorwayId) {
+                $first = $items->first();
+                $colorway = $first->colorway;
+
+                return [
+                    'colorway' => [
+                        'id' => $colorway?->id ?? (int) $colorwayId,
+                        'name' => $colorway?->name ?? '',
+                        'primary_image_url' => $colorway?->primary_image_url,
+                    ],
+                    'bases' => $items->map(fn (OrderItem $item) => [
+                        'id' => $item->base->id ?? $item->base_id,
+                        'descriptor' => $item->base->descriptor ?? '',
+                        'weight' => $item->base->weight?->value,
+                        'quantity' => $item->quantity,
+                        'unit_price' => $item->unit_price !== null ? (float) $item->unit_price : null,
+                        'line_total' => $item->line_total !== null ? (float) $item->line_total : null,
+                    ])->values()->all(),
+                ];
+            })
+            ->values()
+            ->all();
+
+        $skeinCount = (int) $order->orderItems->sum('quantity');
+        $colorwayCount = $order->orderItems->pluck('colorway_id')->unique()->count();
+
+        return Inertia::render('store/orders/OrderDetailPage', [
+            'id' => $order->id,
+            'order_date' => $order->order_date->toDateString(),
+            'status' => $order->status->value,
+            'notes' => $order->notes,
+            'subtotal_amount' => $order->subtotal_amount !== null ? (float) $order->subtotal_amount : null,
+            'shipping_amount' => $order->shipping_amount !== null ? (float) $order->shipping_amount : null,
+            'discount_amount' => $order->discount_amount !== null ? (float) $order->discount_amount : null,
+            'tax_amount' => $order->tax_amount !== null ? (float) $order->tax_amount : null,
+            'total_amount' => $order->total_amount !== null ? (float) $order->total_amount : null,
+            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'skein_count' => $skeinCount,
+            'colorway_count' => $colorwayCount,
+            'items_by_colorway' => $itemsByColorway,
         ]);
     }
 
@@ -519,7 +596,7 @@ class StoreController extends Controller
                 'order_date' => now(),
             ]);
 
-            return redirect()->route('store.creator.orders', ['creator' => $creator])
+            return redirect()->route('store.orders.show', ['order' => $order->id])
                 ->with('success', 'Order submitted successfully');
         });
     }

@@ -22,6 +22,9 @@ Route::prefix('store')->middleware(['auth', 'verified'])->group(function () {
     Route::post('{creator}/order/submit', [StoreController::class, 'submitOrder'])
         ->name('store.creator.order.submit');
 
+    Route::get('orders/{order}', [StoreController::class, 'showOrder'])
+        ->name('store.orders.show');
+
     Route::get('{creator}/orders', [StoreController::class, 'orders'])
         ->name('store.creator.orders');
 

@@ -20,6 +20,7 @@ import UiCard from '@/components/ui/UiCard.vue';
 // import { useFormSubmission } from '@/composables/useFormSubmission';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 // import OrderItemDrawer from '@/pages/creator/orders/components/OrderItemDrawer.vue';
+import { orderStatusBadgeClass } from '@/utils/orderStatusBadge';
 import { Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -163,16 +164,6 @@ function formatStatus(status: string): string {
         .join(' ');
 }
 
-function getStatusBadgeClass(status: string): string {
-    const statusMap: Record<string, string> = {
-        draft: 'bg-gray-100 text-gray-800',
-        open: 'bg-blue-100 text-blue-800',
-        closed: 'bg-green-100 text-green-800',
-        cancelled: 'bg-red-100 text-red-800',
-    };
-    return statusMap[status.toLowerCase()] || 'bg-gray-100 text-gray-800';
-}
-
 // TODO: Re-enable form submission when ready to work on orders
 // const { form, onSubmit } = useFormSubmission({
 //     route: () => update(props.order.id),
@@ -215,7 +206,9 @@ function getStatusBadgeClass(status: string): string {
                                 <span
                                     class="inline-block rounded-full px-3 py-1 text-sm font-medium"
                                     :class="
-                                        getStatusBadgeClass(props.order.status)
+                                        orderStatusBadgeClass(
+                                            props.order.status,
+                                        )
                                     "
                                 >
                                     {{ formatStatus(props.order.status) }}
