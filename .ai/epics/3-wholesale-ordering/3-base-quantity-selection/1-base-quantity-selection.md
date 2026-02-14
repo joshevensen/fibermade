@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 3.3: Prompt 1 -- Order Builder Backend (Routes, Save, Submit)
 
@@ -33,16 +33,19 @@ Build the backend for step 2 of the order flow: the review route that loads colo
 
 ## Acceptance Criteria
 
-- [ ] New route: `GET /store/{creator}/order/review` renders the base & quantity selection page
+- [ ] New route: `GET /store/{creator}/order/review` returns Inertia data for the base & quantity selection page (page UI is built in Prompt 2)
 - [ ] New route: `POST /store/{creator}/order/save` saves the order as a draft
 - [ ] New route: `POST /store/{creator}/order/submit` validates minimums and submits the order
 - [ ] `review()` controller action:
   - Receives colorway IDs via `?colorways=1,2,3` query param (new order) or `?draft={orderId}` (resuming draft)
+  - If neither valid `colorways` nor valid `draft` is provided: redirects to step 1 (`store.creator.order.step1`) with flash "Select colorways or resume a draft"
+  - If `draft` belongs to another store or is not draft status: returns 403
   - Verifies store-creator relationship (403 if not)
   - Loads colorways with `inventories.base` and `media`, scoped to creator's account
   - Calculates wholesale prices: `retail_price * (1 - discount_rate)`, rounded to 2 decimal places
   - Loads wholesale terms: `discount_rate`, `minimum_order_quantity`, `minimum_order_value`, `allows_preorders`
   - For draft resumption: loads existing Order with orderItems, verifies it belongs to this store+creator and is draft status
+  - For draft resumption: loads only active colorways; items whose colorway/base is inactive or missing are skipped or shown as minimal line
   - Returns via Inertia: colorways with bases (including wholesale_price, inventory_quantity), wholesale terms, draft data if resuming
 - [ ] Colorway data shape returned to Vue:
   - `id`, `name`, `primary_image_url`
@@ -55,21 +58,26 @@ Build the backend for step 2 of the order flow: the review route that loads colo
     - `created_by` = authenticated user's id
   - Creates/replaces OrderItems: one per colorway+base combination with quantity > 0
     - `unit_price` = wholesale price
-    - `line_total` = unit_price * quantity
-  - Calculates `subtotal_amount` and `total_amount` on the Order
+    - `line_total` = round(unit_price * quantity, 2)
+  - Calculates `subtotal_amount` and `total_amount` on the Order (round to 2 decimal places)
   - If an `order_id` is present in the request, update the existing draft (verify ownership + draft status); otherwise create a new order
-  - Redirects to order list with success message, includes order_id in response for subsequent saves
+  - Redirects to creator's order list (`store.creator.orders`) with success message, includes order_id in response for subsequent saves
 - [ ] `submitOrder()` controller action:
   - Loads the draft order (from `order_id` in request), verifies ownership + draft status
   - Validates minimum_order_quantity: total skeins >= minimum (if set)
   - Validates minimum_order_value: total amount >= minimum (if set)
-  - Returns validation error if minimums not met
+  - Returns 422 with Inertia-shaped validation errors (e.g. `minimum_order_quantity`, `minimum_order_value`) if minimums not met
+  - Uses transaction + row lock (`lockForUpdate`); if order already submitted, returns 409 or 422
   - On success: sets `status` = open, `order_date` = today
-  - Redirects to order detail page (`/store/orders/{order}`) with success message
+  - Redirects to creator's order list (`store.creator.orders`) with success message (order detail page added in Story 3.4)
 - [ ] Tests covering:
   - Review: authorization (403 for unrelated store), data loading with correct wholesale prices, draft resumption
+  - Review: empty/invalid colorways and no draft → redirects to step 1 with flash
+  - Review: draft belongs to another store or is not draft → 403
   - Save: creates Order + OrderItems, updates existing draft, ignores zero-quantity items, calculates totals correctly
+  - Save: order_id belongs to another store's draft or is not draft → 403
   - Submit: validates minimums (rejects below, accepts at/above), changes status to open, sets order_date
+  - Submit: order already submitted (second submit) → fails with 409 or 422
   - Draft resumption: can't resume non-draft orders, can't resume orders belonging to other stores
 
 ---
@@ -82,17 +90,17 @@ Build the backend for step 2 of the order flow: the review route that loads colo
   1. Load the Order with `orderItems.colorway` and `orderItems.base`
   2. Verify the order belongs to this store (`orderable_type/id`) and creator (`account_id`)
   3. Verify status is draft (can't resume non-draft orders)
-  4. Extract the colorway IDs from existing items and load full colorway data (same as new order flow)
+  4. Extract the colorway IDs from existing items and load full colorway data (only active colorways; skip or minimal line for inactive/missing)
   5. Pass existing quantities to pre-populate the form
 - **Wholesale price calculation**: Done in the controller. `wholesale_price = round(retail_price * (1 - discount_rate), 2)`.
 - **Minimum order validation** (submit action):
   - `minimum_order_quantity`: total skeins (sum of all quantities) must be >= this value. If null, no minimum.
   - `minimum_order_value`: total dollar amount (sum of line_totals) must be >= this value. If null, no minimum.
-  - Return validation errors if not met.
+  - Return 422 with Inertia-shaped validation errors if not met.
 - **OrderPolicy considerations**: The order's `account_id` is the creator's, not the store user's. The existing `OrderPolicy::create()` checks `$user->account_id !== null` which passes for store users, but the order is created on a different account. Handle authorization in the controller by verifying the store-creator relationship instead of using the policy.
-- **FormRequest**: The existing `StoreOrderRequest` validates order fields but requires `type` and `status` which the controller sets. Create a lightweight store-side request or validate manually in the controller. The request from the Vue page only sends: `order_id` (optional), `notes`, and `items` (array of `{ colorway_id, base_id, quantity }`).
+- **FormRequest**: Create a dedicated `StoreOrderBuilderRequest` (or similar) for save and submit. Rules: `order_id` (nullable for save, required for submit), `notes` (nullable, string), `items` (array of `{ colorway_id, base_id, quantity }`). Do not reuse `StoreOrderRequest` which requires `type` and `status` that the controller sets.
 - **OrderItem sync on save**: When updating a draft, delete existing items and re-create from the new data. This is simpler than diffing and handles additions/removals cleanly: `$order->orderItems()->delete()` then `$order->orderItems()->createMany($items)`.
-- **Order totals**: `subtotal_amount = sum(line_totals)`. `total_amount = subtotal_amount` (shipping/discount/tax are 0 for Stage 1).
+- **Order totals**: `subtotal_amount = round(sum(line_totals), 2)`. `total_amount = subtotal_amount` (shipping/discount/tax are 0 for Stage 1). Round all monetary values to 2 decimal places.
 - **Preventing duplicate orders**: The first save returns the `order_id`. Subsequent saves include this ID and hit the update path. The Vue page (Prompt 2) will handle passing this ID back.
 
 ## References
@@ -105,7 +113,8 @@ Build the backend for step 2 of the order flow: the review route that loads colo
 - `platform/app/Models/Inventory.php` -- fields (colorway_id, base_id, quantity), base relationship
 - `platform/app/Models/Base.php` -- fields (descriptor, weight, retail_price)
 - `platform/app/Models/Store.php` -- `creators()` pivot with discount_rate, minimum_order_quantity, minimum_order_value, allows_preorders
-- `platform/app/Http/Requests/StoreOrderRequest.php` -- existing validation (reference, may not reuse directly)
+- `platform/app/Http/Requests/StoreOrderRequest.php` -- existing validation (reference, do not reuse)
+- `platform/app/Http/Requests/StoreOrderBuilderRequest.php` -- new Form Request for save/submit
 - `platform/app/Policies/OrderPolicy.php` -- existing authorization (controller handles store-side auth separately)
 - `platform/app/Enums/OrderType.php` -- Wholesale
 - `platform/app/Enums/OrderStatus.php` -- Draft, Open, Accepted, Fulfilled, Delivered, Cancelled
@@ -113,5 +122,7 @@ Build the backend for step 2 of the order flow: the review route that loads colo
 ## Files
 
 - Modify `platform/app/Http/Controllers/StoreController.php` -- add `review()`, `saveOrder()`, `submitOrder()` actions
+- Create `platform/app/Http/Requests/StoreOrderBuilderRequest.php` -- validation for save and submit
 - Modify `platform/routes/store.php` -- add GET review, POST save, POST submit routes
 - Create `platform/tests/Feature/Http/Controllers/Store/OrderBuilderTest.php` -- tests for review, save, submit, minimums, draft resumption
+- Run `php artisan wayfinder:generate` after route changes (or rely on Vite plugin)

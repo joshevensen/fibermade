@@ -134,7 +134,7 @@ function toggleExpanded(id: number): void {
 function handleContinue(): void {
     if (selectedIds.value.size === 0) return;
     const ids = Array.from(selectedIds.value).join(',');
-    router.visit(`/store/${props.creator.id}/order/step-2?colorways=${ids}`);
+    router.visit(`/store/${props.creator.id}/order/review?colorways=${ids}`);
 }
 </script>
 
