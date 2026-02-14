@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 3.2: Prompt 1 -- Order Builder: Colorway Selection (Step 1)
 
@@ -20,29 +20,29 @@ Build the first step of the order flow: a two-panel page where stores browse a c
 
 ## Constraints
 
-- Route: `GET /store/{creator}/order` in `routes/store.php`
-- The controller must verify the store has a `creator_store` relationship with this creator (403 if not)
+- Route: `GET /store/{creator}/order` in `routes/store.php`, named `store.creator.order.step1`. Step 2 will be `GET /store/{creator}/order/step-2` (Story 3.3), named `store.creator.order.step2`.
+- The controller must verify the store has a `creator_store` relationship with this creator (403 if not); reuse `viewCreatorOrders` policy like the order list action.
 - Load the creator's active colorways with: collections, inventories (with base), and primary media
-- The `discount_rate` from the `creator_store` pivot must be passed to the Vue page for wholesale price calculation
+- The `discount_rate` from the `creator_store` pivot must be passed to the Vue page for wholesale price calculation. When `discount_rate` is null, Vue shows retail only (no wholesale line).
 - Colorway data must include enough detail for filtering (collection names, colors) and display (name, primary image URL, description)
 - Selected colorways are managed client-side (Vue reactive state) -- no server round-trip until the user clicks "Continue"
-- The "Continue" action navigates to step 2, passing the selected colorway IDs. Use URL query parameters or a POST to transfer selection to step 2.
+- The "Continue" action navigates to `GET /store/{creator}/order/step-2?colorways=1,2,3` (comma-separated IDs in query). Story 3.3 implements that route.
 - Follow existing Vue patterns: TypeScript interfaces, `StoreLayout`, UI components
 
 ## Acceptance Criteria
 
-- [ ] New route: `GET /store/{creator}/order` renders the colorway selection page
-- [ ] Controller action:
+- [x] New route: `GET /store/{creator}/order` named `store.creator.order.step1` renders the colorway selection page
+- [x] Controller action:
   - Verifies store-creator relationship (403 if not)
   - Loads creator's active colorways with `collections`, `inventories.base`, `media`
   - Loads `discount_rate` from `creator_store` pivot
   - Loads all active collections for the creator (for filter dropdown)
   - Returns data via Inertia to the Vue page
-- [ ] Colorway data shape passed to Vue:
+- [x] Colorway data shape passed to Vue:
   - `id`, `name`, `description`, `status`, `colors` (array of color strings), `primary_image_url`
   - `collections`: array of `{ id, name }`
   - `bases`: array of `{ id, descriptor, weight, retail_price, inventory_quantity }` (derived from inventories with base)
-- [ ] Vue page `store/orders/ColorwaySelectionPage.vue`:
+- [x] Vue page `store/orders/ColorwaySelectionPage.vue`:
   - **Left panel (2/3 width)**: scrollable list of colorway cards
     - Each card shows: name, primary image (or placeholder), collection name(s), color tags
     - Cards are expandable to show: description, available bases with wholesale prices
@@ -55,28 +55,25 @@ Build the first step of the order flow: a two-panel page where stores browse a c
     - Collection dropdown (populated from creator's collections)
     - Color multi-select or tag filter
   - **Continue button** at the bottom (disabled if no colorways selected)
-    - Navigates to step 2 with selected colorway IDs
-- [ ] Wholesale price display: `retail_price * (1 - discount_rate)` calculated and shown per base in the expanded colorway view
-- [ ] Responsive: on mobile, right panel collapses below the left panel or becomes a bottom sheet
-- [ ] Tests: controller tests for authorization, data loading, and correct data shape
+    - Navigates to `store.creator.order.step2` with query param `colorways=id1,id2,...`
+  - **Empty state**: When creator has no active colorways, show "No colorways available. Ask this creator to add colorways to their catalog." and keep Continue disabled.
+- [x] Wholesale price display: when `discount_rate` is set, show `retail_price * (1 - discount_rate)` per base in the expanded colorway view; when null, show retail only (no wholesale line).
+- [x] Responsive: on mobile, stack layout — selection panel appears below the colorway grid (single column), not a bottom sheet.
+- [x] Tests: controller tests for authorization, data loading, and correct data shape
 
 ---
 
 ## Tech Analysis
 
 - **Loading colorways**: Query the creator's account colorways: `Colorway::where('account_id', $creator->account_id)->where('status', ColorwayStatus::Active)->with(['collections', 'inventories.base', 'media'])->get()`. This gives us everything needed for display and filtering.
-- **Discount rate**: Load from the pivot: `$store->creators()->where('creator_id', $creator->id)->first()->pivot->discount_rate`. The `discount_rate` is a decimal (e.g., `0.20` for 20% off). Wholesale price = `retail_price * (1 - discount_rate)`.
+- **Discount rate**: Load from the pivot: `$store->creators()->where('creator_id', $creator->id)->first()->pivot->discount_rate`. The `discount_rate` is a decimal (e.g., `0.20` for 20% off). When set, wholesale price = `retail_price * (1 - discount_rate)`. When null, Vue shows retail only (no wholesale line).
 - **Primary image URL**: The `Colorway` model has a `getPrimaryImageUrlAttribute()` accessor that returns the URL of the primary media or the first media item. Access it as `$colorway->primary_image_url`. If no media exists, it returns null -- the Vue page should show a placeholder.
 - **Colors enum**: Colorway has `colors` cast as `AsEnumCollection::class.':'.Color::class`. This is a collection of `Color` enum values (Red, Blue, Green, etc.). Serialize as an array of string values for the Vue page.
 - **Collection filter**: Load `Collection::where('account_id', $creator->account_id)->where('status', BaseStatus::Active)->get()` separately for the filter dropdown. A colorway may belong to multiple collections.
 - **Color filter**: The Vue page can filter client-side by checking if any of the colorway's colors match the selected filter colors. No server-side filtering needed since the dataset is small (typical creator has <200 colorways).
-- **Passing selection to step 2**: Options:
-  1. **URL query params**: `?colorways=1,2,3` -- simple, bookmarkable, but URL length limited. Fine for typical selections (<50 IDs).
-  2. **POST with redirect**: Post the selection, store in session, redirect to step 2. More robust but adds complexity.
-  3. **Client-side state**: Use Inertia's `router.visit()` with data. This is the Inertia pattern.
-  **Recommendation**: Use `router.visit('/store/{creator}/order/review', { data: { colorways: [1,2,3] } })` or URL params. Simplest approach: URL query params since the ID list is small.
+- **Passing selection to step 2**: Use URL query params. Continue navigates to `GET /store/{creator}/order/step-2?colorways=1,2,3` (comma-separated IDs). Use `router.visit()` with `query: { colorways: selectedIds.join(',') }` (or Wayfinder-generated URL). Story 3.3 implements the step-2 route.
 - **Base data via Inventory**: A colorway's bases are accessed through the `inventories` relationship. Each Inventory record has `base_id` and `quantity`. Load `inventories.base` to get base details. Group by base to avoid duplicates (a colorway should have one inventory per base).
-- **Responsive layout**: Use Tailwind's `lg:grid-cols-3` for the two-panel layout. On smaller screens, stack vertically or hide the sidebar with a floating "Selected (N)" button.
+- **Responsive layout**: Use Tailwind's `lg:grid-cols-3` for the two-panel layout. On smaller screens, stack vertically — selection panel below the colorway grid (single column).
 
 ## References
 
@@ -98,6 +95,6 @@ Build the first step of the order flow: a two-panel page where stores browse a c
 ## Files
 
 - Modify `platform/app/Http/Controllers/StoreController.php` -- add `order()` action that loads colorways, collections, discount_rate
-- Modify `platform/routes/store.php` -- add `GET /{creator}/order` route
+- Modify `platform/routes/store.php` -- add `GET /{creator}/order` route named `store.creator.order.step1`
 - Create `platform/resources/js/pages/store/orders/ColorwaySelectionPage.vue` -- two-panel layout with colorway browsing and selection
-- Create `platform/tests/Feature/Http/Controllers/Store/ColorwaySelectionTest.php` -- tests for authorization, data loading, filtering data
+- Create `platform/tests/Feature/Http/Controllers/Store/ColorwaySelectionTest.php` -- tests for authorization (403 when no relationship), data loading, and correct payload shape (colorways, collections, discount_rate)

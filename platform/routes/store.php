@@ -12,6 +12,9 @@ Route::prefix('store')->middleware(['auth', 'verified'])->group(function () {
     Route::get('settings', [UserController::class, 'edit'])
         ->name('store.settings');
 
+    Route::get('{creator}/order', [StoreController::class, 'order'])
+        ->name('store.creator.order.step1');
+
     Route::get('{creator}/orders', [StoreController::class, 'orders'])
         ->name('store.creator.orders');
 

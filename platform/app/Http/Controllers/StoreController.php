@@ -3,18 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AccountType;
+use App\Enums\BaseStatus;
+use App\Enums\ColorwayStatus;
 use App\Enums\InviteType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\UpdateStoreRequest;
+use App\Models\Collection;
+use App\Models\Colorway;
 use App\Models\Creator;
 use App\Models\Invite;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Store;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Collection;
+use Illuminate\Support\Collection as SupportCollection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -145,11 +149,11 @@ class StoreController extends Controller
     }
 
     /**
-     * @param  Collection<int, \App\Models\Creator>  $creators
+     * @param  SupportCollection<int, \App\Models\Creator>  $creators
      * @param  array<int, array<string, int>>  $countsByAccount  account_id => [status => count]
      * @return array<int, array<string, mixed>>
      */
-    private function transformCreatorsForHome(Collection $creators, Store $store, array $countsByAccount): array
+    private function transformCreatorsForHome(SupportCollection $creators, Store $store, array $countsByAccount): array
     {
         $items = [];
 
@@ -234,6 +238,87 @@ class StoreController extends Controller
     }
 
     /**
+     * Display the order builder step 1: colorway selection.
+     */
+    public function order(Creator $creator): Response|RedirectResponse
+    {
+        $this->authorize('viewAny', Store::class);
+
+        $user = auth()->user();
+        if ($user->account?->type !== AccountType::Store || ! $user->account->store) {
+            return redirect()->route('store.home');
+        }
+
+        $store = $user->account->store;
+        $this->authorize('viewCreatorOrders', [$store, $creator]);
+
+        $pivot = $store->creators()->where('creator_id', $creator->id)->first()?->pivot;
+        $discountRate = $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : null;
+
+        $colorways = Colorway::query()
+            ->where('account_id', $creator->account_id)
+            ->where('status', ColorwayStatus::Active)
+            ->with(['collections', 'inventories.base', 'media'])
+            ->get();
+
+        $collections = Collection::query()
+            ->where('account_id', $creator->account_id)
+            ->where('status', BaseStatus::Active)
+            ->get();
+
+        $colorwaysData = $this->transformColorwaysForOrderStep1($colorways);
+        $collectionsData = $collections->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all();
+
+        return Inertia::render('store/orders/ColorwaySelectionPage', [
+            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'colorways' => $colorwaysData,
+            'collections' => $collectionsData,
+            'discount_rate' => $discountRate,
+        ]);
+    }
+
+    /**
+     * @param  SupportCollection<int, Colorway>  $colorways
+     * @return array<int, array<string, mixed>>
+     */
+    private function transformColorwaysForOrderStep1(SupportCollection $colorways): array
+    {
+        $items = [];
+
+        foreach ($colorways as $colorway) {
+            $basesByBaseId = $colorway->inventories->groupBy('base_id');
+            $bases = [];
+            foreach ($basesByBaseId as $inventoriesForBase) {
+                $inventory = $inventoriesForBase->first();
+                $base = $inventory->base;
+                if (! $base) {
+                    continue;
+                }
+                $bases[] = [
+                    'id' => $base->id,
+                    'descriptor' => $base->descriptor,
+                    'weight' => $base->weight?->value,
+                    'retail_price' => $base->retail_price !== null ? (float) $base->retail_price : null,
+                    'inventory_quantity' => $inventory->quantity,
+                ];
+            }
+
+            $items[] = [
+                'id' => $colorway->id,
+                'name' => $colorway->name,
+                'description' => $colorway->description,
+                'status' => $colorway->status->value,
+                'colors' => $colorway->colors?->map(fn ($c) => $c->value)->values()->all() ?? [],
+                'primary_image_url' => $colorway->primary_image_url,
+                'collections' => $colorway->collections->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all(),
+                'bases' => $bases,
+            ];
+        }
+
+        return $items;
+    }
+
+    /**
      * @return array{0: array<int, array<string, mixed>>, 1: int, 2: int}
      */
     private function indexForCreator(Creator $creator, bool $mergeInvites): array
@@ -302,10 +387,10 @@ class StoreController extends Controller
     }
 
     /**
-     * @param  Collection<int, \App\Models\Creator>  $creators
+     * @param  SupportCollection<int, \App\Models\Creator>  $creators
      * @return array<int, array<string, mixed>>
      */
-    private function transformVendorsForIndex(Collection $creators): array
+    private function transformVendorsForIndex(SupportCollection $creators): array
     {
         $items = [];
 
@@ -327,11 +412,11 @@ class StoreController extends Controller
     }
 
     /**
-     * @param  Collection<int, \App\Models\Store>  $stores
-     * @param  Collection<int, \App\Models\Invite>  $invites
-     * @return Collection<int, array<string, mixed>>
+     * @param  SupportCollection<int, \App\Models\Store>  $stores
+     * @param  SupportCollection<int, \App\Models\Invite>  $invites
+     * @return SupportCollection<int, array<string, mixed>>
      */
-    private function mergeStoresAndInvites(Collection $stores, Collection $invites): Collection
+    private function mergeStoresAndInvites(SupportCollection $stores, SupportCollection $invites): SupportCollection
     {
         $items = collect();
 
@@ -381,10 +466,10 @@ class StoreController extends Controller
     }
 
     /**
-     * @param  Collection<int, \App\Models\Store>  $stores
+     * @param  SupportCollection<int, \App\Models\Store>  $stores
      * @return array<int, array<string, mixed>>
      */
-    private function transformStoresForIndex(Collection $stores): array
+    private function transformStoresForIndex(SupportCollection $stores): array
     {
         $items = [];
 
