@@ -1,0 +1,28 @@
+schema: platform
+
+context: |
+  Fibermade is a commerce platform for the fiber community — connecting
+  independent dyers (creators) with yarn stores via wholesale ordering,
+  product sync, and relationship management.
+
+  Monorepo with two sub-projects:
+  - platform/ — Laravel 12 + Inertia (Vue 3) + Sanctum auth + MySQL
+  - shopify/ — React Router (TypeScript) + Prisma + SQLite embedded Shopify app
+
+  Conventions:
+  - User stories use role-based language (creator, store owner), not persona names
+  - Story IDs follow group prefix pattern: SI, CI, WO, WM, SR, IM, PP, CO, RS, SF, SE
+  - Platform uses Laravel resource controllers, form requests, and policies for authorization
+  - Shopify app communicates with platform via Sanctum API tokens and Shopify webhooks
+  - Cross-system entities are linked via ExternalIdentifier records
+
+rules:
+  proposal:
+    - Reference user story IDs from about/User-Stories.md when applicable
+    - Identify which sub-project (platform, shopify, or both) is affected
+  specs:
+    - Use SHALL/MUST for normative requirements (RFC 2119)
+    - Every requirement must have at least one WHEN/THEN scenario
+  tasks:
+    - Each task should be completable in a single coding session
+    - Order tasks by dependency — what must be built first
