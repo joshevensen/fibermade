@@ -143,6 +143,25 @@ class OrderController extends Controller
             ->toArray();
 
         $order->load(['account', 'orderItems.colorway', 'orderItems.base', 'orderable', 'externalIdentifiers.integration']);
+
+        $wholesaleTerms = null;
+        if ($order->type === OrderType::Wholesale) {
+            $creator = $order->account?->creator;
+            if ($creator) {
+                $pivot = $creator->stores()->where('stores.id', $order->orderable_id)->first()?->pivot;
+                if ($pivot) {
+                    $wholesaleTerms = [
+                        'discount_rate' => $pivot->discount_rate,
+                        'payment_terms' => $pivot->payment_terms,
+                        'lead_time_days' => $pivot->lead_time_days,
+                        'minimum_order_quantity' => $pivot->minimum_order_quantity,
+                        'minimum_order_value' => $pivot->minimum_order_value,
+                        'allows_preorders' => (bool) $pivot->allows_preorders,
+                    ];
+                }
+            }
+        }
+
         $orderArray = $order->toArray();
         $orderArray['external_identifiers'] = $order->externalIdentifiers->map(fn ($identifier) => [
             'integration_type' => $identifier->integration->type->value,
@@ -162,6 +181,7 @@ class OrderController extends Controller
             'colorways' => $colorways,
             'bases' => $bases,
             'allowedTransitions' => $order->getAllowedTransitions(),
+            'wholesaleTerms' => $wholesaleTerms,
         ]);
     }
 

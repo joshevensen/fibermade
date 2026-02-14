@@ -34,6 +34,7 @@ interface OrderItem {
         id: number;
         code: string;
         descriptor: string;
+        weight?: { value: string } | string | null;
     } | null;
 }
 
@@ -49,8 +50,13 @@ interface OrderableStore {
     id: number;
     name: string;
     email?: string | null;
+    owner_name?: string | null;
+    address_line1?: string | null;
+    address_line2?: string | null;
     city?: string | null;
     state_region?: string | null;
+    postal_code?: string | null;
+    country_code?: string | null;
 }
 
 interface OrderableCustomer {
@@ -76,6 +82,15 @@ const WORKFLOW_STEPS = [
     { key: 'delivered', label: 'Delivered' },
 ] as const;
 
+interface WholesaleTerms {
+    discount_rate?: number | null;
+    payment_terms?: string | null;
+    lead_time_days?: number | null;
+    minimum_order_quantity?: number | null;
+    minimum_order_value?: number | null;
+    allows_preorders?: boolean | null;
+}
+
 interface Props {
     order: {
         id: number;
@@ -94,6 +109,7 @@ interface Props {
     colorways: Array<{ id: number; name: string }>;
     bases: Array<{ id: number; code: string; descriptor: string }>;
     allowedTransitions: string[];
+    wholesaleTerms?: WholesaleTerms | null;
 }
 
 const props = defineProps<Props>();
@@ -249,6 +265,33 @@ function formatStatus(status: string): string {
         .split('_')
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ');
+}
+
+function formatStoreAddress(store: OrderableStore): string {
+    const parts = [
+        store.address_line1,
+        store.address_line2,
+        [store.city, store.state_region].filter(Boolean).join(', '),
+        store.postal_code,
+        store.country_code,
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join('\n') : '—';
+}
+
+function formatBaseDisplay(base: OrderItem['base']): string {
+    if (!base) return 'N/A';
+    const descriptor = base.descriptor || base.code || '';
+    const weightRaw = base.weight;
+    const weight =
+        typeof weightRaw === 'string'
+            ? weightRaw
+            : weightRaw && typeof weightRaw === 'object' && 'value' in weightRaw
+              ? (weightRaw as { value: string }).value
+              : null;
+    const weightDisplay = weight
+        ? ` - ${weight.charAt(0).toUpperCase() + weight.slice(1)}`
+        : '';
+    return descriptor ? `${descriptor}${weightDisplay}` : base.code || 'N/A';
 }
 </script>
 
@@ -508,7 +551,7 @@ function formatStatus(status: string): string {
                                             {{ item.colorway?.name || 'N/A' }}
                                         </td>
                                         <td class="px-4 py-2 text-sm">
-                                            {{ item.base?.code || 'N/A' }}
+                                            {{ formatBaseDisplay(item.base) }}
                                         </td>
                                         <td
                                             class="px-4 py-2 text-right text-sm"
@@ -635,6 +678,18 @@ function formatStatus(status: string): string {
                                 <div
                                     v-if="
                                         (order.orderable as OrderableStore)
+                                            .owner_name
+                                    "
+                                    class="mt-2 text-sm text-surface-600"
+                                >
+                                    {{
+                                        (order.orderable as OrderableStore)
+                                            .owner_name
+                                    }}
+                                </div>
+                                <div
+                                    v-if="
+                                        (order.orderable as OrderableStore)
                                             .email
                                     "
                                     class="mt-2 text-sm text-surface-600"
@@ -646,22 +701,16 @@ function formatStatus(status: string): string {
                                 </div>
                                 <div
                                     v-if="
-                                        (order.orderable as OrderableStore)
-                                            .city ||
-                                        (order.orderable as OrderableStore)
-                                            .state_region
+                                        formatStoreAddress(
+                                            order.orderable as OrderableStore,
+                                        ) !== '—'
                                     "
-                                    class="mt-2 text-sm text-surface-600"
+                                    class="mt-2 text-sm whitespace-pre-line text-surface-600"
                                 >
                                     {{
-                                        [
-                                            (order.orderable as OrderableStore)
-                                                .city,
-                                            (order.orderable as OrderableStore)
-                                                .state_region,
-                                        ]
-                                            .filter(Boolean)
-                                            .join(', ')
+                                        formatStoreAddress(
+                                            order.orderable as OrderableStore,
+                                        )
                                     }}
                                 </div>
                             </div>
@@ -727,6 +776,86 @@ function formatStatus(status: string): string {
                                             .join(', ')
                                     }}
                                 </div>
+                            </div>
+                        </div>
+                    </template>
+                </UiCard>
+
+                <UiCard v-if="order.type === 'wholesale' && wholesaleTerms">
+                    <template #header>
+                        <h3 class="text-lg font-semibold">Wholesale Terms</h3>
+                    </template>
+                    <template #content>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-surface-600"
+                                    >Discount rate:</span
+                                >
+                                <span class="font-medium">
+                                    {{
+                                        wholesaleTerms.discount_rate != null
+                                            ? `${(wholesaleTerms.discount_rate * 100).toFixed(1)}%`
+                                            : '—'
+                                    }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-surface-600"
+                                    >Payment terms:</span
+                                >
+                                <span class="font-medium">
+                                    {{ wholesaleTerms.payment_terms ?? '—' }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-surface-600">Lead time:</span>
+                                <span class="font-medium">
+                                    {{
+                                        wholesaleTerms.lead_time_days != null
+                                            ? `${wholesaleTerms.lead_time_days} days`
+                                            : '—'
+                                    }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-surface-600"
+                                    >Min. order quantity:</span
+                                >
+                                <span class="font-medium">
+                                    {{
+                                        wholesaleTerms.minimum_order_quantity ??
+                                        '—'
+                                    }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-surface-600"
+                                    >Min. order value:</span
+                                >
+                                <span class="font-medium">
+                                    {{
+                                        wholesaleTerms.minimum_order_value !=
+                                        null
+                                            ? formatCurrency(
+                                                  wholesaleTerms.minimum_order_value,
+                                              )
+                                            : '—'
+                                    }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-surface-600"
+                                    >Preorder allowed:</span
+                                >
+                                <span class="font-medium">
+                                    {{
+                                        wholesaleTerms.allows_preorders != null
+                                            ? wholesaleTerms.allows_preorders
+                                                ? 'Yes'
+                                                : 'No'
+                                            : '—'
+                                    }}
+                                </span>
                             </div>
                         </div>
                     </template>

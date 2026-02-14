@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 4.3: Prompt 1 -- Order Detail Page (Creator)
 
@@ -22,10 +22,10 @@ Enhance the creator-side `OrderEditPage.vue` to be a comprehensive wholesale ord
 
 - The `OrderController::edit()` method already loads `orderItems.colorway`, `orderItems.base`, `orderable`, and `externalIdentifiers.integration`. For wholesale orders, additionally load the `creator_store` pivot data by querying the pivot table where `creator_id` matches the order's account creator and `store_id` matches the orderable.
 - Only load and display wholesale terms when `order.type === 'wholesale'` -- the page should still work for retail and show orders without the wholesale-specific sections
-- Store info section should show: store name (linked to store edit page), owner name, email, full address (line1, line2, city, state, postal, country)
-- Wholesale terms section should show: discount rate (%), payment terms, lead time (days), minimum order quantity, minimum order value ($), preorder allowance
-- Follow the existing sidebar card pattern in `OrderEditPage.vue` -- store info and terms go in the sidebar
-- The line items table should show: Colorway name, Base descriptor (e.g., "Sock - 100g"), Quantity, Unit Price, Line Total
+- Store info and wholesale terms go in two separate sidebar cards (Store Info card, Wholesale Terms card), following the existing card pattern in `OrderEditPage.vue`
+- Store info section should show: store name (linked to store edit page), owner name, email, full address using Store fields: address_line1, address_line2, city, state_region, postal_code, country_code
+- Wholesale terms section should show: discount rate (%), payment terms, lead time (days), minimum order quantity, minimum order value ($), preorder allowance; display "—" when a term is null
+- The line items table should show: Colorway name, Base descriptor and weight (e.g., "Sock - 100g"), Quantity, Unit Price, Line Total
 
 ## Acceptance Criteria
 
@@ -33,6 +33,7 @@ Enhance the creator-side `OrderEditPage.vue` to be a comprehensive wholesale ord
   - Retrieves the `creator_store` pivot record matching the order's creator and store
   - Passes `wholesaleTerms` object to the page with: discount_rate, payment_terms, lead_time_days, minimum_order_quantity, minimum_order_value, allows_preorders
   - For non-wholesale orders, `wholesaleTerms` is null
+  - If the order's account has no creator, `wholesaleTerms` is null
 - [ ] `OrderEditPage.vue` store info sidebar card (only for wholesale orders):
   - Store name as a link to the store edit page
   - Owner name
@@ -45,27 +46,30 @@ Enhance the creator-side `OrderEditPage.vue` to be a comprehensive wholesale ord
   - Minimum order quantity
   - Minimum order value formatted as currency
   - Preorder status (yes/no)
-- [ ] Line items table shows base descriptor (e.g., "Sock - 100g") instead of just base code
+  - Display "—" when any term value is null
+- [ ] Line items table shows base descriptor and weight (e.g., "Sock - 100g") instead of just base code; weight shown when available
 - [ ] Non-wholesale orders (retail, show) render without the wholesale-specific sidebar cards
 - [ ] Tests verify:
   - Wholesale order edit loads pivot data correctly
   - Non-wholesale order edit does not load pivot data
   - Store info is present in the response for wholesale orders
-- [ ] `php artisan test --filter=OrderControllerTest` passes
+  - Wholesale order with account that has no creator returns wholesaleTerms null
+- [ ] `php artisan test tests/Feature/Http/Controllers/OrderControllerTest.php` passes
 
 ---
 
 ## Tech Analysis
 
 - **Loading the creator_store pivot**: The order's `account_id` belongs to the creator. The order's `orderable_id` is the store's ID (when type is wholesale). The `creator_store` pivot links `creator_id` ↔ `store_id`. To get the pivot data:
-  1. Get the creator from the order's account: `$order->account->creator`
-  2. Query the pivot: `$creator->stores()->where('store_id', $order->orderable_id)->first()?->pivot`
-  This gives access to all the pivot fields. Alternatively, query `DB::table('creator_store')` directly, but using the relationship is cleaner.
+  1. Get the creator from the order's account: `$order->account?->creator`
+  2. If no creator, skip pivot loading and pass `wholesaleTerms: null`
+  3. Query the pivot: `$creator->stores()->where('stores.id', $order->orderable_id)->first()?->pivot`
+  This gives access to all the pivot fields. Use `OrderType::Wholesale` for type checks instead of string comparison.
 - **Creator model relationship**: The `Account` model has a `creator()` HasOne relationship. The `Creator` model has a `stores()` BelongsToMany through `creator_store` with pivot fields. Need to verify the pivot fields are declared in the `withPivot()` call on the relationship.
 - **Conditional loading**: In the controller, check `$order->type === OrderType::Wholesale` before loading pivot data. This keeps the logic clean and avoids unnecessary queries for other order types.
 - **Store info from orderable**: The order's `orderable` relationship already loads the Store model for wholesale orders. This gives us name, email, owner_name, and address fields directly -- no additional query needed for store info.
-- **Base descriptor display**: The `OrderItem` belongs to a `Base` which has `descriptor` and `weight` fields. The `orderItems.base` relationship is already eager-loaded. Just update the template to show `base.descriptor` instead of `base.code`.
-- **Page Props**: Add `wholesaleTerms` to the Props interface as an optional object. The existing Props interface already has `order.orderable` typed as `OrderableStore` for wholesale orders. The wholesale terms are separate from the orderable since they come from the pivot table (creator-specific terms for that store).
+- **Base descriptor and weight display**: The `OrderItem` belongs to a `Base` which has `descriptor` and `weight` fields. The `orderItems.base` relationship is already eager-loaded. Update the template to show `base.descriptor` (and `base.weight?.value` when present) instead of `base.code`. Format as "Descriptor - Weight" e.g. "Sock - 100g".
+- **Page Props**: Add `wholesaleTerms` to the Props interface as an optional object. Extend the `OrderableStore` interface with full address fields (address_line1, address_line2, city, state_region, postal_code, country_code, owner_name) for the Store info card. The wholesale terms are separate from the orderable since they come from the pivot table (creator-specific terms for that store).
 
 ## References
 
