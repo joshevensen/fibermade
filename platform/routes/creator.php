@@ -76,6 +76,11 @@ Route::prefix('creator')->middleware(['auth', 'verified'])->group(function () {
     // TODO: Re-enable order write operations (store, update, destroy) when ready to work on orders.
     // These routes are currently disabled via OrderPolicy.
     Route::resource('orders', OrderController::class)->except(['create']);
+    Route::patch('orders/{order}/submit', [OrderController::class, 'submit'])->name('orders.submit');
+    Route::patch('orders/{order}/accept', [OrderController::class, 'accept'])->name('orders.accept');
+    Route::patch('orders/{order}/fulfill', [OrderController::class, 'fulfill'])->name('orders.fulfill');
+    Route::patch('orders/{order}/deliver', [OrderController::class, 'deliver'])->name('orders.deliver');
+    Route::patch('orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::resource('order-items', OrderItemController::class);
 
     // Shows routes

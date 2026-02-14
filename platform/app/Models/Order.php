@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Exceptions\InvalidOrderTransitionException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -45,6 +46,20 @@ class Order extends Model
 {
     /** @use HasFactory<\Database\Factories\OrderFactory> */
     use HasFactory, SoftDeletes;
+
+    /**
+     * Allowed status transitions: each status value maps to an array of allowed target statuses.
+     *
+     * @var array<string, list<OrderStatus>>
+     */
+    public static array $transitions = [
+        'draft' => [OrderStatus::Open],
+        'open' => [OrderStatus::Accepted, OrderStatus::Cancelled],
+        'accepted' => [OrderStatus::Fulfilled, OrderStatus::Cancelled],
+        'fulfilled' => [OrderStatus::Delivered, OrderStatus::Cancelled],
+        'delivered' => [],
+        'cancelled' => [],
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -179,5 +194,48 @@ class Order extends Model
             ->where('integration_id', $integration->id)
             ->where('external_type', $externalType)
             ->exists();
+    }
+
+    /**
+     * Check whether the order can transition to the given status.
+     */
+    public function canTransitionTo(OrderStatus $status): bool
+    {
+        $allowed = self::$transitions[$this->status->value] ?? [];
+
+        return in_array($status, $allowed, true);
+    }
+
+    /**
+     * Transition the order to the given status. Throws InvalidOrderTransitionException if invalid.
+     */
+    public function transitionTo(OrderStatus $status, ?int $userId = null, ?string $note = null): void
+    {
+        if (! $this->canTransitionTo($status)) {
+            throw new InvalidOrderTransitionException(
+                "Order cannot transition from {$this->status->value} to {$status->value}."
+            );
+        }
+
+        $from = $this->status->value;
+        $to = $status->value;
+
+        $this->status = $status;
+
+        if ($userId !== null) {
+            $this->updated_by = $userId;
+        }
+
+        if ($status === OrderStatus::Cancelled) {
+            $this->cancelled_at = now();
+        }
+
+        if ($note !== null && $note !== '') {
+            $date = now()->toDateTimeString();
+            $block = "\n\n---\n[Status Change: {$from} → {$to}] {$date}\n{$note}";
+            $this->notes = trim(($this->notes ?? '').$block);
+        }
+
+        $this->save();
     }
 }

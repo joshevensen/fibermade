@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
+use App\Exceptions\InvalidOrderTransitionException;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Customer;
@@ -11,6 +12,7 @@ use App\Models\Order;
 use App\Models\Show;
 use App\Models\Store;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -216,5 +218,45 @@ class OrderController extends Controller
         $order->delete();
 
         return redirect()->route('orders.index');
+    }
+
+    public function submit(Request $request, Order $order): RedirectResponse
+    {
+        return $this->performTransition($order, OrderStatus::Open, $request);
+    }
+
+    public function accept(Request $request, Order $order): RedirectResponse
+    {
+        return $this->performTransition($order, OrderStatus::Accepted, $request);
+    }
+
+    public function fulfill(Request $request, Order $order): RedirectResponse
+    {
+        return $this->performTransition($order, OrderStatus::Fulfilled, $request);
+    }
+
+    public function deliver(Request $request, Order $order): RedirectResponse
+    {
+        return $this->performTransition($order, OrderStatus::Delivered, $request);
+    }
+
+    public function cancel(Request $request, Order $order): RedirectResponse
+    {
+        return $this->performTransition($order, OrderStatus::Cancelled, $request);
+    }
+
+    private function performTransition(Order $order, OrderStatus $targetStatus, Request $request): RedirectResponse
+    {
+        $this->authorize('update', $order);
+
+        $request->validate(['note' => 'nullable|string|max:1000']);
+
+        try {
+            $order->transitionTo($targetStatus, $request->user()->id, $request->input('note'));
+        } catch (InvalidOrderTransitionException $e) {
+            abort(422, $e->getMessage());
+        }
+
+        return redirect()->route('orders.edit', $order);
     }
 }
