@@ -8,20 +8,20 @@ The current landing page at `platform/resources/js/pages/website/HomePage.vue` w
 
 The page currently has 6 content sections built with raw HTML/Tailwind, but we have 11 Tailwind Plus-based components in `platform/resources/js/components/web/` that should be used instead. Only WebHeader, WebHero, WebNewsletter, and WebFooter are currently imported — the rest are unused.
 
-The page is launching before user signups are ready, so the only action is joining the early access email list. The email signup form will be visual-only in this prompt — the backend integration with a newsletter service is handled in prompt 2.
+The product is launching with billing ready — this is not a "coming soon" page. The goal is to convert visitors into signups. The page should convey "just launched" to set proper expectations without being tentative about it.
 
 ## Goal
 
-Rebuild the landing page with updated positioning (Shopify app for the fiber community) and use the existing Tailwind Plus web components for a polished design. The page should clearly communicate: Shopify is generic → Fibermade makes it fiber-specific → here's what it does → sign up for early access.
+Rebuild the landing page with updated positioning (Shopify app for the fiber community) and use the existing Tailwind Plus web components for a polished design. The page should clearly communicate: Shopify is generic → Fibermade makes it fiber-specific → here's what it does → sign up now.
 
 ## Non-Goals
 
 - Do not build a full marketing website (just one landing page)
 - Do not add a blog, about page, or multi-page marketing site
-- Do not build any backend for the email signup form (that's prompt 2)
 - Do not add animations or complex interactivity
-- Do not add a pricing section
+- Do not add a pricing section (pricing lives on its own page or in the signup flow)
 - Do not write final marketing copy — use good placeholder copy that captures the right tone and message; it will be refined later
+- Do not add an email newsletter signup — the CTA is product registration
 
 ## Page Structure
 
@@ -33,8 +33,10 @@ The page should use these sections in this order, using existing web components:
 ### 2. Hero — `WebHero` (`screenshotRight` variant)
 - **Headline**: Contrast angle — "Shopify wasn't built for yarn. Fibermade fixes that." (or similar)
 - **Subline**: One sentence about what Fibermade does — adds wholesale ordering and converts Shopify's generic concepts into fiber-specific ones (colorways, bases, etc.)
-- **CTA button**: "Join the early list" → scrolls to `#newsletter`
+- **CTA button**: "Get started" or "Sign up" → links to the registration page
+- **Secondary button** (optional): "Learn more" → scrolls down the page
 - **Screenshot**: Placeholder image for now (will be replaced with real product screenshots)
+- **"Just launched" framing**: Could be a small badge/announcement banner above the headline (e.g., "Just launched") — subtle, not a whole section
 
 ### 3. Problem Statement — `WebFeatures` (`threeColumn` variant)
 - **Section title**: Something like "The problem" or "Why Shopify falls short for fiber businesses"
@@ -53,25 +55,20 @@ The page should use these sections in this order, using existing web components:
   - (More features as appropriate from the Stage 1 scope)
 - Placeholder screenshot(s) alongside features if using `imageRight` variant
 
-### 5. Coming Soon / Roadmap — lighter section
-- Sets expectations: "Currently in development"
-- Brief mention of what's being built first
-- "Early list members get first access" — gives reason to sign up
-- Could use `WebCallToAction` or a simple custom section
+### 5. Final CTA — `WebCallToAction`
+- Reinforce the signup call-to-action
+- Something like "Ready to make Shopify work for your yarn business?" with a "Get started" button → registration page
+- Could weave in "just launched" / "be one of the first" framing here
 
-### 6. Newsletter Signup — `WebNewsletter` (`stacked` or `justified` variant)
-- `id="newsletter"` anchor for hero CTA scroll
-- Title: "Get early access" or "Follow along"
-- The form is **visual only** — the submit button does not do anything yet (prompt 2 wires it to a newsletter service)
-- No backend route, no form submission logic
-
-### 7. Footer — `WebFooter` (`centered` variant)
+### 6. Footer — `WebFooter` (`centered` variant)
 - Keep simple with Fibermade tagline
 
 ### Sections to Remove (from current page)
 - "What Fibermade believes" (philosophy) — too abstract for a landing page
 - "Who this is for / not for" — audience is clear from the rest of the page
 - All "production-first" framing — doesn't match Stage 1 reality
+- Newsletter/email signup section — CTA is now product registration
+- "Coming soon" / roadmap section — the product is launched
 
 ## Constraints
 
@@ -86,32 +83,40 @@ The page should use these sections in this order, using existing web components:
 - Login/register links for unauthenticated users
 - Dashboard link for authenticated users (existing behavior)
 
+### CTA behavior
+- Primary CTA ("Get started" / "Sign up") links to the existing registration page
+- Authenticated users should see "Go to Dashboard" instead of signup CTAs
+
 ## Acceptance Criteria
 
 - [ ] Page uses Tailwind Plus web components (not raw HTML for major sections)
-- [ ] Hero with contrast-angle headline, subline, CTA, and placeholder screenshot
+- [ ] Hero with contrast-angle headline, subline, signup CTA, and placeholder screenshot
+- [ ] "Just launched" framing (badge, banner, or subtle copy — not a whole section)
 - [ ] Problem statement section (3-4 fiber-specific Shopify pain points)
 - [ ] Features section (what Fibermade adds to Shopify)
-- [ ] Coming soon / roadmap section with early access framing
-- [ ] Newsletter signup form present (visual only — no backend)
+- [ ] Final CTA section reinforcing signup
 - [ ] Footer with Fibermade tagline
 - [ ] Header with login/register links (unauthenticated) or dashboard link (authenticated)
+- [ ] Signup CTAs link to registration page (or dashboard for authenticated users)
 - [ ] Page is responsive (mobile-friendly)
 - [ ] No "production-first" or "commerce platform" framing — messaging reflects Shopify app positioning
+- [ ] No email newsletter signup — CTA is product registration
 
 ---
 
 ## Tech Analysis
 
-- **No backend work** — this prompt is purely frontend. The email signup form is visual-only; prompt 2 connects it to a newsletter service.
+- **No backend work** — this prompt is purely frontend. All CTAs link to the existing registration page.
 - **Web components to use**:
   - `WebHeader` — already in use, keep as-is
-  - `WebHero` — switch to `screenshotRight` variant, update props
+  - `WebHero` — switch to `screenshotRight` variant, update props for signup CTA
   - `WebFeatures` — use for problem statement (`threeColumn`) and features (`featureList` or `imageRight`)
-  - `WebCallToAction` or custom — for coming soon section
-  - `WebNewsletter` — already imported, keep as visual placeholder
+  - `WebCallToAction` — final CTA section reinforcing signup
   - `WebFooter` — already in use, keep as-is
-- **Placeholder images**: Use simple placeholder divs with gray background and descriptive text (e.g., "Product screenshot — coming soon") that can be swapped for real screenshots later.
+- **Components no longer needed on this page**:
+  - `WebNewsletter` — no email signup
+- **Placeholder images**: Use simple placeholder divs with gray background and descriptive text (e.g., "Product screenshot") that can be swapped for real screenshots later.
+- **Auth-aware CTAs**: Use the existing `isAuthenticated` computed property and route helpers (`register()`, `dashboard()`) already in `HomePage.vue` to show the right CTA text and link.
 
 ## References
 

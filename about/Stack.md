@@ -11,7 +11,10 @@ https://forge.laravel.com/docs/introduction
 
 ## Email
 
-- **Postmark** — Transactional email (order confirmations, invitations, password resets).
+- **Mailtrap** — Local (and optional staging) email; inbox capture, no real delivery.
+https://api-docs.mailtrap.io/docs/mailtrap-api-docs/5tjdeg9545058-mailtrap-api
+
+- **Postmark** — Transactional email in production (order confirmations, invitations, password resets).
 https://postmarkapp.com/developer
 
 - **MailerLite** — Marketing email (newsletters, announcements, onboarding sequences).

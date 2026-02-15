@@ -4,13 +4,13 @@ status: pending
 
 ## Context
 
-The registration page exists at `platform/resources/js/pages/auth/RegisterPage.vue` with fields for name, email, business_name, password (confirmed), and checkboxes for terms, privacy, and marketing opt-in. The `CreateNewUser` action at `platform/app/Actions/Fortify/CreateNewUser.php` handles registration: it validates input, checks the email whitelist (currently limited to `kristen@badfrogyarnco.com` in `config/auth.php`), creates an Account (type: Creator), Creator record, and User. The `FortifyServiceProvider` renders the register view via Inertia. Registration always creates a Creator account -- there's no account type selection.
+The registration page exists at `platform/resources/js/pages/auth/RegisterPage.vue` with fields for name, email, business_name, password (confirmed), and checkboxes for terms, privacy, and marketing opt-in. The `CreateNewUser` action at `platform/app/Actions/Fortify/CreateNewUser.php` handles registration: it validates input, checks an email whitelist (currently limited to `kristen@badfrogyarnco.com` in `config/auth.php`), creates an Account (type: Creator), Creator record, and User. The `FortifyServiceProvider` renders the register view via Inertia. Registration always creates a Creator account -- there's no account type selection.
 
-For beta launch, the whitelist needs to be expanded or made configurable so 5-10 personally onboarded creators can register. The registration page needs visual polish to match the app's design system and feel production-ready.
+Registration is open to anyone — the email whitelist needs to be removed entirely. The registration page needs visual polish to match the app's design system and feel production-ready.
 
 ## Goal
 
-Polish the registration page for production readiness: update the visual design to be clean and professional, expand the email whitelist approach for beta (allow configuration via environment variable or expand the config array), ensure error messaging is clear and helpful, and add any missing UX touches (loading states, field validation feedback).
+Polish the registration page for production readiness: update the visual design to be clean and professional, remove the email whitelist so registration is open to anyone, ensure error messaging is clear and helpful, and add any missing UX touches (loading states, field validation feedback).
 
 ## Non-Goals
 
@@ -23,7 +23,7 @@ Polish the registration page for production readiness: update the visual design 
 ## Constraints
 
 - The registration page should use the existing Vue component library and Tailwind CSS classes used elsewhere in the app
-- Change the whitelist approach: instead of hardcoding emails in `config/auth.php`, use an environment variable `REGISTRATION_WHITELIST` that accepts a comma-separated list of emails. If the variable is empty or not set, allow all registrations (open registration for when beta expands).
+- Remove the email whitelist from `config/auth.php` and the whitelist check from `CreateNewUser` — registration is open to anyone
 - Keep the existing fields: name, email, business_name, password, password_confirmation, terms, privacy, marketing
 - Add client-side validation feedback (inline errors below fields, not just a banner at the top)
 - Add a loading/submitting state to the submit button to prevent double-clicks
@@ -35,28 +35,21 @@ Polish the registration page for production readiness: update the visual design 
 
 - [ ] Registration page has polished, professional visual design
 - [ ] Consistent with the app's design system (typography, spacing, colors)
-- [ ] Whitelist now reads from `REGISTRATION_WHITELIST` env variable (comma-separated emails)
-- [ ] Empty/missing `REGISTRATION_WHITELIST` allows all registrations
+- [ ] Email whitelist removed — anyone can register
 - [ ] Server validation errors display inline below the relevant field
 - [ ] Submit button shows loading state while form is processing
 - [ ] Responsive layout works on mobile screens
 - [ ] Login link visible for existing users ("Already have an account? Log in")
 - [ ] Terms and privacy checkboxes clearly labeled
 - [ ] Password confirmation field validates match client-side
-- [ ] `CreateNewUser` action updated to read whitelist from env
-- [ ] `.env.example` updated with `REGISTRATION_WHITELIST` variable
+- [ ] `CreateNewUser` action updated to remove whitelist check
+- [ ] Whitelist config removed from `config/auth.php`
 
 ---
 
 ## Tech Analysis
 
-- **Whitelist via env**: Replace the config array in `config/auth.php` with:
-  ```php
-  'registration_email_whitelist' => env('REGISTRATION_WHITELIST')
-      ? array_map('trim', explode(',', env('REGISTRATION_WHITELIST')))
-      : [],
-  ```
-  This reads a comma-separated string from the environment and splits it into an array. Empty string or missing variable results in an empty array, which the `CreateNewUser` action already treats as "allow all".
+- **Remove whitelist**: Delete the `registration_email_whitelist` config from `config/auth.php` and remove the whitelist check from `CreateNewUser.php`. Registration is open to anyone.
 - **Inertia form handling**: The existing `RegisterPage.vue` likely uses Inertia's `useForm()` composable which provides `form.errors` (server-side errors keyed by field name), `form.processing` (loading state), and `form.post()` for submission. These features should already be available -- the work is mostly in the template to display them properly.
 - **Inline errors**: For each field, check `form.errors.{field}` and render a `<p class="text-red-500 text-sm mt-1">{{ form.errors.name }}</p>` below the input. This is a common pattern with Inertia + Vue.
 - **Loading state**: Use `form.processing` to disable the submit button and show a spinner or "Creating account..." text.
@@ -73,6 +66,5 @@ Polish the registration page for production readiness: update the visual design 
 ## Files
 
 - Modify `platform/resources/js/pages/auth/RegisterPage.vue` -- visual polish, inline errors, loading state
-- Modify `platform/app/Actions/Fortify/CreateNewUser.php` -- update whitelist check if config structure changes
-- Modify `platform/config/auth.php` -- change whitelist to read from env variable
-- Modify `platform/.env.example` -- add `REGISTRATION_WHITELIST` variable
+- Modify `platform/app/Actions/Fortify/CreateNewUser.php` -- remove whitelist check
+- Modify `platform/config/auth.php` -- remove whitelist config
