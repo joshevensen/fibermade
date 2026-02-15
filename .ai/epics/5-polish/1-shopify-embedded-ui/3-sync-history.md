@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 5.1: Prompt 3 -- Sync History Page
 
