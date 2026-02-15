@@ -50,11 +50,11 @@
                 <tr>
                     <td style="padding: 24px 32px 32px 32px; text-align: center; border-top: 1px solid #e5e7eb; font-size: 13px; color: #6b7280;">
                         @if ($creatorForward && $creatorName)
-                            <p style="margin: 0 0 4px 0;">Sent via <a href="{{ config('app.url') }}" style="color: #4f46e5; text-decoration: none;">{{ config('app.name') }}</a></p>
-                            <p style="margin: 0;">Production-first inventory for small-batch dyers.</p>
+                            <p style="margin: 0 0 4px 0;">Sent via <a href="{{ config('app.url') }}" style="color: #4f46e5; text-decoration: none;">Fibermade</a></p>
+                            <p style="margin: 0;">Fibermade — A commerce platform for the fiber community</p>
                         @else
-                            <p style="margin: 0 0 4px 0;"><a href="{{ config('app.url') }}" style="color: #4f46e5; text-decoration: none;">{{ config('app.name') }}</a></p>
-                            <p style="margin: 0;">Production-first inventory for small-batch dyers.</p>
+                            <p style="margin: 0 0 4px 0;"><a href="{{ config('app.url') }}" style="color: #4f46e5; text-decoration: none;">Fibermade</a></p>
+                            <p style="margin: 0;">Fibermade — A commerce platform for the fiber community</p>
                         @endif
                     </td>
                 </tr>

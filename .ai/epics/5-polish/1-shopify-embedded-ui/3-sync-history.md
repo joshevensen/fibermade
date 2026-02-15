@@ -21,29 +21,31 @@ Create a sync history page at `/app/sync-history` that surfaces IntegrationLog d
 ## Constraints
 
 - Create a new route file `shopify/app/routes/app.sync-history.tsx` (file-based routing: `/app/sync-history`)
-- The loader fetches logs via `FibermadeClient.getIntegrationLogs()` with `limit: 100`
+- The loader fetches logs via `FibermadeClient.getIntegrationLogs(integrationId, { limit: 100 })` — API expects query param `limit` (max 100)
 - If not connected, redirect to `/app`
 - Use Polaris `IndexTable` or `DataTable` for the log list
 - Display columns: Status (badge), Resource Type, Message, Synced At
 - Status badges: success = "success" tone, error = "critical" tone, warning = "warning" tone
-- Resource type should be human-readable: strip the `App\\Models\\` prefix (e.g., "Colorway", "Collection", "Order")
-- Format `synced_at` as a relative time (e.g., "2 minutes ago") or readable date
-- Add a status filter using Polaris `Filters` or `ChoiceList` -- filter client-side since we load all logs at once
+- Resource type should be human-readable: strip the `App\\Models\\` prefix (e.g., "Colorway", "Collection", "Order"); when null or empty show "—" (em dash)
+- Format `synced_at`: relative time when &lt; 24h (e.g., "2 minutes ago"), then short absolute date/time for older entries
+- Add a status filter using Polaris `Filters` or `ChoiceList` — filter client-side since we load all logs at once
+- Show a loading state (Polaris Spinner or skeleton) while logs are fetched
 - Show an empty state if no logs exist (Polaris `EmptyState` component)
 
 ## Acceptance Criteria
 
 - [ ] Route `app.sync-history.tsx` exists and renders at `/app/sync-history`
-- [ ] Loader fetches integration logs via `getIntegrationLogs()` with limit 100
+- [ ] Loader fetches integration logs via `getIntegrationLogs(integrationId, { limit: 100 })`
 - [ ] Redirects to `/app` if shop is not connected
 - [ ] Table displays: Status (badge), Resource Type, Message, Synced At
 - [ ] Status badges use appropriate tones (success/critical/warning)
-- [ ] Resource type displayed without namespace prefix (e.g., "Colorway" not "App\\Models\\Colorway")
-- [ ] Synced at displayed as readable date/time
+- [ ] Resource type displayed without namespace prefix (e.g., "Colorway" not "App\\Models\\Colorway"); show "—" when null or empty
+- [ ] Synced at: relative time when &lt; 24h, short absolute date/time for older
 - [ ] Client-side status filter (all / success / error / warning)
+- [ ] Loading state (Spinner or skeleton) shown while logs are fetched
 - [ ] Empty state shown when no logs exist
 - [ ] Page title is "Sync History"
-- [ ] Navigation highlights "Sync History" when on this page
+- [ ] Navigation highlights "Sync History" when on this page (verify default nav behavior; document if manual highlight is needed)
 
 ---
 
@@ -66,9 +68,12 @@ Create a sync history page at `/app/sync-history` that surfaces IntegrationLog d
     updated_at: string;
   }
   ```
-- **Resource type parsing**: `loggable_type` comes as `"App\\Models\\Colorway"`. Split on `\\` and take the last segment. Handle null (show "—" or "General").
+- **Resource type parsing**: `loggable_type` comes as `"App\\Models\\Colorway"`. Split on `\\` and take the last segment. When null or empty, show "—" (em dash).
 - **Client-side filtering**: Load all logs, store in state, filter using `useState` for the selected status filter. Polaris `Filters` component with a `ChoiceList` for status.
-- **Date formatting**: Use JavaScript `Intl.DateTimeFormat` or a simple helper for relative time. Shopify Polaris doesn't include a date formatter -- keep it simple with `new Date(synced_at).toLocaleString()`.
+- **Date formatting**: Relative when &lt; 24h (e.g. `Intl.RelativeTimeFormat` or a small helper); for older entries use short absolute (e.g. `new Date(synced_at).toLocaleString()` or `Intl.DateTimeFormat`).
+- **Loading state**: Show Polaris Spinner or skeleton until loader resolves; avoids flash of empty content.
+- **Loader errors**: Let the route error boundary handle failures (e.g. `getIntegrationLogs` throws); no special catch/redirect in loader.
+- **Nav highlight**: Rely on default `s-link` / app nav behavior; verify that "Sync History" highlights when path is `/app/sync-history` and document. Add explicit `useLocation()`-based highlight only if default does not.
 - **IndexTable vs DataTable**: `IndexTable` is better for selectable rows (not needed here). Use `DataTable` for a simple read-only table, or a custom card-based layout with Polaris `ResourceList`. `DataTable` is simplest.
 
 ## References
