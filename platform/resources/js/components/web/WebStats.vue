@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 interface StatItem {
     id: number | string;
     name: string;
@@ -7,6 +9,7 @@ interface StatItem {
 
 interface Props {
     variant?: 'grid' | 'simple';
+    background?: 'white' | 'surface' | 'primary';
     title?: string;
     description?: string;
     stats: StatItem[];
@@ -14,11 +17,23 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'simple',
+    background: 'white',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 </script>
 
 <template>
-    <div class="py-24 sm:py-32">
+    <div :class="[backgroundClass, 'py-24 sm:py-32']">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <!-- Grid variant with title/description -->
             <div
@@ -47,9 +62,7 @@ const props = withDefaults(defineProps<Props>(), {
                         :key="stat.id"
                         class="flex flex-col bg-surface-400/5 p-8"
                     >
-                        <dt
-                            class="text-sm/6 font-semibold text-surface-600"
-                        >
+                        <dt class="text-sm/6 font-semibold text-surface-600">
                             {{ stat.name }}
                         </dt>
                         <dd

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
 import { useIcon } from '@/composables/useIcon';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface PricingTier {
     id: string;
@@ -24,6 +24,7 @@ interface DiscountedTier {
 
 interface Props {
     variant?: 'single' | 'twoTier' | 'twoTierWithExtra' | 'threeTiers';
+    background?: 'white' | 'surface' | 'primary';
     showPricingToggle?: boolean;
     subtitle?: string;
     title: string;
@@ -40,7 +41,19 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'threeTiers',
+    background: 'white',
     showPricingToggle: false,
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 
 const pricingFrequency = ref<'monthly' | 'annually'>('monthly');
@@ -49,7 +62,10 @@ const { IconList } = useIcon();
 
 <template>
     <!-- SinglePrice variant -->
-    <div v-if="variant === 'single'" class="py-24 sm:py-32">
+    <div
+        v-if="variant === 'single'"
+        :class="[backgroundClass, 'py-24 sm:py-32']"
+    >
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto max-w-4xl sm:text-center">
                 <h2
@@ -80,9 +96,7 @@ const { IconList } = useIcon();
                     >
                         {{ tiers[0].name }}
                     </h3>
-                    <p
-                        class="mt-6 text-base/7 text-surface-600"
-                    >
+                    <p class="mt-6 text-base/7 text-surface-600">
                         {{ tiers[0].description }}
                     </p>
                     <div class="mt-10 flex items-center gap-x-4">
@@ -93,9 +107,7 @@ const { IconList } = useIcon();
                                 singlePrice?.includedLabel || "What's included"
                             }}
                         </h4>
-                        <div
-                            class="h-px flex-auto bg-surface-100"
-                        ></div>
+                        <div class="h-px flex-auto bg-surface-100"></div>
                     </div>
                     <ul
                         role="list"
@@ -124,9 +136,7 @@ const { IconList } = useIcon();
                         class="rounded-2xl bg-surface-50 py-10 text-center inset-ring inset-ring-surface-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16"
                     >
                         <div class="mx-auto max-w-xs px-8">
-                            <p
-                                class="text-base font-semibold text-surface-600"
-                            >
+                            <p class="text-base font-semibold text-surface-600">
                                 Pay once, own it forever
                             </p>
                             <p
@@ -153,9 +163,7 @@ const { IconList } = useIcon();
                             >
                                 {{ singlePrice?.buttonText || 'Get access' }}
                             </UiLink>
-                            <p
-                                class="mt-6 text-xs/5 text-surface-600"
-                            >
+                            <p class="mt-6 text-xs/5 text-surface-600">
                                 Invoices and receipts available for easy company
                                 reimbursement
                             </p>
@@ -169,7 +177,10 @@ const { IconList } = useIcon();
     <!-- TwoTier variant -->
     <div
         v-else-if="variant === 'twoTier'"
-        class="relative isolate px-6 py-24 sm:py-32 lg:px-8"
+        :class="[
+            backgroundClass,
+            'relative isolate px-6 py-24 sm:py-32 lg:px-8',
+        ]"
     >
         <div class="mx-auto max-w-4xl text-center">
             <h2
@@ -211,9 +222,7 @@ const { IconList } = useIcon();
                 <h3
                     :id="tier.id"
                     :class="[
-                        tier.featured
-                            ? 'text-primary-400'
-                            : 'text-primary-500',
+                        tier.featured ? 'text-primary-400' : 'text-primary-500',
                         'text-base/7 font-semibold',
                     ]"
                 >
@@ -222,9 +231,7 @@ const { IconList } = useIcon();
                 <p class="mt-4 flex items-baseline gap-x-2">
                     <span
                         :class="[
-                            tier.featured
-                                ? 'text-white'
-                                : 'text-surface-900',
+                            tier.featured ? 'text-white' : 'text-surface-900',
                             'text-5xl font-semibold tracking-tight',
                         ]"
                     >
@@ -243,9 +250,7 @@ const { IconList } = useIcon();
                 </p>
                 <p
                     :class="[
-                        tier.featured
-                            ? 'text-surface-300'
-                            : 'text-surface-600',
+                        tier.featured ? 'text-surface-300' : 'text-surface-600',
                         'mt-6 text-base/7',
                     ]"
                 >
@@ -254,9 +259,7 @@ const { IconList } = useIcon();
                 <ul
                     role="list"
                     :class="[
-                        tier.featured
-                            ? 'text-surface-300'
-                            : 'text-surface-600',
+                        tier.featured ? 'text-surface-300' : 'text-surface-600',
                         'mt-8 space-y-3 text-sm/6 sm:mt-10',
                     ]"
                 >
@@ -297,7 +300,7 @@ const { IconList } = useIcon();
     <!-- TwoTierWithExtra variant -->
     <div
         v-else-if="variant === 'twoTierWithExtra'"
-        class="isolate overflow-hidden bg-surface-900"
+        :class="[backgroundClass, 'isolate overflow-hidden']"
     >
         <div
             class="mx-auto max-w-7xl px-6 pt-24 pb-96 text-center sm:pt-32 lg:px-8"
@@ -354,9 +357,7 @@ const { IconList } = useIcon();
                                         /month
                                     </span>
                                 </div>
-                                <p
-                                    class="mt-6 text-base/7 text-surface-600"
-                                >
+                                <p class="mt-6 text-base/7 text-surface-600">
                                     {{ tier.description }}
                                 </p>
                                 <ul
@@ -397,9 +398,7 @@ const { IconList } = useIcon();
                                 >
                                     {{ discountedTier.title }}
                                 </h3>
-                                <p
-                                    class="mt-1 text-base/7 text-surface-600"
-                                >
+                                <p class="mt-1 text-base/7 text-surface-600">
                                     {{ discountedTier.description }}
                                 </p>
                             </div>
@@ -421,7 +420,7 @@ const { IconList } = useIcon();
     </div>
 
     <!-- ThreeTiers variant -->
-    <div v-else class="py-24 sm:py-32">
+    <div v-else :class="[backgroundClass, 'py-24 sm:py-32']">
         <form class="group/tiers">
             <div class="mx-auto max-w-7xl px-6 lg:px-8">
                 <div class="mx-auto max-w-4xl text-center">
@@ -552,9 +551,7 @@ const { IconList } = useIcon();
                                     Most popular
                                 </p>
                             </div>
-                            <p
-                                class="mt-4 text-sm/6 text-surface-600"
-                            >
+                            <p class="mt-4 text-sm/6 text-surface-600">
                                 {{ tier.description }}
                             </p>
                             <!-- Monthly price (shown when toggle is disabled or monthly is selected) -->

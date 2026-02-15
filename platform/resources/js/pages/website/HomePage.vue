@@ -2,8 +2,10 @@
 import WebCallToAction from '@/components/web/WebCallToAction.vue';
 import WebFeatures from '@/components/web/WebFeatures.vue';
 import WebFooter from '@/components/web/WebFooter.vue';
+import WebFrequentlyAskedQuestions from '@/components/web/WebFrequentlyAskedQuestions.vue';
 import WebHeader from '@/components/web/WebHeader.vue';
 import WebHero from '@/components/web/WebHero.vue';
+import WebPricing from '@/components/web/WebPricing.vue';
 import { dashboard, login, register } from '@/routes';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -16,24 +18,34 @@ const placeholderScreenshot =
 
 const problemFeatures = [
     {
-        name: 'Generic product concepts',
+        name: 'Scattered wholesale orders',
         description:
-            "Shopify's variants don't map to how you think — colorways, bases, and weights get lost in the system.",
+            'Orders come in through emails, texts, and PDFs. There\u2019s no single place to track what\u2019s been requested, accepted, or fulfilled.',
     },
     {
-        name: 'No wholesale workflow',
+        name: 'Generic product model',
         description:
-            'Wholesale orders end up scattered across emails, spreadsheets, and PDFs with no single place to manage them.',
+            'Shopify thinks in products and variants. You think in colorways, bases, and weights \u2014 and the translation is always lossy.',
     },
     {
-        name: 'Inventory that misses the point',
+        name: 'No inventory reservation',
         description:
-            "Inventory tools don't understand how dyed yarn actually works — from bases to colorways to production.",
+            'Shopify can\u2019t distinguish what\u2019s committed to wholesale from what\u2019s free for retail, so you risk overselling both.',
     },
     {
-        name: "You've adapted to Shopify",
+        name: 'No wholesale catalog',
         description:
-            "You've learned to think in Shopify's language instead of the system adapting to how fiber businesses work.",
+            'Stores can\u2019t browse your line and place orders the way retail customers can. They have to ask you what\u2019s available.',
+    },
+    {
+        name: 'Duplicate product management',
+        description:
+            'You end up creating separate wholesale variants just to show different pricing \u2014 doubling the work to maintain your catalog.',
+    },
+    {
+        name: 'No per-store terms',
+        description:
+            'Every store gets the same deal because there\u2019s nowhere to manage individual discounts, minimums, or payment terms.',
     },
 ];
 
@@ -53,74 +65,149 @@ const solutionFeatures = [
         description:
             'Inventory that understands how dyed yarn works so you can plan and sell with confidence.',
     },
+    {
+        name: 'Store relationship management',
+        description:
+            'Set wholesale terms per store — discounts, minimums, lead times, and payment terms — all in one place.',
+    },
+];
+
+const pricingTier = {
+    id: 'fibermade',
+    name: 'Fibermade for Shopify',
+    href: register().url,
+    description:
+        'Everything you need to run wholesale alongside your existing Shopify store. One plan, no tiers, no surprise fees.',
+    features: [
+        'Wholesale catalog with fiber-specific terminology',
+        'Store relationship management with per-store terms',
+        'Inline ordering for your wholesale customers',
+        'Smart inventory reservation (wholesale vs. retail)',
+        'Bi-directional Shopify sync',
+        '30-day money-back guarantee',
+    ],
+    priceMonthly: '$39',
+};
+
+const faqs = [
+    {
+        id: 1,
+        question: 'Do I need to leave Shopify?',
+        answer: 'No. Fibermade is a Shopify app that adds wholesale capabilities to your existing store. Your retail customers see no change, and you keep everything that already works.',
+    },
+    {
+        id: 2,
+        question: 'How does inventory sync work?',
+        answer: 'Fibermade syncs inventory bi-directionally with Shopify. When a wholesale order is accepted, inventory reserves automatically. Retail sales in Shopify sync back to Fibermade so you always know what\u2019s available.',
+    },
+    {
+        id: 3,
+        question: 'How do stores place wholesale orders?',
+        answer: 'You invite stores to Fibermade where they can browse your catalog, see wholesale pricing, and place orders directly — no more email tag or spreadsheets.',
+    },
+    {
+        id: 4,
+        question: 'Does Fibermade handle payments?',
+        answer: 'Wholesale payments are handled outside Fibermade — check, Venmo, wire transfer, however you and your stores already work. You mark orders paid in the system when payment arrives.',
+    },
+    {
+        id: 5,
+        question: 'What if I want to cancel?',
+        answer: 'Cancel anytime. If you cancel within 30 days, you get a full refund — no questions asked. We want you to have enough time to actually use the wholesale features before deciding.',
+    },
+    {
+        id: 6,
+        question: 'Why $39/month?',
+        answer: 'It matches what you already pay for Shopify Basic — an easy mental anchor. Your total stack is $78/month for both Shopify and Fibermade, which is far less than the $2,000+/month Shopify Plus charges for B2B features.',
+    },
 ];
 </script>
 
 <template>
     <Head title="Fibermade – Shopify for the fiber community" />
-    <div class="flex min-h-screen flex-col bg-surface-50">
+    <main class="flex min-h-screen flex-col bg-surface-50">
         <WebHeader
             company-name="Fibermade"
             :navigation="[]"
             :login-link="isAuthenticated ? undefined : login().url"
             :signup-link="isAuthenticated ? undefined : register().url"
         />
-        <main class="flex-1">
-            <WebHero
-                variant="screenshotRight"
-                title="Shopify wasn't built for yarn. Fibermade fixes that."
-                description="Fibermade adds wholesale ordering to your Shopify store and turns generic variants into fiber-specific concepts — colorways, bases, and the language your business actually uses."
-                :badge="{ label: 'Just launched', text: '' }"
-                :primary-button="
-                    isAuthenticated
-                        ? {
-                              text: 'Go to Dashboard',
-                              href: dashboard().url,
-                          }
-                        : {
-                              text: 'Get started',
-                              href: register().url,
-                          }
-                "
-                :secondary-button="
-                    isAuthenticated
-                        ? undefined
-                        : { text: 'Learn more', href: '#features' }
-                "
-                :screenshot-url="placeholderScreenshot"
-            />
+        
+        <WebHero
+            variant="screenshotRight"
+            title="Shopify wasn't built for yarn. Fibermade fixes that."
+            description="Fibermade adds wholesale ordering to your Shopify store and turns generic variants into fiber-specific concepts — colorways, bases, and the language your business actually uses."
+            :badge="{ label: 'Just launched', text: '' }"
+            :primary-button="
+                isAuthenticated
+                    ? {
+                            text: 'Go to Dashboard',
+                            href: dashboard().url,
+                        }
+                    : {
+                            text: 'Get started',
+                            href: register().url,
+                        }
+            "
+            :secondary-button="
+                isAuthenticated
+                    ? undefined
+                    : { text: 'Learn more', href: '#features' }
+            "
+            :screenshot-url="placeholderScreenshot"
+        />
 
-            <WebFeatures
-                variant="threeColumn"
-                title="Why Shopify falls short for fiber businesses"
-                :features="problemFeatures"
-            />
+        <WebFeatures
+            variant="threeColumn"
+            background="surface"
+            title="Why Shopify falls short for fiber businesses"
+            :features="problemFeatures"
+        />
 
-            <section id="features">
-                <WebFeatures
-                    variant="featureList"
-                    title="What Fibermade adds to your Shopify store"
-                    :features="solutionFeatures"
-                />
-            </section>
+        <WebFeatures
+            variant="featureList"
+            title="What Fibermade adds to your Shopify store"
+            :features="solutionFeatures"
+        />
 
-            <WebCallToAction
-                variant="centered"
-                title="Ready to make Shopify work for your yarn business?"
-                description="Just launched — be one of the first to run your fiber business on Shopify the way it should work."
-                :primary-button="
-                    isAuthenticated
-                        ? {
-                              text: 'Go to Dashboard',
-                              href: dashboard().url,
-                          }
-                        : {
-                              text: 'Get started',
-                              href: register().url,
-                          }
-                "
-            />
-        </main>
+        <WebPricing
+            variant="single"
+            background="surface"
+            subtitle="Pricing"
+            title="Simple pricing, no surprises"
+            description="One plan that includes everything. No feature gates, no per-store fees, no hidden costs."
+            :tiers="[pricingTier]"
+            :single-price="{
+                price: '$39',
+                currency: '/month',
+                buttonText: 'Get started',
+            }"
+        />
+
+        <WebFrequentlyAskedQuestions
+            title="Frequently asked questions"
+            description="Have a different question? Reach out by "
+            support-email-link="mailto:support@fibermade.com"
+            :faqs="faqs"
+        />
+
+        <WebCallToAction
+            variant="centered"
+            background="primary"
+            title="Ready to make Shopify work for your yarn business?"
+            description="Just launched — be one of the first to run your fiber business on Shopify the way it should work."
+            :primary-button="
+                isAuthenticated
+                    ? {
+                            text: 'Go to Dashboard',
+                            href: dashboard().url,
+                        }
+                    : {
+                            text: 'Get started',
+                            href: register().url,
+                        }
+            "
+        />
 
         <WebFooter
             variant="centered"
@@ -129,5 +216,5 @@ const solutionFeatures = [
             :social-links="[]"
             copyright-text="All rights reserved."
         />
-    </div>
+    </main>
 </template>

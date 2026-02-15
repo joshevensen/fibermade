@@ -1,22 +1,27 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
-import { usePage } from '@inertiajs/vue3';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage();
 const account = computed(
     () =>
-        page.props.account as
-            | { type?: string; subscription_status?: string; reactivation_days_remaining?: number | null }
-            | null,
+        page.props.account as {
+            type?: string;
+            subscription_status?: string;
+            reactivation_days_remaining?: number | null;
+        } | null,
 );
 
 const showBanner = computed(
-    () => account.value?.type === 'creator' && account.value?.subscription_status === 'inactive',
+    () =>
+        account.value?.type === 'creator' &&
+        account.value?.subscription_status === 'inactive',
 );
 
-const daysRemaining = computed(() => account.value?.reactivation_days_remaining ?? null);
+const daysRemaining = computed(
+    () => account.value?.reactivation_days_remaining ?? null,
+);
 
 function goToReactivate(): void {
     router.visit('/creator/subscription/reactivate');
@@ -32,15 +37,15 @@ function goToReactivate(): void {
         <p class="text-amber-900 dark:text-amber-100">
             Your subscription has ended.
             <template v-if="daysRemaining !== null">
-                {{ daysRemaining }} {{ daysRemaining === 1 ? 'day' : 'days' }} left to reactivate and
-                keep your data.
+                {{ daysRemaining }}
+                {{ daysRemaining === 1 ? 'day' : 'days' }} left to reactivate
+                and keep your data.
             </template>
-            <template v-else> Reactivate within 90 days to keep your data. </template>
+            <template v-else>
+                Reactivate within 90 days to keep your data.
+            </template>
         </p>
-        <UiButton
-            size="small"
-            @click="goToReactivate"
-        >
+        <UiButton size="small" @click="goToReactivate">
             Reactivate subscription
         </UiButton>
     </div>

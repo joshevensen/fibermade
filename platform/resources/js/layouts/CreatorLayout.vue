@@ -2,14 +2,14 @@
 import AppHeader from '@/components/AppHeader.vue';
 import AppMobileDrawer from '@/components/AppMobileDrawer.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
-import PaymentFailedBanner from '@/pages/creator/components/PaymentFailedBanner.vue';
-import ReactivationBanner from '@/pages/creator/components/ReactivationBanner.vue';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useCreatorNavigation } from '@/composables/useNavigation';
 import { useSidebarState } from '@/composables/useSidebarState';
 import BaseCreateDrawer from '@/pages/creator/bases/BaseCreateDrawer.vue';
 import CollectionCreateDrawer from '@/pages/creator/collections/CollectionCreateDrawer.vue';
 import ColorwayCreateDrawer from '@/pages/creator/colorways/ColorwayCreateDrawer.vue';
+import PaymentFailedBanner from '@/pages/creator/components/PaymentFailedBanner.vue';
+import ReactivationBanner from '@/pages/creator/components/ReactivationBanner.vue';
 // TODO: Re-enable CustomerCreateDrawer in Stage 2
 // import CustomerCreateDrawer from '@/pages/creator/customers/CustomerCreateDrawer.vue';
 // TODO: Re-enable OrderCreateDrawer when ready to work on orders

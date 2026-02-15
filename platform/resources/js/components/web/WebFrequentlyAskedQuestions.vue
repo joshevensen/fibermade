@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
+import { computed } from 'vue';
 
 interface FAQItem {
     id: number | string;
@@ -9,6 +10,7 @@ interface FAQItem {
 
 interface Props {
     variant?: 'twoColumns' | 'threeColumns';
+    background?: 'white' | 'surface' | 'primary';
     title: string;
     description: string;
     supportEmailLink: string;
@@ -17,11 +19,28 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'twoColumns',
+    background: 'white',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 </script>
 
 <template>
-    <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
+    <div
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8',
+        ]"
+    >
         <h2
             class="text-4xl font-semibold tracking-tight text-surface-900 sm:text-5xl"
         >
@@ -46,14 +65,10 @@ const props = withDefaults(defineProps<Props>(), {
                 ]"
             >
                 <div v-for="faq in faqs" :key="faq.id">
-                    <dt
-                        class="text-base/7 font-semibold text-surface-900"
-                    >
+                    <dt class="text-base/7 font-semibold text-surface-900">
                         {{ faq.question }}
                     </dt>
-                    <dd
-                        class="mt-2 text-base/7 text-surface-600"
-                    >
+                    <dd class="mt-2 text-base/7 text-surface-600">
                         {{ faq.answer }}
                     </dd>
                 </div>

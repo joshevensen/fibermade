@@ -7,8 +7,8 @@ use App\Enums\IntegrationType;
 use App\Models\Base;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
-use App\Models\Inventory;
 use App\Models\IntegrationLog;
+use App\Models\Inventory;
 use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyApiException;
 use App\Services\Shopify\ShopifySyncService;
@@ -29,16 +29,12 @@ class SyncBaseDeletedToShopifyJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! config('services.shopify.catalog_sync_enabled', false)) {
-            return;
-        }
-
         $integration = Integration::where('account_id', $this->accountId)
             ->where('type', IntegrationType::Shopify)
             ->where('active', true)
             ->first();
 
-        if (! $integration) {
+        if (! $integration || ! $integration->isCatalogSyncEnabled()) {
             return;
         }
 

@@ -2,7 +2,7 @@
 import UiDialog from '@/components/ui/UiDialog.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import { useIcon } from '@/composables/useIcon';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 interface NavigationLink {
     name: string;
@@ -11,6 +11,7 @@ interface NavigationLink {
 
 interface Props {
     variant?: 'right' | 'centered';
+    background?: 'white' | 'surface' | 'primary';
     logoUrl?: string;
     companyName?: string;
     navigation: NavigationLink[];
@@ -20,7 +21,19 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'right',
+    background: 'white',
     companyName: 'Your Company',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 
 const mobileMenuOpen = ref(false);
@@ -28,7 +41,7 @@ const { IconList } = useIcon();
 </script>
 
 <template>
-    <header>
+    <header :class="backgroundClass">
         <!-- Right variant -->
         <nav
             v-if="variant === 'right'"

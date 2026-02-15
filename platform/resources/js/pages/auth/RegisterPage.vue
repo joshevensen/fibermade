@@ -6,8 +6,8 @@ import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { useForm } from '@inertiajs/vue3';
 import { login } from '@/routes';
+import { useForm } from '@inertiajs/vue3';
 
 const initialValues = {
     name: '',
@@ -54,13 +54,15 @@ async function onSubmit({
         marketing_opt_in: values.marketing_opt_in ?? false,
     };
 
-    const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+    const csrfToken = (
+        document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement
+    )?.content;
 
     const response = await fetch(url.toString(), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
         },
@@ -79,7 +81,9 @@ async function onSubmit({
     if (response.status === 422 && data.errors) {
         const flat: Record<string, string> = {};
         for (const [key, value] of Object.entries(data.errors)) {
-            flat[key] = Array.isArray(value) ? (value[0] as string) : (value as string);
+            flat[key] = Array.isArray(value)
+                ? (value[0] as string)
+                : (value as string);
         }
         form.setError(flat);
         return;

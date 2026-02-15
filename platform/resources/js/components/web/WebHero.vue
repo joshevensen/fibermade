@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
 import { useIcon } from '@/composables/useIcon';
+import { computed } from 'vue';
 
 interface ImageTile {
     url: string;
@@ -25,6 +26,7 @@ interface ButtonConfig {
 
 interface Props {
     variant?: 'withImageTiles' | 'simple' | 'page' | 'screenshotRight';
+    background?: 'white' | 'surface' | 'primary';
     subtitle?: string;
     title: string;
     description?: string;
@@ -39,6 +41,18 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'simple',
+    background: 'white',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 
 const { IconList } = useIcon();
@@ -46,7 +60,10 @@ const { IconList } = useIcon();
 
 <template>
     <!-- WithImageTiles variant -->
-    <div v-if="variant === 'withImageTiles'" class="relative isolate">
+    <div
+        v-if="variant === 'withImageTiles'"
+        :class="[backgroundClass, 'relative isolate']"
+    >
         <div class="overflow-hidden">
             <div
                 class="mx-auto max-w-7xl px-6 pt-36 pb-32 sm:pt-60 lg:px-8 lg:pt-32"
@@ -186,7 +203,7 @@ const { IconList } = useIcon();
     <!-- Simple variant -->
     <div
         v-else-if="variant === 'simple'"
-        class="relative isolate px-6 pt-14 lg:px-8"
+        :class="[backgroundClass, 'relative isolate px-6 pt-14 lg:px-8']"
     >
         <div class="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
             <div
@@ -244,7 +261,10 @@ const { IconList } = useIcon();
     </div>
 
     <!-- Page variant -->
-    <div v-else-if="variant === 'page'" class="px-6 py-24 sm:py-32 lg:px-8">
+    <div
+        v-else-if="variant === 'page'"
+        :class="[backgroundClass, 'px-6 py-24 sm:py-32 lg:px-8']"
+    >
         <div class="mx-auto max-w-2xl text-center">
             <p
                 v-if="subtitle"
@@ -269,7 +289,10 @@ const { IconList } = useIcon();
     <!-- ScreenshotRight variant -->
     <div
         v-else
-        class="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:px-8 lg:py-40"
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:px-8 lg:py-40',
+        ]"
     >
         <div class="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:pt-8">
             <img
@@ -294,10 +317,7 @@ const { IconList } = useIcon();
                     >
                         <span>{{ badge.text }}</span>
                         <i
-                            :class="[
-                                IconList.Right,
-                                'size-5 text-surface-400',
-                            ]"
+                            :class="[IconList.Right, 'size-5 text-surface-400']"
                             aria-hidden="true"
                         ></i>
                     </span>

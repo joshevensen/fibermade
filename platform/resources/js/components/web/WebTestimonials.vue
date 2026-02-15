@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 interface TestimonialAuthor {
     name: string;
     handle?: string;
@@ -13,18 +15,31 @@ interface Testimonial {
 
 interface Props {
     variant?: 'grid' | 'simple' | 'twoColumn';
+    background?: 'white' | 'surface' | 'primary';
     testimonials: Testimonial[];
     logoUrl?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'simple',
+    background: 'white',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 </script>
 
 <template>
     <!-- Grid variant -->
-    <div v-if="variant === 'grid'" class="py-24 sm:py-32">
+    <div v-if="variant === 'grid'" :class="[backgroundClass, 'py-24 sm:py-32']">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div
                 class="mx-auto flow-root max-w-2xl sm:mt-20 lg:mx-0 lg:max-w-none"
@@ -39,12 +54,8 @@ const props = withDefaults(defineProps<Props>(), {
                         "
                         class="pt-8 sm:inline-block sm:w-full sm:px-4"
                     >
-                        <figure
-                            class="rounded-2xl bg-surface-50 p-8 text-sm/6"
-                        >
-                            <blockquote
-                                class="text-surface-900"
-                            >
+                        <figure class="rounded-2xl bg-surface-50 p-8 text-sm/6">
+                            <blockquote class="text-surface-900">
                                 <p>{{ `"${testimonial.body}"` }}</p>
                             </blockquote>
                             <figcaption class="mt-6 flex items-center gap-x-4">
@@ -54,9 +65,7 @@ const props = withDefaults(defineProps<Props>(), {
                                     alt=""
                                 />
                                 <div>
-                                    <div
-                                        class="font-semibold text-surface-900"
-                                    >
+                                    <div class="font-semibold text-surface-900">
                                         {{ testimonial.author.name }}
                                     </div>
                                     <div
@@ -77,15 +86,13 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- Simple variant -->
     <section
         v-else-if="variant === 'simple'"
-        class="relative isolate overflow-hidden px-6 py-24 sm:py-32 lg:px-8"
+        :class="[
+            backgroundClass,
+            'relative isolate overflow-hidden px-6 py-24 sm:py-32 lg:px-8',
+        ]"
     >
         <div class="mx-auto max-w-2xl lg:max-w-4xl">
-            <img
-                v-if="logoUrl"
-                class="mx-auto h-12"
-                :src="logoUrl"
-                alt=""
-            />
+            <img v-if="logoUrl" class="mx-auto h-12" :src="logoUrl" alt="" />
             <figure v-if="testimonials.length > 0" class="mt-10">
                 <blockquote
                     class="text-center text-xl/8 font-semibold text-surface-900 sm:text-2xl/9"
@@ -101,9 +108,7 @@ const props = withDefaults(defineProps<Props>(), {
                     <div
                         class="mt-4 flex items-center justify-center space-x-3 text-base"
                     >
-                        <div
-                            class="font-semibold text-surface-900"
-                        >
+                        <div class="font-semibold text-surface-900">
                             {{ testimonials[0].author.name }}
                         </div>
                         <svg
@@ -128,7 +133,7 @@ const props = withDefaults(defineProps<Props>(), {
     </section>
 
     <!-- TwoColumn variant -->
-    <section v-else class="py-24 sm:py-32">
+    <section v-else :class="[backgroundClass, 'py-24 sm:py-32']">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div
                 class="mx-auto grid max-w-2xl grid-cols-1 lg:mx-0 lg:max-w-none lg:grid-cols-2"
@@ -154,9 +159,7 @@ const props = withDefaults(defineProps<Props>(), {
                         <figure
                             class="mt-10 flex flex-auto flex-col justify-between"
                         >
-                            <blockquote
-                                class="text-lg/8 text-surface-900"
-                            >
+                            <blockquote class="text-lg/8 text-surface-900">
                                 <p>"{{ testimonial.body }}"</p>
                             </blockquote>
                             <figcaption class="mt-10 flex items-center gap-x-6">
@@ -166,9 +169,7 @@ const props = withDefaults(defineProps<Props>(), {
                                     alt=""
                                 />
                                 <div class="text-base">
-                                    <div
-                                        class="font-semibold text-surface-900"
-                                    >
+                                    <div class="font-semibold text-surface-900">
                                         {{ testimonial.author.name }}
                                     </div>
                                     <div

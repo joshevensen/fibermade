@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
+import { computed } from 'vue';
 
 interface ButtonConfig {
     text: string;
@@ -8,6 +9,7 @@ interface ButtonConfig {
 
 interface Props {
     variant?: 'justified' | 'centered' | 'stacked';
+    background?: 'white' | 'surface' | 'primary';
     title: string;
     description?: string;
     primaryButton: ButtonConfig;
@@ -16,6 +18,18 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'centered',
+    background: 'white',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 </script>
 
@@ -23,7 +37,10 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- Justified variant: side-by-side layout -->
     <div
         v-if="variant === 'justified'"
-        class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:justify-between lg:px-8"
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:flex lg:items-center lg:justify-between lg:px-8',
+        ]"
     >
         <h2
             class="max-w-2xl text-4xl font-semibold tracking-tight text-surface-900 sm:text-5xl"
@@ -49,7 +66,10 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- Centered variant: everything centered with description -->
-    <div v-else-if="variant === 'centered'" class="px-6 py-24 sm:py-32 lg:px-8">
+    <div
+        v-else-if="variant === 'centered'"
+        :class="[backgroundClass, 'px-6 py-24 sm:py-32 lg:px-8']"
+    >
         <div class="mx-auto max-w-2xl text-center">
             <h2
                 class="text-4xl font-semibold tracking-tight text-balance text-surface-900 sm:text-5xl"
@@ -82,7 +102,13 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- Stacked variant: title and buttons stacked -->
-    <div v-else class="mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8">
+    <div
+        v-else
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-7xl px-6 py-24 sm:py-32 lg:px-8',
+        ]"
+    >
         <h2
             class="max-w-2xl text-4xl font-semibold tracking-tight text-balance text-surface-900 sm:text-5xl"
         >

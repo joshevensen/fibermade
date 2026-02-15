@@ -26,16 +26,12 @@ class SyncColorwayImagesToShopifyJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! config('services.shopify.catalog_sync_enabled', false)) {
-            return;
-        }
-
         $integration = Integration::where('account_id', $this->colorway->account_id)
             ->where('type', IntegrationType::Shopify)
             ->where('active', true)
             ->first();
 
-        if (! $integration) {
+        if (! $integration || ! $integration->isCatalogSyncEnabled()) {
             return;
         }
 

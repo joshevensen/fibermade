@@ -4,6 +4,7 @@ import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import { useIcon } from '@/composables/useIcon';
+import { computed } from 'vue';
 
 interface ContactFieldConfig {
     name: string;
@@ -26,6 +27,7 @@ interface TestimonialConfig {
 
 interface Props {
     variant?: 'simple' | 'withTestimonial';
+    background?: 'white' | 'surface' | 'primary';
     title: string;
     description: string;
     fields: ContactFieldConfig[];
@@ -42,9 +44,21 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'simple',
+    background: 'white',
     submitButtonText: "Let's talk",
     formMethod: 'POST',
     showDecorativeBackground: true,
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 
 const { IconList } = useIcon();
@@ -81,7 +95,7 @@ function handleSubmit(event: {
     <!-- Simple variant -->
     <div
         v-if="variant === 'simple'"
-        class="isolate px-6 py-24 sm:py-32 lg:px-8"
+        :class="[backgroundClass, 'isolate px-6 py-24 sm:py-32 lg:px-8']"
     >
         <div
             v-if="showDecorativeBackground"
@@ -294,7 +308,10 @@ function handleSubmit(event: {
     <!-- WithTestimonial variant -->
     <div
         v-else
-        class="mx-auto max-w-xl px-6 py-24 sm:py-32 lg:max-w-4xl lg:px-8"
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-xl px-6 py-24 sm:py-32 lg:max-w-4xl lg:px-8',
+        ]"
     >
         <h2
             class="text-4xl font-semibold tracking-tight text-pretty text-surface-900 sm:text-5xl"
@@ -392,11 +409,7 @@ function handleSubmit(event: {
                 </UiForm>
             </div>
             <div v-if="testimonial" class="lg:mt-6 lg:w-80 lg:flex-none">
-                <img
-                    class="h-12 w-auto"
-                    :src="testimonial.logoUrl"
-                    alt=""
-                />
+                <img class="h-12 w-auto" :src="testimonial.logoUrl" alt="" />
                 <figure class="mt-10">
                     <blockquote
                         class="text-lg/8 font-semibold text-surface-900"
@@ -415,9 +428,7 @@ function handleSubmit(event: {
                             >
                                 {{ testimonial.authorName }}
                             </div>
-                            <div
-                                class="text-sm/6 text-surface-600"
-                            >
+                            <div class="text-sm/6 text-surface-600">
                                 {{ testimonial.authorRole }}
                             </div>
                         </div>

@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-import { usePage } from '@inertiajs/vue3';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage();
 const account = computed(
-    () => page.props.account as { type?: string; subscription_status?: string } | null,
+    () =>
+        page.props.account as {
+            type?: string;
+            subscription_status?: string;
+        } | null,
 );
-const nextBillingDate = computed(() => page.props.next_billing_date as string | null | undefined);
+const nextBillingDate = computed(
+    () => page.props.next_billing_date as string | null | undefined,
+);
 
 const isCreator = computed(() => account.value?.type === 'creator');
 
@@ -50,7 +55,10 @@ function openBillingPortal(): void {
         <template #title>Billing</template>
         <template #subtitle>
             <span class="capitalize">{{ statusLabel }}</span>
-            <span v-if="account?.subscription_status === 'active'" class="text-muted-foreground">
+            <span
+                v-if="account?.subscription_status === 'active'"
+                class="text-muted-foreground"
+            >
                 — $39/month
                 <template v-if="formattedNextBilling">
                     · Next billing {{ formattedNextBilling }}
@@ -60,7 +68,8 @@ function openBillingPortal(): void {
         <template #content>
             <div class="flex flex-col gap-3">
                 <p class="text-muted-foreground text-sm">
-                    Manage your subscription, payment method, and invoices in the billing portal.
+                    Manage your subscription, payment method, and invoices in
+                    the billing portal.
                 </p>
                 <UiButton @click="openBillingPortal">Manage Billing</UiButton>
             </div>

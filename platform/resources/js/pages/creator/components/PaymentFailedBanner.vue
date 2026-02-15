@@ -1,14 +1,21 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
-import { usePage } from '@inertiajs/vue3';
-import { router } from '@inertiajs/vue3';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage();
-const account = computed(() => page.props.account as { type?: string; subscription_status?: string } | null);
+const account = computed(
+    () =>
+        page.props.account as {
+            type?: string;
+            subscription_status?: string;
+        } | null,
+);
 
 const showBanner = computed(
-    () => account.value?.type === 'creator' && account.value?.subscription_status === 'past_due',
+    () =>
+        account.value?.type === 'creator' &&
+        account.value?.subscription_status === 'past_due',
 );
 
 function openBillingPortal(): void {
@@ -23,7 +30,8 @@ function openBillingPortal(): void {
         role="alert"
     >
         <p class="text-amber-900 dark:text-amber-100">
-            Your payment failed. Update your payment method to avoid losing access.
+            Your payment failed. Update your payment method to avoid losing
+            access.
         </p>
         <UiButton
             size="small"

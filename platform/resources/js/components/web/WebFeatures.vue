@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 interface Feature {
     name: string;
     description: string;
@@ -12,6 +14,7 @@ interface ImageConfig {
 
 interface Props {
     variant?: 'imageLeft' | 'imageRight' | 'featureList' | 'threeColumn';
+    background?: 'white' | 'surface' | 'primary';
     subtitle?: string;
     title: string;
     description?: string;
@@ -21,12 +24,27 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'threeColumn',
+    background: 'white',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 </script>
 
 <template>
     <!-- ImageLeft variant -->
-    <div v-if="variant === 'imageLeft'" class="overflow-hidden py-24 sm:py-32">
+    <div
+        v-if="variant === 'imageLeft'"
+        :class="[backgroundClass, 'overflow-hidden py-24 sm:py-32']"
+    >
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div
                 class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-2"
@@ -94,7 +112,7 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- ImageRight variant -->
     <div
         v-else-if="variant === 'imageRight'"
-        class="overflow-hidden py-24 sm:py-32"
+        :class="[backgroundClass, 'overflow-hidden py-24 sm:py-32']"
     >
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div
@@ -159,7 +177,10 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- FeatureList variant -->
-    <div v-else-if="variant === 'featureList'" class="py-24 sm:py-32">
+    <div
+        v-else-if="variant === 'featureList'"
+        :class="[backgroundClass, 'py-24 sm:py-32']"
+    >
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div
                 class="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 sm:gap-y-20 lg:mx-0 lg:max-w-none lg:grid-cols-5"
@@ -210,7 +231,7 @@ const props = withDefaults(defineProps<Props>(), {
     </div>
 
     <!-- ThreeColumn variant -->
-    <div v-else class="py-24 sm:py-32">
+    <div v-else :class="[backgroundClass, 'py-24 sm:py-32']">
         <div class="mx-auto max-w-7xl px-6 lg:px-8">
             <div class="mx-auto max-w-2xl lg:mx-0">
                 <h2
@@ -218,10 +239,7 @@ const props = withDefaults(defineProps<Props>(), {
                 >
                     {{ title }}
                 </h2>
-                <p
-                    v-if="description"
-                    class="mt-6 text-lg/8 text-surface-700"
-                >
+                <p v-if="description" class="mt-6 text-lg/8 text-surface-700">
                     {{ description }}
                 </p>
             </div>

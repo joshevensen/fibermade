@@ -5,6 +5,7 @@ namespace App\Services\Shopify;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Low-level HTTP client for Shopify Admin GraphQL API.
@@ -14,10 +15,6 @@ use Illuminate\Support\Facades\Http;
 class ShopifyGraphqlClient
 {
     private const API_VERSION = '2024-01';
-
-    private const MAX_RETRIES = 3;
-
-    private const INITIAL_BACKOFF_MS = 1000;
 
     public function __construct(
         private readonly string $shop,
@@ -34,10 +31,12 @@ class ShopifyGraphqlClient
      */
     public function request(string $query, array $variables = []): array
     {
+        $maxRetries = config('services.shopify.max_retries', 3);
+        $initialBackoffMs = config('services.shopify.initial_backoff_ms', 1000);
         $attempt = 0;
         $lastException = null;
 
-        while ($attempt <= self::MAX_RETRIES) {
+        while ($attempt <= $maxRetries) {
             try {
                 $response = $this->client()
                     ->asJson()
@@ -48,6 +47,11 @@ class ShopifyGraphqlClient
 
                 if ($response->status() === 429) {
                     $retryAfter = (int) $response->header('Retry-After', 2);
+                    Log::warning('Shopify API rate limit (429)', [
+                        'shop' => $this->shop,
+                        'retry_after_seconds' => $retryAfter,
+                        'attempt' => $attempt + 1,
+                    ]);
                     $lastException = new ShopifyRateLimitException("Rate limited. Retry after {$retryAfter}s.");
                     sleep($retryAfter);
                     $attempt++;
@@ -72,6 +76,11 @@ class ShopifyGraphqlClient
 
                 if ($e->response?->status() === 429) {
                     $retryAfter = (int) $e->response->header('Retry-After', 2);
+                    Log::warning('Shopify API rate limit (429)', [
+                        'shop' => $this->shop,
+                        'retry_after_seconds' => $retryAfter,
+                        'attempt' => $attempt + 1,
+                    ]);
                     sleep($retryAfter);
                     $attempt++;
 
@@ -80,7 +89,7 @@ class ShopifyGraphqlClient
 
                 $status = $e->response?->status();
                 if ($status >= 500 || $status === 429) {
-                    $backoffMs = self::INITIAL_BACKOFF_MS * (2 ** $attempt);
+                    $backoffMs = $initialBackoffMs * (2 ** $attempt);
                     usleep($backoffMs * 1000);
                     $attempt++;
 

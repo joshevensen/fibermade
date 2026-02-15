@@ -8,8 +8,8 @@ use App\Models\Base;
 use App\Models\Colorway;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
-use App\Models\Inventory;
 use App\Models\IntegrationLog;
+use App\Models\Inventory;
 use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyApiException;
 use App\Services\Shopify\ShopifySyncService;
@@ -30,13 +30,9 @@ class SyncBaseToShopifyJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! config('services.shopify.catalog_sync_enabled', false)) {
-            return;
-        }
-
         $accountId = $this->base->account_id;
         $integration = $this->getShopifyIntegration($accountId);
-        if (! $integration) {
+        if (! $integration || ! $integration->isCatalogSyncEnabled()) {
             return;
         }
 

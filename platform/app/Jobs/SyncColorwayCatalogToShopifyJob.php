@@ -26,12 +26,8 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
 
     public function handle(): void
     {
-        if (! config('services.shopify.catalog_sync_enabled', false)) {
-            return;
-        }
-
         $integration = $this->getShopifyIntegration();
-        if (! $integration) {
+        if (! $integration || ! $integration->isCatalogSyncEnabled()) {
             return;
         }
 

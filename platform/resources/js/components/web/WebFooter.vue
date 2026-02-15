@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import UiLink from '@/components/ui/UiLink.vue';
 import type { Component } from 'vue';
+import { computed } from 'vue';
 
 interface NavigationLink {
     name: string;
@@ -20,6 +21,7 @@ interface SocialLink {
 
 interface Props {
     variant?: 'columns' | 'centered';
+    background?: 'white' | 'surface' | 'primary';
     logoUrl?: string;
     description?: string;
     navigationSections?: NavigationSection[];
@@ -31,7 +33,19 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'columns',
+    background: 'white',
     copyrightText: 'All rights reserved.',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 </script>
 
@@ -39,7 +53,10 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- Columns variant -->
     <footer
         v-if="variant === 'columns'"
-        class="mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32"
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32',
+        ]"
     >
         <div class="xl:grid xl:grid-cols-3 xl:gap-8">
             <div class="space-y-8">
@@ -150,7 +167,10 @@ const props = withDefaults(defineProps<Props>(), {
     <!-- Centered variant -->
     <footer
         v-else
-        class="mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8"
+        :class="[
+            backgroundClass,
+            'mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8',
+        ]"
     >
         <nav
             v-if="mainLinks && mainLinks.length > 0"

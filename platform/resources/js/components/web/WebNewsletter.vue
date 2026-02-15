@@ -2,9 +2,11 @@
 import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
+import { computed } from 'vue';
 
 interface Props {
     variant?: 'justified' | 'stacked';
+    background?: 'white' | 'surface' | 'primary';
     title: string;
     emailPlaceholder?: string;
     submitButtonText?: string;
@@ -18,9 +20,21 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
     variant: 'stacked',
+    background: 'white',
     emailPlaceholder: 'Enter your email',
     submitButtonText: 'Subscribe',
     formMethod: 'POST',
+});
+
+const backgroundClass = computed(() => {
+    switch (props.background) {
+        case 'surface':
+            return 'bg-surface-200';
+        case 'primary':
+            return 'bg-primary-500';
+        default:
+            return 'bg-white';
+    }
 });
 
 function handleSubmit(event: {
@@ -51,7 +65,7 @@ function handleSubmit(event: {
 </script>
 
 <template>
-    <div class="py-16 sm:py-24 lg:py-32">
+    <div :class="[backgroundClass, 'py-16 sm:py-24 lg:py-32']">
         <!-- Justified variant: grid layout -->
         <div
             v-if="variant === 'justified'"
@@ -83,10 +97,7 @@ function handleSubmit(event: {
                         </UiButton>
                     </div>
                 </UiForm>
-                <p
-                    v-if="privacyPolicy"
-                    class="mt-4 text-sm/6 text-surface-900"
-                >
+                <p v-if="privacyPolicy" class="mt-4 text-sm/6 text-surface-900">
                     {{ privacyPolicy.text }}
                     <a
                         :href="privacyPolicy.link"
@@ -125,10 +136,7 @@ function handleSubmit(event: {
                         </UiButton>
                     </div>
                 </UiForm>
-                <p
-                    v-if="privacyPolicy"
-                    class="mt-4 text-sm/6 text-surface-900"
-                >
+                <p v-if="privacyPolicy" class="mt-4 text-sm/6 text-surface-900">
                     {{ privacyPolicy.text }}
                     <a
                         :href="privacyPolicy.link"

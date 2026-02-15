@@ -65,7 +65,9 @@ class ShopifyWebhookController extends Controller
             : $inventoryItemId;
 
         try {
-            $client = InventorySyncService::createShopifyClient($integration);
+            $client = app()->bound('shopify.graphql_client_resolver')
+                ? app('shopify.graphql_client_resolver')($integration)
+                : InventorySyncService::createShopifyClient($integration);
             if (! $client instanceof ShopifyGraphqlClient) {
                 Log::warning('Shopify webhook: integration has no API config', ['integration_id' => $integration->id]);
 

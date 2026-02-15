@@ -76,6 +76,23 @@ class Integration extends Model
     }
 
     /**
+     * Whether automatic catalog sync to Shopify is enabled for this integration.
+     * Requires global SHOPIFY_CATALOG_SYNC_ENABLED; per-integration setting can disable.
+     */
+    public function isCatalogSyncEnabled(): bool
+    {
+        if ($this->type !== IntegrationType::Shopify) {
+            return false;
+        }
+
+        if (! config('services.shopify.catalog_sync_enabled', false)) {
+            return false;
+        }
+
+        return (bool) ($this->settings['catalog_sync_enabled'] ?? true);
+    }
+
+    /**
      * Get Shopify API config (shop domain and access token) for Shopify integrations.
      *
      * @return array{shop: string, access_token: string}|null

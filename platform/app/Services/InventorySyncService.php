@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\DB;
  */
 class InventorySyncService
 {
-    public function __construct() {}
+    public function __construct(
+        private readonly ?ShopifySyncService $shopifySyncOverride = null
+    ) {}
 
     /**
      * Push a single inventory item's quantity to Shopify.
@@ -221,6 +223,8 @@ class InventorySyncService
      * Pull inventory quantity from Shopify into Fibermade.
      *
      * Used when processing inventory_levels/update webhook.
+     * Accepts webhook value (Shopify wins). When both systems changed since last sync,
+     * logs a conflict warning to IntegrationLog for manual review.
      */
     public function pullInventoryFromShopify(string $variantGid, int $quantity, Integration $integration, string $syncSource = 'webhook'): bool
     {
@@ -239,34 +243,92 @@ class InventorySyncService
             return false;
         }
 
-        DB::transaction(function () use ($inventory, $quantity, $integration, $syncSource) {
+        $fibermadeQuantity = $inventory->quantity;
+        $lastSyncedAt = $inventory->last_synced_at;
+        $isConflict = $this->detectInventoryConflict($inventory, $quantity);
+
+        DB::transaction(function () use ($inventory, $quantity, $integration, $syncSource, $fibermadeQuantity, $lastSyncedAt, $isConflict) {
             $inventory->update([
                 'quantity' => $quantity,
                 'last_synced_at' => now(),
                 'sync_status' => 'synced',
             ]);
 
-            IntegrationLog::create([
-                'integration_id' => $integration->id,
-                'loggable_type' => Inventory::class,
-                'loggable_id' => $inventory->id,
-                'status' => IntegrationLogStatus::Success,
-                'message' => "Pulled inventory from Shopify: quantity={$quantity}",
-                'metadata' => [
-                    'sync_source' => $syncSource,
-                    'direction' => 'pull',
-                    'quantity' => $quantity,
-                    'shopify_variant_id' => $inventory->getExternalIdFor($integration, 'shopify_variant'),
-                ],
-                'synced_at' => now(),
-            ]);
+            if ($isConflict) {
+                IntegrationLog::create([
+                    'integration_id' => $integration->id,
+                    'loggable_type' => Inventory::class,
+                    'loggable_id' => $inventory->id,
+                    'status' => IntegrationLogStatus::Warning,
+                    'message' => 'Inventory sync conflict: both Fibermade and Shopify changed since last sync; Shopify value applied',
+                    'metadata' => [
+                        'sync_source' => $syncSource,
+                        'direction' => 'pull',
+                        'conflict' => true,
+                        'fibermade_quantity' => $fibermadeQuantity,
+                        'shopify_quantity' => $quantity,
+                        'last_synced_at' => $lastSyncedAt?->toIso8601String(),
+                        'shopify_variant_id' => $inventory->getExternalIdFor($integration, 'shopify_variant'),
+                    ],
+                    'synced_at' => now(),
+                ]);
+            } else {
+                IntegrationLog::create([
+                    'integration_id' => $integration->id,
+                    'loggable_type' => Inventory::class,
+                    'loggable_id' => $inventory->id,
+                    'status' => IntegrationLogStatus::Success,
+                    'message' => "Pulled inventory from Shopify: quantity={$quantity}",
+                    'metadata' => [
+                        'sync_source' => $syncSource,
+                        'direction' => 'pull',
+                        'quantity' => $quantity,
+                        'shopify_variant_id' => $inventory->getExternalIdFor($integration, 'shopify_variant'),
+                    ],
+                    'synced_at' => now(),
+                ]);
+            }
         });
+
+        return true;
+    }
+
+    /**
+     * True when both Fibermade and Shopify have changed since last sync and values differ.
+     * Within 60 seconds of last sync we treat the webhook as likely our own push echo (no conflict).
+     */
+    private function detectInventoryConflict(Inventory $inventory, int $incomingQuantity): bool
+    {
+        $lastSyncedAt = $inventory->last_synced_at;
+        if (! $lastSyncedAt) {
+            return false;
+        }
+
+        if ($inventory->updated_at <= $lastSyncedAt) {
+            return false;
+        }
+
+        if ($inventory->quantity === $incomingQuantity) {
+            return false;
+        }
+
+        $secondsSinceSync = now()->diffInSeconds($lastSyncedAt, false);
+        if ($secondsSinceSync < 0) {
+            $secondsSinceSync = -$secondsSinceSync;
+        }
+        if ($secondsSinceSync <= 60) {
+            return false;
+        }
 
         return true;
     }
 
     private function shopifySyncFor(Integration $integration): ShopifySyncService
     {
+        if ($this->shopifySyncOverride !== null) {
+            return $this->shopifySyncOverride;
+        }
+
         $client = self::createShopifyClient($integration);
 
         if (! $client) {

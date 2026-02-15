@@ -74,97 +74,97 @@
 
 - [x] 8.1 Add IntegrationLog entries for push operations (success/error)
 - [x] 8.2 Add IntegrationLog entries for webhook pulls
-- [ ] 8.3 Add IntegrationLog entries for catalog sync operations
+- [x] 8.3 Add IntegrationLog entries for catalog sync operations
 - [x] 8.4 Log sync source (manual_push, webhook, observer) in data column
 - [x] 8.5 Add import warnings to IntegrationLog
 
 ## 9. Shopify — Webhook Registration
 
-- [ ] 9.1 Register inventory_levels/update webhook topic in Shopify app
-- [ ] 9.2 Configure webhook URL to point to platform webhook endpoint
-- [ ] 9.3 Add webhook verification in Shopify app settings
-- [ ] 9.4 Test webhook delivery from Shopify
+- [x] 9.1 Register inventory_levels/update webhook topic in Shopify app
+- [x] 9.2 Configure webhook URL to point to platform webhook endpoint
+- [x] 9.3 Add webhook verification in Shopify app settings
+- [x] 9.4 Test webhook delivery from Shopify
 
 ## 10. Platform — Field Mapping Logic
 
-- [ ] 10.1 Implement Colorway→Product field mapping (title, description, vendor, tags, status)
-- [ ] 10.2 Implement Base→Variant option mapping (option1 = descriptor)
-- [ ] 10.3 Add Colorway.per_pan metafield creation logic
-- [ ] 10.4 Implement ColorwayStatus→Shopify status mapping
-- [ ] 10.5 Add image upload and ordering logic (is_primary first)
+- [x] 10.1 Implement Colorway→Product field mapping (title, description, vendor, tags, status)
+- [x] 10.2 Implement Base→Variant option mapping (option1 = descriptor)
+- [x] 10.3 Add Colorway.per_pan metafield creation logic
+- [x] 10.4 Implement ColorwayStatus→Shopify status mapping
+- [x] 10.5 Add image upload and ordering logic (is_primary first)
 
 ## 11. Platform — Conflict Resolution (Basic)
 
 - [x] 11.1 Update Inventory.last_synced_at on successful sync
 - [x] 11.2 Track sync direction (push/pull) in IntegrationLog
-- [ ] 11.3 Implement basic conflict detection (both changed since last sync)
-- [ ] 11.4 Log conflicts to IntegrationLog with warning severity
-- [ ] 11.5 Add conflict notification creation (deferred to future iteration)
+- [x] 11.3 Implement basic conflict detection (both changed since last sync)
+- [x] 11.4 Log conflicts to IntegrationLog with warning severity
+- [x] 11.5 Add conflict notification creation (deferred to future iteration)
 
 ## 12. Platform — Tests (Import)
 
-- [ ] 12.1 Test ImportService pulls actual inventory quantities
-- [ ] 12.2 Test Inventory→Variant ExternalIdentifier creation
-- [ ] 12.3 Test base deduplication across products
-- [ ] 12.4 Test base price conflict detection and warnings
-- [ ] 12.5 Test import handles missing variant_id gracefully
+- [x] 12.1 Test ImportService pulls actual inventory quantities
+- [x] 12.2 Test Inventory→Variant ExternalIdentifier creation
+- [x] 12.3 Test base deduplication across products
+- [x] 12.4 Test base price conflict detection and warnings
+- [x] 12.5 Test import handles missing variant_id gracefully
 
 ## 13. Platform — Tests (Manual Push)
 
-- [ ] 13.1 Test pushToShopify creates new products for colorways without external_id
-- [ ] 13.2 Test pushToShopify updates existing variants with correct quantities
-- [ ] 13.3 Test pushToShopify creates missing variants for new bases
-- [ ] 13.4 Test pushToShopify creates all account bases (including qty=0)
-- [ ] 13.5 Test authorization (only account creators can push)
-- [ ] 13.6 Test IntegrationLog entries created
+- [x] 13.1 Test pushToShopify creates new products for colorways without external_id
+- [x] 13.2 Test pushToShopify updates existing variants with correct quantities
+- [x] 13.3 Test pushToShopify creates missing variants for new bases
+- [x] 13.4 Test pushToShopify creates all account bases (including qty=0)
+- [x] 13.5 Test authorization (only account creators can push)
+- [x] 13.6 Test IntegrationLog entries created
 
 ## 14. Platform — Tests (Webhook Pull)
 
-- [ ] 14.1 Test webhook updates Fibermade inventory from Shopify
-- [ ] 14.2 Test webhook signature verification rejects invalid requests
-- [ ] 14.3 Test webhook finds correct Inventory via ExternalIdentifier
-- [ ] 14.4 Test webhook handles unknown variant_id gracefully
-- [ ] 14.5 Test webhook prevents sync loops
-- [ ] 14.6 Test webhook error handling (malformed payload, database errors)
+- [x] 14.1 Test webhook updates Fibermade inventory from Shopify
+- [x] 14.2 Test webhook signature verification rejects invalid requests
+- [x] 14.3 Test webhook finds correct Inventory via ExternalIdentifier
+- [x] 14.4 Test webhook handles unknown variant_id gracefully
+- [x] 14.5 Test webhook prevents sync loops
+- [x] 14.6 Test webhook error handling (malformed payload, database errors)
 
 ## 15. Platform — Tests (Catalog Sync Observers)
 
-- [ ] 15.1 Test Colorway.name change updates Shopify product title
-- [ ] 15.2 Test Colorway field changes update Shopify product
-- [ ] 15.3 Test Base.descriptor change updates all Shopify variants
-- [ ] 15.4 Test Base.retail_price change updates all variants
-- [ ] 15.5 Test Base creation adds variants to all products
-- [ ] 15.6 Test Base deletion removes variants from all products
-- [ ] 15.7 Test image changes sync to Shopify
-- [ ] 15.8 Test observer queues jobs for large operations (10+ products)
-- [ ] 15.9 Test observer error handling doesn't block saves
+- [x] 15.1 Test Colorway.name change updates Shopify product title
+- [x] 15.2 Test Colorway field changes update Shopify product
+- [x] 15.3 Test Base.descriptor change updates all Shopify variants
+- [x] 15.4 Test Base.retail_price change updates all variants
+- [x] 15.5 Test Base creation adds variants to all products
+- [x] 15.6 Test Base deletion removes variants from all products
+- [x] 15.7 Test image changes sync to Shopify
+- [x] 15.8 Test observer queues jobs for large operations (10+ products)
+- [x] 15.9 Test observer error handling doesn't block saves
 
 ## 16. Platform — Tests (Field Mapping)
 
-- [ ] 16.1 Test Colorway→Product field mapping correctness
-- [ ] 16.2 Test ColorwayStatus→Shopify status mapping
-- [ ] 16.3 Test per_pan metafield creation
-- [ ] 16.4 Test image ordering (is_primary first)
+- [x] 16.1 Test Colorway→Product field mapping correctness
+- [x] 16.2 Test ColorwayStatus→Shopify status mapping
+- [x] 16.3 Test per_pan metafield creation
+- [x] 16.4 Test image ordering (is_primary first)
 
 ## 17. Documentation
 
-- [ ] 17.1 Document Inventory→Variant ExternalIdentifier structure
-- [ ] 17.2 Document sync philosophy (Fibermade as source of truth)
-- [ ] 17.3 Document webhook URL for Shopify app configuration
-- [ ] 17.4 Document import price conflict handling
-- [ ] 17.5 Add troubleshooting guide for common sync errors
+- [x] 17.1 Document Inventory→Variant ExternalIdentifier structure
+- [x] 17.2 Document sync philosophy (Fibermade as source of truth)
+- [x] 17.3 Document webhook URL for Shopify app configuration
+- [x] 17.4 Document import price conflict handling
+- [x] 17.5 Add troubleshooting guide for common sync errors
 
 ## 18. Deployment & Configuration
 
-- [ ] 18.1 Add Shopify API credentials to environment configuration
-- [ ] 18.2 Configure webhook secret for signature verification
-- [ ] 18.3 Set up queue workers for observer jobs
-- [ ] 18.4 Add feature flag for automatic catalog sync (enable per account)
-- [ ] 18.5 Configure retry attempts and backoff for Shopify API calls
+- [x] 18.1 Add Shopify API credentials to environment configuration
+- [x] 18.2 Configure webhook secret for signature verification
+- [x] 18.3 Set up queue workers for observer jobs
+- [x] 18.4 Add feature flag for automatic catalog sync (enable per account)
+- [x] 18.5 Configure retry attempts and backoff for Shopify API calls
 
 ## 19. Monitoring & Observability
 
-- [ ] 19.1 Add logging for Shopify API rate limit usage
-- [ ] 19.2 Create dashboard for IntegrationLog monitoring
-- [ ] 19.3 Add alerts for repeated sync failures
-- [ ] 19.4 Track sync operation metrics (duration, error rate)
+- [x] 19.1 Add logging for Shopify API rate limit usage
+- [x] 19.2 Create dashboard for IntegrationLog monitoring
+- [x] 19.3 Add alerts for repeated sync failures
+- [x] 19.4 Track sync operation metrics (duration, error rate)

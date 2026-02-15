@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import PageFilter from '@/components/PageFilter.vue';
 import UiButton from '@/components/ui/UiButton.vue';
-import UiDialog from '@/components/ui/UiDialog.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
+import UiDialog from '@/components/ui/UiDialog.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiMessage from '@/components/ui/UiMessage.vue';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
@@ -265,8 +265,8 @@ function pushToShopify(): void {
             >
                 <p class="text-surface-700">
                     You are about to push
-                    <strong>{{ totalVariantCount }}</strong> variants to Shopify.
-                    This may take a moment. Continue?
+                    <strong>{{ totalVariantCount }}</strong> variants to
+                    Shopify. This may take a moment. Continue?
                 </p>
                 <template #footer>
                     <UiButton
