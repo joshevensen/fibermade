@@ -310,6 +310,12 @@ const { IconList } = useIcon();
                         ></i>
                     </span>
                 </UiLink>
+                <span
+                    v-else
+                    class="rounded-full bg-indigo-50 px-3 py-1 text-sm/6 font-semibold text-indigo-600 ring-1 ring-indigo-600/20 ring-inset dark:bg-indigo-500/10 dark:text-indigo-400 dark:ring-indigo-500/25"
+                >
+                    {{ badge.label }}
+                </span>
             </div>
             <h1
                 class="mt-10 text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-7xl dark:text-white"

@@ -12,6 +12,12 @@ import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 
+const initialValues = {
+    email: '',
+    password: '',
+    remember: false,
+};
+
 const props = defineProps<{
     status?: string;
     canResetPassword: boolean;
@@ -20,11 +26,7 @@ const props = defineProps<{
 
 const { form, onSubmit } = useFormSubmission({
     route: store,
-    initialValues: {
-        email: '',
-        password: '',
-        remember: false,
-    },
+    initialValues,
     resetFieldsOnSuccess: ['password'],
 });
 </script>
@@ -35,10 +37,7 @@ const { form, onSubmit } = useFormSubmission({
         description="Enter your email and password below to log in"
         page-title="Log in"
     >
-        <UiForm
-            :initialValues="{ email: '', password: '', remember: false }"
-            @submit="onSubmit"
-        >
+        <UiForm :initialValues="initialValues" @submit="onSubmit">
             <UiFormFieldInput
                 name="email"
                 label="Email address"

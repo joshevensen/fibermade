@@ -6,11 +6,13 @@ import { useFormSubmission } from '@/composables/useFormSubmission';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { store } from '@/routes/password/confirm';
 
+const initialValues = {
+    password: '',
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: store,
-    initialValues: {
-        password: '',
-    },
+    initialValues,
     successMessage: 'Password confirmed successfully.',
     resetFieldsOnSuccess: ['password'],
 });
@@ -22,7 +24,7 @@ const { form, onSubmit } = useFormSubmission({
         description="This is a secure area of the application. Please confirm your password before continuing."
         page-title="Confirm password"
     >
-        <UiForm :initialValues="{ password: '' }" @submit="onSubmit">
+        <UiForm :initialValues="initialValues" @submit="onSubmit">
             <UiFormFieldPassword
                 name="password"
                 label="Password"

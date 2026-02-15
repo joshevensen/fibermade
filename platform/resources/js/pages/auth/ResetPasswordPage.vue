@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormField from '@/components/ui/UiFormField.vue';
+import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
-import UiInputText from '@/components/ui/UiInputText.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { update } from '@/routes/password';
@@ -13,14 +12,16 @@ const props = defineProps<{
     email: string;
 }>();
 
+const initialValues = {
+    email: props.email,
+    password: '',
+    password_confirmation: '',
+    token: props.token,
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: update,
-    initialValues: {
-        email: props.email,
-        password: '',
-        password_confirmation: '',
-        token: props.token,
-    },
+    initialValues,
     successMessage: 'Your password has been reset successfully.',
     resetFieldsOnSuccess: ['password', 'password_confirmation'],
     transform: (values) => ({
@@ -37,30 +38,15 @@ const { form, onSubmit } = useFormSubmission({
         description="Please enter your new password below"
         page-title="Reset password"
     >
-        <UiForm
-            :initialValues="{
-                email: props.email,
-                password: '',
-                password_confirmation: '',
-            }"
-            @submit="onSubmit"
-        >
-            <UiFormField
+        <UiForm :initialValues="initialValues" @submit="onSubmit">
+            <UiFormFieldInput
                 name="email"
                 label="Email"
                 :serverError="form.errors.email"
-            >
-                <template #default="{ props: fieldProps, id }">
-                    <UiInputText
-                        v-bind="fieldProps"
-                        :id="id"
-                        type="email"
-                        autocomplete="email"
-                        :value="props.email"
-                        readonly
-                    />
-                </template>
-            </UiFormField>
+                type="email"
+                readonly
+                autocomplete="email"
+            />
 
             <UiFormFieldPassword
                 name="password"

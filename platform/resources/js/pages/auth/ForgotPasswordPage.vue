@@ -10,6 +10,10 @@ import { login } from '@/routes';
 import { email } from '@/routes/password';
 import { watch } from 'vue';
 
+const initialValues = {
+    email: '',
+};
+
 const props = defineProps<{
     status?: string;
 }>();
@@ -27,9 +31,7 @@ watch(
 
 const { form, onSubmit } = useFormSubmission({
     route: email,
-    initialValues: {
-        email: '',
-    },
+    initialValues,
     successMessage: 'We have emailed your password reset link!',
 });
 </script>
@@ -37,10 +39,10 @@ const { form, onSubmit } = useFormSubmission({
 <template>
     <AuthLayout
         title="Forgot password"
-        description="Enter your email to receive a password reset link"
+        description="Enter your email and we'll send you a reset link"
         page-title="Forgot password"
     >
-        <UiForm :initialValues="{ email: '' }" @submit="onSubmit">
+        <UiForm :initialValues="initialValues" @submit="onSubmit">
             <UiFormFieldInput
                 name="email"
                 label="Email address"

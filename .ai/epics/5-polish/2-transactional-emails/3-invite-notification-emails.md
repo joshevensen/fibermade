@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 5.2: Prompt 3 -- Store Invite & Creator Notification Emails
 
@@ -19,49 +19,52 @@ Add a notification email to the creator when a store accepts their invite, and r
 
 ## Constraints
 
-- Create one new Mailable: `StoreInviteAcceptedMail` -- sent to the creator when a store accepts their invite
+- Create one new Mailable: `StoreInviteAcceptedMail` — sent to the creator when a store accepts their invite
 - The Mailable should implement `ShouldQueue` for async delivery
-- Email view extends the shared layout (`emails.layouts.transactional`)
-- **Invite accepted notification** (to creator): includes store name, owner name, and a message like "Great news! {store_name} has accepted your invite and is now connected on Fibermade."
-- Dispatch in `InviteController::acceptStore()` after the invite is marked as accepted and the store is linked
-- The creator's email comes from the invite's `inviter` (polymorphic relationship) -- resolve to the account owner's email
-- Review `StoreInviteMail` and its Blade view to ensure:
-  - It uses the shared layout correctly (Prompt 1 should have handled this)
-  - Subject line, content, and CTA button are polished for production
-  - The accept URL is correct and works
+- Email view extends the shared layout (`emails.layout`)
+- **Invite accepted notification** (to creator): includes store name, owner name, congratulatory message (e.g. "Great news! {store_name} has accepted your invite and is now connected on Fibermade."), and a CTA link to creator stores page (`route('creator.stores.index')`) — e.g. "View your stores"
+- **Creator email resolution**: Primary `Creator.email`; fallback to account owner (`account.users()->where('role', UserRole::Owner)->first()?->email`). Skip sending when both are null.
+- **Mailable constructor**: Pass `Invite` and `Store` models with eager loads (`inviter`, `inviter.account`, `store`) — follows wholesale order pattern
+- **Dispatch**: Inside `DB::transaction()` in `InviteController::acceptStore()`, after `$invite->update(['accepted_at' => now()])` and the store is linked to the creator
+- **Required review**: `StoreInviteMail` and its Blade view — verify layout, subject, content, and CTA are consistent with design system
 
 ## Acceptance Criteria
 
 - [ ] `StoreInviteAcceptedMail` Mailable created with queued delivery
-- [ ] Blade view created at `resources/views/emails/invites/invite-accepted.blade.php` extending shared layout
-- [ ] Email sent to creator (inviter's account owner) when store accepts invite
-- [ ] Email includes store name, owner name, and congratulatory message
+- [ ] Blade view created at `resources/views/emails/invite-accepted.blade.php` extending `emails.layout`
+- [ ] Email sent to creator when store accepts invite (Creator.email or account owner fallback)
+- [ ] Email not sent when creator email and account owner email are both null
+- [ ] Email includes store name, owner name, congratulatory message
 - [ ] Email subject: "{store_name} accepted your invite on Fibermade"
-- [ ] Dispatched in `InviteController::acceptStore()` after successful acceptance
+- [ ] Email includes CTA button linking to creator stores page
+- [ ] Dispatched inside transaction in `InviteController::acceptStore()` after invite update and store link
 - [ ] Existing `StoreInviteMail` reviewed and consistent with design system
-- [ ] Test verifies email is dispatched on invite acceptance (use `Mail::fake()`)
+- [ ] Test: email dispatched on invite acceptance (use `Mail::fake()`)
+- [ ] Test: email not sent when creator and account owner both have no email
 
 ---
 
 ## Tech Analysis
 
-- **Finding the creator email**: The `Invite` model has an `inviter` polymorphic relationship (`inviter_type`, `inviter_id`). For store invites, the inviter is a `Creator`. The Creator belongs to an `Account`, which has users. Get the owner: `$invite->inviter->account->users()->where('role', UserRole::Owner)->first()->email`.
-- **Dispatch point**: In `InviteController::acceptStore()`, after `$invite->update(['accepted_at' => now()])` and the store is linked to the creator. Add `Mail::to($creatorEmail)->queue(new StoreInviteAcceptedMail($invite, $store))`.
-- **Mailable constructor**: Pass the `Invite` (for inviter context) and the newly created `Store` (for store name/owner). Or pass just the relevant data (store name, owner name, creator name) to keep the Mailable simple.
-- **Existing invite email review**: The `StoreInviteMail` was migrated to the shared layout in Prompt 1. Verify the CTA button styling matches the order emails, the subject is clear, and the content reads well. Minor copy tweaks are acceptable.
+- **Finding the creator email**: Primary `$invite->inviter->email` (Creator); fallback `$invite->inviter->account->users()->where('role', UserRole::Owner)->first()?->email`. If both null, skip sending (optionally log).
+- **Dispatch point**: Inside `DB::transaction()` in `acceptStore()`, after `$invite->update(['accepted_at' => now()])` and `$creator->stores()->attach($store->id)`. Eager-load `inviter`, `inviter.account`, and `store` before queuing.
+- **Mailable constructor**: `public function __construct(public Invite $invite, public Store $store)` — use `SerializesModels` trait.
+- **CTA route**: `route('creator.stores.index')` for "View your stores" button.
+- **Existing invite email review**: Verify `store-invite.blade.php` extends `emails.layout`, subject is clear, CTA button styling matches order emails.
 
 ## References
 
-- `platform/app/Http/Controllers/InviteController.php` -- `acceptStore()` method, `store()` method
-- `platform/app/Models/Invite.php` -- invite model with inviter relationship
-- `platform/app/Mail/StoreInviteMail.php` -- existing invite Mailable (reference)
-- `platform/resources/views/emails/store-invite.blade.php` -- existing invite template
-- `platform/resources/views/emails/layouts/transactional.blade.php` -- shared layout
+- `platform/app/Http/Controllers/InviteController.php` — `acceptStore()` method, `store()` method
+- `platform/app/Models/Invite.php` — invite model with inviter relationship
+- `platform/app/Mail/StoreInviteMail.php` — existing invite Mailable (reference)
+- `platform/app/Mail/WholesaleNewOrderNotificationMail.php` — pattern for creator notification with CTA
+- `platform/resources/views/emails/store-invite.blade.php` — existing invite template
+- `platform/resources/views/emails/layout.blade.php` — shared layout
 
 ## Files
 
 - Create `platform/app/Mail/StoreInviteAcceptedMail.php`
-- Create `platform/resources/views/emails/invites/invite-accepted.blade.php`
-- Modify `platform/app/Http/Controllers/InviteController.php` -- dispatch `StoreInviteAcceptedMail` in `acceptStore()`
-- Review/modify `platform/resources/views/emails/store-invite.blade.php` -- polish if needed
-- Create `platform/tests/Feature/Mail/InviteMailTest.php` -- test invite accepted email dispatch
+- Create `platform/resources/views/emails/invite-accepted.blade.php`
+- Modify `platform/app/Http/Controllers/InviteController.php` — dispatch `StoreInviteAcceptedMail` inside transaction in `acceptStore()`
+- Review/modify `platform/resources/views/emails/store-invite.blade.php` — ensure design system consistency
+- Create `platform/tests/Feature/Mail/InviteMailTest.php` — test invite accepted email dispatch and skip-when-no-email

@@ -8,6 +8,7 @@ use App\Enums\InviteType;
 use App\Enums\UserRole;
 use App\Http\Requests\AcceptStoreInviteRequest;
 use App\Http\Requests\StoreInviteRequest;
+use App\Mail\StoreInviteAcceptedMail;
 use App\Mail\StoreInviteMail;
 use App\Models\Account;
 use App\Models\Creator;
@@ -165,6 +166,17 @@ class InviteController extends Controller
             $creator->stores()->attach($store->id, ['status' => 'active']);
 
             $invite->update(['accepted_at' => now()]);
+
+            $invite->load(['inviter', 'inviter.account']);
+            $creatorEmail = $creator->email ?? $creator->account->users()->where('role', UserRole::Owner)->first()?->email;
+            if (! empty($creatorEmail)) {
+                Mail::to($creatorEmail)->queue(new StoreInviteAcceptedMail($invite, $store));
+            } else {
+                Log::warning('Store invite accepted: creator has no email, skipping notification', [
+                    'invite_id' => $invite->id,
+                    'creator_id' => $creator->id,
+                ]);
+            }
 
             return $user;
         });
