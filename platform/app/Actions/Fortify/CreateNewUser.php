@@ -24,8 +24,6 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input): User
     {
-        $whitelist = config('auth.registration_email_whitelist', []);
-
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
             'email' => [
@@ -34,11 +32,6 @@ class CreateNewUser implements CreatesNewUsers
                 'email',
                 'max:255',
                 Rule::unique(User::class),
-                function ($attribute, $value, $fail) use ($whitelist) {
-                    if (! empty($whitelist) && ! in_array($value, $whitelist, true)) {
-                        $fail('This email address is not authorized to register.');
-                    }
-                },
             ],
             'password' => $this->passwordRules(),
             'business_name' => ['required', 'string', 'max:255'],

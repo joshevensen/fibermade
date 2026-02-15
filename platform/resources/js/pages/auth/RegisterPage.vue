@@ -10,18 +10,20 @@ import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { store } from '@/routes/register';
 
+const initialValues = {
+    name: '',
+    email: '',
+    business_name: '',
+    password: '',
+    password_confirmation: '',
+    terms_accepted: false,
+    privacy_accepted: false,
+    marketing_opt_in: false,
+};
+
 const { form, onSubmit } = useFormSubmission({
     route: store,
-    initialValues: {
-        name: '',
-        email: '',
-        business_name: '',
-        password: '',
-        password_confirmation: '',
-        terms_accepted: false,
-        privacy_accepted: false,
-        marketing_opt_in: false,
-    },
+    initialValues,
     successMessage: 'Your account has been created successfully.',
     resetFieldsOnSuccess: ['password', 'password_confirmation'],
 });
@@ -33,19 +35,7 @@ const { form, onSubmit } = useFormSubmission({
         description="Enter your details below to create your account"
         page-title="Register"
     >
-        <UiForm
-            :initialValues="{
-                name: '',
-                email: '',
-                business_name: '',
-                password: '',
-                password_confirmation: '',
-                terms_accepted: false,
-                privacy_accepted: false,
-                marketing_opt_in: false,
-            }"
-            @submit="onSubmit"
-        >
+        <UiForm :initialValues="initialValues" @submit="onSubmit">
             <UiFormFieldInput
                 name="name"
                 label="Name"

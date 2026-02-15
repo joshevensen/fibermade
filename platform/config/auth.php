@@ -116,21 +116,4 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Registration Email Whitelist
-    |--------------------------------------------------------------------------
-    |
-    | A list of email addresses that are allowed to register for an account.
-    | Leave empty to allow all email addresses. This is useful during
-    | initial production phases to control registration access.
-    |
-    | Example: ['user1@example.com', 'user2@example.com']
-    |
-    */
-
-    'registration_email_whitelist' => [
-        'kristen@badfrogyarnco.com',
-    ],
-
 ];

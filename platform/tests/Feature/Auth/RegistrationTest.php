@@ -4,7 +4,6 @@ use App\Enums\AccountType;
 use App\Models\Account;
 use App\Models\Creator;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 
 test('registration screen can be rendered', function () {
     $response = $this->get(route('register'));
@@ -13,8 +12,6 @@ test('registration screen can be rendered', function () {
 });
 
 test('new users can register with all required fields', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -47,8 +44,6 @@ test('new users can register with all required fields', function () {
 });
 
 test('registration requires business name', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -62,8 +57,6 @@ test('registration requires business name', function () {
 });
 
 test('registration requires terms acceptance', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -77,8 +70,6 @@ test('registration requires terms acceptance', function () {
 });
 
 test('registration requires privacy acceptance', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
@@ -91,42 +82,7 @@ test('registration requires privacy acceptance', function () {
     $response->assertSessionHasErrors('privacy_accepted');
 });
 
-test('registration blocks email not in whitelist when whitelist is configured', function () {
-    Config::set('auth.registration_email_whitelist', ['allowed@example.com']);
-
-    $response = $this->post(route('register.store'), [
-        'name' => 'Test User',
-        'email' => 'blocked@example.com',
-        'business_name' => 'Test Business',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-        'terms_accepted' => true,
-        'privacy_accepted' => true,
-    ]);
-
-    $response->assertSessionHasErrors('email');
-});
-
-test('registration allows email in whitelist when whitelist is configured', function () {
-    Config::set('auth.registration_email_whitelist', ['allowed@example.com']);
-
-    $response = $this->post(route('register.store'), [
-        'name' => 'Test User',
-        'email' => 'allowed@example.com',
-        'business_name' => 'Test Business',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-        'terms_accepted' => true,
-        'privacy_accepted' => true,
-    ]);
-
-    $this->assertAuthenticated();
-    $response->assertRedirectToRoute('dashboard');
-});
-
-test('registration allows any email when whitelist is empty', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
+test('registration allows any email', function () {
     $response = $this->post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'anyone@example.com',

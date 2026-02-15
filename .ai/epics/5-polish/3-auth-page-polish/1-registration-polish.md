@@ -1,4 +1,4 @@
-status: pending
+status: done
 
 # Story 5.3: Prompt 1 -- Registration Page Polish
 

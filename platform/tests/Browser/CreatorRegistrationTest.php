@@ -4,11 +4,8 @@ use App\Enums\AccountType;
 use App\Models\Account;
 use App\Models\Creator;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 
 test('creator can complete full registration flow', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
     $page = visit('/register');
 
     $page->assertSee('Create an account')
@@ -40,8 +37,6 @@ test('creator can complete full registration flow', function () {
 });
 
 test('creator registration shows validation errors for required fields', function () {
-    Config::set('auth.registration_email_whitelist', []);
-
     $page = visit('/register');
 
     $page->click('[data-test="register-user-button"]')
@@ -49,23 +44,4 @@ test('creator registration shows validation errors for required fields', functio
         ->assertNoJavascriptErrors();
 
     expect(User::count())->toBe(0);
-});
-
-test('creator registration respects email whitelist when configured', function () {
-    Config::set('auth.registration_email_whitelist', ['allowed@example.com']);
-
-    $page = visit('/register');
-
-    $page->fill('input[name="name"]', 'Jane Smith')
-        ->fill('input[name="email"]', 'blocked@example.com')
-        ->fill('input[name="business_name"]', 'Jane\'s Yarn Studio')
-        ->fill('input[name="password"]', 'SecurePassword123')
-        ->fill('input[name="password_confirmation"]', 'SecurePassword123')
-        ->check('input[name="terms_accepted"]')
-        ->check('input[name="privacy_accepted"]')
-        ->click('[data-test="register-user-button"]')
-        ->wait(0.5)
-        ->assertNoJavascriptErrors();
-
-    expect(User::where('email', 'blocked@example.com')->exists())->toBeFalse();
 });
