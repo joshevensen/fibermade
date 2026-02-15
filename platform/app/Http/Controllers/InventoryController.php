@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\BaseStatus;
 use App\Enums\Color;
 use App\Enums\ColorwayStatus;
+use App\Enums\IntegrationType;
 use App\Enums\Technique;
 use App\Http\Requests\StoreInventoryRequest;
 use App\Http\Requests\UpdateInventoryQuantityRequest;
@@ -12,7 +13,10 @@ use App\Http\Requests\UpdateInventoryRequest;
 use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
+use App\Models\Integration;
 use App\Models\Inventory;
+use App\Services\InventorySyncService;
+use App\Services\Shopify\ShopifyApiException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -219,5 +223,61 @@ class InventoryController extends Controller
         $inventory->delete();
 
         return redirect()->route('inventory.index');
+    }
+
+    /**
+     * Push all inventory to Shopify.
+     */
+    public function pushToShopify(InventorySyncService $inventorySync): RedirectResponse
+    {
+        $this->authorize('pushToShopify', Inventory::class);
+
+        $user = auth()->user();
+        $accountId = $user->account_id;
+
+        if (! $accountId) {
+            return redirect()->route('inventory.index')
+                ->with('error', 'You must belong to an account to push inventory to Shopify.');
+        }
+
+        $integration = Integration::where('account_id', $accountId)
+            ->where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->first();
+
+        if (! $integration || ! $integration->getShopifyConfig()) {
+            return redirect()->route('inventory.index')
+                ->with('error', 'Shopify integration is not configured. Add your shop domain and access token in settings.');
+        }
+
+        $colorways = Colorway::where('account_id', $accountId)
+            ->whereHas('inventories')
+            ->get();
+
+        $totalUpdated = 0;
+        $totalCreated = 0;
+        $errors = [];
+
+        foreach ($colorways as $colorway) {
+            try {
+                $result = $inventorySync->pushAllInventoryForColorway($colorway, $integration, 'manual_push');
+                $totalUpdated += $result['variants_updated'];
+                $totalCreated += $result['variants_created'];
+            } catch (ShopifyApiException $e) {
+                $errors[] = "{$colorway->name}: {$e->getMessage()}";
+            } catch (\Throwable $e) {
+                $errors[] = "{$colorway->name}: {$e->getMessage()}";
+            }
+        }
+
+        if (! empty($errors)) {
+            return redirect()->route('inventory.index')
+                ->with('error', 'Some colorways failed to sync: '.implode('; ', array_slice($errors, 0, 3)));
+        }
+
+        $count = $totalUpdated + $totalCreated;
+
+        return redirect()->route('inventory.index')
+            ->with('success', "Successfully pushed inventory to Shopify. {$count} variants updated.");
     }
 }

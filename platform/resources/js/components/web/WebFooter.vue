@@ -20,8 +20,7 @@ interface SocialLink {
 
 interface Props {
     variant?: 'columns' | 'centered';
-    logoUrlLight?: string;
-    logoUrlDark?: string;
+    logoUrl?: string;
     description?: string;
     navigationSections?: NavigationSection[];
     mainLinks?: NavigationLink[];
@@ -45,20 +44,14 @@ const props = withDefaults(defineProps<Props>(), {
         <div class="xl:grid xl:grid-cols-3 xl:gap-8">
             <div class="space-y-8">
                 <img
-                    v-if="logoUrlLight"
-                    class="h-9 dark:hidden"
-                    :src="logoUrlLight"
-                    :alt="companyName || 'Company name'"
-                />
-                <img
-                    v-if="logoUrlDark"
-                    class="h-9 not-dark:hidden"
-                    :src="logoUrlDark"
+                    v-if="logoUrl"
+                    class="h-9"
+                    :src="logoUrl"
                     :alt="companyName || 'Company name'"
                 />
                 <p
                     v-if="description"
-                    class="text-sm/6 text-balance text-gray-600 dark:text-gray-400"
+                    class="text-sm/6 text-balance text-surface-600"
                 >
                     {{ description }}
                 </p>
@@ -67,7 +60,7 @@ const props = withDefaults(defineProps<Props>(), {
                         v-for="item in socialLinks"
                         :key="item.name"
                         :href="item.href"
-                        class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
+                        class="text-surface-600 hover:text-surface-800"
                     >
                         <span class="sr-only">{{ item.name }}</span>
                         <component
@@ -92,7 +85,7 @@ const props = withDefaults(defineProps<Props>(), {
                     >
                         <div :class="{ 'mt-10 md:mt-0': index === 1 }">
                             <h3
-                                class="text-sm/6 font-semibold text-gray-900 dark:text-white"
+                                class="text-sm/6 font-semibold text-surface-900"
                             >
                                 {{ section.title }}
                             </h3>
@@ -103,7 +96,7 @@ const props = withDefaults(defineProps<Props>(), {
                                 >
                                     <UiLink
                                         :href="link.href"
-                                        class="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                                        class="text-sm/6 text-surface-600 hover:text-surface-900"
                                     >
                                         {{ link.name }}
                                     </UiLink>
@@ -122,7 +115,7 @@ const props = withDefaults(defineProps<Props>(), {
                     >
                         <div :class="{ 'mt-10 md:mt-0': index === 1 }">
                             <h3
-                                class="text-sm/6 font-semibold text-gray-900 dark:text-white"
+                                class="text-sm/6 font-semibold text-surface-900"
                             >
                                 {{ section.title }}
                             </h3>
@@ -133,7 +126,7 @@ const props = withDefaults(defineProps<Props>(), {
                                 >
                                     <UiLink
                                         :href="link.href"
-                                        class="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300"
+                                        class="text-sm/6 text-surface-600 hover:text-surface-900"
                                     >
                                         {{ link.name }}
                                     </UiLink>
@@ -145,9 +138,9 @@ const props = withDefaults(defineProps<Props>(), {
             </div>
         </div>
         <div
-            class="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24 dark:border-white/10"
+            class="mt-16 border-t border-surface-900/10 pt-8 sm:mt-20 lg:mt-24"
         >
-            <p class="text-sm/6 text-gray-600 dark:text-gray-400">
+            <p class="text-sm/6 text-surface-600">
                 &copy; {{ new Date().getFullYear() }}
                 {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
             </p>
@@ -168,7 +161,7 @@ const props = withDefaults(defineProps<Props>(), {
                 v-for="item in mainLinks"
                 :key="item.name"
                 :href="item.href"
-                class="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                class="text-surface-600 hover:text-surface-900"
             >
                 {{ item.name }}
             </UiLink>
@@ -178,13 +171,13 @@ const props = withDefaults(defineProps<Props>(), {
                 v-for="item in socialLinks"
                 :key="item.name"
                 :href="item.href"
-                class="text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
+                class="text-surface-600 hover:text-surface-800"
             >
                 <span class="sr-only">{{ item.name }}</span>
                 <component :is="item.icon" class="size-6" aria-hidden="true" />
             </UiLink>
         </div>
-        <p class="mt-10 text-center text-sm/6 text-gray-600 dark:text-gray-400">
+        <p class="mt-10 text-center text-sm/6 text-surface-600">
             &copy; {{ new Date().getFullYear() }}
             {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
         </p>

@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  * @property int $colorway_id
  * @property int $base_id
  * @property int $quantity
+ * @property \Illuminate\Support\Carbon|null $last_synced_at
+ * @property string|null $sync_status
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  */
@@ -38,6 +40,8 @@ class Inventory extends Model
         'colorway_id',
         'base_id',
         'quantity',
+        'last_synced_at',
+        'sync_status',
     ];
 
     /**
@@ -49,6 +53,7 @@ class Inventory extends Model
     {
         return [
             'quantity' => 'integer',
+            'last_synced_at' => 'datetime',
         ];
     }
 

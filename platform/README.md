@@ -48,6 +48,10 @@ Laravel application that serves the Fibermade API and the Inertia/Vue dashboards
 5. **Herd (optional)**  
    Add this directory as a site in Herd so the app is served over HTTPS at a `.test` domain. Set `APP_URL` in `.env` to that URL.
 
+6. **Stripe (optional, for Creator billing)**  
+   Set `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, and `STRIPE_PRICE_ID` (Stripe Price ID for the $39/month subscription). Configure the [Stripe Customer Portal](https://dashboard.stripe.com/settings/billing/portal) in the Stripe Dashboard for self-service billing (payment methods, invoices, cancellation).  
+   Use **Stripe test mode** (test keys) for local/staging. Test card: `4242 4242 4242 4242`. To test webhooks locally, use the [Stripe CLI](https://docs.stripe.com/stripe-cli): `stripe listen --forward-to https://platform.test/webhooks/stripe` (replace with your local URL), then trigger events with `stripe trigger checkout.session.completed` etc.
+
 ---
 
 ## Running the app

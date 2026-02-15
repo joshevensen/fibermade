@@ -28,11 +28,12 @@ class CsvColumnMapper
         'option1_value' => ['Option1 Value', 'option 1 value'],
         'variant_price' => ['Variant Price', 'price'],
         'variant_sku' => ['Variant SKU', 'sku'],
+        'variant_id' => ['Variant ID', 'Variant Id', 'variant_id'],
         'cost' => ['Cost per item', 'cost'],
         'position' => ['position'],
 
         // Inventory fields
-        'available' => ['Available (not editable)', 'location: Studio'],
+        'available' => ['Available (not editable)', 'location: Studio', 'Variant Inventory Qty', 'variant_inventory_quantity'],
 
         // Order fields
         'order_id' => ['Id', 'id'],

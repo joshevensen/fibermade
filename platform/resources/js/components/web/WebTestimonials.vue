@@ -14,8 +14,7 @@ interface Testimonial {
 interface Props {
     variant?: 'grid' | 'simple' | 'twoColumn';
     testimonials: Testimonial[];
-    logoUrlLight?: string;
-    logoUrlDark?: string;
+    logoUrl?: string;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -41,28 +40,28 @@ const props = withDefaults(defineProps<Props>(), {
                         class="pt-8 sm:inline-block sm:w-full sm:px-4"
                     >
                         <figure
-                            class="rounded-2xl bg-gray-50 p-8 text-sm/6 dark:bg-white/2.5"
+                            class="rounded-2xl bg-surface-50 p-8 text-sm/6"
                         >
                             <blockquote
-                                class="text-gray-900 dark:text-gray-100"
+                                class="text-surface-900"
                             >
                                 <p>{{ `"${testimonial.body}"` }}</p>
                             </blockquote>
                             <figcaption class="mt-6 flex items-center gap-x-4">
                                 <img
-                                    class="size-10 rounded-full bg-gray-50 dark:bg-gray-800"
+                                    class="size-10 rounded-full bg-surface-50"
                                     :src="testimonial.author.imageUrl"
                                     alt=""
                                 />
                                 <div>
                                     <div
-                                        class="font-semibold text-gray-900 dark:text-white"
+                                        class="font-semibold text-surface-900"
                                     >
                                         {{ testimonial.author.name }}
                                     </div>
                                     <div
                                         v-if="testimonial.author.handle"
-                                        class="text-gray-600 dark:text-gray-400"
+                                        class="text-surface-600"
                                     >
                                         {{ `@${testimonial.author.handle}` }}
                                     </div>
@@ -82,20 +81,14 @@ const props = withDefaults(defineProps<Props>(), {
     >
         <div class="mx-auto max-w-2xl lg:max-w-4xl">
             <img
-                v-if="logoUrlLight"
-                class="mx-auto h-12 dark:hidden"
-                :src="logoUrlLight"
-                alt=""
-            />
-            <img
-                v-if="logoUrlDark"
-                class="mx-auto h-12 not-dark:hidden"
-                :src="logoUrlDark"
+                v-if="logoUrl"
+                class="mx-auto h-12"
+                :src="logoUrl"
                 alt=""
             />
             <figure v-if="testimonials.length > 0" class="mt-10">
                 <blockquote
-                    class="text-center text-xl/8 font-semibold text-gray-900 sm:text-2xl/9 dark:text-white"
+                    class="text-center text-xl/8 font-semibold text-surface-900 sm:text-2xl/9"
                 >
                     <p>"{{ testimonials[0].body }}"</p>
                 </blockquote>
@@ -109,7 +102,7 @@ const props = withDefaults(defineProps<Props>(), {
                         class="mt-4 flex items-center justify-center space-x-3 text-base"
                     >
                         <div
-                            class="font-semibold text-gray-900 dark:text-white"
+                            class="font-semibold text-surface-900"
                         >
                             {{ testimonials[0].author.name }}
                         </div>
@@ -118,13 +111,13 @@ const props = withDefaults(defineProps<Props>(), {
                             width="3"
                             height="3"
                             aria-hidden="true"
-                            class="fill-gray-900 dark:fill-white"
+                            class="fill-surface-900"
                         >
                             <circle cx="1" cy="1" r="1" />
                         </svg>
                         <div
                             v-if="testimonials[0].author.role"
-                            class="text-gray-600 dark:text-gray-400"
+                            class="text-surface-600"
                         >
                             {{ testimonials[0].author.role }}
                         </div>
@@ -148,45 +141,39 @@ const props = withDefaults(defineProps<Props>(), {
                         :class="[
                             'flex flex-col pb-10 sm:pb-16 lg:pr-8 lg:pb-0 xl:pr-20',
                             index === 1
-                                ? 'border-t border-gray-900/10 pt-10 sm:pt-16 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 xl:pl-20 dark:border-white/10'
+                                ? 'border-t border-surface-900/10 pt-10 sm:pt-16 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 xl:pl-20'
                                 : '',
                         ]"
                     >
                         <img
-                            v-if="logoUrlLight"
-                            class="h-12 self-start dark:hidden"
-                            :src="logoUrlLight"
-                            alt=""
-                        />
-                        <img
-                            v-if="logoUrlDark"
-                            class="h-12 self-start not-dark:hidden"
-                            :src="logoUrlDark"
+                            v-if="logoUrl"
+                            class="h-12 self-start"
+                            :src="logoUrl"
                             alt=""
                         />
                         <figure
                             class="mt-10 flex flex-auto flex-col justify-between"
                         >
                             <blockquote
-                                class="text-lg/8 text-gray-900 dark:text-gray-100"
+                                class="text-lg/8 text-surface-900"
                             >
                                 <p>"{{ testimonial.body }}"</p>
                             </blockquote>
                             <figcaption class="mt-10 flex items-center gap-x-6">
                                 <img
-                                    class="size-14 rounded-full bg-gray-50 dark:bg-gray-800"
+                                    class="size-14 rounded-full bg-surface-50"
                                     :src="testimonial.author.imageUrl"
                                     alt=""
                                 />
                                 <div class="text-base">
                                     <div
-                                        class="font-semibold text-gray-900 dark:text-white"
+                                        class="font-semibold text-surface-900"
                                     >
                                         {{ testimonial.author.name }}
                                     </div>
                                     <div
                                         v-if="testimonial.author.role"
-                                        class="mt-1 text-gray-500 dark:text-gray-400"
+                                        class="mt-1 text-surface-500"
                                     >
                                         {{ testimonial.author.role }}
                                     </div>

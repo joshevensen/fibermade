@@ -62,6 +62,11 @@ class ImportController extends Controller
                 $message .= ' Some errors occurred: '.implode(', ', array_slice($allErrors, 0, 5));
             }
 
+            $warnings = $productsResult['warnings'] ?? [];
+            if (! empty($warnings)) {
+                $message .= ' Warnings: '.implode('; ', array_slice($warnings, 0, 5));
+            }
+
             return Redirect::route('user.edit', ['tab' => 'import'])
                 ->with('success', $message);
         }

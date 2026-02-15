@@ -28,13 +28,13 @@ const props = withDefaults(defineProps<Props>(), {
                 <div class="text-center">
                     <h2
                         v-if="title"
-                        class="text-4xl font-semibold tracking-tight text-balance text-gray-900 sm:text-5xl dark:text-white"
+                        class="text-4xl font-semibold tracking-tight text-balance text-surface-900 sm:text-5xl"
                     >
                         {{ title }}
                     </h2>
                     <p
                         v-if="description"
-                        class="mt-4 text-lg/8 text-gray-600 dark:text-gray-300"
+                        class="mt-4 text-lg/8 text-surface-600"
                     >
                         {{ description }}
                     </p>
@@ -45,15 +45,15 @@ const props = withDefaults(defineProps<Props>(), {
                     <div
                         v-for="stat in stats"
                         :key="stat.id"
-                        class="flex flex-col bg-gray-400/5 p-8 dark:bg-white/5"
+                        class="flex flex-col bg-surface-400/5 p-8"
                     >
                         <dt
-                            class="text-sm/6 font-semibold text-gray-600 dark:text-gray-300"
+                            class="text-sm/6 font-semibold text-surface-600"
                         >
                             {{ stat.name }}
                         </dt>
                         <dd
-                            class="order-first text-3xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                            class="order-first text-3xl font-semibold tracking-tight text-surface-900"
                         >
                             {{ stat.value }}
                         </dd>
@@ -71,11 +71,11 @@ const props = withDefaults(defineProps<Props>(), {
                     :key="stat.id"
                     class="mx-auto flex max-w-xs flex-col gap-y-4"
                 >
-                    <dt class="text-base/7 text-gray-600 dark:text-gray-400">
+                    <dt class="text-base/7 text-surface-600">
                         {{ stat.name }}
                     </dt>
                     <dd
-                        class="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white"
+                        class="order-first text-3xl font-semibold tracking-tight text-surface-900 sm:text-5xl"
                     >
                         {{ stat.value }}
                     </dd>

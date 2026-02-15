@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BaseController;
+use App\Http\Controllers\BillingPortalController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\ColorwayController;
 use App\Http\Controllers\CustomerController;
@@ -14,10 +15,19 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ShowController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\SubscriptionReactivationController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\EnsureActiveSubscriptionMiddleware;
+use App\Http\Middleware\EnsureCreatorCanWriteMiddleware;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
-Route::prefix('creator')->middleware(['auth', 'verified'])->group(function () {
+Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscriptionMiddleware::class, EnsureCreatorCanWriteMiddleware::class])->group(function () {
+    Route::get('subscription/expired', fn () => Inertia::render('creator/SubscriptionExpiredPage'))->name('subscription.expired');
+    Route::get('subscription/reactivate', SubscriptionReactivationController::class)->name('subscription.reactivate');
+
+    Route::get('billing/portal', BillingPortalController::class)->name('billing.portal');
+
     // Dashboard route
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
@@ -63,6 +73,7 @@ Route::prefix('creator')->middleware(['auth', 'verified'])->group(function () {
 
     // Inventory routes
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');
+    Route::post('inventory/push-to-shopify', [InventoryController::class, 'pushToShopify'])->name('inventory.pushToShopify');
     Route::patch('inventory/quantity', [InventoryController::class, 'updateQuantity'])->name('inventory.updateQuantity');
 
     // Stores routes

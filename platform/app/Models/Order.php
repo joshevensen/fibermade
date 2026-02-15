@@ -79,6 +79,7 @@ class Order extends Model
         'payment_id',
         'source',
         'cancelled_at',
+        'delivered_at',
         'refunded_amount',
         'taxes',
         'total_amount',
@@ -105,6 +106,7 @@ class Order extends Model
             'discount_amount' => 'decimal:2',
             'tax_amount' => 'decimal:2',
             'cancelled_at' => 'datetime',
+            'delivered_at' => 'datetime',
             'refunded_amount' => 'decimal:2',
             'taxes' => 'array',
             'total_amount' => 'decimal:2',
@@ -240,6 +242,10 @@ class Order extends Model
 
         if ($status === OrderStatus::Cancelled) {
             $this->cancelled_at = now();
+        }
+
+        if ($status === OrderStatus::Delivered) {
+            $this->delivered_at = $this->delivered_at ?? now();
         }
 
         if ($note !== null && $note !== '') {

@@ -5,6 +5,7 @@ import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
 import AccountForm from './components/AccountForm.vue';
+import BillingCard from './components/BillingCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
 import ImportProductsCard from './components/ImportProductsCard.vue';
 import PasswordForm from './components/PasswordForm.vue';
@@ -105,6 +106,7 @@ watch(
 
             <UiTabPanel value="account">
                 <div class="space-y-4">
+                    <BillingCard />
                     <AccountForm v-if="account" :account="account" />
                     <!-- <AccountUsersCard
                         v-if="account && user.role === 'owner' && account.users"

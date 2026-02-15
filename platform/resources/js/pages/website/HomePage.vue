@@ -58,7 +58,7 @@ const solutionFeatures = [
 
 <template>
     <Head title="Fibermade – Shopify for the fiber community" />
-    <div class="flex min-h-screen flex-col bg-white">
+    <div class="flex min-h-screen flex-col bg-surface-50">
         <WebHeader
             company-name="Fibermade"
             :navigation="[]"
@@ -87,8 +87,7 @@ const solutionFeatures = [
                         ? undefined
                         : { text: 'Learn more', href: '#features' }
                 "
-                :screenshot-url-light="placeholderScreenshot"
-                :screenshot-url-dark="placeholderScreenshot"
+                :screenshot-url="placeholderScreenshot"
             />
 
             <WebFeatures

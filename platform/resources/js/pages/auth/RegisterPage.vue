@@ -5,10 +5,9 @@ import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiLink from '@/components/ui/UiLink.vue';
-import { useFormSubmission } from '@/composables/useFormSubmission';
 import AuthLayout from '@/layouts/AuthLayout.vue';
+import { useForm } from '@inertiajs/vue3';
 import { login } from '@/routes';
-import { store } from '@/routes/register';
 
 const initialValues = {
     name: '',
@@ -21,12 +20,75 @@ const initialValues = {
     marketing_opt_in: false,
 };
 
-const { form, onSubmit } = useFormSubmission({
-    route: store,
-    initialValues,
-    successMessage: 'Your account has been created successfully.',
-    resetFieldsOnSuccess: ['password', 'password_confirmation'],
-});
+const form = useForm(initialValues);
+
+function getPromoFromUrl(): string | null {
+    if (typeof window === 'undefined') return null;
+    return new URL(window.location.href).searchParams.get('promo');
+}
+
+async function onSubmit({
+    valid,
+    values,
+}: {
+    valid: boolean;
+    values: Record<string, unknown>;
+}): Promise<void> {
+    if (!valid) return;
+
+    const promo = getPromoFromUrl();
+    const url = new URL('/register/checkout', window.location.origin);
+    if (promo) url.searchParams.set('promo', promo);
+
+    form.clearErrors();
+    form.processing = true;
+
+    const body = {
+        name: values.name,
+        email: values.email,
+        business_name: values.business_name,
+        password: values.password,
+        password_confirmation: values.password_confirmation,
+        terms_accepted: values.terms_accepted,
+        privacy_accepted: values.privacy_accepted,
+        marketing_opt_in: values.marketing_opt_in ?? false,
+    };
+
+    const csrfToken = (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content;
+
+    const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+        },
+        body: JSON.stringify(body),
+    });
+
+    form.processing = false;
+
+    const data = await response.json().catch(() => ({}));
+
+    if (response.ok && data.redirect_url) {
+        window.location.href = data.redirect_url;
+        return;
+    }
+
+    if (response.status === 422 && data.errors) {
+        const flat: Record<string, string> = {};
+        for (const [key, value] of Object.entries(data.errors)) {
+            flat[key] = Array.isArray(value) ? (value[0] as string) : (value as string);
+        }
+        form.setError(flat);
+        return;
+    }
+
+    if (data.message) {
+        form.setError({ form: data.message });
+    }
+}
 </script>
 
 <template>
@@ -36,6 +98,13 @@ const { form, onSubmit } = useFormSubmission({
         page-title="Register"
     >
         <UiForm :initialValues="initialValues" @submit="onSubmit">
+            <p
+                v-if="form.errors.form"
+                class="text-destructive text-sm"
+                role="alert"
+            >
+                {{ form.errors.form }}
+            </p>
             <UiFormFieldInput
                 name="name"
                 label="Name"

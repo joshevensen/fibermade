@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BlockAccessMiddleware;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Auth\AuthenticationException;
@@ -20,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->prepend(BlockAccessMiddleware::class);
+
+        $middleware->validateCsrfTokens(except: ['webhooks/stripe', 'webhooks/shopify/inventory']);
+
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
         // We do not call statefulApi() so the API is token-only (stateless).

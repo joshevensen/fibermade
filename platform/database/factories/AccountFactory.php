@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\AccountType;
 use App\Enums\BaseStatus;
+use App\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,6 +22,7 @@ class AccountFactory extends Factory
         return [
             'status' => BaseStatus::Active,
             'type' => AccountType::Creator,
+            'subscription_status' => SubscriptionStatus::Active,
             'onboarded_at' => null,
         ];
     }
@@ -42,6 +44,7 @@ class AccountFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => AccountType::Store,
+            'subscription_status' => null,
         ]);
     }
 
@@ -52,6 +55,7 @@ class AccountFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'type' => AccountType::Buyer,
+            'subscription_status' => null,
         ]);
     }
 
@@ -62,6 +66,36 @@ class AccountFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'onboarded_at' => now(),
+        ]);
+    }
+
+    /**
+     * Creator with active subscription (default for creator type).
+     */
+    public function subscribed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'subscription_status' => SubscriptionStatus::Active,
+        ]);
+    }
+
+    /**
+     * Creator with past_due subscription.
+     */
+    public function pastDue(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'subscription_status' => SubscriptionStatus::PastDue,
+        ]);
+    }
+
+    /**
+     * Creator with inactive subscription.
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'subscription_status' => SubscriptionStatus::Inactive,
         ]);
     }
 }

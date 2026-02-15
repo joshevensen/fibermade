@@ -14,6 +14,8 @@ See [Personas.md](Personas.md) for details.
 - **SI-2:** As a creator, I want my existing Shopify products to import automatically so that my Fibermade catalog is ready without data entry.
 - **SI-3:** As a creator, I want product changes in Shopify to sync to Fibermade so that my catalog stays current without extra work.
 - **SI-4:** As a creator, I want to push products from Fibermade to Shopify so that new colorways I create in Fibermade appear in my shop.
+- **SI-5:** As a creator, I want inventory changes from Shopify retail sales and manual adjustments to sync to Fibermade so that my available inventory stays accurate across both channels.
+- **SI-6:** As a creator, I want inventory changes in Fibermade to sync to Shopify so that my retail store reflects current stock levels.
 
 ---
 
@@ -56,15 +58,18 @@ See [Personas.md](Personas.md) for details.
 - **SR-3:** As a creator, I want to pause or end a store relationship so that I can manage my capacity without deleting history.
 - **SR-4:** As a store owner, I want to see the creators I buy from so that I can manage my suppliers in one place.
 - **SR-5:** As a store owner, I want to see a creator's wholesale terms so that I understand pricing and expectations before ordering.
+- **SR-6:** As a creator, I want to invite stores to join Fibermade so that I can establish wholesale relationships with my buyers.
+- **SR-7:** As a store owner, I want to accept a creator's invitation so that I can start browsing their catalog and placing wholesale orders.
 
 ---
 
 ## Inventory Management
 
 - **IM-1:** As a creator, I want to see the difference between total inventory and available inventory so that I know what's committed vs. what's free to sell.
-- **IM-2:** As a creator, I want inventory reserved automatically when orders are placed so that I don't oversell.
+- **IM-2:** As a creator, I want inventory reserved automatically when orders are accepted so that I don't oversell.
 - **IM-3:** As a creator, I want to adjust inventory for loss, damage, or corrections so that my numbers stay accurate.
 - **IM-4:** As a creator, I want to reconcile inventory after a dye session or show so that my counts match reality.
+- **IM-5:** As a creator, I want the option to accept orders without reserving inventory so that I can support dye-to-order workflows.
 
 ---
 

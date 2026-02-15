@@ -74,4 +74,65 @@ class Integration extends Model
     {
         return $this->hasMany(IntegrationLog::class);
     }
+
+    /**
+     * Get Shopify API config (shop domain and access token) for Shopify integrations.
+     *
+     * @return array{shop: string, access_token: string}|null
+     */
+    public function getShopifyConfig(): ?array
+    {
+        if ($this->type !== IntegrationType::Shopify) {
+            return null;
+        }
+
+        $settings = $this->settings ?? [];
+        $shop = $settings['shop'] ?? $settings['store_url'] ?? null;
+        if (is_string($shop) && str_starts_with($shop, 'http')) {
+            $parsed = parse_url($shop);
+            $shop = $parsed['host'] ?? $shop;
+        }
+
+        $credentials = $this->credentials;
+        if (empty($credentials) || ! $shop) {
+            return null;
+        }
+
+        $accessToken = $credentials;
+        $decoded = json_decode($credentials, true);
+        if (is_array($decoded) && isset($decoded['access_token'])) {
+            $accessToken = $decoded['access_token'];
+        }
+
+        if (empty($accessToken)) {
+            return null;
+        }
+
+        return [
+            'shop' => $shop,
+            'access_token' => $accessToken,
+        ];
+    }
+
+    /**
+     * Find an active Shopify integration by shop domain (e.g. from X-Shopify-Shop-Domain).
+     */
+    public static function findShopifyByShopDomain(string $shopDomain): ?self
+    {
+        $normalized = strtolower(preg_replace('#^https?://#', '', rtrim($shopDomain, '/')));
+
+        return self::where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->get()
+            ->first(function (self $i) use ($normalized) {
+                $config = $i->getShopifyConfig();
+
+                return $config && self::normalizeShopDomain($config['shop']) === $normalized;
+            });
+    }
+
+    private static function normalizeShopDomain(string $shop): string
+    {
+        return strtolower(preg_replace('#^https?://#', '', rtrim($shop, '/')));
+    }
 }

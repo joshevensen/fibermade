@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import PageFilter from '@/components/PageFilter.vue';
+import UiButton from '@/components/ui/UiButton.vue';
+import UiDialog from '@/components/ui/UiDialog.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
+import UiMessage from '@/components/ui/UiMessage.vue';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
+import { router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, ref, watch } from 'vue';
 import InventoryQuantityInput from './components/InventoryQuantityInput.vue';
 
@@ -193,10 +197,93 @@ function handleSortChange(value: { field: string; order: number }): void {
     sortField.value = value.field;
     sortOrder.value = value.order;
 }
+
+// Push to Shopify
+const page = usePage();
+const pushToShopifyLoading = ref(false);
+const successMessage = computed(
+    () => (page.props.flash as { success?: string } | undefined)?.success || '',
+);
+const errorMessage = computed(
+    () => (page.props.flash as { error?: string } | undefined)?.error || '',
+);
+
+const totalVariantCount = computed(() =>
+    props.colorways.reduce((sum, c) => sum + c.bases.length, 0),
+);
+const showPushConfirmDialog = ref(false);
+
+function performPushToShopify(): void {
+    if (pushToShopifyLoading.value) return;
+    showPushConfirmDialog.value = false;
+    pushToShopifyLoading.value = true;
+    router.post(
+        '/creator/inventory/push-to-shopify',
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                pushToShopifyLoading.value = false;
+            },
+        },
+    );
+}
+
+function pushToShopify(): void {
+    if (pushToShopifyLoading.value) return;
+    if (totalVariantCount.value >= 50) {
+        showPushConfirmDialog.value = true;
+    } else {
+        performPushToShopify();
+    }
+}
 </script>
 
 <template>
     <CreatorLayout page-title="Inventory">
+        <div class="mb-4 flex flex-col gap-2">
+            <div class="flex items-center justify-between gap-4">
+                <UiButton
+                    label="Push to Shopify"
+                    icon="pi pi-cloud-upload"
+                    :loading="pushToShopifyLoading"
+                    :disabled="pushToShopifyLoading"
+                    @click="pushToShopify"
+                />
+            </div>
+            <UiMessage v-if="successMessage" severity="success" size="small">
+                {{ successMessage }}
+            </UiMessage>
+            <UiMessage v-if="errorMessage" severity="error" size="small">
+                {{ errorMessage }}
+            </UiMessage>
+            <UiDialog
+                v-model:visible="showPushConfirmDialog"
+                header="Confirm Push to Shopify"
+                modal
+                size="small"
+            >
+                <p class="text-surface-700">
+                    You are about to push
+                    <strong>{{ totalVariantCount }}</strong> variants to Shopify.
+                    This may take a moment. Continue?
+                </p>
+                <template #footer>
+                    <UiButton
+                        label="Cancel"
+                        severity="secondary"
+                        outlined
+                        @click="showPushConfirmDialog = false"
+                    />
+                    <UiButton
+                        label="Push to Shopify"
+                        icon="pi pi-cloud-upload"
+                        :loading="pushToShopifyLoading"
+                        @click="performPushToShopify"
+                    />
+                </template>
+            </UiDialog>
+        </div>
         <UiCard>
             <template #title>
                 <PageFilter

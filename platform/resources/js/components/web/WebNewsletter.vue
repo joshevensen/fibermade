@@ -58,7 +58,7 @@ function handleSubmit(event: {
             class="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 lg:grid-cols-12 lg:gap-8 lg:px-8"
         >
             <h2
-                class="max-w-xl text-3xl font-semibold tracking-tight text-balance text-gray-900 sm:text-4xl lg:col-span-7 dark:text-white"
+                class="max-w-xl text-3xl font-semibold tracking-tight text-balance text-surface-900 sm:text-4xl"
             >
                 {{ title }}
             </h2>
@@ -85,12 +85,12 @@ function handleSubmit(event: {
                 </UiForm>
                 <p
                     v-if="privacyPolicy"
-                    class="mt-4 text-sm/6 text-gray-900 dark:text-gray-300"
+                    class="mt-4 text-sm/6 text-surface-900"
                 >
                     {{ privacyPolicy.text }}
                     <a
                         :href="privacyPolicy.link"
-                        class="font-semibold whitespace-nowrap text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="font-semibold whitespace-nowrap text-primary-500 hover:text-primary-400"
                         >privacy policy</a
                     >.
                 </p>
@@ -100,7 +100,7 @@ function handleSubmit(event: {
         <!-- Stacked variant: vertical layout -->
         <div v-else class="mx-auto max-w-7xl px-6 lg:px-8">
             <h2
-                class="max-w-2xl text-3xl font-semibold tracking-tight text-balance text-gray-900 sm:text-4xl dark:text-white"
+                class="max-w-2xl text-3xl font-semibold tracking-tight text-balance text-surface-900 sm:text-4xl"
             >
                 {{ title }}
             </h2>
@@ -127,12 +127,12 @@ function handleSubmit(event: {
                 </UiForm>
                 <p
                     v-if="privacyPolicy"
-                    class="mt-4 text-sm/6 text-gray-900 dark:text-gray-300"
+                    class="mt-4 text-sm/6 text-surface-900"
                 >
                     {{ privacyPolicy.text }}
                     <a
                         :href="privacyPolicy.link"
-                        class="font-semibold whitespace-nowrap text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                        class="font-semibold whitespace-nowrap text-primary-500 hover:text-primary-400"
                         >privacy policy</a
                     >.
                 </p>

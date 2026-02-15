@@ -2,6 +2,8 @@
 import AppHeader from '@/components/AppHeader.vue';
 import AppMobileDrawer from '@/components/AppMobileDrawer.vue';
 import AppSidebar from '@/components/AppSidebar.vue';
+import PaymentFailedBanner from '@/pages/creator/components/PaymentFailedBanner.vue';
+import ReactivationBanner from '@/pages/creator/components/ReactivationBanner.vue';
 import { useCreateDrawer } from '@/composables/useCreateDrawer';
 import { useCreatorNavigation } from '@/composables/useNavigation';
 import { useSidebarState } from '@/composables/useSidebarState';
@@ -66,6 +68,9 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
                     mobileDrawerVisible = !mobileDrawerVisible
                 "
             />
+
+            <PaymentFailedBanner />
+            <ReactivationBanner />
 
             <!-- Page Content -->
             <main class="flex-1 overflow-auto px-4 pt-3.5 pb-8">

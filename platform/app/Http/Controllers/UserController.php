@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AccountType;
+use App\Enums\SubscriptionStatus;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Account;
 use App\Models\Dye;
@@ -22,10 +24,22 @@ class UserController extends Controller
         $user = $request->user();
         $account = null;
         $dyes = collect();
+        $nextBillingDate = null;
 
         if ($user->account_id) {
             $account = Account::with('users')->find($user->account_id);
             $dyes = Dye::where('account_id', $user->account_id)->get();
+
+            if ($account
+                && $account->type === AccountType::Creator
+                && $account->subscription_status === SubscriptionStatus::Active
+            ) {
+                $subscription = $account->subscription();
+                if ($subscription) {
+                    $periodEnd = $subscription->currentPeriodEnd();
+                    $nextBillingDate = $periodEnd?->format('Y-m-d');
+                }
+            }
         }
 
         $routeName = $request->route()->getName();
@@ -37,6 +51,7 @@ class UserController extends Controller
             'status' => $request->session()->get('status'),
             'account' => $account,
             'dyes' => $dyes,
+            'next_billing_date' => $nextBillingDate,
         ]);
     }
 

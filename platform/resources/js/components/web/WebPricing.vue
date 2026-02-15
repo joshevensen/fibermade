@@ -54,52 +54,52 @@ const { IconList } = useIcon();
             <div class="mx-auto max-w-4xl sm:text-center">
                 <h2
                     v-if="subtitle"
-                    class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400"
+                    class="text-base/7 font-semibold text-primary-500"
                 >
                     {{ subtitle }}
                 </h2>
                 <h2
-                    class="text-5xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-6xl sm:text-balance dark:text-white"
+                    class="text-5xl font-semibold tracking-tight text-pretty text-surface-900 sm:text-6xl sm:text-balance"
                 >
                     {{ title }}
                 </h2>
                 <p
                     v-if="description"
-                    class="mx-auto mt-6 max-w-2xl text-lg font-medium text-pretty text-gray-500 sm:text-xl/8 dark:text-gray-400"
+                    class="mx-auto mt-6 max-w-2xl text-lg font-medium text-pretty text-surface-500 sm:text-xl/8"
                 >
                     {{ description }}
                 </p>
             </div>
             <div
                 v-if="tiers.length > 0"
-                class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none dark:bg-gray-800/50 dark:ring-white/10"
+                class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-surface-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none"
             >
                 <div class="p-8 sm:p-10 lg:flex-auto">
                     <h3
-                        class="text-3xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                        class="text-3xl font-semibold tracking-tight text-surface-900"
                     >
                         {{ tiers[0].name }}
                     </h3>
                     <p
-                        class="mt-6 text-base/7 text-gray-600 dark:text-gray-300"
+                        class="mt-6 text-base/7 text-surface-600"
                     >
                         {{ tiers[0].description }}
                     </p>
                     <div class="mt-10 flex items-center gap-x-4">
                         <h4
-                            class="flex-none text-sm/6 font-semibold text-indigo-600 dark:text-indigo-400"
+                            class="flex-none text-sm/6 font-semibold text-primary-500"
                         >
                             {{
                                 singlePrice?.includedLabel || "What's included"
                             }}
                         </h4>
                         <div
-                            class="h-px flex-auto bg-gray-100 dark:bg-white/10"
+                            class="h-px flex-auto bg-surface-100"
                         ></div>
                     </div>
                     <ul
                         role="list"
-                        class="mt-8 grid grid-cols-1 gap-4 text-sm/6 text-gray-600 sm:grid-cols-2 sm:gap-6 dark:text-gray-300"
+                        class="mt-8 grid grid-cols-1 gap-4 text-sm/6 text-surface-600 sm:grid-cols-2 sm:gap-6"
                     >
                         <li
                             v-for="feature in tiers[0].features"
@@ -109,7 +109,7 @@ const { IconList } = useIcon();
                             <i
                                 :class="[
                                     IconList.Check,
-                                    'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400',
+                                    'h-6 w-5 flex-none text-primary-500',
                                 ]"
                                 aria-hidden="true"
                             ></i>
@@ -121,11 +121,11 @@ const { IconList } = useIcon();
                     class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0"
                 >
                     <div
-                        class="rounded-2xl bg-gray-50 py-10 text-center inset-ring inset-ring-gray-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16 dark:inset-ring-white/10"
+                        class="rounded-2xl bg-surface-50 py-10 text-center inset-ring inset-ring-surface-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16"
                     >
                         <div class="mx-auto max-w-xs px-8">
                             <p
-                                class="text-base font-semibold text-gray-600 dark:text-gray-400"
+                                class="text-base font-semibold text-surface-600"
                             >
                                 Pay once, own it forever
                             </p>
@@ -133,7 +133,7 @@ const { IconList } = useIcon();
                                 class="mt-6 flex items-baseline justify-center gap-x-2"
                             >
                                 <span
-                                    class="text-5xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                                    class="text-5xl font-semibold tracking-tight text-surface-900"
                                 >
                                     {{
                                         singlePrice?.price ||
@@ -142,19 +142,19 @@ const { IconList } = useIcon();
                                 </span>
                                 <span
                                     v-if="singlePrice?.currency"
-                                    class="text-sm/6 font-semibold tracking-wide text-gray-600 dark:text-gray-400"
+                                    class="text-sm/6 font-semibold tracking-wide text-surface-600"
                                 >
                                     {{ singlePrice.currency }}
                                 </span>
                             </p>
                             <UiLink
                                 :href="tiers[0].href"
-                                class="mt-10 block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
+                                class="mt-10 block w-full rounded-md bg-primary-500 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                             >
                                 {{ singlePrice?.buttonText || 'Get access' }}
                             </UiLink>
                             <p
-                                class="mt-6 text-xs/5 text-gray-600 dark:text-gray-400"
+                                class="mt-6 text-xs/5 text-surface-600"
                             >
                                 Invoices and receipts available for easy company
                                 reimbursement
@@ -174,19 +174,19 @@ const { IconList } = useIcon();
         <div class="mx-auto max-w-4xl text-center">
             <h2
                 v-if="subtitle"
-                class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400"
+                class="text-base/7 font-semibold text-primary-500"
             >
                 {{ subtitle }}
             </h2>
             <p
-                class="mt-2 text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-6xl dark:text-white"
+                class="mt-2 text-5xl font-semibold tracking-tight text-balance text-surface-900 sm:text-6xl"
             >
                 {{ title }}
             </p>
         </div>
         <p
             v-if="description"
-            class="mx-auto mt-6 max-w-2xl text-center text-lg font-medium text-pretty text-gray-600 sm:text-xl/8 dark:text-gray-400"
+            class="mx-auto mt-6 max-w-2xl text-center text-lg font-medium text-pretty text-surface-600 sm:text-xl/8"
         >
             {{ description }}
         </p>
@@ -198,22 +198,22 @@ const { IconList } = useIcon();
                 :key="tier.id"
                 :class="[
                     tier.featured
-                        ? 'relative bg-gray-900 shadow-2xl dark:bg-gray-800 dark:shadow-none'
-                        : 'bg-white/60 sm:mx-8 lg:mx-0 dark:bg-white/2.5',
+                        ? 'relative bg-surface-900 shadow-2xl'
+                        : 'bg-surface-0/60 sm:mx-8 lg:mx-0',
                     tier.featured
                         ? ''
                         : tierIdx === 0
                           ? 'rounded-t-3xl sm:rounded-b-none lg:rounded-tr-none lg:rounded-bl-3xl'
                           : 'sm:rounded-t-none lg:rounded-tr-3xl lg:rounded-bl-none',
-                    'rounded-3xl p-8 ring-1 ring-gray-900/10 sm:p-10 dark:ring-white/10',
+                    'rounded-3xl p-8 ring-1 ring-surface-900/10 sm:p-10',
                 ]"
             >
                 <h3
                     :id="tier.id"
                     :class="[
                         tier.featured
-                            ? 'text-indigo-400'
-                            : 'text-indigo-600 dark:text-indigo-400',
+                            ? 'text-primary-400'
+                            : 'text-primary-500',
                         'text-base/7 font-semibold',
                     ]"
                 >
@@ -224,7 +224,7 @@ const { IconList } = useIcon();
                         :class="[
                             tier.featured
                                 ? 'text-white'
-                                : 'text-gray-900 dark:text-white',
+                                : 'text-surface-900',
                             'text-5xl font-semibold tracking-tight',
                         ]"
                     >
@@ -233,8 +233,8 @@ const { IconList } = useIcon();
                     <span
                         :class="[
                             tier.featured
-                                ? 'text-gray-400'
-                                : 'text-gray-500 dark:text-gray-400',
+                                ? 'text-surface-400'
+                                : 'text-surface-500',
                             'text-base',
                         ]"
                     >
@@ -244,8 +244,8 @@ const { IconList } = useIcon();
                 <p
                     :class="[
                         tier.featured
-                            ? 'text-gray-300'
-                            : 'text-gray-600 dark:text-gray-300',
+                            ? 'text-surface-300'
+                            : 'text-surface-600',
                         'mt-6 text-base/7',
                     ]"
                 >
@@ -255,8 +255,8 @@ const { IconList } = useIcon();
                     role="list"
                     :class="[
                         tier.featured
-                            ? 'text-gray-300'
-                            : 'text-gray-600 dark:text-gray-300',
+                            ? 'text-surface-300'
+                            : 'text-surface-600',
                         'mt-8 space-y-3 text-sm/6 sm:mt-10',
                     ]"
                 >
@@ -268,8 +268,8 @@ const { IconList } = useIcon();
                         <i
                             :class="[
                                 tier.featured
-                                    ? 'text-indigo-400'
-                                    : 'text-indigo-600 dark:text-indigo-400',
+                                    ? 'text-primary-400'
+                                    : 'text-primary-500',
                                 IconList.Check,
                                 'h-6 w-5 flex-none',
                             ]"
@@ -283,8 +283,8 @@ const { IconList } = useIcon();
                     :aria-describedby="tier.id"
                     :class="[
                         tier.featured
-                            ? 'bg-indigo-500 text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-indigo-500 dark:shadow-none'
-                            : 'text-indigo-600 inset-ring inset-ring-indigo-200 hover:inset-ring-indigo-300 focus-visible:outline-indigo-600 dark:bg-white/10 dark:text-white dark:inset-ring-white/5 dark:hover:bg-white/20 dark:hover:inset-ring-white/5 dark:focus-visible:outline-white/75',
+                            ? 'bg-primary-400 text-white shadow-xs hover:bg-primary-300 focus-visible:outline-primary-500'
+                            : 'text-primary-500 inset-ring inset-ring-primary-200 hover:inset-ring-primary-300 focus-visible:outline-primary-500',
                         'mt-8 block rounded-md px-3.5 py-2.5 text-center text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 sm:mt-10',
                     ]"
                 >
@@ -297,7 +297,7 @@ const { IconList } = useIcon();
     <!-- TwoTierWithExtra variant -->
     <div
         v-else-if="variant === 'twoTierWithExtra'"
-        class="isolate overflow-hidden bg-gray-900"
+        class="isolate overflow-hidden bg-surface-900"
     >
         <div
             class="mx-auto max-w-7xl px-6 pt-24 pb-96 text-center sm:pt-32 lg:px-8"
@@ -305,7 +305,7 @@ const { IconList } = useIcon();
             <div class="mx-auto max-w-4xl">
                 <h2
                     v-if="subtitle"
-                    class="text-base/7 font-semibold text-indigo-400"
+                    class="text-base/7 font-semibold text-primary-400"
                 >
                     {{ subtitle }}
                 </h2>
@@ -318,7 +318,7 @@ const { IconList } = useIcon();
             <div class="relative mt-6">
                 <p
                     v-if="description"
-                    class="mx-auto max-w-2xl text-lg font-medium text-pretty text-gray-400 sm:text-xl/8"
+                    class="mx-auto max-w-2xl text-lg font-medium text-pretty text-surface-400 sm:text-xl/8"
                 >
                     {{ description }}
                 </p>
@@ -333,35 +333,35 @@ const { IconList } = useIcon();
                         <div
                             v-for="tier in tiers.slice(0, 2)"
                             :key="tier.id"
-                            class="flex flex-col justify-between rounded-3xl p-8 shadow-xl outline-1 outline-gray-900/10 sm:p-10 dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10"
+                            class="flex flex-col justify-between rounded-3xl p-8 shadow-xl outline-1 outline-surface-900/10 sm:p-10"
                         >
                             <div>
                                 <h3
                                     :id="tier.id"
-                                    class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400"
+                                    class="text-base/7 font-semibold text-primary-500"
                                 >
                                     {{ tier.name }}
                                 </h3>
                                 <div class="mt-4 flex items-baseline gap-x-2">
                                     <span
-                                        class="text-5xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                                        class="text-5xl font-semibold tracking-tight text-surface-900"
                                     >
                                         {{ tier.priceMonthly }}
                                     </span>
                                     <span
-                                        class="text-base/7 font-semibold text-gray-600 dark:text-gray-400"
+                                        class="text-base/7 font-semibold text-surface-600"
                                     >
                                         /month
                                     </span>
                                 </div>
                                 <p
-                                    class="mt-6 text-base/7 text-gray-600 dark:text-gray-300"
+                                    class="mt-6 text-base/7 text-surface-600"
                                 >
                                     {{ tier.description }}
                                 </p>
                                 <ul
                                     role="list"
-                                    class="mt-10 space-y-4 text-sm/6 text-gray-600 dark:text-gray-300"
+                                    class="mt-10 space-y-4 text-sm/6 text-surface-600"
                                 >
                                     <li
                                         v-for="feature in tier.features"
@@ -371,7 +371,7 @@ const { IconList } = useIcon();
                                         <i
                                             :class="[
                                                 IconList.Check,
-                                                'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400',
+                                                'h-6 w-5 flex-none text-primary-500',
                                             ]"
                                             aria-hidden="true"
                                         ></i>
@@ -382,30 +382,30 @@ const { IconList } = useIcon();
                             <UiLink
                                 :href="tier.href"
                                 :aria-describedby="tier.id"
-                                class="mt-8 block rounded-md bg-indigo-600 px-3.5 py-2 text-center text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-400"
+                                class="mt-8 block rounded-md bg-primary-500 px-3.5 py-2 text-center text-sm/6 font-semibold text-white shadow-xs hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                             >
                                 Get started today
                             </UiLink>
                         </div>
                         <div
                             v-if="discountedTier"
-                            class="flex flex-col items-start gap-x-8 gap-y-6 rounded-3xl p-8 ring-1 ring-gray-900/10 sm:gap-y-10 sm:p-10 lg:col-span-2 lg:flex-row lg:items-center dark:bg-gray-800/20 dark:ring-white/10"
+                            class="flex flex-col items-start gap-x-8 gap-y-6 rounded-3xl p-8 ring-1 ring-surface-900/10 sm:gap-y-10 sm:p-10 lg:col-span-2 lg:flex-row lg:items-center"
                         >
                             <div class="lg:min-w-0 lg:flex-1">
                                 <h3
-                                    class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400"
+                                    class="text-base/7 font-semibold text-primary-500"
                                 >
                                     {{ discountedTier.title }}
                                 </h3>
                                 <p
-                                    class="mt-1 text-base/7 text-gray-600 dark:text-gray-400"
+                                    class="mt-1 text-base/7 text-surface-600"
                                 >
                                     {{ discountedTier.description }}
                                 </p>
                             </div>
                             <UiLink
                                 :href="discountedTier.href"
-                                class="rounded-md px-3.5 py-2 text-sm/6 font-semibold text-indigo-600 inset-ring inset-ring-indigo-200 hover:inset-ring-indigo-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-white/10 dark:text-white dark:inset-ring-white/5 dark:hover:bg-white/20 dark:hover:inset-ring-white/5 dark:focus-visible:outline-white/75"
+                                class="rounded-md px-3.5 py-2 text-sm/6 font-semibold text-primary-500 inset-ring inset-ring-primary-200 hover:inset-ring-primary-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
                             >
                                 {{
                                     discountedTier.buttonText ||
@@ -427,29 +427,29 @@ const { IconList } = useIcon();
                 <div class="mx-auto max-w-4xl text-center">
                     <h2
                         v-if="subtitle"
-                        class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400"
+                        class="text-base/7 font-semibold text-primary-500"
                     >
                         {{ subtitle }}
                     </h2>
                     <p
-                        class="mt-2 text-5xl font-semibold tracking-tight text-balance text-gray-900 sm:text-6xl dark:text-white"
+                        class="mt-2 text-5xl font-semibold tracking-tight text-balance text-surface-900 sm:text-6xl"
                     >
                         {{ title }}
                     </p>
                 </div>
                 <p
                     v-if="description"
-                    class="mx-auto mt-6 max-w-2xl text-center text-lg font-medium text-pretty text-gray-600 sm:text-xl/8 dark:text-gray-400"
+                    class="mx-auto mt-6 max-w-2xl text-center text-lg font-medium text-pretty text-surface-600 sm:text-xl/8"
                 >
                     {{ description }}
                 </p>
                 <div v-if="showPricingToggle" class="mt-16 flex justify-center">
                     <fieldset aria-label="Payment frequency">
                         <div
-                            class="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs/5 font-semibold inset-ring inset-ring-gray-200 dark:inset-ring-white/10"
+                            class="grid grid-cols-2 gap-x-1 rounded-full p-1 text-center text-xs/5 font-semibold inset-ring inset-ring-surface-200"
                         >
                             <label
-                                class="group relative rounded-full px-2.5 py-1 has-checked:bg-indigo-600 dark:has-checked:bg-indigo-500"
+                                class="group relative rounded-full px-2.5 py-1 has-checked:bg-primary-500"
                             >
                                 <input
                                     v-model="pricingFrequency"
@@ -459,12 +459,12 @@ const { IconList } = useIcon();
                                     class="absolute inset-0 appearance-none rounded-full"
                                 />
                                 <span
-                                    class="text-gray-500 group-has-checked:text-white dark:text-gray-400"
+                                    class="text-surface-500 group-has-checked:text-white"
                                     >Monthly</span
                                 >
                             </label>
                             <label
-                                class="group relative rounded-full px-2.5 py-1 has-checked:bg-indigo-600 dark:has-checked:bg-indigo-500"
+                                class="group relative rounded-full px-2.5 py-1 has-checked:bg-primary-500"
                             >
                                 <input
                                     v-model="pricingFrequency"
@@ -474,7 +474,7 @@ const { IconList } = useIcon();
                                     class="absolute inset-0 appearance-none rounded-full"
                                 />
                                 <span
-                                    class="text-gray-500 group-has-checked:text-white dark:text-gray-400"
+                                    class="text-surface-500 group-has-checked:text-white"
                                     >Annually</span
                                 >
                             </label>
@@ -496,7 +496,7 @@ const { IconList } = useIcon();
                         :key="tier.id"
                         :class="[
                             showPricingToggle
-                                ? 'rounded-3xl p-8 ring-1 ring-gray-200 data-featured:ring-2 data-featured:ring-indigo-600 xl:p-10 dark:bg-gray-800/50 dark:ring-white/15 dark:data-featured:ring-indigo-400'
+                                ? 'rounded-3xl p-8 ring-1 ring-surface-200 data-featured:ring-2 data-featured:ring-primary-500 xl:p-10'
                                 : tier.mostPopular
                                   ? 'lg:z-10 lg:rounded-b-none'
                                   : 'lg:mt-8',
@@ -507,7 +507,7 @@ const { IconList } = useIcon();
                                 ? '-ml-px lg:rounded-l-none'
                                 : '',
                             !showPricingToggle
-                                ? 'flex flex-col justify-between rounded-3xl p-8 inset-ring inset-ring-gray-200 xl:p-10 dark:bg-gray-800/50 dark:inset-ring-gray-700'
+                                ? 'flex flex-col justify-between rounded-3xl p-8 inset-ring inset-ring-surface-200 xl:p-10'
                                 : '',
                             showPricingToggle ? '' : '',
                         ]"
@@ -525,10 +525,10 @@ const { IconList } = useIcon();
                                     :id="`tier-${tier.id}`"
                                     :class="[
                                         showPricingToggle
-                                            ? 'text-lg/8 font-semibold text-gray-900 group-data-featured/tier:text-indigo-600 dark:text-white dark:group-data-featured/tier:text-indigo-400'
+                                            ? 'text-lg/8 font-semibold text-surface-900 group-data-featured/tier:text-primary-500'
                                             : tier.mostPopular
-                                              ? 'text-indigo-600 dark:text-indigo-400'
-                                              : 'text-gray-900 dark:text-white',
+                                              ? 'text-primary-500'
+                                              : 'text-surface-900',
                                         showPricingToggle
                                             ? ''
                                             : 'text-lg/8 font-semibold',
@@ -541,19 +541,19 @@ const { IconList } = useIcon();
                                         (tier.mostPopular || tier.featured) &&
                                         showPricingToggle
                                     "
-                                    class="rounded-full bg-indigo-600/10 px-2.5 py-1 text-xs/5 font-semibold text-indigo-600 group-not-data-featured/tier:hidden dark:bg-indigo-500 dark:text-white"
+                                    class="rounded-full bg-primary-500/10 px-2.5 py-1 text-xs/5 font-semibold text-primary-500 group-not-data-featured/tier:hidden"
                                 >
                                     Most popular
                                 </p>
                                 <p
                                     v-else-if="tier.mostPopular"
-                                    class="rounded-full bg-indigo-600/10 px-2.5 py-1 text-xs/5 font-semibold text-indigo-600 dark:bg-indigo-400/10 dark:text-indigo-400"
+                                    class="rounded-full bg-primary-500/10 px-2.5 py-1 text-xs/5 font-semibold text-primary-500"
                                 >
                                     Most popular
                                 </p>
                             </div>
                             <p
-                                class="mt-4 text-sm/6 text-gray-600 dark:text-gray-300"
+                                class="mt-4 text-sm/6 text-surface-600"
                             >
                                 {{ tier.description }}
                             </p>
@@ -566,12 +566,12 @@ const { IconList } = useIcon();
                                 class="mt-6 flex items-baseline gap-x-1"
                             >
                                 <span
-                                    class="text-4xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                                    class="text-4xl font-semibold tracking-tight text-surface-900"
                                 >
                                     {{ tier.priceMonthly }}
                                 </span>
                                 <span
-                                    class="text-sm/6 font-semibold text-gray-600 dark:text-gray-400"
+                                    class="text-sm/6 font-semibold text-surface-600"
                                 >
                                     /month
                                 </span>
@@ -585,21 +585,21 @@ const { IconList } = useIcon();
                                 class="mt-6 flex items-baseline gap-x-1"
                             >
                                 <span
-                                    class="text-4xl font-semibold tracking-tight text-gray-900 dark:text-white"
+                                    class="text-4xl font-semibold tracking-tight text-surface-900"
                                 >
                                     {{
                                         tier.priceAnnually || tier.priceMonthly
                                     }}
                                 </span>
                                 <span
-                                    class="text-sm/6 font-semibold text-gray-600 dark:text-gray-400"
+                                    class="text-sm/6 font-semibold text-surface-600"
                                 >
                                     /year
                                 </span>
                             </p>
                             <ul
                                 role="list"
-                                class="mt-8 space-y-3 text-sm/6 text-gray-600 xl:mt-10 dark:text-gray-300"
+                                class="mt-8 space-y-3 text-sm/6 text-surface-600 xl:mt-10"
                             >
                                 <li
                                     v-for="feature in tier.features"
@@ -609,7 +609,7 @@ const { IconList } = useIcon();
                                     <i
                                         :class="[
                                             IconList.Check,
-                                            'h-6 w-5 flex-none text-indigo-600 dark:text-indigo-400',
+                                            'h-6 w-5 flex-none text-primary-500',
                                         ]"
                                         aria-hidden="true"
                                     ></i>
@@ -622,12 +622,12 @@ const { IconList } = useIcon();
                             :aria-describedby="tier.id"
                             :class="[
                                 showPricingToggle
-                                    ? 'mt-6 block w-full rounded-md px-3 py-2 text-center text-sm/6 font-semibold text-indigo-600 inset-ring-1 inset-ring-indigo-200 group-data-featured/tier:bg-indigo-600 group-data-featured/tier:text-white group-data-featured/tier:shadow-xs group-data-featured/tier:inset-ring-0 hover:inset-ring-indigo-300 group-data-featured/tier:hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-white/10 dark:text-white dark:inset-ring dark:inset-ring-white/5 dark:group-data-featured/tier:bg-indigo-500 dark:group-data-featured/tier:shadow-none dark:hover:bg-white/20 dark:hover:inset-ring-white/5 dark:group-data-featured/tier:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500 dark:group-not-data-featured/tier:focus-visible:outline-white/75'
+                                    ? 'mt-6 block w-full rounded-md px-3 py-2 text-center text-sm/6 font-semibold text-primary-500 inset-ring-1 inset-ring-primary-200 group-data-featured/tier:bg-primary-500 group-data-featured/tier:text-white group-data-featured/tier:shadow-xs group-data-featured/tier:inset-ring-0 hover:inset-ring-primary-300 group-data-featured/tier:hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500'
                                     : tier.mostPopular
-                                      ? 'bg-indigo-600 text-white shadow-xs hover:bg-indigo-500 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400'
-                                      : 'text-indigo-600 inset-ring inset-ring-indigo-200 hover:inset-ring-indigo-300 dark:bg-white/10 dark:text-white dark:inset-ring-white/5 dark:hover:bg-white/20 dark:hover:inset-ring-white/5 dark:focus-visible:outline-white/75',
+                                      ? 'bg-primary-500 text-white shadow-xs hover:bg-primary-600'
+                                      : 'text-primary-500 inset-ring inset-ring-primary-200 hover:inset-ring-primary-300',
                                 !showPricingToggle
-                                    ? 'mt-8 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500'
+                                    ? 'mt-8 block rounded-md px-3 py-2 text-center text-sm/6 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500'
                                     : '',
                             ]"
                         >

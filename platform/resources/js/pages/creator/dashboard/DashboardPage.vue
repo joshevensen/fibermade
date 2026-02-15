@@ -1,68 +1,73 @@
 <script setup lang="ts">
+import { useIcon } from '@/composables/useIcon';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
-import DyeListCard from './components/DyeListCard.vue';
-import OpenOrdersCard from './components/OpenOrdersCard.vue';
-import RevenueThisMonthCard from './components/RevenueThisMonthCard.vue';
-// import UpcomingShowsCard from './components/UpcomingShowsCard.vue';
+import NeedsAttentionCard from './components/NeedsAttentionCard.vue';
+import StatsCard from './components/StatsCard.vue';
+import WholesaleOrdersSummaryCard from './components/WholesaleOrdersSummaryCard.vue';
 
-interface Colorway {
-    id: number;
+interface Orderable {
     name: string;
-    per_pan: number;
-}
-
-interface Base {
-    id: number;
-    descriptor: string;
-}
-
-interface DyeListItem {
-    colorway: Colorway;
-    base: Base;
-    quantity: number;
-}
-
-interface Show {
-    id: number;
-    name: string;
-    start_at: string;
-    end_at: string;
-    location_name?: string | null;
-    location_city?: string | null;
-    location_state?: string | null;
 }
 
 interface Order {
     id: number;
+    order_date: string;
     total_amount?: number | null;
-    orderable?: {
-        name: string;
-    } | null;
+    orderable?: Orderable | null;
+}
+
+interface NeedsAttention {
+    pending_orders: number;
+    pending_store_invites: number;
 }
 
 interface Props {
-    dyeList: DyeListItem[];
-    upcomingShows: Show[];
-    openOrders: Order[];
-    revenueThisMonth: number;
+    colorwayCount: number;
+    collectionCount: number;
+    storeCount: number;
+    /** Orders grouped by status: { open: Order[], accepted: Order[], ... } */
+    activeOrders: Record<string, Order[]>;
+    needsAttention: NeedsAttention;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
+
+const { BusinessIconList } = useIcon();
 </script>
 
 <template>
     <CreatorLayout page-title="Dashboard">
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <!-- Left Column: Dye List (spans 2 columns on desktop) -->
-            <div class="order-1 lg:col-span-2">
-                <DyeListCard :dye-list="dyeList" />
+        <div class="flex flex-col gap-6">
+            <!-- Stats row: horizontal on desktop, stack on mobile -->
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <StatsCard
+                    label="Colorways"
+                    :count="colorwayCount"
+                    href="/creator/colorways"
+                    :icon="BusinessIconList.Colorways"
+                />
+                <StatsCard
+                    label="Collections"
+                    :count="collectionCount"
+                    href="/creator/collections"
+                    :icon="BusinessIconList.Collections"
+                />
+                <StatsCard
+                    label="Stores"
+                    :count="storeCount"
+                    href="/creator/stores"
+                    :icon="BusinessIconList.Stores"
+                />
             </div>
 
-            <!-- Right Column: Cards (spans 1 column on desktop) -->
-            <div class="order-2 space-y-6">
-                <!-- <UpcomingShowsCard :upcoming-shows="upcomingShows" /> -->
-                <RevenueThisMonthCard :revenue-this-month="revenueThisMonth" />
-                <OpenOrdersCard :open-orders="openOrders" />
+            <!-- Two-column: main (orders) + sidebar (needs attention) -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div class="lg:col-span-2">
+                    <WholesaleOrdersSummaryCard :active-orders="activeOrders" />
+                </div>
+                <div class="order-first lg:order-none">
+                    <NeedsAttentionCard :needs-attention="needsAttention" />
+                </div>
             </div>
         </div>
     </CreatorLayout>

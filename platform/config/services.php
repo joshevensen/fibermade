@@ -29,6 +29,8 @@ return [
     'stripe' => [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'price_id' => env('STRIPE_PRICE_ID'),
     ],
 
     'resend' => [
@@ -46,6 +48,11 @@ return [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
+    ],
+
+    'shopify' => [
+        'webhook_secret' => env('SHOPIFY_WEBHOOK_SECRET'),
+        'catalog_sync_enabled' => env('SHOPIFY_CATALOG_SYNC_ENABLED', false),
     ],
 
 ];

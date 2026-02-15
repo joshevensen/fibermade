@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\AccountType;
 use App\Enums\BaseStatus;
+use App\Enums\SubscriptionStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -22,6 +23,7 @@ use Laravel\Cashier\Billable;
  * @property \App\Enums\BaseStatus $status
  * @property \App\Enums\AccountType $type
  * @property \Illuminate\Support\Carbon|null $onboarded_at
+ * @property \App\Enums\SubscriptionStatus|null $subscription_status
  * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -39,6 +41,7 @@ class Account extends Model
     protected $fillable = [
         'status',
         'type',
+        'subscription_status',
         'onboarded_at',
     ];
 
@@ -52,6 +55,7 @@ class Account extends Model
         return [
             'status' => BaseStatus::class,
             'type' => AccountType::class,
+            'subscription_status' => SubscriptionStatus::class,
             'onboarded_at' => 'datetime',
         ];
     }
@@ -142,5 +146,29 @@ class Account extends Model
     public function store(): HasOne
     {
         return $this->hasOne(Store::class);
+    }
+
+    /**
+     * Whether this account type requires an active subscription to access Creator features.
+     */
+    public function requiresSubscription(): bool
+    {
+        return $this->type === AccountType::Creator;
+    }
+
+    /**
+     * Whether the account has an active or grace-period subscription (allowed to access Creator routes).
+     */
+    public function hasActiveSubscription(): bool
+    {
+        if (! $this->requiresSubscription()) {
+            return true;
+        }
+
+        return $this->subscription_status !== null && in_array($this->subscription_status, [
+            SubscriptionStatus::Active,
+            SubscriptionStatus::PastDue,
+            SubscriptionStatus::Cancelled,
+        ], true);
     }
 }

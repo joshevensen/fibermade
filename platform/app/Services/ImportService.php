@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\BaseStatus;
 use App\Enums\Color;
 use App\Enums\ColorwayStatus;
+use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
@@ -15,6 +16,7 @@ use App\Models\Colorway;
 use App\Models\Customer;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
+use App\Models\IntegrationLog;
 use App\Models\Inventory;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -36,6 +38,7 @@ class ImportService
             'colorways_updated' => 0,
             'bases_created' => 0,
             'errors' => [],
+            'warnings' => [],
         ];
 
         try {
@@ -53,6 +56,7 @@ class ImportService
             // Process products to create/update Colorways and Bases
             $colorwayMap = [];
             $baseMap = [];
+            $basePriceMap = [];
 
             // First pass: Process product rows to create/update Colorways
             foreach ($productsData as $row) {
@@ -135,8 +139,8 @@ class ImportService
                         continue;
                     }
 
-                    // Create or update base
-                    $base = $this->getOrCreateBaseFromVariant($accountId, $option1Value, $row, $integration);
+                    // Create or update base (with price conflict detection)
+                    $base = $this->getOrCreateBaseFromVariant($accountId, $option1Value, $row, $integration, $basePriceMap, $result['warnings']);
                     $baseKey = $base->descriptor.'-'.$base->weight->value;
                     $baseMap[$baseKey] = $base;
 
@@ -144,23 +148,59 @@ class ImportService
                         $result['bases_created']++;
                     }
 
-                    // Create inventory entry for this colorway-base combination
-                    Inventory::firstOrCreate(
+                    $quantity = (int) (CsvColumnMapper::getValue($row, 'available') ?? 0);
+
+                    $inventory = Inventory::firstOrCreate(
                         [
                             'account_id' => $accountId,
                             'colorway_id' => $colorway->id,
                             'base_id' => $base->id,
                         ],
                         [
-                            'quantity' => 0,
+                            'quantity' => $quantity,
                         ]
                     );
+
+                    if (! $inventory->wasRecentlyCreated && $inventory->quantity !== $quantity) {
+                        $inventory->update(['quantity' => $quantity]);
+                    }
+
+                    $variantIdRaw = CsvColumnMapper::getValue($row, 'variant_id');
+                    if ($variantIdRaw) {
+                        $variantGid = str_starts_with($variantIdRaw, 'gid://')
+                            ? $variantIdRaw
+                            : "gid://shopify/ProductVariant/{$variantIdRaw}";
+                        ExternalIdentifier::firstOrCreate(
+                            [
+                                'integration_id' => $integration->id,
+                                'identifiable_type' => Inventory::class,
+                                'identifiable_id' => $inventory->id,
+                                'external_type' => 'shopify_variant',
+                                'external_id' => $variantGid,
+                            ]
+                        );
+                    }
                 } catch (\Exception $e) {
                     $result['errors'][] = "Error processing variant row: {$e->getMessage()}";
                 }
             }
 
             DB::commit();
+
+            if ($result['success'] && ! empty($result['warnings'])) {
+                IntegrationLog::create([
+                    'integration_id' => $integration->id,
+                    'loggable_type' => Integration::class,
+                    'loggable_id' => $integration->id,
+                    'status' => IntegrationLogStatus::Warning,
+                    'message' => 'Import completed with price conflict warnings',
+                    'metadata' => [
+                        'sync_source' => 'import',
+                        'warnings' => $result['warnings'],
+                    ],
+                    'synced_at' => now(),
+                ]);
+            }
         } catch (\Exception $e) {
             DB::rollBack();
             $result['success'] = false;
@@ -687,10 +727,21 @@ class ImportService
 
     /**
      * Get or create Base from variant data.
+     *
+     * @param  array<string, float>  $basePriceMap  Maps baseKey => first encountered retail_price
+     * @param  array<string>  $warnings  Appended to on price conflicts
      */
-    private function getOrCreateBaseFromVariant(int $accountId, string $optionValue, array $row, Integration $integration): Base
-    {
+    private function getOrCreateBaseFromVariant(
+        int $accountId,
+        string $optionValue,
+        array $row,
+        Integration $integration,
+        array &$basePriceMap,
+        array &$warnings
+    ): Base {
         [$descriptor, $weight] = $this->parseBaseOption($optionValue);
+        $baseKey = $descriptor.'-'.$weight->value;
+        $rowPrice = (float) (CsvColumnMapper::getValue($row, 'variant_price') ?? 0);
 
         $base = Base::where('account_id', $accountId)
             ->where('descriptor', $descriptor)
@@ -705,34 +756,28 @@ class ImportService
         };
 
         if (! $base) {
+            $basePriceMap[$baseKey] = $rowPrice;
             $base = Base::create([
                 'account_id' => $accountId,
                 'descriptor' => $descriptor,
                 'weight' => $weight,
-                'retail_price' => (float) (CsvColumnMapper::getValue($row, 'variant_price') ?? 0),
+                'retail_price' => $rowPrice,
                 'cost' => (float) (CsvColumnMapper::getValue($row, 'cost') ?? 0),
                 'status' => $status,
             ]);
         } else {
+            if (! isset($basePriceMap[$baseKey])) {
+                $basePriceMap[$baseKey] = (float) $base->retail_price;
+            }
+            $firstPrice = $basePriceMap[$baseKey];
+            if ($rowPrice > 0 && abs($firstPrice - $rowPrice) > 0.001) {
+                $warnings[] = "Base '{$descriptor}' has conflicting price \${$rowPrice} (using \${$firstPrice} from first encounter)";
+            }
             $base->update([
-                'retail_price' => (float) (CsvColumnMapper::getValue($row, 'variant_price') ?? $base->retail_price),
+                'retail_price' => $firstPrice,
                 'cost' => (float) (CsvColumnMapper::getValue($row, 'cost') ?? $base->cost),
                 'status' => $status,
             ]);
-        }
-
-        // Create external identifier for variant SKU if present
-        $variantSku = CsvColumnMapper::getValue($row, 'variant_sku');
-        if ($variantSku) {
-            ExternalIdentifier::firstOrCreate(
-                [
-                    'integration_id' => $integration->id,
-                    'identifiable_type' => Base::class,
-                    'identifiable_id' => $base->id,
-                    'external_type' => 'shopify_variant',
-                    'external_id' => $variantSku,
-                ]
-            );
         }
 
         return $base;
@@ -772,20 +817,6 @@ class ImportService
                 'cost' => (float) (CsvColumnMapper::getValue($row, 'cost') ?? $base->cost),
                 'status' => $status,
             ]);
-        }
-
-        // Create external identifier for variant SKU if present
-        $variantSku = CsvColumnMapper::getValue($row, 'variant_sku');
-        if ($variantSku) {
-            ExternalIdentifier::firstOrCreate(
-                [
-                    'integration_id' => $integration->id,
-                    'identifiable_type' => Base::class,
-                    'identifiable_id' => $base->id,
-                    'external_type' => 'shopify_variant',
-                    'external_id' => $variantSku,
-                ]
-            );
         }
 
         return $base;

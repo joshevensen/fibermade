@@ -23,15 +23,15 @@ const props = withDefaults(defineProps<Props>(), {
 <template>
     <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8">
         <h2
-            class="text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl dark:text-white"
+            class="text-4xl font-semibold tracking-tight text-surface-900 sm:text-5xl"
         >
             {{ title }}
         </h2>
-        <p class="mt-6 max-w-2xl text-base/7 text-gray-600 dark:text-gray-400">
+        <p class="mt-6 max-w-2xl text-base/7 text-surface-600">
             {{ description }}
             <UiLink
                 :href="supportEmailLink"
-                class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                class="font-semibold text-primary-500 hover:text-primary-400"
             >
                 sending us an email
             </UiLink>
@@ -47,12 +47,12 @@ const props = withDefaults(defineProps<Props>(), {
             >
                 <div v-for="faq in faqs" :key="faq.id">
                     <dt
-                        class="text-base/7 font-semibold text-gray-900 dark:text-white"
+                        class="text-base/7 font-semibold text-surface-900"
                     >
                         {{ faq.question }}
                     </dt>
                     <dd
-                        class="mt-2 text-base/7 text-gray-600 dark:text-gray-400"
+                        class="mt-2 text-base/7 text-surface-600"
                     >
                         {{ faq.answer }}
                     </dd>

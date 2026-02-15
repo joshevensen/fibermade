@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\SubscriptionStatus;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -48,10 +49,37 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user?->load('account'),
                 'account_type' => $user?->account?->type,
             ],
+            'account' => $user?->account ? $this->sharedAccountProps($user->account) : null,
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
         ];
+    }
+
+    /**
+     * Shared account props for layouts (type, subscription_status, reactivation_days_remaining when inactive).
+     *
+     * @return array{type: \App\Enums\AccountType, subscription_status: \App\Enums\SubscriptionStatus|null, reactivation_days_remaining: int|null}
+     */
+    private function sharedAccountProps(\App\Models\Account $account): array
+    {
+        $props = [
+            'type' => $account->type,
+            'subscription_status' => $account->subscription_status,
+            'reactivation_days_remaining' => null,
+        ];
+
+        if ($account->type === \App\Enums\AccountType::Creator
+            && $account->subscription_status === SubscriptionStatus::Inactive
+        ) {
+            $endsAt = $account->subscriptions()->latest('ends_at')->first()?->ends_at;
+            if ($endsAt) {
+                $daysSince = (int) $endsAt->diffInDays(now(), false);
+                $props['reactivation_days_remaining'] = max(0, 90 - $daysSince);
+            }
+        }
+
+        return $props;
     }
 }

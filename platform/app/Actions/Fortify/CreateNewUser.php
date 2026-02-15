@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Enums\AccountType;
 use App\Enums\BaseStatus;
+use App\Enums\SubscriptionStatus;
 use App\Enums\UserRole;
 use App\Models\Account;
 use App\Models\Creator;
@@ -44,6 +45,7 @@ class CreateNewUser implements CreatesNewUsers
             $account = Account::create([
                 'status' => BaseStatus::Active,
                 'type' => AccountType::Creator,
+                'subscription_status' => SubscriptionStatus::Active,
             ]);
 
             Creator::create([

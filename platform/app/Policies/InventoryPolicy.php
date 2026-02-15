@@ -64,6 +64,14 @@ class InventoryPolicy
     }
 
     /**
+     * Determine whether the user can push inventory to Shopify.
+     */
+    public function pushToShopify(User $user): bool
+    {
+        return $this->viewAny($user);
+    }
+
+    /**
      * Check if the user is an admin.
      */
     private function isAdmin(User $user): bool

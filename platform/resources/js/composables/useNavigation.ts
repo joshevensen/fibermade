@@ -1,6 +1,7 @@
 import { index as basesIndex } from '@/actions/App/Http/Controllers/BaseController';
 import { index as collectionsIndex } from '@/actions/App/Http/Controllers/CollectionController';
 import { index as colorwaysIndex } from '@/actions/App/Http/Controllers/ColorwayController';
+import { index as inventoryIndex } from '@/actions/App/Http/Controllers/InventoryController';
 import { index as ordersIndex } from '@/actions/App/Http/Controllers/OrderController';
 // import { index as showsIndex } from '@/actions/App/Http/Controllers/ShowController';
 import { useIcon } from '@/composables/useIcon';
@@ -23,11 +24,11 @@ export function useCreatorNavigation(): NavigationItem[] {
             href: dashboard.url(),
             icon: BusinessIconList.Dashboard,
         },
-        // {
-        //     title: 'Inventory',
-        //     href: inventoryIndex.url(),
-        //     icon: BusinessIconList.Inventory,
-        // },
+        {
+            title: 'Inventory',
+            href: inventoryIndex.url(),
+            icon: BusinessIconList.Inventory,
+        },
         {
             title: 'Colorways',
             href: colorwaysIndex.url(),
@@ -43,26 +44,26 @@ export function useCreatorNavigation(): NavigationItem[] {
             href: basesIndex.url(),
             icon: BusinessIconList.Bases,
         },
-        {
-            title: 'Orders',
-            href: ordersIndex.url(),
-            icon: BusinessIconList.Orders,
-        },
+        // {
+        //     title: 'Shows',
+        //     href: showsIndex.url(),
+        //     icon: BusinessIconList.Shows,
+        // },
         {
             title: 'Stores',
             href: storesIndex.url(),
             icon: BusinessIconList.Stores,
         },
         // {
-        //     title: 'Shows',
-        //     href: showsIndex.url(),
-        //     icon: BusinessIconList.Shows,
-        // },
-        // {
         //     title: 'Customers',
         //     href: customersIndex.url(),
         //     icon: BusinessIconList.Customers,
         // },
+        {
+            title: 'Orders',
+            href: ordersIndex.url(),
+            icon: BusinessIconList.Orders,
+        },
         {
             title: 'Settings',
             href: userEdit.url(),
