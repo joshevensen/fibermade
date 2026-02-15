@@ -6,11 +6,11 @@ status: pending
 
 The registration page exists at `platform/resources/js/pages/auth/RegisterPage.vue` with fields for name, email, business_name, password (confirmed), and checkboxes for terms, privacy, and marketing opt-in. The `CreateNewUser` action at `platform/app/Actions/Fortify/CreateNewUser.php` handles registration: it validates input, checks an email whitelist (currently limited to `kristen@badfrogyarnco.com` in `config/auth.php`), creates an Account (type: Creator), Creator record, and User. The `FortifyServiceProvider` renders the register view via Inertia. Registration always creates a Creator account -- there's no account type selection.
 
-Registration is open to anyone — the email whitelist needs to be removed entirely. The registration page needs visual polish to match the app's design system and feel production-ready.
+Registration is open to anyone — the email whitelist needs to be removed entirely. The page already uses AuthLayout, UiForm, and the app's UI components; server validation errors display inline and the submit button has a loading state.
 
 ## Goal
 
-Polish the registration page for production readiness: update the visual design to be clean and professional, remove the email whitelist so registration is open to anyone, ensure error messaging is clear and helpful, and add any missing UX touches (loading states, field validation feedback).
+Make registration open to anyone by removing the email whitelist, update tests to match, and refactor the registration page so form initial values are a single source of truth. The page already meets production-ready UX (inline errors, loading state, login link, design system).
 
 ## Non-Goals
 
@@ -19,41 +19,40 @@ Polish the registration page for production readiness: update the visual design 
 - Do not modify the post-registration redirect logic
 - Do not add onboarding flows after registration (that's a future epic)
 - Do not modify the login page -- that's Prompt 2
+- Do not add client-side password confirmation validation (server-side only)
+- Do not add an explicit visual polish pass beyond current layout
 
 ## Constraints
 
 - The registration page should use the existing Vue component library and Tailwind CSS classes used elsewhere in the app
 - Remove the email whitelist from `config/auth.php` and the whitelist check from `CreateNewUser` — registration is open to anyone
 - Keep the existing fields: name, email, business_name, password, password_confirmation, terms, privacy, marketing
-- Add client-side validation feedback (inline errors below fields, not just a banner at the top)
-- Add a loading/submitting state to the submit button to prevent double-clicks
-- Ensure the page works well on mobile (responsive layout)
-- The page should have a clear heading ("Create your account" or similar) and a link to login for existing users
-- Error messages from the server (e.g., "This email address is not authorized to register") should display clearly
+- Remove tests that assert whitelist behavior; remove all `Config::set('auth.registration_email_whitelist', ...)` from remaining tests
+
+## Scope Decisions (recorded)
+
+- **Whitelist:** Remove entirely (config + CreateNewUser).
+- **Tests:** Remove whitelist-related tests entirely (2 Feature + 1 Browser); strip whitelist config overrides from remaining tests.
+- **Client-side password match:** Out of scope; server-side validation only.
+- **Visual polish:** No explicit pass; current layout is sufficient.
+- **Epic doc:** Update to reflect current implementation and narrowed scope.
+- **Initial values:** Refactor RegisterPage so one `initialValues` object is the single source of truth for both `useFormSubmission` and `UiForm`.
 
 ## Acceptance Criteria
 
-- [ ] Registration page has polished, professional visual design
-- [ ] Consistent with the app's design system (typography, spacing, colors)
 - [ ] Email whitelist removed — anyone can register
-- [ ] Server validation errors display inline below the relevant field
-- [ ] Submit button shows loading state while form is processing
-- [ ] Responsive layout works on mobile screens
-- [ ] Login link visible for existing users ("Already have an account? Log in")
-- [ ] Terms and privacy checkboxes clearly labeled
-- [ ] Password confirmation field validates match client-side
 - [ ] `CreateNewUser` action updated to remove whitelist check
 - [ ] Whitelist config removed from `config/auth.php`
-
----
+- [ ] Whitelist-related tests removed (Feature: 2 tests; Browser: 1 test); remaining registration tests no longer set whitelist config
+- [ ] RegisterPage.vue uses a single source of truth for form initial values (no duplicate `initialValues` for `useFormSubmission` and `UiForm`)
+- [ ] Registration page remains consistent with the app's design system (already implemented: AuthLayout, inline server errors, loading state, login link, terms/privacy labels)
 
 ## Tech Analysis
 
-- **Remove whitelist**: Delete the `registration_email_whitelist` config from `config/auth.php` and remove the whitelist check from `CreateNewUser.php`. Registration is open to anyone.
-- **Inertia form handling**: The existing `RegisterPage.vue` likely uses Inertia's `useForm()` composable which provides `form.errors` (server-side errors keyed by field name), `form.processing` (loading state), and `form.post()` for submission. These features should already be available -- the work is mostly in the template to display them properly.
-- **Inline errors**: For each field, check `form.errors.{field}` and render a `<p class="text-red-500 text-sm mt-1">{{ form.errors.name }}</p>` below the input. This is a common pattern with Inertia + Vue.
-- **Loading state**: Use `form.processing` to disable the submit button and show a spinner or "Creating account..." text.
-- **Design polish**: Look at how the creator dashboard pages are styled (e.g., `OrderIndexPage.vue`, `DashboardPage.vue`) for typography and spacing patterns. The auth pages should feel like they belong to the same application.
+- **Already implemented:** RegisterPage.vue uses `useFormSubmission`, passes `form.errors.{field}` as `serverError` to each UiFormField (inline errors), and passes `form.processing` as `loading` to UiButton. AuthLayout provides heading, description, and footer with login link. No template work needed for errors or loading.
+- **Remove whitelist:** Delete the `registration_email_whitelist` config block from `config/auth.php`. In `CreateNewUser.php`, remove the `$whitelist` variable and the closure in the `email` rule that checks the whitelist; keep `required`, `string`, `email`, `max:255`, `Rule::unique(User::class)`.
+- **Tests:** Delete the two Feature tests that assert whitelist allow/block behavior; delete the one Browser test that asserts whitelist. In all remaining registration tests, remove any `Config::set('auth.registration_email_whitelist', ...)`.
+- **Initial values refactor:** Define one `initialValues` object (e.g. a const or ref) in RegisterPage.vue and pass it to both `useFormSubmission({ initialValues: ... })` and `<UiForm :initialValues="...">` so the form has a single source of truth.
 
 ## References
 
@@ -61,10 +60,13 @@ Polish the registration page for production readiness: update the visual design 
 - `platform/app/Actions/Fortify/CreateNewUser.php` -- registration logic with whitelist check
 - `platform/config/auth.php` -- current whitelist config (lines 119-134)
 - `platform/app/Providers/FortifyServiceProvider.php` -- register view rendering
-- `platform/.env.example` -- environment variables
+- `platform/tests/Feature/Auth/RegistrationTest.php` -- Feature tests (remove 2 whitelist tests, strip config from rest)
+- `platform/tests/Browser/CreatorRegistrationTest.php` -- Browser tests (remove 1 whitelist test, strip config from rest)
 
 ## Files
 
-- Modify `platform/resources/js/pages/auth/RegisterPage.vue` -- visual polish, inline errors, loading state
+- Modify `platform/resources/js/pages/auth/RegisterPage.vue` -- single source of truth for initial values
 - Modify `platform/app/Actions/Fortify/CreateNewUser.php` -- remove whitelist check
 - Modify `platform/config/auth.php` -- remove whitelist config
+- Modify `platform/tests/Feature/Auth/RegistrationTest.php` -- remove whitelist tests, remove Config::set whitelist from remaining tests
+- Modify `platform/tests/Browser/CreatorRegistrationTest.php` -- remove whitelist test, remove Config::set whitelist from remaining tests

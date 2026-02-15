@@ -12,6 +12,8 @@ use App\Http\Requests\StoreOrderBuilderRequest;
 use App\Http\Requests\StoreStoreRequest;
 use App\Http\Requests\UpdateStoreRequest;
 use App\Http\Requests\UpdateStoreStatusRequest;
+use App\Mail\WholesaleNewOrderNotificationMail;
+use App\Mail\WholesaleOrderConfirmationMail;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Creator;
@@ -20,9 +22,11 @@ use App\Models\Invite;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Store;
+use App\Services\WholesaleOrderMailHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -596,6 +600,18 @@ class StoreController extends Controller
                 'status' => OrderStatus::Open,
                 'order_date' => now(),
             ]);
+
+            $order->load(['orderable', 'account.users', 'account.creator', 'orderItems.colorway', 'orderItems.base']);
+
+            $storeEmail = WholesaleOrderMailHelper::getStoreEmail($order);
+            if ($storeEmail !== null) {
+                Mail::to($storeEmail)->queue(new WholesaleOrderConfirmationMail($order));
+            }
+
+            $creatorEmail = WholesaleOrderMailHelper::getCreatorEmail($order);
+            if ($creatorEmail !== null) {
+                Mail::to($creatorEmail)->queue(new WholesaleNewOrderNotificationMail($order));
+            }
 
             return redirect()->route('store.orders.show', ['order' => $order->id])
                 ->with('success', 'Order submitted successfully');

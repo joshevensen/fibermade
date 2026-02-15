@@ -7,12 +7,15 @@ use App\Enums\OrderType;
 use App\Exceptions\InvalidOrderTransitionException;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
+use App\Mail\WholesaleOrderStatusUpdateMail;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Show;
 use App\Models\Store;
+use App\Services\WholesaleOrderMailHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -276,6 +279,15 @@ class OrderController extends Controller
             $order->transitionTo($targetStatus, $request->user()->id, $request->input('note'));
         } catch (InvalidOrderTransitionException $e) {
             abort(422, $e->getMessage());
+        }
+
+        if ($order->type === OrderType::Wholesale && $order->orderable instanceof Store) {
+            $order->load(['orderable', 'account.creator', 'orderItems.colorway', 'orderItems.base']);
+
+            $storeEmail = WholesaleOrderMailHelper::getStoreEmail($order);
+            if ($storeEmail !== null) {
+                Mail::to($storeEmail)->queue(new WholesaleOrderStatusUpdateMail($order));
+            }
         }
 
         return redirect()->route('orders.edit', $order);
