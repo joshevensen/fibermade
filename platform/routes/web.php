@@ -9,7 +9,11 @@ use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('website/HomePage');
-})->name('home');
+})->name('home')->withoutMiddleware([
+    \Illuminate\Session\Middleware\StartSession::class,
+    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+]);
 
 Route::get('invites/accept/{token}', [InviteController::class, 'accept'])->name('invites.accept');
 Route::post('invites/accept/{token}', [InviteController::class, 'acceptStore'])->name('invites.accept.store');

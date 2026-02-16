@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
 import UiLink from '@/components/ui/UiLink.vue';
 import { useIcon } from '@/composables/useIcon';
+import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface PricingTier {
@@ -52,7 +54,7 @@ const backgroundClass = computed(() => {
         case 'primary':
             return 'bg-primary-500';
         default:
-            return 'bg-white';
+            return 'bg-surface-50';
     }
 });
 
@@ -88,7 +90,7 @@ const { IconList } = useIcon();
             </div>
             <div
                 v-if="tiers.length > 0"
-                class="mx-auto mt-16 max-w-2xl rounded-3xl ring-1 ring-surface-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none"
+                class="mx-auto mt-16 max-w-2xl rounded-3xl bg-surface-50 ring-1 ring-surface-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none"
             >
                 <div class="p-8 sm:p-10 lg:flex-auto">
                     <h3
@@ -96,10 +98,10 @@ const { IconList } = useIcon();
                     >
                         {{ tiers[0].name }}
                     </h3>
-                    <p class="mt-6 text-base/7 text-surface-600">
+                    <p class="mt-2 text-base/7 text-surface-600">
                         {{ tiers[0].description }}
                     </p>
-                    <div class="mt-10 flex items-center gap-x-4">
+                    <div class="mt-4 flex items-center gap-x-4">
                         <h4
                             class="flex-none text-sm/6 font-semibold text-primary-500"
                         >
@@ -111,7 +113,7 @@ const { IconList } = useIcon();
                     </div>
                     <ul
                         role="list"
-                        class="mt-8 grid grid-cols-1 gap-4 text-sm/6 text-surface-600 sm:grid-cols-2 sm:gap-6"
+                        class="mt-2 grid grid-cols-1 gap-2 text-sm/6 text-surface-600 sm:grid-cols-2 sm:gap-2"
                     >
                         <li
                             v-for="feature in tiers[0].features"
@@ -133,17 +135,17 @@ const { IconList } = useIcon();
                     class="-mt-2 p-2 lg:mt-0 lg:w-full lg:max-w-md lg:shrink-0"
                 >
                     <div
-                        class="rounded-2xl bg-surface-50 py-10 text-center inset-ring inset-ring-surface-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16"
+                        class="rounded-2xl bg-surface-200 py-10 text-center inset-ring inset-ring-surface-900/5 lg:flex lg:flex-col lg:justify-center lg:py-16"
                     >
-                        <div class="mx-auto max-w-xs px-8">
-                            <p class="text-base font-semibold text-surface-600">
+                        <div class="mx-auto max-w-xs px-4">
+                            <p class="text-2xl font-semibold text-surface-600">
                                 Pay once, own it forever
                             </p>
                             <p
                                 class="mt-6 flex items-baseline justify-center gap-x-2"
                             >
                                 <span
-                                    class="text-5xl font-semibold tracking-tight text-surface-900"
+                                    class="text-7xl font-semibold tracking-tight text-surface-900"
                                 >
                                     {{
                                         singlePrice?.price ||
@@ -152,20 +154,25 @@ const { IconList } = useIcon();
                                 </span>
                                 <span
                                     v-if="singlePrice?.currency"
-                                    class="text-sm/6 font-semibold tracking-wide text-surface-600"
+                                    class="text-lg/6 font-semibold tracking-wide text-surface-600"
                                 >
                                     {{ singlePrice.currency }}
                                 </span>
                             </p>
-                            <UiLink
-                                :href="tiers[0].href"
-                                class="mt-10 block w-full rounded-md bg-primary-500 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                            <UiButton
+                                type="button"
+                                severity="primary"
+                                size="large"
+                                class="mt-10 w-full"
+                                @click="router.visit(tiers[0].href)"
                             >
                                 {{ singlePrice?.buttonText || 'Get access' }}
-                            </UiLink>
-                            <p class="mt-6 text-xs/5 text-surface-600">
-                                Invoices and receipts available for easy company
-                                reimbursement
+                            </UiButton>
+                            <p
+                                class="mt-3 text-center text-sm text-surface-600"
+                            >
+                                30-day money-back guarantee. Cancel within 30
+                                days for a full refund.
                             </p>
                         </div>
                     </div>

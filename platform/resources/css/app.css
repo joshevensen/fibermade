@@ -11,6 +11,10 @@
         'Noto Color Emoji';
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 .inventory-input-number .p-inputnumber-input {
     @apply w-10 text-center;
 }

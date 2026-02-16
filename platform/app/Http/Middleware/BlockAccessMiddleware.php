@@ -18,7 +18,11 @@ class BlockAccessMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $blocklist = $this->getBlocklist();
+        try {
+            $blocklist = $this->getBlocklist();
+        } catch (\Throwable) {
+            return $next($request);
+        }
 
         if ($this->isBlocked($request, $blocklist)) {
             return response()->json(['message' => 'Forbidden'], 403);

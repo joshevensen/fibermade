@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import UiLink from '@/components/ui/UiLink.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import { useIcon } from '@/composables/useIcon';
+import { router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface ImageTile {
@@ -51,7 +52,7 @@ const backgroundClass = computed(() => {
         case 'primary':
             return 'bg-primary-500';
         default:
-            return 'bg-white';
+            return 'bg-surface-50';
     }
 });
 
@@ -82,9 +83,11 @@ const { IconList } = useIcon();
                                 class="relative rounded-full px-3 py-1 text-sm/6 text-surface-600 ring-1 ring-surface-900/10 hover:ring-surface-900/20"
                             >
                                 {{ announcement.text }}
-                                <UiLink
-                                    :href="announcement.link"
-                                    class="font-semibold text-primary-500"
+                                <UiButton
+                                    type="button"
+                                    text
+                                    class="p-0 font-semibold text-primary-500"
+                                    @click="router.visit(announcement.link)"
                                 >
                                     <span
                                         class="absolute inset-0"
@@ -95,7 +98,7 @@ const { IconList } = useIcon();
                                         :class="[IconList.Right, 'ml-1']"
                                         aria-hidden="true"
                                     ></i>
-                                </UiLink>
+                                </UiButton>
                             </div>
                         </div>
                         <h1
@@ -113,21 +116,24 @@ const { IconList } = useIcon();
                             v-if="primaryButton || secondaryButton"
                             class="mt-10 flex items-center gap-x-6"
                         >
-                            <UiLink
+                            <UiButton
                                 v-if="primaryButton"
-                                :href="primaryButton.href"
-                                class="rounded-md bg-primary-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                                type="button"
+                                severity="primary"
+                                @click="router.visit(primaryButton.href)"
                             >
                                 {{ primaryButton.text }}
-                            </UiLink>
-                            <UiLink
+                            </UiButton>
+                            <UiButton
                                 v-if="secondaryButton"
-                                :href="secondaryButton.href"
+                                type="button"
+                                text
                                 class="text-sm/6 font-semibold text-surface-900"
+                                @click="router.visit(secondaryButton.href)"
                             >
                                 {{ secondaryButton.text }}
                                 <span aria-hidden="true">→</span>
-                            </UiLink>
+                            </UiButton>
                         </div>
                     </div>
                     <div
@@ -214,14 +220,16 @@ const { IconList } = useIcon();
                     class="relative rounded-full px-3 py-1 text-sm/6 text-surface-600 ring-1 ring-surface-900/10 hover:ring-surface-900/20"
                 >
                     {{ announcement.text }}
-                    <UiLink
-                        :href="announcement.link"
-                        class="font-semibold text-primary-500"
+                    <UiButton
+                        type="button"
+                        text
+                        class="p-0 font-semibold text-primary-500"
+                        @click="router.visit(announcement.link)"
                     >
                         <span class="absolute inset-0" aria-hidden="true"></span
                         >Read more
                         <span aria-hidden="true">&rarr;</span>
-                    </UiLink>
+                    </UiButton>
                 </div>
             </div>
             <div class="text-center">
@@ -240,21 +248,24 @@ const { IconList } = useIcon();
                     v-if="primaryButton || secondaryButton"
                     class="mt-10 flex items-center justify-center gap-x-6"
                 >
-                    <UiLink
+                    <UiButton
                         v-if="primaryButton"
-                        :href="primaryButton.href"
-                        class="rounded-md bg-primary-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                        type="button"
+                        severity="primary"
+                        @click="router.visit(primaryButton.href)"
                     >
                         {{ primaryButton.text }}
-                    </UiLink>
-                    <UiLink
+                    </UiButton>
+                    <UiButton
                         v-if="secondaryButton"
-                        :href="secondaryButton.href"
+                        type="button"
+                        text
                         class="text-sm/6 font-semibold text-surface-900"
+                        @click="router.visit(secondaryButton.href)"
                     >
                         {{ secondaryButton.text }}
                         <span aria-hidden="true">→</span>
-                    </UiLink>
+                    </UiButton>
                 </div>
             </div>
         </div>
@@ -287,90 +298,96 @@ const { IconList } = useIcon();
     </div>
 
     <!-- ScreenshotRight variant -->
-    <div
-        v-else
-        :class="[
-            backgroundClass,
-            'mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:flex lg:px-8 lg:py-40',
-        ]"
-    >
-        <div class="mx-auto max-w-2xl shrink-0 lg:mx-0 lg:pt-8">
-            <img
-                v-if="logoUrl"
-                class="h-11"
-                :src="logoUrl"
-                alt="Your Company"
-            />
-            <div v-if="badge" class="mt-24 sm:mt-32 lg:mt-16">
-                <UiLink
-                    v-if="badge.link"
-                    :href="badge.link"
-                    class="inline-flex space-x-6"
-                >
+    <div v-else :class="[backgroundClass, 'overflow-hidden']">
+        <div
+            class="mx-auto flex max-w-7xl flex-col px-6 py-6 lg:flex-row lg:px-8 lg:py-8"
+        >
+            <div class="max-w-2xl min-w-0 shrink-0">
+                <img
+                    v-if="logoUrl"
+                    class="h-11"
+                    :src="logoUrl"
+                    alt="Your Company"
+                />
+                <div v-if="badge" class="mt-24 sm:mt-32 lg:mt-16">
+                    <UiButton
+                        v-if="badge.link"
+                        type="button"
+                        text
+                        class="inline-flex space-x-6 p-0"
+                        @click="router.visit(badge.link)"
+                    >
+                        <span
+                            class="rounded-full bg-primary-50 px-3 py-1 text-sm/6 font-semibold text-primary-500 ring-1 ring-primary-500/20 ring-inset"
+                        >
+                            {{ badge.label }}
+                        </span>
+                        <span
+                            class="inline-flex items-center space-x-2 text-sm/6 font-medium text-surface-600"
+                        >
+                            <span>{{ badge.text }}</span>
+                            <i
+                                :class="[
+                                    IconList.Right,
+                                    'size-5 text-surface-400',
+                                ]"
+                                aria-hidden="true"
+                            ></i>
+                        </span>
+                    </UiButton>
                     <span
+                        v-else
                         class="rounded-full bg-primary-50 px-3 py-1 text-sm/6 font-semibold text-primary-500 ring-1 ring-primary-500/20 ring-inset"
                     >
                         {{ badge.label }}
                     </span>
-                    <span
-                        class="inline-flex items-center space-x-2 text-sm/6 font-medium text-surface-600"
+                </div>
+                <h1
+                    class="mt-10 text-5xl font-semibold tracking-tight text-pretty text-surface-900 sm:text-7xl"
+                >
+                    {{ title }}
+                </h1>
+                <p
+                    v-if="description"
+                    class="mt-8 text-lg font-medium text-pretty text-surface-500 sm:text-xl/8"
+                >
+                    {{ description }}
+                </p>
+                <div
+                    v-if="primaryButton || secondaryButton"
+                    class="mt-10 flex items-center gap-x-6"
+                >
+                    <UiButton
+                        v-if="primaryButton"
+                        type="button"
+                        severity="primary"
+                        @click="router.visit(primaryButton.href)"
                     >
-                        <span>{{ badge.text }}</span>
-                        <i
-                            :class="[IconList.Right, 'size-5 text-surface-400']"
-                            aria-hidden="true"
-                        ></i>
-                    </span>
-                </UiLink>
-                <span
-                    v-else
-                    class="rounded-full bg-primary-50 px-3 py-1 text-sm/6 font-semibold text-primary-500 ring-1 ring-primary-500/20 ring-inset"
-                >
-                    {{ badge.label }}
-                </span>
+                        {{ primaryButton.text }}
+                    </UiButton>
+                    <UiButton
+                        v-if="secondaryButton"
+                        type="button"
+                        text
+                        class="text-sm/6 font-semibold text-surface-900"
+                        @click="router.visit(secondaryButton.href)"
+                    >
+                        {{ secondaryButton.text }}
+                        <span aria-hidden="true">→</span>
+                    </UiButton>
+                </div>
             </div>
-            <h1
-                class="mt-10 text-5xl font-semibold tracking-tight text-pretty text-surface-900 sm:text-7xl"
-            >
-                {{ title }}
-            </h1>
-            <p
-                v-if="description"
-                class="mt-8 text-lg font-medium text-pretty text-surface-500 sm:text-xl/8"
-            >
-                {{ description }}
-            </p>
             <div
-                v-if="primaryButton || secondaryButton"
-                class="mt-10 flex items-center gap-x-6"
+                v-if="screenshotUrl"
+                class="mx-auto mt-16 flex max-w-2xl min-w-0 sm:mt-24 lg:mx-0 lg:mt-0 lg:ml-10 lg:max-w-none lg:flex-none xl:ml-32"
             >
-                <UiLink
-                    v-if="primaryButton"
-                    :href="primaryButton.href"
-                    class="rounded-md bg-primary-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
-                >
-                    {{ primaryButton.text }}
-                </UiLink>
-                <UiLink
-                    v-if="secondaryButton"
-                    :href="secondaryButton.href"
-                    class="text-sm/6 font-semibold text-surface-900"
-                >
-                    {{ secondaryButton.text }}
-                    <span aria-hidden="true">→</span>
-                </UiLink>
-            </div>
-        </div>
-        <div
-            v-if="screenshotUrl"
-            class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:mt-0 lg:mr-0 lg:ml-10 lg:max-w-none lg:flex-none xl:ml-32"
-        >
-            <div class="max-w-3xl flex-none sm:max-w-5xl lg:max-w-none">
-                <img
-                    :src="screenshotUrl"
-                    alt="App screenshot"
-                    class="w-304 rounded-md bg-surface-50 shadow-xl ring-1 ring-surface-900/10"
-                />
+                <div class="w-full flex-none lg:max-w-3xl xl:max-w-4xl">
+                    <img
+                        :src="screenshotUrl"
+                        alt="App screenshot"
+                        class="w-full max-w-full rounded-md bg-surface-50 object-cover shadow-xl ring-1 ring-surface-900/10"
+                    />
+                </div>
             </div>
         </div>
     </div>

@@ -57,7 +57,7 @@ const backgroundClass = computed(() => {
         case 'primary':
             return 'bg-primary-500';
         default:
-            return 'bg-white';
+            return 'bg-surface-50';
     }
 });
 

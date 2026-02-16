@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import type { Component } from 'vue';
 import { computed } from 'vue';
 
 interface Feature {
     name: string;
     description: string;
-    icon?: string;
+    icon?: string | Component;
 }
 
 interface ImageConfig {
@@ -34,7 +35,7 @@ const backgroundClass = computed(() => {
         case 'primary':
             return 'bg-primary-500';
         default:
-            return 'bg-white';
+            return 'bg-surface-50';
     }
 });
 </script>
@@ -87,14 +88,23 @@ const backgroundClass = computed(() => {
                                 <dt
                                     class="inline font-semibold text-surface-900"
                                 >
+                                    <component
+                                        v-if="
+                                            feature.icon &&
+                                            typeof feature.icon !== 'string'
+                                        "
+                                        :is="feature.icon"
+                                        class="absolute top-1 left-1 size-5 text-primary-500"
+                                        aria-hidden="true"
+                                    />
                                     <i
-                                        v-if="feature.icon"
+                                        v-else-if="feature.icon"
                                         :class="[
                                             feature.icon,
                                             'absolute top-1 left-1 size-5 text-primary-500',
                                         ]"
                                         aria-hidden="true"
-                                    ></i>
+                                    />
                                     {{ feature.name }}
                                 </dt>
                                 {{ ' ' }}
@@ -148,14 +158,23 @@ const backgroundClass = computed(() => {
                                 <dt
                                     class="inline font-semibold text-surface-900"
                                 >
+                                    <component
+                                        v-if="
+                                            feature.icon &&
+                                            typeof feature.icon !== 'string'
+                                        "
+                                        :is="feature.icon"
+                                        class="absolute top-1 left-1 size-5 text-primary-500"
+                                        aria-hidden="true"
+                                    />
                                     <i
-                                        v-if="feature.icon"
+                                        v-else-if="feature.icon"
                                         :class="[
                                             feature.icon,
                                             'absolute top-1 left-1 size-5 text-primary-500',
                                         ]"
                                         aria-hidden="true"
-                                    ></i>
+                                    />
                                     {{ feature.name }}
                                 </dt>
                                 {{ ' ' }}
@@ -213,14 +232,23 @@ const backgroundClass = computed(() => {
                         class="relative pl-9"
                     >
                         <dt class="font-semibold text-surface-900">
+                            <component
+                                v-if="
+                                    feature.icon &&
+                                    typeof feature.icon !== 'string'
+                                "
+                                :is="feature.icon"
+                                class="absolute top-1 left-0 size-5 text-primary-500"
+                                aria-hidden="true"
+                            />
                             <i
-                                v-if="feature.icon"
+                                v-else-if="feature.icon"
                                 :class="[
                                     feature.icon,
                                     'absolute top-1 left-0 size-5 text-primary-500',
                                 ]"
                                 aria-hidden="true"
-                            ></i>
+                            />
                             {{ feature.name }}
                         </dt>
                         <dd class="mt-2">{{ feature.description }}</dd>
@@ -246,8 +274,28 @@ const backgroundClass = computed(() => {
             <dl
                 class="mx-auto mt-16 grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 text-base/7 sm:grid-cols-2 lg:mx-0 lg:max-w-none lg:grid-cols-3"
             >
-                <div v-for="feature in features" :key="feature.name">
+                <div
+                    v-for="feature in features"
+                    :key="feature.name"
+                    class="relative pl-9"
+                >
                     <dt class="font-semibold text-surface-900">
+                        <component
+                            v-if="
+                                feature.icon && typeof feature.icon !== 'string'
+                            "
+                            :is="feature.icon"
+                            class="absolute top-0 left-0 size-5 text-primary-500"
+                            aria-hidden="true"
+                        />
+                        <i
+                            v-else-if="feature.icon"
+                            :class="[
+                                feature.icon,
+                                'absolute top-0 left-0 size-5 text-primary-500',
+                            ]"
+                            aria-hidden="true"
+                        />
                         {{ feature.name }}
                     </dt>
                     <dd class="mt-1 text-surface-600">

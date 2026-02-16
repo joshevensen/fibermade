@@ -39,7 +39,7 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
-        $user = $request->user();
+        $user = $request->hasSession() ? $request->user() : null;
 
         return [
             ...parent::share($request),
@@ -51,8 +51,8 @@ class HandleInertiaRequests extends Middleware
             ],
             'account' => $user?->account ? $this->sharedAccountProps($user->account) : null,
             'flash' => [
-                'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
+                'success' => $request->hasSession() ? $request->session()->get('success') : null,
+                'error' => $request->hasSession() ? $request->session()->get('error') : null,
             ],
         ];
     }

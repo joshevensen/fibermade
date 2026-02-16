@@ -44,7 +44,7 @@ const backgroundClass = computed(() => {
         case 'primary':
             return 'bg-primary-500';
         default:
-            return 'bg-white';
+            return 'bg-surface-50';
     }
 });
 </script>
@@ -53,10 +53,7 @@ const backgroundClass = computed(() => {
     <!-- Columns variant -->
     <footer
         v-if="variant === 'columns'"
-        :class="[
-            backgroundClass,
-            'mx-auto max-w-7xl px-6 pt-16 pb-8 sm:pt-24 lg:px-8 lg:pt-32',
-        ]"
+        :class="[backgroundClass, 'mx-auto max-w-7xl px-6 pt-8 pb-6 lg:px-8']"
     >
         <div class="xl:grid xl:grid-cols-3 xl:gap-8">
             <div class="space-y-8">
@@ -154,9 +151,7 @@ const backgroundClass = computed(() => {
                 </div>
             </div>
         </div>
-        <div
-            class="mt-16 border-t border-surface-900/10 pt-8 sm:mt-20 lg:mt-24"
-        >
+        <div>
             <p class="text-sm/6 text-surface-600">
                 &copy; {{ new Date().getFullYear() }}
                 {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
@@ -169,7 +164,7 @@ const backgroundClass = computed(() => {
         v-else
         :class="[
             backgroundClass,
-            'mx-auto max-w-7xl overflow-hidden px-6 py-20 sm:py-24 lg:px-8',
+            'mx-auto max-w-7xl overflow-hidden px-6 py-8 lg:px-8',
         ]"
     >
         <nav
@@ -186,7 +181,10 @@ const backgroundClass = computed(() => {
                 {{ item.name }}
             </UiLink>
         </nav>
-        <div class="mt-16 flex justify-center gap-x-10">
+        <div
+            v-if="socialLinks && socialLinks.length > 0"
+            class="mt-16 flex justify-center gap-x-10"
+        >
             <UiLink
                 v-for="item in socialLinks"
                 :key="item.name"
@@ -197,7 +195,16 @@ const backgroundClass = computed(() => {
                 <component :is="item.icon" class="size-6" aria-hidden="true" />
             </UiLink>
         </div>
-        <p class="mt-10 text-center text-sm/6 text-surface-600">
+        <p
+            :class="[
+                'text-center text-sm/6 text-surface-600',
+                socialLinks?.length
+                    ? 'mt-10'
+                    : mainLinks?.length
+                      ? 'mt-6'
+                      : 'mt-0',
+            ]"
+        >
             &copy; {{ new Date().getFullYear() }}
             {{ companyName || 'Your Company, Inc.' }}. {{ copyrightText }}
         </p>
