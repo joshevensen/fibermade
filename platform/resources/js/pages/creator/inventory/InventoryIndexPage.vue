@@ -241,49 +241,54 @@ function pushToShopify(): void {
 
 <template>
     <CreatorLayout page-title="Inventory">
-        <div class="mb-4 flex flex-col gap-2">
-            <div class="flex items-center justify-between gap-4">
-                <UiButton
-                    label="Push to Shopify"
-                    icon="pi pi-cloud-upload"
-                    :loading="pushToShopifyLoading"
-                    :disabled="pushToShopifyLoading"
-                    @click="pushToShopify"
-                />
-            </div>
+        <template #header-actions>
+            <UiButton
+                label="Push to Shopify"
+                icon="pi pi-cloud-upload"
+                size="small"
+                :loading="pushToShopifyLoading"
+                :disabled="pushToShopifyLoading"
+                @click="pushToShopify"
+            />
+        </template>
+
+        <div
+            v-if="successMessage || errorMessage"
+            class="mb-4 flex flex-col gap-2"
+        >
             <UiMessage v-if="successMessage" severity="success" size="small">
                 {{ successMessage }}
             </UiMessage>
             <UiMessage v-if="errorMessage" severity="error" size="small">
                 {{ errorMessage }}
             </UiMessage>
-            <UiDialog
-                v-model:visible="showPushConfirmDialog"
-                header="Confirm Push to Shopify"
-                modal
-                size="small"
-            >
-                <p class="text-surface-700">
-                    You are about to push
-                    <strong>{{ totalVariantCount }}</strong> variants to
-                    Shopify. This may take a moment. Continue?
-                </p>
-                <template #footer>
-                    <UiButton
-                        label="Cancel"
-                        severity="secondary"
-                        outlined
-                        @click="showPushConfirmDialog = false"
-                    />
-                    <UiButton
-                        label="Push to Shopify"
-                        icon="pi pi-cloud-upload"
-                        :loading="pushToShopifyLoading"
-                        @click="performPushToShopify"
-                    />
-                </template>
-            </UiDialog>
         </div>
+        <UiDialog
+            v-model:visible="showPushConfirmDialog"
+            header="Confirm Push to Shopify"
+            modal
+            size="small"
+        >
+            <p class="text-surface-700">
+                You are about to push
+                <strong>{{ totalVariantCount }}</strong> variants to Shopify.
+                This may take a moment. Continue?
+            </p>
+            <template #footer>
+                <UiButton
+                    label="Cancel"
+                    severity="secondary"
+                    outlined
+                    @click="showPushConfirmDialog = false"
+                />
+                <UiButton
+                    label="Push to Shopify"
+                    icon="pi pi-cloud-upload"
+                    :loading="pushToShopifyLoading"
+                    @click="performPushToShopify"
+                />
+            </template>
+        </UiDialog>
         <UiCard>
             <template #title>
                 <PageFilter

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('payment_id')->nullable();
             $table->string('source')->nullable();
             $table->timestamp('cancelled_at')->nullable();
+            $table->timestamp('delivered_at')->nullable();
             $table->decimal('refunded_amount', 10, 2)->nullable();
             $table->json('taxes')->nullable();
             $table->decimal('total_amount', 10, 2)->nullable();
@@ -39,6 +40,8 @@ return new class extends Migration
             $table->index('type');
             $table->index('status');
             $table->index('order_date');
+            $table->index('delivered_at');
+            $table->index(['account_id', 'status']);
             $table->index(['orderable_id', 'orderable_type']);
         });
     }

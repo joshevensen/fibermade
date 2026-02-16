@@ -26,18 +26,25 @@ class UserController extends Controller
         $dyes = collect();
         $nextBillingDate = null;
 
+        $business = null;
+
         if ($user->account_id) {
             $account = Account::with('users')->find($user->account_id);
             $dyes = Dye::where('account_id', $user->account_id)->get();
 
-            if ($account
-                && $account->type === AccountType::Creator
-                && $account->subscription_status === SubscriptionStatus::Active
-            ) {
-                $subscription = $account->subscription();
-                if ($subscription) {
-                    $periodEnd = $subscription->currentPeriodEnd();
-                    $nextBillingDate = $periodEnd?->format('Y-m-d');
+            if ($account) {
+                $business = $account->type === AccountType::Creator
+                    ? $account->creator
+                    : $account->store;
+
+                if ($account->type === AccountType::Creator
+                    && $account->subscription_status === SubscriptionStatus::Active
+                ) {
+                    $subscription = $account->subscription();
+                    if ($subscription) {
+                        $periodEnd = $subscription->currentPeriodEnd();
+                        $nextBillingDate = $periodEnd?->format('Y-m-d');
+                    }
                 }
             }
         }
@@ -49,7 +56,7 @@ class UserController extends Controller
 
         return Inertia::render($page, [
             'status' => $request->session()->get('status'),
-            'account' => $account,
+            'business' => $business,
             'dyes' => $dyes,
             'next_billing_date' => $nextBillingDate,
         ]);

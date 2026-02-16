@@ -31,8 +31,7 @@ const headerNavigation = [
     { name: 'FAQs', href: '#faqs' },
 ];
 
-const placeholderScreenshot =
-    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect fill='%23e5e7eb' width='800' height='600'/%3E%3Ctext fill='%239ca3af' font-family='sans-serif' font-size='24' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle'%3EProduct screenshot%3C/text%3E%3C/svg%3E";
+const dashboardScreenshotUrl = '/fibermade-dashboard.png';
 
 const problemFeatures = [
     {
@@ -157,6 +156,7 @@ const faqs = [
         <WebHeader
             background="surface"
             company-name="Fibermade"
+            logo-url="/logo.png"
             :navigation="headerNavigation"
             :login-link="isAuthenticated ? undefined : login().url"
             :signup-link="isAuthenticated ? undefined : register().url"
@@ -184,7 +184,7 @@ const faqs = [
                     ? undefined
                     : { text: 'Learn more', href: '#features' }
             "
-            :screenshot-url="placeholderScreenshot"
+            :screenshot-url="dashboardScreenshotUrl"
         />
 
         <section id="features">
@@ -249,6 +249,10 @@ const faqs = [
             variant="centered"
             company-name="Fibermade"
             description="Shopify for the fiber community. Wholesale and fiber-specific terminology built in."
+            :main-links="[
+                { name: 'Terms', href: '/terms' },
+                { name: 'Privacy', href: '/privacy' },
+            ]"
             :social-links="[]"
             copyright-text="All rights reserved."
         />

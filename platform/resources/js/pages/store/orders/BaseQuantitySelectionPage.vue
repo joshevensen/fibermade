@@ -118,14 +118,6 @@ const minimumsAreMet = computed(() => {
     return true;
 });
 
-const colorwayCount = computed(() => {
-    return visibleColorways.value.filter((cw) =>
-        cw.bases.some(
-            (b) => (quantities.value[getQuantityKey(cw.id, b.id)] ?? 0) > 0,
-        ),
-    ).length;
-});
-
 function buildItemsPayload(): Array<{
     colorway_id: number;
     base_id: number;

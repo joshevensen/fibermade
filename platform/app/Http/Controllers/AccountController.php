@@ -79,7 +79,16 @@ class AccountController extends Controller
         }
 
         $account = Account::findOrFail($user->account_id);
-        $account->update($request->validated());
+
+        $business = $account->type === \App\Enums\AccountType::Creator
+            ? $account->creator
+            : $account->store;
+
+        if (! $business) {
+            abort(404, 'Business profile not found.');
+        }
+
+        $business->update($request->validated());
 
         return back();
     }

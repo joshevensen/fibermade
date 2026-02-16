@@ -67,7 +67,11 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
                 @toggle-mobile-drawer="
                     mobileDrawerVisible = !mobileDrawerVisible
                 "
-            />
+            >
+                <template v-if="$slots['header-actions']" #actions>
+                    <slot name="header-actions" />
+                </template>
+            </AppHeader>
 
             <PaymentFailedBanner />
             <ReactivationBanner />

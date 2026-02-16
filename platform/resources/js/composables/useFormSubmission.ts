@@ -1,11 +1,13 @@
-import { useForm, UseFormReturn } from '@inertiajs/vue3';
+import type { InertiaForm } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
+import type { UrlMethodPair } from '@inertiajs/core';
 import { useToast } from './useToast';
 
 interface FormSubmissionOptions {
     route: () => { url: string; method: string };
     initialValues: Record<string, any>;
-    onSuccess?: (form: UseFormReturn<any>) => void;
-    onError?: (form: UseFormReturn<any>) => void;
+    onSuccess?: (form: InertiaForm<Record<string, any>>) => void;
+    onError?: (form: InertiaForm<Record<string, any>>) => void;
     successMessage?: string;
     resetFieldsOnSuccess?: string[];
     resetFieldsOnError?: string[];
@@ -84,7 +86,7 @@ export function useFormSubmission(options: FormSubmissionOptions) {
         }
 
         // Submit form
-        form.submit(options.route(), submitOptions);
+        form.submit(options.route() as UrlMethodPair, submitOptions);
     }
 
     return {

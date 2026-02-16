@@ -98,6 +98,7 @@ class OrdersSeeder extends Seeder
                 $storeAccount = Account::create([
                     'status' => BaseStatus::Active,
                     'type' => AccountType::Store,
+                    'subscription_status' => null,
                 ]);
 
                 // Create store record
@@ -345,8 +346,12 @@ class OrdersSeeder extends Seeder
                     'status' => $status,
                     'created_by' => $user?->id,
                 ])
-                ->each(function ($order) use ($integration) {
-                    // Create external identifier for retail orders (70% chance)
+                ->each(function ($order) use ($integration, $status) {
+                    if ($status === OrderStatus::Delivered) {
+                        $order->update([
+                            'delivered_at' => $order->order_date?->setTime(14, 0) ?? $order->created_at,
+                        ]);
+                    }
                     if ($integration && $order->type === OrderType::Retail && fake()->boolean(70)) {
                         ExternalIdentifier::create([
                             'integration_id' => $integration->id,

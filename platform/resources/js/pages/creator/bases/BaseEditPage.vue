@@ -17,7 +17,6 @@ import UiInputNumber from '@/components/ui/UiInputNumber.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
-import { useIcon } from '@/composables/useIcon';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import { router } from '@inertiajs/vue3';
 
@@ -46,7 +45,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
 const { requireDelete } = useConfirm();
 
 const initialValues = {

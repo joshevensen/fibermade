@@ -52,6 +52,9 @@ defineOptions({
         :labelPosition="labelPosition ?? 'right'"
         :required="required"
     >
+        <template v-if="$slots.label" #label>
+            <slot name="label" />
+        </template>
         <template #default="{ props: fieldProps, id }">
             <UiCheckbox
                 v-bind="{ ...fieldProps, ...$attrs }"

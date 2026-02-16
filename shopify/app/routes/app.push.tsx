@@ -74,7 +74,9 @@ export const action = async ({
   }
 
   const graphqlRunner: ShopifyGraphqlRunner = async (query, variables) => {
-    const response = await admin.graphql(query, { variables });
+    const response = await admin.graphql(query, {
+      variables: variables as Record<string, unknown>,
+    });
     const json = (await response.json()) as { data?: unknown; errors?: unknown };
     if (!response.ok) {
       const err = new Error(

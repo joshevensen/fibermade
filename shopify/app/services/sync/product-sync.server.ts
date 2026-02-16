@@ -180,10 +180,6 @@ export class ProductSyncService {
           variant,
           product.title ?? ""
         );
-        const retailPrice =
-          variant.price?.trim() !== ""
-            ? parseFloat(variant.price)
-            : undefined;
         await this.client.updateBase(inventory.base_id, {
           descriptor: basePayload.descriptor,
           retail_price: basePayload.retail_price ?? undefined,

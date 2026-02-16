@@ -29,21 +29,13 @@ interface Props {
             quantity: number;
         }>;
     }>;
-    orderTypeOptions: Array<{ label: string; value: string }>;
     orderStatusOptions: Array<{ label: string; value: string }>;
 }
 
 const props = defineProps<Props>();
 
 // Filter state
-const typeFilter = ref<string | 'all'>('all');
 const statusFilter = ref<string | 'all'>('all');
-
-// Add "All" option to filters
-const typeFilterOptions = [
-    { label: 'All', value: 'all' },
-    ...props.orderTypeOptions,
-];
 
 const statusFilterOptions = [
     { label: 'All', value: 'all' },
@@ -95,12 +87,6 @@ function getSkeinCount(order: Props['orders'][0]): number {
 const filteredOrders = computed(() => {
     let filtered = [...props.orders];
 
-    // Apply type filter
-    if (typeFilter.value !== 'all') {
-        filtered = filtered.filter((order) => order.type === typeFilter.value);
-    }
-
-    // Apply status filter
     if (statusFilter.value !== 'all') {
         filtered = filtered.filter(
             (order) => order.status === statusFilter.value,
@@ -116,13 +102,6 @@ const columns = computed(() => [
         header: 'Name',
         sortable: true,
         columnKey: 'name',
-    },
-    {
-        field: 'type',
-        header: 'Type',
-        sortable: true,
-        columnKey: 'type',
-        bodyTemplate: (data: Props['orders'][0]) => formatEnum(data.type),
     },
     {
         field: 'status',
@@ -165,20 +144,6 @@ const columns = computed(() => [
                     label="order"
                 >
                     <template #filters>
-                        <UiFormFieldSelect
-                            name="type-filter"
-                            label="Type"
-                            label-position="left"
-                            :options="typeFilterOptions"
-                            :initial-value="typeFilter"
-                            :validate-on-mount="false"
-                            :validate-on-blur="false"
-                            :validate-on-submit="false"
-                            :validate-on-value-update="false"
-                            size="small"
-                            class="w-40"
-                            @update:model-value="typeFilter = $event"
-                        />
                         <UiFormFieldSelect
                             name="status-filter"
                             label="Status"

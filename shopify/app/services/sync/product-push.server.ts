@@ -81,11 +81,6 @@ interface ProductCreateInput {
   variants?: ProductCreateVariantInput[];
 }
 
-interface CreateMediaInput {
-  originalSource: string;
-  mediaContentType: "IMAGE";
-}
-
 function mapStatus(status: string): "ACTIVE" | "DRAFT" | "ARCHIVED" {
   return status in STATUS_MAP ? STATUS_MAP[status] : "ACTIVE";
 }

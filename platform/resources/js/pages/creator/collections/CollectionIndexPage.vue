@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import {
-    destroy as destroyCollection,
-    edit as editCollection,
-} from '@/actions/App/Http/Controllers/CollectionController';
+import { edit as editCollection } from '@/actions/App/Http/Controllers/CollectionController';
 import GridItem from '@/components/GridItem.vue';
 import GridItemWrapper from '@/components/GridItemWrapper.vue';
 import PageFilter from '@/components/PageFilter.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import { useIcon } from '@/composables/useIcon';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import { router } from '@inertiajs/vue3';
-import { useConfirm } from 'primevue/useconfirm';
 import { computed, ref } from 'vue';
 
 interface Collection {
@@ -30,8 +25,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
-const confirm = useConfirm();
 
 // Filter state
 const statusFilter = ref<string | 'all'>('active');
@@ -82,18 +75,6 @@ const filteredAndSortedCollections = computed(() => {
 
 function handleCollectionClick(collection: Collection): void {
     router.visit(editCollection.url(collection.id));
-}
-
-function handleDelete(collection: Collection, event: Event): void {
-    event.stopPropagation();
-    confirm.require({
-        target: event.currentTarget as HTMLElement,
-        message: `Are you sure you want to delete ${collection.name}?`,
-        icon: IconList.ExclamationTriangle,
-        accept: () => {
-            router.delete(destroyCollection.url(collection.id));
-        },
-    });
 }
 
 const sortOptions = [

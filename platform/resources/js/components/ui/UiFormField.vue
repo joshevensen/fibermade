@@ -59,7 +59,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
             }">
                 <!-- Label positioned based on labelPosition prop -->
                 <label
-                    v-if="label"
+                    v-if="label || $slots.label"
                     :for="fieldId"
                     :class="{
                         'flex justify-between w-full mb-1': labelPosition === 'top',
@@ -69,7 +69,7 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
                     }"
                 >
                     <span>
-                        {{ label }}
+                        <slot name="label">{{ label }}</slot>
                         <small v-if="required" class="text-surface-500">(required)</small>
                     </span>
                     <span v-if="labelPosition === 'top'">

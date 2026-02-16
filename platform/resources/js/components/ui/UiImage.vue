@@ -94,7 +94,7 @@ const hasImage = computed(() => {
     <PrimeImage
         v-else
         v-bind="$attrs"
-        :src="src"
+        :src="src ?? undefined"
         :alt="alt"
         :preview="preview"
         :image-style="imageStyle"

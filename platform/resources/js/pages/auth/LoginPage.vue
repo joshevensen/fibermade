@@ -18,7 +18,7 @@ const initialValues = {
     remember: false,
 };
 
-const props = defineProps<{
+defineProps<{
     status?: string;
     canResetPassword: boolean;
     canRegister: boolean;
@@ -46,7 +46,6 @@ const { form, onSubmit } = useFormSubmission({
                 required
                 autofocus
                 autocomplete="email"
-                placeholder="email@example.com"
             />
 
             <UiFormField
@@ -69,7 +68,6 @@ const { form, onSubmit } = useFormSubmission({
                         :id="id"
                         required
                         autocomplete="current-password"
-                        placeholder="Password"
                     />
                 </template>
             </UiFormField>

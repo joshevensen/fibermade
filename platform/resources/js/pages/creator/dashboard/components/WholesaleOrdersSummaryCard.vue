@@ -29,7 +29,7 @@ interface Props {
     activeOrders: Record<string, Order[]>;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 function formatCurrency(value: number | null | undefined): string {
     if (value === null || value === undefined) {

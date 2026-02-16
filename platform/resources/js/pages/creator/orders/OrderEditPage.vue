@@ -104,7 +104,6 @@ interface Props {
         orderItems?: OrderItem[];
         orderable?: OrderableShow | OrderableStore | OrderableCustomer | null;
     };
-    orderTypeOptions: Array<{ label: string; value: string }>;
     orderStatusOptions: Array<{ label: string; value: string }>;
     colorways: Array<{ id: number; name: string }>;
     bases: Array<{ id: number; code: string; descriptor: string }>;
@@ -415,10 +414,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
                             </div>
 
                             <div
-                                v-if="
-                                    props.order.status === 'cancelled' &&
-                                    props.order.status !== 'draft'
-                                "
+                                v-if="props.order.status === 'cancelled'"
                                 class="pt-4"
                             >
                                 <span
@@ -593,15 +589,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
             <div class="flex flex-col gap-4">
                 <UiCard v-if="order.orderable">
                     <template #header>
-                        <h3 class="text-lg font-semibold">
-                            {{
-                                order.type === 'show'
-                                    ? 'Show'
-                                    : order.type === 'wholesale'
-                                      ? 'Store'
-                                      : 'Customer'
-                            }}
-                        </h3>
+                        <h3 class="text-lg font-semibold">Order Details</h3>
                     </template>
                     <template #content>
                         <div class="space-y-4">
@@ -611,7 +599,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
                                         editShow.url(
                                             (order.orderable as OrderableShow)
                                                 .id,
-                                        ).url
+                                        )
                                     "
                                     class="text-xl font-semibold text-primary hover:underline"
                                 >
@@ -667,7 +655,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
                                         editStore.url(
                                             (order.orderable as OrderableStore)
                                                 .id,
-                                        ).url
+                                        )
                                     "
                                     class="text-xl font-semibold text-primary hover:underline"
                                 >
@@ -721,7 +709,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
                                             (
                                                 order.orderable as OrderableCustomer
                                             ).id,
-                                        ).url
+                                        )
                                     "
                                     class="text-xl font-semibold text-primary hover:underline"
                                 >

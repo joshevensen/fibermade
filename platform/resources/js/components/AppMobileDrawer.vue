@@ -19,7 +19,7 @@ interface Props {
     }>;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
     'update:visible': [value: boolean];
@@ -73,9 +73,9 @@ function handleLogout() {
                             ? (item.icon as Component)
                             : undefined
                     "
-                    :class="[
-                        isActive(item) ? 'text-primary' : 'text-surface-400',
-                    ]"
+                    :class="
+                        isActive(item) ? 'text-primary' : 'text-surface-400'
+                    "
                 />
                 <span
                     :class="[

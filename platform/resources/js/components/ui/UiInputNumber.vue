@@ -42,7 +42,7 @@ export const inputNumberDark = {
 
 <script setup lang="ts">
 import PrimeInputNumber from 'primevue/inputnumber';
-import type { PassThrough } from 'primevue';
+import type { InputNumberProps } from 'primevue/inputnumber';
 
 interface Props {
     modelValue?: number | null;
@@ -59,7 +59,7 @@ interface Props {
     placeholder?: string;
     showClear?: boolean;
     fluid?: boolean;
-    pt?: PassThrough;
+    pt?: InputNumberProps['pt'];
 }
 
 const props = withDefaults(defineProps<Props>(), {

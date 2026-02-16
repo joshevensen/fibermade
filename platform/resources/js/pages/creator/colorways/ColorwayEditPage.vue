@@ -17,7 +17,6 @@ import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
-import { useIcon } from '@/composables/useIcon';
 import { useToast } from '@/composables/useToast';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import InventoryQuantityInput from '@/pages/creator/inventory/components/InventoryQuantityInput.vue';
@@ -58,7 +57,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
 const { requireDelete } = useConfirm();
 const { showSuccess } = useToast();
 

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('status')->default('active');
             $table->string('type')->default('creator')->index();
+            $table->string('subscription_status')->nullable();
             $table->timestamp('onboarded_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

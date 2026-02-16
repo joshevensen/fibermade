@@ -9,8 +9,6 @@ import UiCard from '@/components/ui/UiCard.vue';
 import UiDataView from '@/components/ui/UiDataView.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
-import { useCreateDrawer } from '@/composables/useCreateDrawer';
-import { useIcon } from '@/composables/useIcon';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -37,8 +35,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const { IconList } = useIcon();
-const { openDrawer } = useCreateDrawer();
 
 // Layout state
 const layout = ref<'list' | 'grid'>('list');
@@ -90,10 +86,6 @@ function formatColors(colors: string[] | null | undefined): string {
         return '';
     }
     return colors.map((color) => formatEnum(color)).join(', ');
-}
-
-function getImageUrl(colorway: Colorway): string | undefined {
-    return colorway.primary_image_url ?? undefined;
 }
 
 function getStatusSeverity(status: string): 'success' | 'info' | 'secondary' {

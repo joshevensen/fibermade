@@ -15,7 +15,7 @@ interface Props {
     users: User[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 function getListItemProps(user: User) {
     const metadata: string[] = [];

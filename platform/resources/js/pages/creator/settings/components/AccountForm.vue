@@ -54,7 +54,6 @@ const { form, onSubmit } = useFormSubmission({
                     label="Name"
                     :server-error="form.errors.name"
                     required
-                    placeholder="Account name"
                 />
 
                 <UiFormFieldInput
@@ -62,7 +61,6 @@ const { form, onSubmit } = useFormSubmission({
                     label="Email"
                     type="email"
                     :server-error="form.errors.email"
-                    placeholder="Account email"
                 />
 
                 <UiFormFieldInput
@@ -70,7 +68,6 @@ const { form, onSubmit } = useFormSubmission({
                     label="Phone"
                     type="tel"
                     :server-error="form.errors.phone"
-                    placeholder="Phone number"
                 />
 
                 <UiFormFieldAddress :show-line2="true" :errors="form.errors" />

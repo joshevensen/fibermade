@@ -7,7 +7,6 @@ import { ref, watch } from 'vue';
 import AccountForm from './components/AccountForm.vue';
 import BillingCard from './components/BillingCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
-import ImportProductsCard from './components/ImportProductsCard.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
 
@@ -19,7 +18,7 @@ const user = page.props.auth.user as {
     role?: string;
     account_id?: number | null;
 };
-const account = page.props.account as
+const business = page.props.business as
     | {
           id: number;
           name: string;
@@ -30,29 +29,13 @@ const account = page.props.account as
           city?: string | null;
           state_region?: string | null;
           postal_code?: string | null;
-          users?: Array<{
-              id: number;
-              name: string;
-              email: string;
-              role: string;
-          }>;
       }
     | null
     | undefined;
-const dyes =
-    (page.props.dyes as Array<{
-        id: number;
-        name: string;
-        manufacturer?: string | null;
-        notes?: string | null;
-        does_bleed: boolean;
-        do_like: boolean;
-    }>) || [];
 
 const tabs = [
     { value: 'profile', label: 'Profile' },
     { value: 'account', label: 'Account' },
-    { value: 'import', label: 'Import' },
 ];
 
 function getTabFromUrl(): string {
@@ -105,20 +88,14 @@ watch(
             </UiTabPanel>
 
             <UiTabPanel value="account">
-                <div class="space-y-4">
-                    <BillingCard />
-                    <AccountForm v-if="account" :account="account" />
-                    <!-- <AccountUsersCard
-                        v-if="account && user.role === 'owner' && account.users"
-                        :users="account.users"
-                    /> -->
-                    <DeleteAccountDialog />
-                </div>
-            </UiTabPanel>
-
-            <UiTabPanel value="import">
-                <div class="space-y-4">
-                    <ImportProductsCard />
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="lg:col-span-2">
+                        <AccountForm v-if="business" :account="business" />
+                    </div>
+                    <div class="space-y-4">
+                        <BillingCard />
+                        <DeleteAccountDialog />
+                    </div>
                 </div>
             </UiTabPanel>
         </UiTabs>

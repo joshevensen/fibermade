@@ -3,7 +3,7 @@ import type { ShopifyGraphqlRunner } from "./metafields.server";
 export interface WebhookAdminContext {
   graphql: (
     query: string,
-    options?: { variables?: unknown }
+    options?: { variables?: Record<string, unknown> }
   ) => Promise<Response>;
 }
 
@@ -12,7 +12,9 @@ export function getWebhookGraphqlRunner(
 ): ShopifyGraphqlRunner | undefined {
   if (!admin?.graphql) return undefined;
   return async (query, variables) => {
-    const response = await admin.graphql(query, { variables });
+    const response = await admin.graphql(query, {
+      variables: variables as Record<string, unknown>,
+    });
     const json = (await response.json()) as {
       data?: unknown;
       errors?: unknown;

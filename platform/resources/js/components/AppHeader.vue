@@ -120,14 +120,16 @@ function handleCreateClick(): void {
             v-if="!hideCreateButtons"
             class="relative ml-auto flex items-center gap-2"
         >
-            <UiButton
-                v-if="hasCreateDrawer"
-                :icon="IconList.Plus"
-                size="small"
-                :label="createButtonLabel"
-                aria-label="Create"
-                @click="handleCreateClick"
-            />
+            <slot name="actions">
+                <UiButton
+                    v-if="hasCreateDrawer"
+                    :icon="IconList.Plus"
+                    size="small"
+                    :label="createButtonLabel"
+                    aria-label="Create"
+                    @click="handleCreateClick"
+                />
+            </slot>
         </div>
     </header>
 </template>

@@ -36,7 +36,7 @@ interface Props {
     visible: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
     'update:visible': [value: boolean];

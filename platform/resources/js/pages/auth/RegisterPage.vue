@@ -90,7 +90,7 @@ async function onSubmit({
     }
 
     if (data.message) {
-        form.setError({ form: data.message });
+        form.setError({ form: data.message } as Record<string, string>);
     }
 }
 </script>
@@ -103,21 +103,20 @@ async function onSubmit({
     >
         <UiForm :initialValues="initialValues" @submit="onSubmit">
             <p
-                v-if="form.errors.form"
+                v-if="(form.errors as Record<string, string>)['form']"
                 class="text-destructive text-sm"
                 role="alert"
             >
-                {{ form.errors.form }}
+                {{ (form.errors as Record<string, string>)['form'] }}
             </p>
             <UiFormFieldInput
                 name="name"
-                label="Name"
+                label="Your Name"
                 :serverError="form.errors.name"
                 type="text"
                 required
                 autofocus
                 autocomplete="name"
-                placeholder="Full name"
             />
 
             <UiFormFieldInput
@@ -127,7 +126,6 @@ async function onSubmit({
                 type="email"
                 required
                 autocomplete="email"
-                placeholder="email@example.com"
             />
 
             <UiFormFieldInput
@@ -137,7 +135,6 @@ async function onSubmit({
                 type="text"
                 required
                 autocomplete="organization"
-                placeholder="Your business name"
             />
 
             <UiFormFieldPassword
@@ -146,7 +143,6 @@ async function onSubmit({
                 :serverError="form.errors.password"
                 required
                 autocomplete="new-password"
-                placeholder="Password"
             />
 
             <UiFormFieldPassword
@@ -155,7 +151,6 @@ async function onSubmit({
                 :serverError="form.errors.password_confirmation"
                 required
                 autocomplete="new-password"
-                placeholder="Confirm password"
             />
 
             <div class="space-y-3">
@@ -163,21 +158,39 @@ async function onSubmit({
                     name="terms_accepted"
                     :serverError="form.errors.terms_accepted"
                     required
-                    label="I agree to the Terms of Service"
-                />
+                >
+                    <template #label>
+                        I agree to the
+                        <a
+                            href="/terms"
+                            target="_blank"
+                            class="text-primary-600 underline underline-offset-2 hover:text-primary-500"
+                            >Terms of Service</a
+                        >&nbsp;
+                    </template>
+                </UiFormFieldCheckbox>
 
                 <UiFormFieldCheckbox
                     name="privacy_accepted"
                     :serverError="form.errors.privacy_accepted"
                     required
-                    label="I agree to the Privacy Policy"
-                />
+                >
+                    <template #label>
+                        I agree to the
+                        <a
+                            href="/privacy"
+                            target="_blank"
+                            class="text-primary-600 underline underline-offset-2 hover:text-primary-500"
+                            >Privacy Policy</a
+                        >&nbsp;
+                    </template>
+                </UiFormFieldCheckbox>
 
-                <UiFormFieldCheckbox
+                <!-- <UiFormFieldCheckbox
                     name="marketing_opt_in"
                     :serverError="form.errors.marketing_opt_in"
                     label="I'd like to receive product updates and tips"
-                />
+                /> -->
             </div>
 
             <UiButton

@@ -124,7 +124,7 @@ describe("BulkImportService", () => {
     const node1 = makeProductNode("1", "P1");
     const node2 = makeProductNode("2", "P2");
     let productCallCount = 0;
-    mockGraphql = vi.fn().mockImplementation((query: string, _variables?: Record<string, unknown>) => {
+    mockGraphql = vi.fn().mockImplementation((query: string) => {
       if (query.includes("products(first:")) {
         productCallCount++;
         if (productCallCount === 1) {

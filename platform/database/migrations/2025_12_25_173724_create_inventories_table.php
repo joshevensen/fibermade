@@ -18,6 +18,8 @@ return new class extends Migration
             $table->foreignId('base_id')->constrained()->cascadeOnDelete();
             $table->integer('quantity')->default(0);
             $table->timestamps();
+            $table->timestamp('last_synced_at')->nullable();
+            $table->string('sync_status')->nullable();
 
             $table->unique(['account_id', 'colorway_id', 'base_id']);
         });

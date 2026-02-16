@@ -4,7 +4,10 @@ import db from "../db.server";
 import { FibermadeClient } from "../services/fibermade-client.server";
 import { ProductSyncService } from "../services/sync/product-sync.server";
 import { restProductToShopifyProduct } from "../services/sync/webhook-adapter.server";
-import { getWebhookGraphqlRunner } from "../services/sync/webhook-context.server";
+import {
+  getWebhookGraphqlRunner,
+  type WebhookAdminContext,
+} from "../services/sync/webhook-context.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   try {
@@ -23,7 +26,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       return new Response();
     }
 
-    const graphqlRunner = session && admin ? getWebhookGraphqlRunner(admin) : undefined;
+    const graphqlRunner = session && admin ? getWebhookGraphqlRunner(admin as WebhookAdminContext) : undefined;
     const client = new FibermadeClient(baseUrl);
     client.setToken(connection.fibermadeApiToken);
 
