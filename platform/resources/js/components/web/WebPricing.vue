@@ -139,7 +139,7 @@ const { IconList } = useIcon();
                     >
                         <div class="mx-auto max-w-xs px-4">
                             <p class="text-2xl font-semibold text-surface-600">
-                                Pay once, own it forever
+                                One Price, No Hidden Fees
                             </p>
                             <p
                                 class="mt-6 flex items-baseline justify-center gap-x-2"
@@ -171,7 +171,7 @@ const { IconList } = useIcon();
                             <p
                                 class="mt-3 text-center text-sm text-surface-600"
                             >
-                                30-day money-back guarantee. Cancel within 30
+                                Cancel within 30
                                 days for a full refund.
                             </p>
                         </div>

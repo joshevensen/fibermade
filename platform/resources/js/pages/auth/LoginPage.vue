@@ -85,6 +85,7 @@ const { form, onSubmit } = useFormSubmission({
                 type="submit"
                 :loading="form.processing"
                 data-test="login-button"
+                fullWidth
             >
                 Log in
             </UiButton>

@@ -515,6 +515,7 @@ interface Props {
     disabled?: boolean;
     type?: 'button' | 'submit' | 'reset';
     label?: string;
+    fullWidth?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -539,6 +540,7 @@ defineOptions({
         :disabled="disabled || loading"
         :type="type"
         :label="label"
+        :class="{ 'w-full': fullWidth }"
     >
         <slot />
     </PrimeButton>

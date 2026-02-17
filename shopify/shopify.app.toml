@@ -2,7 +2,7 @@
 
 client_id = "d7694a203b15b9f571764e04c857bb89"
 name = "fibermade"
-application_url = "https://example.com"
+application_url = "https://shopify.fibermade.app"
 embedded = true
 
 [build]
@@ -49,4 +49,4 @@ api_version = "2026-04"
 scopes = "write_products"
 
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+redirect_urls = [ "https://shopify.fibermade.app/auth/callback" ]

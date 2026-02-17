@@ -5,9 +5,19 @@ import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiLink from '@/components/ui/UiLink.vue';
+import { IconList } from '@/composables/useIcon';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { useForm } from '@inertiajs/vue3';
+
+const features = [
+    'Wholesale catalog with fiber-specific terminology',
+    'Store relationship management with per-store terms',
+    'Inline ordering for your wholesale customers',
+    'Smart inventory reservation (wholesale vs. retail)',
+    'Bi-directional Shopify sync',
+    '30-day money-back guarantee',
+];
 
 const initialValues = {
     name: '',
@@ -96,11 +106,7 @@ async function onSubmit({
 </script>
 
 <template>
-    <AuthLayout
-        title="Create an account"
-        description="Enter your details below to create your account"
-        page-title="Register"
-    >
+    <AuthLayout title="Create an account" page-title="Register" wide>
         <UiForm :initialValues="initialValues" @submit="onSubmit">
             <p
                 v-if="(form.errors as Record<string, string>)['form']"
@@ -109,97 +115,134 @@ async function onSubmit({
             >
                 {{ (form.errors as Record<string, string>)['form'] }}
             </p>
-            <UiFormFieldInput
-                name="name"
-                label="Your Name"
-                :serverError="form.errors.name"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-            />
 
-            <UiFormFieldInput
-                name="email"
-                label="Email address"
-                :serverError="form.errors.email"
-                type="email"
-                required
-                autocomplete="email"
-            />
+            <div class="grid gap-8 lg:grid-cols-5">
+                <!-- Left column: Form fields -->
+                <div class="space-y-4 lg:col-span-3">   
+                    <UiFormFieldInput
+                        name="business_name"
+                        label="Business name"
+                        :serverError="form.errors.business_name"
+                        type="text"
+                        required
+                        autofocus
+                        autocomplete="organization"
+                    />
 
-            <UiFormFieldInput
-                name="business_name"
-                label="Business name"
-                :serverError="form.errors.business_name"
-                type="text"
-                required
-                autocomplete="organization"
-            />
+                    <UiFormFieldInput
+                        name="name"
+                        label="Your Name"
+                        :serverError="form.errors.name"
+                        type="text"
+                        required
+                        autocomplete="name"
+                    />
 
-            <UiFormFieldPassword
-                name="password"
-                label="Password"
-                :serverError="form.errors.password"
-                required
-                autocomplete="new-password"
-            />
+                    <UiFormFieldInput
+                        name="email"
+                        label="Email address"
+                        :serverError="form.errors.email"
+                        type="email"
+                        required
+                        autocomplete="email"
+                    />
 
-            <UiFormFieldPassword
-                name="password_confirmation"
-                label="Confirm password"
-                :serverError="form.errors.password_confirmation"
-                required
-                autocomplete="new-password"
-            />
+                    <UiFormFieldPassword
+                        name="password"
+                        label="Password"
+                        :serverError="form.errors.password"
+                        required
+                        autocomplete="new-password"
+                    />
 
-            <div class="space-y-3">
-                <UiFormFieldCheckbox
-                    name="terms_accepted"
-                    :serverError="form.errors.terms_accepted"
-                    required
-                >
-                    <template #label>
-                        I agree to the
-                        <a
-                            href="/terms"
-                            target="_blank"
-                            class="text-primary-600 underline underline-offset-2 hover:text-primary-500"
-                            >Terms of Service</a
-                        >&nbsp;
-                    </template>
-                </UiFormFieldCheckbox>
+                    <UiFormFieldPassword
+                        name="password_confirmation"
+                        label="Confirm password"
+                        :serverError="form.errors.password_confirmation"
+                        required
+                        autocomplete="new-password"
+                    />
 
-                <UiFormFieldCheckbox
-                    name="privacy_accepted"
-                    :serverError="form.errors.privacy_accepted"
-                    required
-                >
-                    <template #label>
-                        I agree to the
-                        <a
-                            href="/privacy"
-                            target="_blank"
-                            class="text-primary-600 underline underline-offset-2 hover:text-primary-500"
-                            >Privacy Policy</a
-                        >&nbsp;
-                    </template>
-                </UiFormFieldCheckbox>
+                    <UiButton
+                        type="submit"
+                        :loading="form.processing"
+                        data-test="register-user-button"
+                        fullWidth
+                    >
+                        Continue to payment
+                    </UiButton>
+                </div>
 
-                <!-- <UiFormFieldCheckbox
-                    name="marketing_opt_in"
-                    :serverError="form.errors.marketing_opt_in"
-                    label="I'd like to receive product updates and tips"
-                /> -->
+                <!-- Right column: Pricing + checkboxes -->
+                <div class="lg:col-span-2 flex flex-col gap-6">
+                    <!-- Pricing card -->
+                    <div
+                        class="rounded-2xl bg-surface-200 py-8 text-center inset-ring inset-ring-surface-900/5 flex flex-col justify-center"
+                    >
+                        <div class="mx-auto max-w-xs px-4">
+                            <p
+                                class="text-lg font-semibold text-surface-600"
+                            >
+                                One Price, No Hidden Fees
+                            </p>
+                            <p
+                                class="mt-4 flex items-baseline justify-center gap-x-2"
+                            >
+                                <span
+                                    class="text-5xl font-semibold tracking-tight text-surface-900"
+                                >
+                                    $39
+                                </span>
+                                <span
+                                    class="text-base/6 font-semibold tracking-wide text-surface-600"
+                                >
+                                    /month
+                                </span>
+                            </p>
+                            <p
+                                class="mt-3 text-center text-xs text-surface-500"
+                            >
+                                Cancel within 30 days for a full refund.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Terms & Privacy checkboxes -->
+                    <div class="space-y-3 border-t border-surface-200 pt-4">
+                        <UiFormFieldCheckbox
+                            name="terms_accepted"
+                            :serverError="form.errors.terms_accepted"
+                            required
+                        >
+                            <template #label>
+                                I agree to the
+                                <a
+                                    href="/terms"
+                                    target="_blank"
+                                    class="text-primary-600 underline underline-offset-2 hover:text-primary-500"
+                                    >Terms of Service</a
+                                >&nbsp;
+                            </template>
+                        </UiFormFieldCheckbox>
+
+                        <UiFormFieldCheckbox
+                            name="privacy_accepted"
+                            :serverError="form.errors.privacy_accepted"
+                            required
+                        >
+                            <template #label>
+                                I agree to the
+                                <a
+                                    href="/privacy"
+                                    target="_blank"
+                                    class="text-primary-600 underline underline-offset-2 hover:text-primary-500"
+                                    >Privacy Policy</a
+                                >&nbsp;
+                            </template>
+                        </UiFormFieldCheckbox>
+                    </div>
+                </div>
             </div>
-
-            <UiButton
-                type="submit"
-                :loading="form.processing"
-                data-test="register-user-button"
-            >
-                Create account
-            </UiButton>
         </UiForm>
 
         <template #footer>

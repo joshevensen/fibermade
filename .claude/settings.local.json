@@ -3,7 +3,8 @@
     "allow": [
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:github.com)",
-      "Bash(php artisan test:*)"
+      "Bash(php artisan test:*)",
+      "WebFetch(domain:shopify.dev)"
     ]
   }
 }

@@ -4,11 +4,15 @@ import UiCard from '@/components/ui/UiCard.vue';
 import { home } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 
-defineProps<{
-    title?: string;
-    description?: string;
-    pageTitle?: string;
-}>();
+const props = withDefaults(
+    defineProps<{
+        title?: string;
+        description?: string;
+        pageTitle?: string;
+        wide?: boolean;
+    }>(),
+    { wide: false },
+);
 </script>
 
 <template>
@@ -16,7 +20,12 @@ defineProps<{
     <div
         class="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-3 md:p-6"
     >
-        <div class="flex w-full max-w-md flex-col gap-6">
+        <div
+            :class="[
+                'flex w-full flex-col gap-6',
+                wide ? 'max-w-4xl' : 'max-w-md',
+            ]"
+        >
             <Link
                 :href="home()"
                 class="flex items-center gap-2 self-center font-medium"

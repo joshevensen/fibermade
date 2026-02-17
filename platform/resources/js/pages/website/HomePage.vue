@@ -43,31 +43,31 @@ const problemFeatures = [
     {
         name: 'Generic product model',
         description:
-            'Shopify thinks in products and variants. You think in colorways, bases, and weights \u2014 and the translation is always lossy.',
+            'Shopify thinks in products and variants. You think in colorways, bases, and weights \u2014 and something always gets lost in translation.',
         icon: IconBox,
     },
     {
-        name: 'No inventory reservation',
+        name: 'Inventory that doesn\u2019t fit your workflow',
         description:
-            'Shopify can\u2019t distinguish what\u2019s committed to wholesale from what\u2019s free for retail, so you risk overselling both.',
+            'Shopify tracks stock counts, but it doesn\u2019t understand dyeing batches, undyed inventory, or what\u2019s in production. You end up tracking the real picture somewhere else.',
         icon: IconPackageOff,
     },
     {
         name: 'No wholesale catalog',
         description:
-            'Stores can\u2019t browse your line and place orders the way retail customers can. They have to ask you what\u2019s available.',
+            'Stores can\u2019t see your full catalog and place orders the way retail customers can. They have to ask you what\u2019s available.',
         icon: IconBookOff,
     },
     {
-        name: 'Duplicate product management',
+        name: 'Too many tools, none connected',
         description:
-            'You end up creating separate wholesale variants just to show different pricing \u2014 doubling the work to maintain your catalog.',
+            'You\u2019re juggling Shopify, spreadsheets, email, and maybe an invoicing app. Nothing talks to each other, so you\u2019re the integration layer.',
         icon: IconCopy,
     },
     {
-        name: 'No per-store terms',
+        name: 'Painful catalog updates',
         description:
-            'Every store gets the same deal because there\u2019s nowhere to manage individual discounts, minimums, or payment terms.',
+            'Want to change the price of a base or add a new one across all your colorways? In Shopify, that means editing every product and its variants one by one.',
         icon: IconUsers,
     },
 ];
@@ -76,7 +76,7 @@ const solutionFeatures = [
     {
         name: 'Wholesale ordering',
         description:
-            'Stores can browse your line sheet and place orders directly — no more email tag or PDFs.',
+            'Stores can browse your wholesale catalog and place orders directly — no more email tag or PDFs.',
         icon: IconShoppingCart,
     },
     {
@@ -104,12 +104,12 @@ const pricingTier = {
     name: 'Fibermade for Shopify',
     href: register().url,
     description:
-        'Everything you need to run wholesale alongside your existing Shopify store. One plan, no tiers, no surprise fees.',
+        'Everything you need to turn Shopify into a wholesale business. One plan, no tiers, no surprise fees.',
     features: [
-        'Wholesale catalog with fiber-specific terminology',
-        'Store relationship management with per-store terms',
-        'Inline ordering for your wholesale customers',
-        'Smart inventory reservation (wholesale vs. retail)',
+        'Fiber-specific terminology',
+        'Store relationship management',
+        'Online wholesale catalog',
+        'Smart inventory reservation',
         'Bi-directional Shopify sync',
         '30-day money-back guarantee',
     ],
@@ -120,7 +120,7 @@ const faqs = [
     {
         id: 1,
         question: 'Do I need to leave Shopify?',
-        answer: 'No. Fibermade is a Shopify app that adds wholesale capabilities to your existing store. Your retail customers see no change, and you keep everything that already works.',
+        answer: 'No. Fibermade is a Shopify app that adds fiber-specific capabilities to your existing store. Your retail customers see no change, and you keep everything that already works.',
     },
     {
         id: 2,
@@ -139,13 +139,13 @@ const faqs = [
     },
     {
         id: 5,
-        question: 'What if I want to cancel?',
-        answer: 'Cancel anytime. If you cancel within 30 days, you get a full refund — no questions asked. We want you to have enough time to actually use the wholesale features before deciding.',
+        question: 'How does the 30-day guarantee work?',
+        answer: 'If Fibermade isn\u2019t the right fit, cancel within 30 days for a full automatic refund \u2014 no questions asked. We want you to have enough time to actually use the wholesale features before deciding.',
     },
     {
         id: 6,
-        question: 'Why $39/month?',
-        answer: 'It matches what you already pay for Shopify Basic — an easy mental anchor. Your total stack is $78/month for both Shopify and Fibermade, which is far less than the $2,000+/month Shopify Plus charges for B2B features.',
+        question: 'What happens to my Shopify store if I cancel?',
+        answer: 'Your Shopify store keeps running as normal. Any changes Fibermade synced to Shopify \u2014 like inventory updates \u2014 stay in place, but no further syncs will happen. Your retail storefront, customers, and orders are unaffected.',
     },
 ];
 </script>
@@ -166,7 +166,7 @@ const faqs = [
             variant="screenshotRight"
             background="white"
             title="Shopify wasn't built for yarn. Fibermade fixes that."
-            description="Fibermade adds wholesale ordering to your Shopify store and turns generic variants into fiber-specific concepts — colorways, bases, and the language your business actually uses."
+            description="Fibermade adds wholesale ordering to your Shopify store and turns a generic ecommerce tool into something fiber-specific — colorways, bases, and the language your business actually uses."
             :badge="{ label: 'We\'ve just launched Fibermade!', text: '' }"
             :primary-button="
                 isAuthenticated
@@ -175,7 +175,7 @@ const faqs = [
                           href: dashboard().url,
                       }
                     : {
-                          text: 'Get started',
+                          text: 'Fiberize Your Shopify Store',
                           href: register().url,
                       }
             "
@@ -213,7 +213,7 @@ const faqs = [
                 :single-price="{
                     price: '$39',
                     currency: '/month',
-                    buttonText: 'Get started',
+                    buttonText: 'Fiberize Your Shopify Store',
                 }"
             />
         </section>
@@ -231,7 +231,7 @@ const faqs = [
             variant="centered"
             background="primary"
             title="Ready to make Shopify work for your yarn business?"
-            description="Just launched — be one of the first to run your fiber business on Shopify the way it should work."
+            description="Just launched — be one of the first to Fiberize your Shopify store. Manage colorways, track dyeing batches, and wholesale with ease."
             :primary-button="
                 isAuthenticated
                     ? {
@@ -239,7 +239,7 @@ const faqs = [
                           href: dashboard().url,
                       }
                     : {
-                          text: 'Get started',
+                          text: 'Fiberize Your Shopify Store',
                           href: register().url,
                       }
             "
