@@ -151,9 +151,11 @@ function getGridItemProps(item: StoreOrInviteItem) {
         });
     }
     if (item.item_type === 'store' && item.discount_rate != null) {
+        const rate = Number(item.discount_rate);
+        const pct = rate <= 1 ? rate * 100 : rate;
         metadata.push({
             label: 'Discount',
-            value: `${Number(item.discount_rate)}%`,
+            value: `${pct}%`,
         });
     }
     if (item.item_type === 'store' && item.payment_terms) {

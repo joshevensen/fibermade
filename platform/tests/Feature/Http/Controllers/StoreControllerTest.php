@@ -201,7 +201,7 @@ test('creator update saves to pivot only and does not change store model or stat
 
     $pivot = $creator->stores()->where('stores.id', $store->id)->first()->pivot;
     expect($pivot->status)->toBe('active');
-    expect((float) $pivot->discount_rate)->toBe(20.0);
+    expect((float) $pivot->discount_rate)->toBe(0.2);
     expect($pivot->payment_terms)->toBe('Net 60');
     expect((int) $pivot->minimum_order_quantity)->toBe(12);
     expect((float) $pivot->minimum_order_value)->toBe(100.0);

@@ -171,8 +171,7 @@ const { IconList } = useIcon();
                             <p
                                 class="mt-3 text-center text-sm text-surface-600"
                             >
-                                Cancel within 30
-                                days for a full refund.
+                                Cancel within 30 days for a full refund.
                             </p>
                         </div>
                     </div>

@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             FoundationSeeder::class,
             BadFrogSeeder::class,
+            StoresSeeder::class,
             // OrdersSeeder::class,
         ]);
     }

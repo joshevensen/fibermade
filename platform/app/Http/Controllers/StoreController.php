@@ -979,7 +979,7 @@ class StoreController extends Controller
                 'state_region' => $store->state_region,
                 'postal_code' => $store->postal_code,
                 'country_code' => $store->country_code,
-                'discount_rate' => $pivot->discount_rate !== null ? (float) $pivot->discount_rate : null,
+                'discount_rate' => $pivot->discount_rate !== null ? $this->discountRateForForm((float) $pivot->discount_rate) : null,
                 'minimum_order_quantity' => $pivot->minimum_order_quantity !== null ? (int) $pivot->minimum_order_quantity : null,
                 'minimum_order_value' => $pivot->minimum_order_value !== null ? (float) $pivot->minimum_order_value : null,
                 'payment_terms' => $pivot->payment_terms,
@@ -1066,12 +1066,24 @@ class StoreController extends Controller
     {
         $user = $request->user();
         if ($user->account?->type === AccountType::Creator && $user->account->creator) {
-            $user->account->creator->stores()->updateExistingPivot($store->id, $request->validated());
+            $validated = $request->validated();
+            if (array_key_exists('discount_rate', $validated) && $validated['discount_rate'] !== null) {
+                $validated['discount_rate'] = (float) $validated['discount_rate'] / 100;
+            }
+            $user->account->creator->stores()->updateExistingPivot($store->id, $validated);
         } else {
             $store->update($request->validated());
         }
 
         return redirect()->route('stores.index');
+    }
+
+    /**
+     * Convert stored discount_rate (decimal 0–1 or legacy percentage 0–100) to form percentage 0–100.
+     */
+    private function discountRateForForm(float $stored): float
+    {
+        return $stored <= 1 ? $stored * 100 : $stored;
     }
 
     /**

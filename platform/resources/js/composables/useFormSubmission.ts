@@ -1,6 +1,6 @@
+import type { UrlMethodPair } from '@inertiajs/core';
 import type { InertiaForm } from '@inertiajs/vue3';
 import { useForm } from '@inertiajs/vue3';
-import type { UrlMethodPair } from '@inertiajs/core';
 import { useToast } from './useToast';
 
 interface FormSubmissionOptions {

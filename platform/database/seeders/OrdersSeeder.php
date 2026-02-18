@@ -2,11 +2,8 @@
 
 namespace Database\Seeders;
 
-use App\Enums\AccountType;
-use App\Enums\BaseStatus;
 use App\Enums\OrderStatus;
 use App\Enums\OrderType;
-use App\Enums\StoreVendorStatus;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
@@ -17,7 +14,6 @@ use App\Models\Integration;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Show;
-use App\Models\Store;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -38,7 +34,6 @@ class OrdersSeeder extends Seeder
         $account = $creator->account;
 
         $this->seedCustomers($account);
-        $this->seedStores($account);
         $this->seedShows($account);
         $this->seedOrders($account);
         $this->seedOrderItems($account);
@@ -68,57 +63,6 @@ class OrdersSeeder extends Seeder
                     ]);
                 }
             });
-    }
-
-    /**
-     * Seed stores.
-     *
-     * Note: This creates stores that are already seeded in FoundationSeeder.
-     * This method can be removed or updated if FoundationSeeder already handles this.
-     * For now, we'll check if stores already exist before creating new ones.
-     */
-    protected function seedStores(Account $creatorAccount): void
-    {
-        // Get the creator record for the creator account
-        $creator = Creator::where('account_id', $creatorAccount->id)->first();
-
-        if (! $creator) {
-            return;
-        }
-
-        // Get existing stores that have vendor relationships with this creator
-        $existingStoreIds = $creator->stores()->pluck('stores.id');
-
-        // Only create additional stores if we need more
-        $storesToCreate = 8 - $existingStoreIds->count();
-
-        if ($storesToCreate > 0) {
-            for ($i = 0; $i < $storesToCreate; $i++) {
-                // Create store account
-                $storeAccount = Account::create([
-                    'status' => BaseStatus::Active,
-                    'type' => AccountType::Store,
-                    'subscription_status' => null,
-                ]);
-
-                // Create store record
-                $store = Store::factory()->create([
-                    'account_id' => $storeAccount->id,
-                ]);
-
-                // Create vendor relationship
-                $creator->stores()->attach($store->id, [
-                    'discount_rate' => fake()->randomFloat(2, 10, 30),
-                    'minimum_order_quantity' => fake()->numberBetween(5, 20),
-                    'minimum_order_value' => fake()->randomFloat(2, 100, 500),
-                    'payment_terms' => fake()->randomElement(['Net 30', 'Net 60', 'Due on Receipt']),
-                    'lead_time_days' => fake()->numberBetween(14, 60),
-                    'allows_preorders' => fake()->boolean(30),
-                    'status' => StoreVendorStatus::Active->value,
-                    'notes' => fake()->optional()->sentence(),
-                ]);
-            }
-        }
     }
 
     /**
@@ -343,6 +287,7 @@ class OrdersSeeder extends Seeder
                 ->count($count)
                 ->create([
                     'account_id' => $account->id,
+                    'type' => OrderType::Retail,
                     'status' => $status,
                     'created_by' => $user?->id,
                 ])
@@ -370,7 +315,9 @@ class OrdersSeeder extends Seeder
      */
     protected function seedOrderItems(Account $account): void
     {
-        $orders = Order::where('account_id', $account->id)->get();
+        $orders = Order::where('account_id', $account->id)
+            ->where('type', OrderType::Retail)
+            ->get();
         $bases = Base::where('account_id', $account->id)->get();
         $colorways = Colorway::where('account_id', $account->id)->get();
 

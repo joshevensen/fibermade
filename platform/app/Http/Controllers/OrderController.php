@@ -33,10 +33,11 @@ class OrderController extends Controller
         $query = $user->is_admin
             ? Order::with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration'])
             : ($user->account_id ? Order::where('account_id', $user->account_id)->with(['account', 'orderItems', 'orderable', 'externalIdentifiers.integration']) : null);
-        $orders = $query ? $query->orderByDesc('order_date')->get() : collect();
+        $orders = $query ? $query->where('status', '!=', OrderStatus::Draft)->orderByDesc('order_date')->get() : collect();
 
         $orders = $orders->map(function ($order) {
             $orderArray = $order->toArray();
+            $orderArray['orderItems'] = $orderArray['order_items'] ?? [];
             $orderArray['external_identifiers'] = $order->externalIdentifiers->map(fn ($identifier) => [
                 'integration_type' => $identifier->integration->type->value,
                 'external_type' => $identifier->external_type,
@@ -55,10 +56,12 @@ class OrderController extends Controller
             ->toArray();
 
         $orderStatusOptions = collect(OrderStatus::cases())
+            ->filter(fn ($case) => $case !== OrderStatus::Draft)
             ->map(fn ($case) => [
                 'label' => Str::title(str_replace('_', ' ', preg_replace('/([A-Z])/', ' $1', $case->name))),
                 'value' => $case->value,
             ])
+            ->values()
             ->toArray();
 
         return Inertia::render('creator/orders/OrderIndexPage', [
@@ -166,6 +169,7 @@ class OrderController extends Controller
         }
 
         $orderArray = $order->toArray();
+        $orderArray['orderItems'] = $orderArray['order_items'] ?? [];
         $orderArray['external_identifiers'] = $order->externalIdentifiers->map(fn ($identifier) => [
             'integration_type' => $identifier->integration->type->value,
             'external_type' => $identifier->external_type,

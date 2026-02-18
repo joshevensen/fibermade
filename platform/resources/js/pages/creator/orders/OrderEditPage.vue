@@ -228,12 +228,12 @@ function stepStatus(stepIndex: number): 'completed' | 'current' | 'upcoming' {
 const calculatedTotals = computed(() => {
     const subtotal =
         props.order.orderItems?.reduce(
-            (sum, item) => sum + (item.line_total || 0),
+            (sum, item) => sum + Number(item.line_total ?? 0),
             0,
-        ) || 0;
-    const shipping = props.order.shipping_amount || 0;
-    const discount = props.order.discount_amount || 0;
-    const tax = props.order.tax_amount || 0;
+        ) ?? 0;
+    const shipping = Number(props.order.shipping_amount ?? 0);
+    const discount = Number(props.order.discount_amount ?? 0);
+    const tax = Number(props.order.tax_amount ?? 0);
     const total = subtotal + shipping - discount + tax;
 
     return {
@@ -246,10 +246,17 @@ const calculatedTotals = computed(() => {
 });
 
 function formatCurrency(amount: number): string {
+    const n = Number(amount);
+    if (Number.isNaN(n)) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+        }).format(0);
+    }
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
-    }).format(amount);
+    }).format(n);
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -461,7 +468,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
                     :closable="true"
                     :show-header="true"
                     @update:visible="
-                        (v) => {
+                        (v: any) => {
                             if (!v) closeTransitionDialog();
                         }
                     "
@@ -782,7 +789,7 @@ function formatBaseDisplay(base: OrderItem['base']): string {
                                 <span class="font-medium">
                                     {{
                                         wholesaleTerms.discount_rate != null
-                                            ? `${(wholesaleTerms.discount_rate * 100).toFixed(1)}%`
+                                            ? `${Number(wholesaleTerms.discount_rate > 1 ? wholesaleTerms.discount_rate : wholesaleTerms.discount_rate * 100).toFixed(1)}%`
                                             : '—'
                                     }}
                                 </span>
