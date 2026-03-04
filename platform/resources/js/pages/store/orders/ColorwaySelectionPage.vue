@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
 import PageFilter from '@/components/PageFilter.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
-import UiTag from '@/components/ui/UiTag.vue';
 import StoreLayout from '@/layouts/StoreLayout.vue';
 import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -33,11 +33,20 @@ interface ColorwayItem {
     bases: BaseItem[];
 }
 
+interface WholesaleTerms {
+    discount_rate: number | null;
+    minimum_order_quantity: number | null;
+    minimum_order_value: number | null;
+    allows_preorders: boolean;
+    payment_terms: string | null;
+    lead_time_days: number | null;
+}
+
 interface Props {
     creator: { id: number; name: string };
     colorways: ColorwayItem[];
     collections: CollectionItem[];
-    discount_rate: number | null;
+    wholesale_terms: WholesaleTerms;
 }
 
 const props = defineProps<Props>();
@@ -77,11 +86,13 @@ const filteredColorways = computed(() => {
         list = list.filter((cw) => cw.colors.some((c) => set.has(c)));
     }
 
-    return list;
+    return [...list].sort((a, b) => a.name.localeCompare(b.name));
 });
 
 const selectedColorways = computed(() =>
-    props.colorways.filter((cw) => selectedIds.value.has(cw.id)),
+    props.colorways
+        .filter((cw) => selectedIds.value.has(cw.id))
+        .sort((a, b) => a.name.localeCompare(b.name)),
 );
 
 function formatEnum(value: string | null | undefined): string {
@@ -104,11 +115,24 @@ function formatCurrency(value: number | null | undefined): string {
     }).format(value);
 }
 
+function formatDiscountRate(value: number | null | undefined): string {
+    if (value === null || value === undefined) return '—';
+    const percent = value <= 1 ? Math.round(value * 100) : Math.round(value);
+    return `${percent}%`;
+}
+
+function discountRateForCalculation(): number | null {
+    const rate = props.wholesale_terms.discount_rate;
+    if (rate === null) return null;
+    return rate <= 1 ? rate : rate / 100;
+}
+
 function wholesalePrice(retailPrice: number | null): number | null {
-    if (retailPrice === null || props.discount_rate === null) {
+    const rate = discountRateForCalculation();
+    if (retailPrice === null || rate === null) {
         return null;
     }
-    return retailPrice * (1 - props.discount_rate);
+    return retailPrice * (1 - rate);
 }
 
 function toggleSelected(id: number): void {
@@ -140,11 +164,17 @@ function handleContinue(): void {
 
 <template>
     <StoreLayout :page-title="`New order — ${props.creator.name}`">
+        <CreatorPageHeader
+            :creator="props.creator"
+            :back-url="`/store/${props.creator.id}/orders`"
+        />
+
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <!-- Left panel: colorway list -->
             <div class="flex flex-col gap-4 lg:col-span-2">
                 <UiCard>
                     <template #title>
+                        Colorway Selection
                         <PageFilter
                             :count="props.colorways.length"
                             :filtered-count="filteredColorways.length"
@@ -204,10 +234,7 @@ function handleContinue(): void {
                             No colorways match the current filters.
                         </div>
 
-                        <div
-                            v-else
-                            class="flex max-h-[70vh] flex-col gap-4 overflow-y-auto"
-                        >
+                        <div v-else class="flex flex-col gap-4">
                             <button
                                 v-for="cw in filteredColorways"
                                 :key="cw.id"
@@ -222,7 +249,12 @@ function handleContinue(): void {
                             >
                                 <div class="flex gap-4 p-4">
                                     <div
-                                        class="h-20 w-20 shrink-0 overflow-hidden rounded bg-surface-200"
+                                        class="shrink-0 overflow-hidden rounded bg-surface-200"
+                                        :class="
+                                            expandedId === cw.id
+                                                ? 'h-32 w-32'
+                                                : 'h-16 w-16'
+                                        "
                                     >
                                         <img
                                             v-if="cw.primary_image_url"
@@ -243,53 +275,78 @@ function handleContinue(): void {
                                         >
                                             {{ cw.name }}
                                         </div>
-                                        <div
-                                            v-if="cw.collections.length > 0"
-                                            class="mt-1 text-sm text-surface-600"
+                                        <button
+                                            v-if="expandedId !== cw.id"
+                                            type="button"
+                                            class="mt-1 text-sm text-primary-600 hover:underline"
+                                            @click.stop="toggleExpanded(cw.id)"
                                         >
-                                            {{
-                                                cw.collections
-                                                    .map((c) => c.name)
-                                                    .join(', ')
-                                            }}
-                                        </div>
+                                            Show more
+                                        </button>
                                         <div
-                                            v-if="cw.colors.length > 0"
-                                            class="mt-2 flex flex-wrap gap-1"
+                                            v-if="expandedId === cw.id"
+                                            class="mt-2 space-y-1 text-sm text-surface-600"
                                         >
-                                            <UiTag
-                                                v-for="color in cw.colors"
-                                                :key="color"
-                                                severity="secondary"
-                                                :value="formatEnum(color)"
-                                            />
+                                            <div>
+                                                Collection:
+                                                {{
+                                                    cw.collections.length > 0
+                                                        ? cw.collections
+                                                              .map((c) => c.name)
+                                                              .join(', ')
+                                                        : '—'
+                                                }}
+                                            </div>
+                                            <div>
+                                                Colors:
+                                                {{
+                                                    cw.colors.length > 0
+                                                        ? cw.colors
+                                                              .map((c) =>
+                                                                  formatEnum(c),
+                                                              )
+                                                              .join(', ')
+                                                        : '—'
+                                                }}
+                                            </div>
+                                            <div>
+                                                Technique: Variegated
+                                            </div>
+                                            <button
+                                                type="button"
+                                                class="mt-2 block text-sm text-primary-600 hover:underline"
+                                                @click.stop="toggleExpanded(cw.id)"
+                                            >
+                                                Show less
+                                            </button>
                                         </div>
                                     </div>
                                     <div
-                                        class="flex shrink-0 items-center text-primary-600"
+                                        class="flex shrink-0 items-center"
+                                        aria-hidden="true"
                                     >
                                         <span
-                                            v-if="selectedIds.has(cw.id)"
-                                            class="text-lg"
-                                            aria-hidden="true"
+                                            class="flex h-8 w-8 items-center justify-center rounded border-2 transition-colors"
+                                            :class="
+                                                selectedIds.has(cw.id)
+                                                    ? 'border-primary-500 bg-primary-500 text-white'
+                                                    : 'border-surface-400 bg-surface-0'
+                                            "
                                         >
-                                            ✓
+                                            <span
+                                                v-if="selectedIds.has(cw.id)"
+                                                class="text-lg leading-none"
+                                            >
+                                                ✓
+                                            </span>
                                         </span>
                                     </div>
                                 </div>
 
-                                <!-- Expandable: description + bases -->
                                 <div
-                                    v-if="expandedId === cw.id"
+                                    v-if="expandedId === cw.id && (cw.description || cw.bases.length > 0)"
                                     class="border-t border-surface-100 px-4 py-3"
                                 >
-                                    <button
-                                        type="button"
-                                        class="mb-2 text-sm text-primary-600 hover:underline"
-                                        @click.stop="toggleExpanded(cw.id)"
-                                    >
-                                        Show less
-                                    </button>
                                     <p
                                         v-if="cw.description"
                                         class="mb-3 text-sm text-surface-600"
@@ -322,7 +379,7 @@ function handleContinue(): void {
                                             <span>
                                                 <template
                                                     v-if="
-                                                        discount_rate != null &&
+                                                        wholesale_terms.discount_rate != null &&
                                                         base.retail_price !=
                                                             null
                                                     "
@@ -363,18 +420,6 @@ function handleContinue(): void {
                                         </div>
                                     </div>
                                 </div>
-                                <div
-                                    v-else
-                                    class="border-t border-surface-100 px-4 py-2"
-                                >
-                                    <button
-                                        type="button"
-                                        class="text-sm text-primary-600 hover:underline"
-                                        @click.stop="toggleExpanded(cw.id)"
-                                    >
-                                        Show more
-                                    </button>
-                                </div>
                             </button>
                         </div>
                     </template>
@@ -384,42 +429,128 @@ function handleContinue(): void {
             <!-- Right panel: selection sidebar -->
             <div class="lg:sticky lg:top-4 lg:col-span-1 lg:self-start">
                 <UiCard>
-                    <template #title>
-                        Selected ({{ selectedIds.size }})
-                    </template>
+                    <template #title>Selected</template>
 
                     <template #content>
-                        <div
-                            v-if="selectedColorways.length === 0"
-                            class="rounded border border-dashed border-surface-200 py-6 text-center text-sm text-surface-500"
-                        >
-                            Select colorways from the list
-                        </div>
-                        <ul v-else class="flex flex-col gap-2">
-                            <li
-                                v-for="cw in selectedColorways"
-                                :key="cw.id"
-                                class="flex items-center justify-between gap-2 rounded border border-surface-200 bg-surface-50 px-3 py-2"
+                        <div class="space-y-4 text-sm">
+                            <div>
+                                <div
+                                    v-if="
+                                        wholesale_terms.minimum_order_quantity !=
+                                            null &&
+                                        wholesale_terms.minimum_order_value !=
+                                            null
+                                    "
+                                    class="flex justify-between"
+                                >
+                                    <span class="text-surface-600"
+                                        >Minimum Order</span
+                                    >
+                                    <span>{{
+                                        wholesale_terms.minimum_order_quantity
+                                    }}
+                                        skeins /
+                                        {{
+                                            formatCurrency(
+                                                wholesale_terms.minimum_order_value,
+                                            )
+                                        }}</span>
+                                </div>
+                                <div
+                                    v-if="
+                                        wholesale_terms.discount_rate != null
+                                    "
+                                    class="flex justify-between"
+                                >
+                                    <span class="text-surface-600"
+                                        >Discount Rate</span
+                                    >
+                                    <span>{{
+                                        formatDiscountRate(
+                                            wholesale_terms.discount_rate,
+                                        )
+                                    }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Allow Preorder</span
+                                    >
+                                    <span>{{
+                                        wholesale_terms.allows_preorders
+                                            ? 'Yes'
+                                            : 'No'
+                                    }}</span>
+                                </div>
+                                <div
+                                    v-if="
+                                        wholesale_terms.lead_time_days != null
+                                    "
+                                    class="flex justify-between"
+                                >
+                                    <span class="text-surface-600"
+                                        >Lead Time</span
+                                    >
+                                    <span>{{
+                                        wholesale_terms.lead_time_days
+                                    }}
+                                        days</span>
+                                </div>
+                                <div
+                                    v-if="wholesale_terms.payment_terms"
+                                    class="flex justify-between"
+                                >
+                                    <span class="text-surface-600"
+                                        >Deposit Due</span
+                                    >
+                                    <span>{{
+                                        wholesale_terms.payment_terms
+                                    }}</span>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="selectedColorways.length === 0"
+                                class="rounded border border-dashed border-surface-200 py-6 text-center text-sm text-surface-500"
                             >
-                                <span class="min-w-0 truncate text-sm">{{
-                                    cw.name
-                                }}</span>
+                                Select colorways from the list
+                            </div>
+                            <template v-else>
+                                <div class="space-y-1">
+                                    <div
+                                        v-for="cw in selectedColorways"
+                                        :key="cw.id"
+                                        class="flex items-center justify-between gap-2"
+                                    >
+                                        <span
+                                            class="min-w-0 truncate font-bold text-surface-700"
+                                            >{{ cw.name }}</span
+                                        >
+                                        <UiButton
+                                            label="Remove"
+                                            size="small"
+                                            severity="secondary"
+                                            outlined
+                                            @click.stop="
+                                                removeSelected(cw.id)
+                                            "
+                                        />
+                                    </div>
+                                </div>
+
+                                    <div class="mt-2 mb-4 flex justify-between">
+                                        <span class="text-surface-600"
+                                            >Colorways</span
+                                        >
+                                        <span>{{ selectedIds.size }}</span>
+                                    </div>
+
                                 <UiButton
-                                    label="Remove"
-                                    size="small"
-                                    severity="secondary"
-                                    outlined
-                                    @click.stop="removeSelected(cw.id)"
+                                    label="Continue"
+                                    :disabled="selectedIds.size === 0"
+                                    class="w-full"
+                                    @click="handleContinue"
                                 />
-                            </li>
-                        </ul>
-                        <div class="mt-4">
-                            <UiButton
-                                label="Continue"
-                                :disabled="selectedIds.size === 0"
-                                class="w-full"
-                                @click="handleContinue"
-                            />
+                            </template>
                         </div>
                     </template>
                 </UiCard>

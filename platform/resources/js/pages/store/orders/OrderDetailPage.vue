@@ -1,9 +1,9 @@
 <script setup lang="ts">
+import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiTag from '@/components/ui/UiTag.vue';
 import StoreLayout from '@/layouts/StoreLayout.vue';
-import { Link } from '@inertiajs/vue3';
 
 interface BaseItem {
     id: number;
@@ -108,13 +108,13 @@ function isStepActive(stepIndex: number): boolean {
 
 <template>
     <StoreLayout :page-title="`Order — ${props.creator.name}`">
+        <CreatorPageHeader
+            :creator="props.creator"
+            :back-url="`/store/${props.creator.id}/orders`"
+        />
+
         <div class="space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <h1 class="text-2xl font-semibold">Order Detail</h1>
-                <Link :href="`/store/${props.creator.id}/orders`">
-                    <UiButton label="Back" severity="secondary" outlined />
-                </Link>
-            </div>
+            <h1 class="text-2xl font-semibold">Order Detail</h1>
 
             <div
                 class="flex flex-wrap items-center gap-4 text-sm text-surface-600"

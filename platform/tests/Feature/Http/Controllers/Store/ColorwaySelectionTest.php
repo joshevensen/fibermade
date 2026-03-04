@@ -77,7 +77,7 @@ test('colorway selection returns 200 and correct data shape when store has relat
         ->where('colorways.0.bases.0.inventory_quantity', 10)
         ->has('collections', 1)
         ->where('collections.0.id', $collection->id)
-        ->has('discount_rate')
-        ->where('discount_rate', 0.20)
+        ->has('wholesale_terms')
+        ->where('wholesale_terms.discount_rate', 0.20)
     );
 });

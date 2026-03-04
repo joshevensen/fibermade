@@ -43,6 +43,7 @@ export const inputNumberDark = {
 <script setup lang="ts">
 import PrimeInputNumber from 'primevue/inputnumber';
 import type { InputNumberProps } from 'primevue/inputnumber';
+import { computed } from 'vue';
 
 interface Props {
     modelValue?: number | null;
@@ -69,28 +70,53 @@ const props = withDefaults(defineProps<Props>(), {
 defineOptions({
     inheritAttrs: false,
 });
+
+const overflowFixPt = computed(() => ({
+    root: { class: 'min-w-0' },
+}));
+
+type PtRoot = { root?: { class?: string }; [key: string]: unknown };
+
+const mergePt = computed(() => {
+    const base = overflowFixPt.value;
+    const user = props.pt as PtRoot | undefined;
+    if (!user) return base;
+    const userRoot = user.root;
+    const rootClass = [base.root?.class, userRoot?.class].filter(Boolean);
+    return {
+        ...user,
+        root: {
+            ...userRoot,
+            class: rootClass,
+        },
+    };
+});
+
+console.log('disabled', props.disabled);
 </script>
 
 <template>
-    <PrimeInputNumber
-        v-bind="$attrs"
-        :modelValue="modelValue"
-        :showButtons="showButtons"
-        :buttonLayout="buttonLayout"
-        :min="min"
-        :max="max"
-        :step="step"
-        :size="size"
-        :invalid="invalid"
-        :disabled="disabled"
-        :variant="variant"
-        :readonly="readonly"
-        :placeholder="placeholder"
-        :showClear="showClear"
-        :fluid="fluid"
-        :pt="pt"
-    >
-        <slot />
-    </PrimeInputNumber>
+    <div class="min-w-0 max-w-full">
+        <PrimeInputNumber
+            v-bind="$attrs"
+            :modelValue="modelValue"
+            :showButtons="showButtons"
+            :buttonLayout="buttonLayout"
+            :min="min"
+            :max="max"
+            :step="step"
+            :size="size"
+            :invalid="invalid"
+            :disabled="disabled"
+            :variant="variant"
+            :readonly="readonly"
+            :placeholder="placeholder"
+            :showClear="showClear"
+            :fluid="fluid"
+            :pt="mergePt"
+        >
+            <slot />
+        </PrimeInputNumber>
+    </div>
 </template>
 

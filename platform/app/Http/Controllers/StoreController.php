@@ -14,6 +14,7 @@ use App\Http\Requests\UpdateStoreRequest;
 use App\Http\Requests\UpdateStoreStatusRequest;
 use App\Mail\WholesaleNewOrderNotificationMail;
 use App\Mail\WholesaleOrderConfirmationMail;
+use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Creator;
@@ -242,7 +243,7 @@ class StoreController extends Controller
         ])->all();
 
         return Inertia::render('store/orders/OrderListPage', [
-            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'creator' => $this->transformCreatorForStoreHeader($creator),
             'orders' => $orders,
             'orderStatusOptions' => $orderStatusOptions,
         ]);
@@ -316,7 +317,7 @@ class StoreController extends Controller
             'discount_amount' => $order->discount_amount !== null ? (float) $order->discount_amount : null,
             'tax_amount' => $order->tax_amount !== null ? (float) $order->tax_amount : null,
             'total_amount' => $order->total_amount !== null ? (float) $order->total_amount : null,
-            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'creator' => $this->transformCreatorForStoreHeader($creator),
             'skein_count' => $skeinCount,
             'colorway_count' => $colorwayCount,
             'items_by_colorway' => $itemsByColorway,
@@ -339,7 +340,15 @@ class StoreController extends Controller
         $this->authorize('viewCreatorOrders', [$store, $creator]);
 
         $pivot = $store->creators()->where('creator_id', $creator->id)->first()?->pivot;
-        $discountRate = $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : null;
+
+        $wholesaleTerms = [
+            'discount_rate' => $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : null,
+            'minimum_order_quantity' => $pivot?->minimum_order_quantity !== null ? (int) $pivot->minimum_order_quantity : null,
+            'minimum_order_value' => $pivot?->minimum_order_value !== null ? (float) $pivot->minimum_order_value : null,
+            'allows_preorders' => (bool) ($pivot?->allows_preorders ?? false),
+            'payment_terms' => $pivot?->payment_terms,
+            'lead_time_days' => $pivot?->lead_time_days !== null ? (int) $pivot->lead_time_days : null,
+        ];
 
         $colorways = Colorway::query()
             ->where('account_id', $creator->account_id)
@@ -356,10 +365,10 @@ class StoreController extends Controller
         $collectionsData = $collections->map(fn ($c) => ['id' => $c->id, 'name' => $c->name])->all();
 
         return Inertia::render('store/orders/ColorwaySelectionPage', [
-            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'creator' => $this->transformCreatorForStoreHeader($creator),
             'colorways' => $colorwaysData,
             'collections' => $collectionsData,
-            'discount_rate' => $discountRate,
+            'wholesale_terms' => $wholesaleTerms,
         ]);
     }
 
@@ -379,7 +388,9 @@ class StoreController extends Controller
         $this->authorize('viewCreatorOrders', [$store, $creator]);
 
         $pivot = $store->creators()->where('creator_id', $creator->id)->first()?->pivot;
-        $discountRate = $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : 0;
+        $discountRate = $pivot?->discount_rate !== null
+            ? $this->discountRateForCalculation((float) $pivot->discount_rate)
+            : 0;
 
         $colorwayIds = $this->parseColorwayIdsFromQuery();
         $draftOrderId = request()->query('draft');
@@ -444,17 +455,25 @@ class StoreController extends Controller
             ->with(['inventories.base', 'media'])
             ->get();
 
-        $colorwaysData = $this->transformColorwaysForOrderStep2($colorways, $discountRate);
+        $bases = Base::query()
+            ->where('account_id', $creator->account_id)
+            ->where('status', BaseStatus::Active)
+            ->orderBy('code')
+            ->get();
+
+        $colorwaysData = $this->transformColorwaysForOrderStep2($colorways, $bases, $discountRate);
 
         $wholesaleTerms = [
             'discount_rate' => $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : null,
             'minimum_order_quantity' => $pivot?->minimum_order_quantity !== null ? (int) $pivot->minimum_order_quantity : null,
             'minimum_order_value' => $pivot?->minimum_order_value !== null ? (float) $pivot->minimum_order_value : null,
             'allows_preorders' => (bool) ($pivot?->allows_preorders ?? false),
+            'payment_terms' => $pivot?->payment_terms,
+            'lead_time_days' => $pivot?->lead_time_days !== null ? (int) $pivot->lead_time_days : null,
         ];
 
         return Inertia::render('store/orders/BaseQuantitySelectionPage', [
-            'creator' => ['id' => $creator->id, 'name' => $creator->name],
+            'creator' => $this->transformCreatorForStoreHeader($creator),
             'colorways' => $colorwaysData,
             'wholesale_terms' => $wholesaleTerms,
             'draft' => $draft,
@@ -470,7 +489,9 @@ class StoreController extends Controller
         $this->authorize('viewCreatorOrders', [$store, $creator]);
 
         $pivot = $store->creators()->where('creator_id', $creator->id)->first()?->pivot;
-        $discountRate = $pivot?->discount_rate !== null ? (float) $pivot->discount_rate : 0;
+        $discountRate = $pivot?->discount_rate !== null
+            ? $this->discountRateForCalculation((float) $pivot->discount_rate)
+            : 0;
 
         $items = collect($request->input('items', []))->filter(fn ($item) => (int) ($item['quantity'] ?? 0) > 0)->all();
 
@@ -635,37 +656,56 @@ class StoreController extends Controller
     }
 
     /**
+     * @return array{id: int, name: string, email: string|null, phone: string|null, address_line1: string|null, address_line2: string|null, city: string|null, state_region: string|null, postal_code: string|null, country_code: string|null}
+     */
+    private function transformCreatorForStoreHeader(Creator $creator): array
+    {
+        return [
+            'id' => $creator->id,
+            'name' => $creator->name,
+            'email' => $creator->email,
+            'phone' => $creator->phone,
+            'address_line1' => $creator->address_line1,
+            'address_line2' => $creator->address_line2,
+            'city' => $creator->city,
+            'state_region' => $creator->state_region,
+            'postal_code' => $creator->postal_code,
+            'country_code' => $creator->country_code,
+        ];
+    }
+
+    /**
      * @param  SupportCollection<int, Colorway>  $colorways
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Base>  $accountBases
      * @return array<int, array<string, mixed>>
      */
-    private function transformColorwaysForOrderStep2(SupportCollection $colorways, float $discountRate): array
+    private function transformColorwaysForOrderStep2(SupportCollection $colorways, \Illuminate\Database\Eloquent\Collection $accountBases, float $discountRate): array
     {
         $items = [];
 
         foreach ($colorways as $colorway) {
-            $basesByBaseId = $colorway->inventories->groupBy('base_id');
             $bases = [];
-            foreach ($basesByBaseId as $inventoriesForBase) {
-                $inventory = $inventoriesForBase->first();
-                $base = $inventory->base;
-                if (! $base || $base->status !== BaseStatus::Active) {
-                    continue;
-                }
+            foreach ($accountBases as $base) {
+                $inventory = $colorway->inventories->firstWhere('base_id', $base->id);
+                $inventoryQuantity = $inventory !== null ? $inventory->quantity : 0;
+
                 $retailPrice = $base->retail_price !== null ? (float) $base->retail_price : 0;
                 $wholesalePrice = round($retailPrice * (1 - $discountRate), 2);
+
                 $bases[] = [
                     'id' => $base->id,
                     'descriptor' => $base->descriptor,
                     'weight' => $base->weight?->value,
                     'retail_price' => $retailPrice,
                     'wholesale_price' => $wholesalePrice,
-                    'inventory_quantity' => $inventory->quantity,
+                    'inventory_quantity' => $inventoryQuantity,
                 ];
             }
 
             $items[] = [
                 'id' => $colorway->id,
                 'name' => $colorway->name,
+                'per_pan' => (int) $colorway->per_pan,
                 'primary_image_url' => $colorway->primary_image_url,
                 'bases' => $bases,
             ];
@@ -1076,6 +1116,15 @@ class StoreController extends Controller
         }
 
         return redirect()->route('stores.index');
+    }
+
+    /**
+     * Convert stored discount_rate to decimal 0–1 for price calculations.
+     * Handles both decimal storage (0.40) and legacy percentage storage (40).
+     */
+    private function discountRateForCalculation(float $stored): float
+    {
+        return $stored <= 1 ? $stored : $stored / 100;
     }
 
     /**

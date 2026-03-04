@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import PageFilter from '@/components/PageFilter.vue';
+import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
+import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiDataTable from '@/components/ui/UiDataTable.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
+import UiLink from '@/components/ui/UiLink.vue';
 import UiTag from '@/components/ui/UiTag.vue';
 import StoreLayout from '@/layouts/StoreLayout.vue';
-import { Link, router } from '@inertiajs/vue3';
+import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Order {
@@ -18,7 +21,17 @@ interface Order {
 }
 
 interface Props {
-    creator: { id: number; name: string };
+    creator: {
+        id: number;
+        name: string;
+        email: string | null;
+        phone: string | null;
+        address_line1: string | null;
+        address_line2: string | null;
+        city: string | null;
+        state_region: string | null;
+        postal_code: string | null;
+    };
     orders: Order[];
     orderStatusOptions: Array<{ label: string; value: string }>;
 }
@@ -88,6 +101,10 @@ function getOrderStatusSeverity(
     }
 }
 
+function handleNewOrder(): void {
+    router.visit(`/store/${props.creator.id}/order`);
+}
+
 function handleStatusFilterChange(value: string): void {
     statusFilter.value = value;
     router.get(
@@ -134,16 +151,15 @@ const columns = computed(() => [
         columnKey: 'colorway_count',
         bodyTemplate: (data: Order) => data.colorway_count.toString(),
     },
-    {
-        header: '',
-        sortable: false,
-        columnKey: 'actions',
-    },
 ]);
 </script>
 
 <template>
     <StoreLayout :page-title="`Orders — ${props.creator.name}`">
+        <CreatorPageHeader :creator="props.creator">
+            <UiButton label="New Order" size="large" @click="handleNewOrder" />
+        </CreatorPageHeader>
+
         <UiCard>
             <template #title>
                 <PageFilter
@@ -196,20 +212,20 @@ const columns = computed(() => [
                         />
                     </template>
                     <template #actions="{ data }">
-                        <Link
+                        <UiLink
                             v-if="data.status === 'draft'"
                             :href="`/store/${props.creator.id}/order/${data.id}`"
                             class="text-primary hover:underline"
                         >
                             Continue Order
-                        </Link>
-                        <Link
+                        </UiLink>
+                        <UiLink
                             v-else
                             :href="`/store/orders/${data.id}`"
                             class="text-primary hover:underline"
                         >
                             View Order
-                        </Link>
+                        </UiLink>
                     </template>
                 </UiDataTable>
             </template>

@@ -3,10 +3,12 @@ import {
     saveOrder,
     submitOrder,
 } from '@/actions/App/Http/Controllers/StoreController';
+import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
+import UiInputNumber from '@/components/ui/UiInputNumber.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import StoreLayout from '@/layouts/StoreLayout.vue';
 import { router, usePage } from '@inertiajs/vue3';
@@ -24,6 +26,7 @@ interface BaseItem {
 interface ColorwayItem {
     id: number;
     name: string;
+    per_pan: number;
     primary_image_url: string | null;
     bases: BaseItem[];
 }
@@ -33,6 +36,8 @@ interface WholesaleTerms {
     minimum_order_quantity: number | null;
     minimum_order_value: number | null;
     allows_preorders: boolean;
+    payment_terms: string | null;
+    lead_time_days: number | null;
 }
 
 interface DraftItem {
@@ -81,6 +86,12 @@ function formatCurrency(value: number | null | undefined): string {
     }).format(value);
 }
 
+function formatDiscountRate(value: number | null | undefined): string {
+    if (value === null || value === undefined) return '—';
+    const percent = value <= 1 ? Math.round(value * 100) : Math.round(value);
+    return `${percent}%`;
+}
+
 const visibleColorways = computed(() =>
     props.colorways.filter((cw) => visibleColorwayIds.value.includes(cw.id)),
 );
@@ -88,6 +99,15 @@ const visibleColorways = computed(() =>
 const skeinCount = computed(() => {
     return Object.values(quantities.value).reduce((sum, qty) => sum + qty, 0);
 });
+
+function skeinCountForColorway(cw: ColorwayItem): number {
+    return cw.bases.reduce(
+        (sum, base) =>
+            sum +
+            (quantities.value[getQuantityKey(cw.id, base.id)] ?? 0),
+        0,
+    );
+}
 
 function lineTotal(colorwayId: number, baseId: number): number {
     const base = props.colorways
@@ -161,9 +181,14 @@ function goBack(): void {
 }
 
 function isInputDisabled(base: BaseItem): boolean {
-    return (
-        !props.wholesale_terms.allows_preorders && base.inventory_quantity === 0
-    );
+    console.log('base.inventory_quantity', base.inventory_quantity);
+    
+    if (base.inventory_quantity === 0) {
+        console.log('isInputDisabled', props.wholesale_terms.allows_preorders);
+        return !props.wholesale_terms.allows_preorders;
+    }
+    console.log('isInputDisabled: false');
+    return false;
 }
 
 function initFromDraft(): void {
@@ -254,115 +279,186 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
 
 <template>
     <StoreLayout :page-title="`Order — ${props.creator.name}`">
-        <div class="space-y-6">
-            <h1 class="text-2xl font-semibold">
-                Base &amp; Quantity Selection
-            </h1>
-            <p class="text-muted-foreground">
-                Order for {{ props.creator.name }}
-            </p>
+        <CreatorPageHeader
+            :creator="props.creator"
+            :back-url="`/store/${props.creator.id}/order`"
+        />
 
-            <div v-if="!hasVisibleColorways" class="space-y-4">
-                <div
-                    class="rounded-lg border border-dashed border-surface-300 py-12 text-center text-sm text-surface-500"
-                >
-                    No colorways selected. Go back to select colorways.
-                </div>
-                <UiButton label="Back" severity="secondary" @click="goBack" />
-            </div>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <!-- Left panel: base quantity selection -->
+            <div class="flex flex-col gap-4 lg:col-span-2">
+                <UiCard>
+                    <template #title>
+                        Base &amp; Quantity Selection
+                    </template>
 
-            <template v-else>
-                <div class="space-y-6">
-                    <UiCard
-                        v-for="cw in visibleColorways"
-                        :key="cw.id"
-                        class="overflow-hidden"
-                    >
-                        <template #title>
+                    <template #content>
+                        <div
+                            v-if="!hasVisibleColorways"
+                            class="space-y-4"
+                        >
                             <div
-                                class="flex items-center justify-between gap-4"
+                                class="rounded-lg border border-dashed border-surface-300 py-12 text-center text-sm text-surface-500"
                             >
-                                <div class="flex items-center gap-4">
-                                    <div
-                                        class="h-16 w-16 shrink-0 overflow-hidden rounded bg-surface-200"
-                                    >
-                                        <img
-                                            v-if="cw.primary_image_url"
-                                            :src="cw.primary_image_url"
-                                            :alt="cw.name"
-                                            class="h-full w-full object-cover"
-                                        />
-                                        <div
-                                            v-else
-                                            class="flex h-full w-full items-center justify-center text-surface-400"
-                                        >
-                                            —
-                                        </div>
-                                    </div>
-                                    <span class="font-medium">{{
-                                        cw.name
-                                    }}</span>
-                                </div>
-                                <UiButton
-                                    label="Remove"
-                                    size="small"
-                                    severity="secondary"
-                                    outlined
-                                    @click="removeColorway(cw.id)"
-                                />
+                                No colorways selected. Go back to select
+                                colorways.
                             </div>
-                        </template>
+                            <UiButton
+                                label="Back"
+                                severity="secondary"
+                                @click="goBack"
+                            />
+                        </div>
 
-                        <template #content>
-                            <div
-                                class="flex flex-col gap-4 sm:flex-row sm:flex-wrap"
-                            >
+                        <template v-else>
+                            <div class="flex flex-col gap-4">
                                 <div
-                                    v-for="base in cw.bases"
-                                    :key="base.id"
-                                    class="flex min-w-0 flex-1 flex-col gap-1 rounded border border-surface-200 bg-surface-50 p-3 sm:min-w-[180px]"
+                                    v-for="cw in visibleColorways"
+                                    :key="cw.id"
+                                    class="flex flex-col gap-2 rounded-lg border border-surface-200 p-4 transition-colors hover:bg-surface-50"
                                 >
                                     <div
-                                        class="text-sm font-medium text-surface-700"
+                                        class="flex items-center justify-between gap-4"
                                     >
-                                        {{ base.descriptor }}
-                                        <span
-                                            v-if="base.weight"
-                                            class="font-normal text-surface-500"
+                                        <div class="font-semibold text-surface-900">
+                                            {{ cw.name }}
+                                            <span class="text-surface-500">
+                                                ({{ skeinCountForColorway(cw) }})
+                                            </span>
+                                            <span
+                                                v-if="cw.per_pan > 0"
+                                                class="ml-2 text-surface-500 font-normal"
+                                            >
+                                                {{ cw.per_pan }} skeins per pan
+                                            </span>
+                                        </div>
+                                        <UiButton
+                                            label="Remove"
+                                            size="small"
+                                            severity="secondary"
+                                            outlined
+                                            @click="removeColorway(cw.id)"
+                                        />
+                                    </div>
+                                    <div
+                                        class="scrollbar-thin flex gap-4 overflow-x-auto pb-2"
+                                        @click.stop
+                                    >
+                                        <div
+                                            v-for="base in cw.bases"
+                                            :key="base.id"
+                                            class="relative flex min-w-[160px] shrink-0 flex-col gap-2 rounded border p-3 transition-opacity"
+                                            :class="
+                                                base.inventory_quantity === 0
+                                                    ? 'border-surface-200 bg-surface-100 opacity-60'
+                                                    : 'border-surface-200 bg-surface-50'
+                                            "
                                         >
-                                            ({{ formatEnum(base.weight) }})
-                                        </span>
-                                    </div>
-                                    <div class="text-sm text-primary-600">
-                                        {{
-                                            formatCurrency(base.wholesale_price)
-                                        }}
-                                    </div>
-                                    <input
-                                        v-model.number="
-                                            quantities[
-                                                getQuantityKey(cw.id, base.id)
-                                            ]
-                                        "
-                                        type="number"
-                                        min="0"
-                                        step="1"
-                                        :disabled="isInputDisabled(base)"
-                                        class="w-20 rounded border border-surface-300 bg-surface-0 px-2 py-1 text-sm disabled:bg-surface-100 disabled:opacity-60"
-                                    />
-                                    <div class="text-xs text-surface-500">
-                                        {{ base.inventory_quantity }} available
+                                            <div
+                                                v-if="isInputDisabled(base)"
+                                                class="absolute inset-0 z-10 cursor-not-allowed rounded"
+                                                aria-hidden
+                                            />
+                                            <div
+                                                class="text-sm font-medium"
+                                                :class="
+                                                    base.inventory_quantity === 0
+                                                        ? 'text-surface-500'
+                                                        : 'text-surface-700'
+                                                "
+                                            >
+                                                {{ base.descriptor }}
+                                                <span
+                                                    v-if="base.weight"
+                                                    class="font-normal text-surface-500"
+                                                >
+                                                    ({{
+                                                        formatEnum(
+                                                            base.weight,
+                                                        )
+                                                    }})
+                                                </span>
+                                            </div>
+                                            <div class="inline-flex">
+                                                <UiInputNumber
+                                                    :model-value="
+                                                        quantities[
+                                                            getQuantityKey(
+                                                                cw.id,
+                                                                base.id,
+                                                            )
+                                                        ] ?? 0
+                                                    "
+                                                    :min="0"
+                                                    :step="
+                                                        cw.per_pan > 0
+                                                            ? cw.per_pan
+                                                            : 1
+                                                    "
+                                                    :disabled="
+                                                        isInputDisabled(base)
+                                                    "
+                                                    show-buttons
+                                                    button-layout="horizontal"
+                                                    size="small"
+                                                    @update:model-value="
+                                                        quantities[
+                                                            getQuantityKey(
+                                                                cw.id,
+                                                                base.id,
+                                                            )
+                                                        ] =
+                                                            $event ?? 0
+                                                    "
+                                                />
+                                            </div>
+                                            <div class="flex justify-between items-center">
+                                                <p
+                                                    class="text-sm"
+                                                    :class="
+                                                        base.inventory_quantity === 0
+                                                            ? 'text-surface-500'
+                                                            : 'text-primary-600'
+                                                    "
+                                                >
+                                                    {{
+                                                        formatCurrency(
+                                                            base.wholesale_price,
+                                                        )
+                                                    }}
+                                                </p>
+                                                <p
+                                                    class="text-xs text-surface-500"
+                                                >
+                                                    {{
+                                                        base.inventory_quantity
+                                                    }}
+                                                    available
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </template>
-                    </UiCard>
-                </div>
+                    </template>
+                </UiCard>
+            </div>
 
+            <!-- Right panel: order details -->
+            <div
+                class="lg:sticky lg:top-4 lg:col-span-1 lg:self-start"
+            >
                 <UiCard>
-                    <template #title>Order details</template>
+                    <template #title>Order Details</template>
                     <template #content>
-                        <div class="space-y-4">
+                        <div
+                            v-if="!hasVisibleColorways"
+                            class="rounded border border-dashed border-surface-200 py-6 text-center text-sm text-surface-500"
+                        >
+                            Select colorways to see order details
+                        </div>
+                        <div v-else class="space-y-4">
                             <UiForm
                                 :initial-values="{
                                     order_id: saveInitialValues.order_id,
@@ -370,6 +466,119 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                 }"
                                 @submit="handleSaveSubmit"
                             >
+                                <div class="text-sm">
+                                    <div>
+                                        <div
+                                            v-if="
+                                                wholesale_terms.minimum_order_quantity !=
+                                                    null &&
+                                                wholesale_terms.minimum_order_value !=
+                                                    null
+                                            "
+                                            class="flex justify-between"
+                                        >
+                                            <span class="text-surface-600"
+                                                >Minimum Order</span
+                                            >
+                                            <span>{{
+                                                wholesale_terms.minimum_order_quantity
+                                            }}
+                                                skeins /
+                                                {{
+                                                    formatCurrency(
+                                                        wholesale_terms.minimum_order_value,
+                                                    )
+                                                }}</span>
+                                        </div>
+                                        <div
+                                            v-if="
+                                                wholesale_terms.discount_rate !=
+                                                null
+                                            "
+                                            class="flex justify-between"
+                                        >
+                                            <span class="text-surface-600"
+                                                >Discount Rate</span
+                                            >
+                                            <span>{{
+                                                formatDiscountRate(
+                                                    wholesale_terms.discount_rate,
+                                                )
+                                            }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-surface-600"
+                                                >Allow Preorder</span
+                                            >
+                                            <span>{{
+                                                wholesale_terms.allows_preorders
+                                                    ? 'Yes'
+                                                    : 'No'
+                                            }}</span>
+                                        </div>
+                                        <div
+                                            v-if="
+                                                wholesale_terms.lead_time_days !=
+                                                null
+                                            "
+                                            class="flex justify-between"
+                                        >
+                                            <span class="text-surface-600"
+                                                >Lead Time</span
+                                            >
+                                            <span>{{
+                                                wholesale_terms.lead_time_days
+                                            }}
+                                                days</span>
+                                        </div>
+                                        <div
+                                            v-if="
+                                                wholesale_terms.payment_terms
+                                            "
+                                            class="flex justify-between"
+                                        >
+                                            <span class="text-surface-600"
+                                                >Deposit Due</span
+                                            >
+                                            <span>{{
+                                                wholesale_terms.payment_terms
+                                            }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-6 mb-3 flex justify-between">
+                                        <span class="text-surface-600"
+                                            >Total Skeins</span
+                                        >
+                                        <span>{{ skeinCount }}</span>
+                                    </div>
+
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between">
+                                            <span class="text-surface-600"
+                                                >Subtotal</span
+                                            >
+                                            <span>{{
+                                                formatCurrency(subtotal)
+                                            }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-surface-600"
+                                                >Tax</span
+                                            >
+                                            <span>{{ formatCurrency(0) }}</span>
+                                        </div>
+                                        <div
+                                            class="flex justify-between border-t border-surface-200 pt-2 font-medium"
+                                        >
+                                            <span>Total</span>
+                                            <span>{{
+                                                formatCurrency(total)
+                                            }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <UiFormField
                                     name="notes"
                                     label="Order notes"
@@ -384,114 +593,14 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                     />
                                 </UiFormField>
 
-                                <div class="space-y-2">
-                                    <div
-                                        v-if="
-                                            wholesale_terms.minimum_order_quantity !=
-                                            null
-                                        "
-                                        class="text-sm"
-                                        :class="
-                                            skeinCount >=
-                                            (wholesale_terms.minimum_order_quantity ??
-                                                0)
-                                                ? 'text-green-600'
-                                                : 'text-surface-600'
-                                        "
-                                    >
-                                        Skeins: {{ skeinCount }} /
-                                        {{
-                                            wholesale_terms.minimum_order_quantity
-                                        }}
-                                    </div>
-                                    <div
-                                        v-if="
-                                            wholesale_terms.minimum_order_value !=
-                                            null
-                                        "
-                                        class="text-sm"
-                                        :class="
-                                            subtotal >=
-                                            (wholesale_terms.minimum_order_value ??
-                                                0)
-                                                ? 'text-green-600'
-                                                : 'text-surface-600'
-                                        "
-                                    >
-                                        Total:
-                                        {{ formatCurrency(subtotal) }} /
-                                        {{
-                                            formatCurrency(
-                                                wholesale_terms.minimum_order_value,
-                                            )
-                                        }}
-                                    </div>
-                                    <div
-                                        v-if="minQtyError || minValError"
-                                        class="text-sm text-red-600"
-                                    >
-                                        <span v-if="minQtyError">{{
-                                            minQtyError
-                                        }}</span>
-                                        <span
-                                            v-if="minQtyError && minValError"
-                                            class="mx-1"
-                                        >
-                                            &bull;
-                                        </span>
-                                        <span v-if="minValError">{{
-                                            minValError
-                                        }}</span>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 space-y-1 text-sm">
-                                    <div class="flex justify-between">
-                                        <span class="text-surface-600"
-                                            >Subtotal</span
-                                        >
-                                        <span>{{
-                                            formatCurrency(subtotal)
-                                        }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-surface-600"
-                                            >Shipping</span
-                                        >
-                                        <span>{{ formatCurrency(0) }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-surface-600"
-                                            >Discount</span
-                                        >
-                                        <span>{{ formatCurrency(0) }}</span>
-                                    </div>
-                                    <div class="flex justify-between">
-                                        <span class="text-surface-600"
-                                            >Tax</span
-                                        >
-                                        <span>{{ formatCurrency(0) }}</span>
-                                    </div>
-                                    <div
-                                        class="flex justify-between border-t border-surface-200 pt-2 font-medium"
-                                    >
-                                        <span>Total</span>
-                                        <span>{{ formatCurrency(total) }}</span>
-                                    </div>
-                                </div>
-
                                 <div
-                                    class="mt-6 flex flex-wrap items-center gap-3"
+                                    class="mt-6 flex flex-wrap items-center justify-between gap-2"
                                 >
-                                    <UiButton
-                                        label="Back"
-                                        severity="secondary"
-                                        outlined
-                                        @click="goBack"
-                                    />
                                     <UiButton
                                         type="submit"
                                         label="Save as Draft"
+                                        severity="secondary"
+                                        outlined
                                         :disabled="!hasVisibleColorways"
                                         :loading="saveForm.processing"
                                     />
@@ -510,7 +619,7 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                         </div>
                     </template>
                 </UiCard>
-            </template>
+            </div>
         </div>
     </StoreLayout>
 </template>
