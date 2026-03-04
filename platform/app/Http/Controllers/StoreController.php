@@ -274,7 +274,8 @@ class StoreController extends Controller
             'account.creator',
         ]);
 
-        $creator = $order->account->creator;
+        $creator = $order->account?->creator
+            ?? $store->creators()->where('account_id', $order->account_id)->first();
         if (! $creator) {
             abort(404);
         }

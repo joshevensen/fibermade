@@ -214,7 +214,7 @@ const columns = computed(() => [
                     <template #actions="{ data }">
                         <UiLink
                             v-if="data.status === 'draft'"
-                            :href="`/store/${props.creator.id}/order/${data.id}`"
+                            :href="`/store/${props.creator.id}/order/review?draft=${data.id}`"
                             class="text-primary hover:underline"
                         >
                             Continue Order

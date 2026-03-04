@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
 import PageFilter from '@/components/PageFilter.vue';
+import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
@@ -292,7 +292,9 @@ function handleContinue(): void {
                                                 {{
                                                     cw.collections.length > 0
                                                         ? cw.collections
-                                                              .map((c) => c.name)
+                                                              .map(
+                                                                  (c) => c.name,
+                                                              )
                                                               .join(', ')
                                                         : '—'
                                                 }}
@@ -309,13 +311,13 @@ function handleContinue(): void {
                                                         : '—'
                                                 }}
                                             </div>
-                                            <div>
-                                                Technique: Variegated
-                                            </div>
+                                            <div>Technique: Variegated</div>
                                             <button
                                                 type="button"
                                                 class="mt-2 block text-sm text-primary-600 hover:underline"
-                                                @click.stop="toggleExpanded(cw.id)"
+                                                @click.stop="
+                                                    toggleExpanded(cw.id)
+                                                "
                                             >
                                                 Show less
                                             </button>
@@ -344,7 +346,10 @@ function handleContinue(): void {
                                 </div>
 
                                 <div
-                                    v-if="expandedId === cw.id && (cw.description || cw.bases.length > 0)"
+                                    v-if="
+                                        expandedId === cw.id &&
+                                        (cw.description || cw.bases.length > 0)
+                                    "
                                     class="border-t border-surface-100 px-4 py-3"
                                 >
                                     <p
@@ -379,7 +384,8 @@ function handleContinue(): void {
                                             <span>
                                                 <template
                                                     v-if="
-                                                        wholesale_terms.discount_rate != null &&
+                                                        wholesale_terms.discount_rate !=
+                                                            null &&
                                                         base.retail_price !=
                                                             null
                                                     "
@@ -446,20 +452,20 @@ function handleContinue(): void {
                                     <span class="text-surface-600"
                                         >Minimum Order</span
                                     >
-                                    <span>{{
-                                        wholesale_terms.minimum_order_quantity
-                                    }}
+                                    <span
+                                        >{{
+                                            wholesale_terms.minimum_order_quantity
+                                        }}
                                         skeins /
                                         {{
                                             formatCurrency(
                                                 wholesale_terms.minimum_order_value,
                                             )
-                                        }}</span>
+                                        }}</span
+                                    >
                                 </div>
                                 <div
-                                    v-if="
-                                        wholesale_terms.discount_rate != null
-                                    "
+                                    v-if="wholesale_terms.discount_rate != null"
                                     class="flex justify-between"
                                 >
                                     <span class="text-surface-600"
@@ -490,10 +496,12 @@ function handleContinue(): void {
                                     <span class="text-surface-600"
                                         >Lead Time</span
                                     >
-                                    <span>{{
-                                        wholesale_terms.lead_time_days
-                                    }}
-                                        days</span>
+                                    <span
+                                        >{{
+                                            wholesale_terms.lead_time_days
+                                        }}
+                                        days</span
+                                    >
                                 </div>
                                 <div
                                     v-if="wholesale_terms.payment_terms"
@@ -530,19 +538,17 @@ function handleContinue(): void {
                                             size="small"
                                             severity="secondary"
                                             outlined
-                                            @click.stop="
-                                                removeSelected(cw.id)
-                                            "
+                                            @click.stop="removeSelected(cw.id)"
                                         />
                                     </div>
                                 </div>
 
-                                    <div class="mt-2 mb-4 flex justify-between">
-                                        <span class="text-surface-600"
-                                            >Colorways</span
-                                        >
-                                        <span>{{ selectedIds.size }}</span>
-                                    </div>
+                                <div class="mt-2 mb-4 flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Colorways</span
+                                    >
+                                    <span>{{ selectedIds.size }}</span>
+                                </div>
 
                                 <UiButton
                                     label="Continue"

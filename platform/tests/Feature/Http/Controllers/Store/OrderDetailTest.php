@@ -94,6 +94,55 @@ test('store can view own order', function () {
     );
 });
 
+test('store can view own draft order', function () {
+    $storeAccount = Account::factory()->storeType()->create();
+    $store = Store::factory()->create(['account_id' => $storeAccount->id]);
+    $user = User::factory()->create(['account_id' => $storeAccount->id]);
+
+    $creatorAccount = Account::factory()->creator()->create();
+    $creator = Creator::factory()->create(['account_id' => $creatorAccount->id]);
+    $store->creators()->attach($creator->id, ['status' => 'active']);
+
+    $colorway = Colorway::factory()->create([
+        'account_id' => $creator->account_id,
+        'status' => ColorwayStatus::Active,
+    ]);
+    $base = Base::factory()->create([
+        'account_id' => $creator->account_id,
+        'status' => BaseStatus::Active,
+        'descriptor' => 'Merino Worsted',
+    ]);
+
+    $order = Order::factory()->create([
+        'account_id' => $creator->account_id,
+        'type' => OrderType::Wholesale,
+        'status' => OrderStatus::Draft,
+        'orderable_type' => Store::class,
+        'orderable_id' => $store->id,
+        'subtotal_amount' => 60,
+        'total_amount' => 60,
+    ]);
+    OrderItem::factory()->create([
+        'order_id' => $order->id,
+        'colorway_id' => $colorway->id,
+        'base_id' => $base->id,
+        'quantity' => 3,
+        'unit_price' => 20,
+        'line_total' => 60,
+    ]);
+
+    $response = $this->actingAs($user)->get(route('store.orders.show', ['order' => $order->id]));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('store/orders/OrderDetailPage')
+        ->has('id')
+        ->where('status', 'draft')
+        ->has('creator')
+        ->where('creator.id', $creator->id)
+    );
+});
+
 test('store cannot view another store order', function () {
     $storeAAccount = Account::factory()->storeType()->create();
     $storeA = Store::factory()->create(['account_id' => $storeAAccount->id]);

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import CreatorPageHeader from '@/components/store/CreatorPageHeader.vue';
-import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-import UiTag from '@/components/ui/UiTag.vue';
 import StoreLayout from '@/layouts/StoreLayout.vue';
 
 interface BaseItem {
@@ -42,7 +40,6 @@ interface Props {
 const props = defineProps<Props>();
 
 const STATUS_STEPS = [
-    'draft',
     'open',
     'accepted',
     'fulfilled',
@@ -70,27 +67,6 @@ function formatCurrency(value: number | null | undefined): string {
     }).format(value);
 }
 
-function getOrderStatusSeverity(
-    status: string,
-): 'success' | 'info' | 'secondary' | 'warn' | 'danger' | 'contrast' {
-    switch (status) {
-        case 'draft':
-            return 'secondary';
-        case 'open':
-            return 'info';
-        case 'accepted':
-            return 'info';
-        case 'fulfilled':
-            return 'success';
-        case 'delivered':
-            return 'success';
-        case 'cancelled':
-            return 'danger';
-        default:
-            return 'secondary';
-    }
-}
-
 function isStepCompleted(stepIndex: number): boolean {
     if (props.status === 'cancelled') return false;
     const stepOrder = STATUS_STEPS.indexOf(
@@ -113,68 +89,16 @@ function isStepActive(stepIndex: number): boolean {
             :back-url="`/store/${props.creator.id}/orders`"
         />
 
-        <div class="space-y-6">
-            <h1 class="text-2xl font-semibold">Order Detail</h1>
-
-            <div
-                class="flex flex-wrap items-center gap-4 text-sm text-surface-600"
-            >
-                <span>Order date: {{ formatDate(props.order_date) }}</span>
-                <span>Creator: {{ props.creator.name }}</span>
-                <span
-                    >{{ props.skein_count }} skeins,
-                    {{ props.colorway_count }} colorways</span
-                >
-            </div>
-
-            <div class="flex items-center gap-3">
-                <UiTag
-                    :severity="getOrderStatusSeverity(props.status)"
-                    :value="formatEnum(props.status)"
-                />
-                <div
-                    v-if="props.status === 'cancelled'"
-                    class="text-sm font-medium text-surface-600"
-                >
-                    This order has been cancelled
-                </div>
-            </div>
-
-            <div
-                v-if="props.status !== 'cancelled'"
-                class="flex flex-wrap items-center gap-2"
-            >
-                <template v-for="(step, index) in STATUS_STEPS" :key="step">
-                    <span
-                        class="rounded px-2 py-1 text-xs font-medium"
-                        :class="{
-                            'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-200':
-                                isStepActive(index),
-                            'bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400':
-                                isStepCompleted(index),
-                            'bg-surface-50 text-surface-400 dark:bg-surface-900 dark:text-surface-500':
-                                !isStepCompleted(index) && !isStepActive(index),
-                        }"
-                    >
-                        {{ formatEnum(step) }}
-                    </span>
-                    <span
-                        v-if="index < STATUS_STEPS.length - 1"
-                        class="text-surface-300 dark:text-surface-600"
-                    >
-                        →
-                    </span>
-                </template>
-            </div>
-
-            <div class="space-y-6">
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <main class="min-w-0 space-y-6 lg:col-span-2">
+                <h2 class="sr-only">Colorways in this order</h2>
                 <UiCard
                     v-for="group in props.items_by_colorway"
                     :key="group.colorway.id"
                     class="overflow-hidden"
                 >
-                    <template #title>
-                        <div class="flex items-center gap-4">
+                    <template #content>
+                        <div class="flex gap-4">
                             <div
                                 class="h-16 w-16 shrink-0 overflow-hidden rounded bg-surface-200"
                             >
@@ -191,96 +115,157 @@ function isStepActive(stepIndex: number): boolean {
                                     —
                                 </div>
                             </div>
-                            <span class="font-medium">{{
-                                group.colorway.name
-                            }}</span>
+                            <div class="min-w-0 flex-1 flex flex-col gap-1">
+                                <span class="font-medium">{{
+                                    group.colorway.name
+                                }}</span>
+                                <p class="text-sm text-surface-600">
+                                    <template
+                                        v-for="(base, idx) in group.bases"
+                                        :key="base.id"
+                                    >
+                                        <span v-if="idx > 0"> · </span>
+                                        <span>
+                                            {{ base.descriptor }}<span
+                                                v-if="base.weight"
+                                                class="text-surface-500"
+                                            >
+                                                ({{ formatEnum(base.weight) }})
+                                            </span>
+                                            {{ base.quantity }} ×
+                                            {{ formatCurrency(base.unit_price) }}
+                                            =
+                                            {{ formatCurrency(base.line_total) }}
+                                        </span>
+                                    </template>
+                                </p>
+                            </div>
                         </div>
                     </template>
+                </UiCard>
+            </main>
 
+            <aside
+                class="min-w-0 lg:sticky lg:top-6 lg:col-span-1 lg:self-start"
+            >
+                <UiCard>
+                    <template #title>Order details</template>
                     <template #content>
-                        <div
-                            class="flex flex-col gap-4 sm:flex-row sm:flex-wrap"
-                        >
-                            <div
-                                v-for="base in group.bases"
-                                :key="base.id"
-                                class="flex min-w-0 flex-1 flex-col gap-1 rounded border border-surface-200 bg-surface-50 p-3 sm:min-w-[180px]"
-                            >
-                                <div
-                                    class="text-sm font-medium text-surface-700"
-                                >
-                                    {{ base.descriptor }}
-                                    <span
-                                        v-if="base.weight"
-                                        class="font-normal text-surface-500"
+                        <div class="space-y-4">
+                            <div class="space-y-1 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Order date</span
                                     >
-                                        ({{ formatEnum(base.weight) }})
-                                    </span>
+                                    <span>{{
+                                        formatDate(props.order_date)
+                                    }}</span>
                                 </div>
-                                <div class="text-sm text-surface-600">
-                                    Qty: {{ base.quantity }} ×
-                                    {{ formatCurrency(base.unit_price) }} =
-                                    {{ formatCurrency(base.line_total) }}
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Colorways</span
+                                    >
+                                    <span>{{ props.colorway_count }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Skeins</span
+                                    >
+                                    <span>{{ props.skein_count }}</span>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="props.status === 'cancelled'"
+                                class="text-sm font-medium text-surface-600"
+                            >
+                                This order has been cancelled
+                            </div>
+
+                            <div
+                                v-if="props.status !== 'cancelled'"
+                                class="flex flex-wrap items-center gap-2"
+                            >
+                                <template
+                                    v-for="(step, index) in STATUS_STEPS"
+                                    :key="step"
+                                >
+                                    <span
+                                        class="rounded px-2 py-1 text-xs font-medium"
+                                        :class="{
+                                            'bg-primary-100 text-primary-800':
+                                                isStepActive(index),
+                                            'bg-surface-100 text-surface-600':
+                                                isStepCompleted(index),
+                                            'bg-surface-50 text-surface-400':
+                                                !isStepCompleted(index) &&
+                                                !isStepActive(index),
+                                        }"
+                                    >
+                                        {{ formatEnum(step) }}
+                                    </span>
+                                    <span
+                                        v-if="index < STATUS_STEPS.length - 1"
+                                        class="text-surface-300"
+                                    >
+                                        →
+                                    </span>
+                                </template>
+                            </div>
+
+                            <div
+                                v-if="props.notes"
+                                class="rounded border border-surface-200 bg-surface-50 p-3 text-sm"
+                            >
+                                <span
+                                    class="font-medium text-surface-700"
+                                    >Order notes:</span
+                                >
+                                <p class="mt-1 text-surface-600">
+                                    {{ props.notes }}
+                                </p>
+                            </div>
+
+                            <div class="space-y-1 border-t border-surface-200 pt-4 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Subtotal</span
+                                    >
+                                    <span>{{
+                                        formatCurrency(props.subtotal_amount)
+                                    }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Shipping</span
+                                    >
+                                    <span>{{
+                                        formatCurrency(
+                                            props.shipping_amount ?? 0,
+                                        )
+                                    }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-surface-600"
+                                        >Tax</span
+                                    >
+                                    <span>{{
+                                        formatCurrency(props.tax_amount ?? 0)
+                                    }}</span>
+                                </div>
+                                <div
+                                    class="flex justify-between border-t border-surface-200 pt-2 font-medium"
+                                >
+                                    <span>Total</span>
+                                    <span>{{
+                                        formatCurrency(props.total_amount)
+                                    }}</span>
                                 </div>
                             </div>
                         </div>
                     </template>
                 </UiCard>
-            </div>
-
-            <UiCard>
-                <template #title>Order summary</template>
-                <template #content>
-                    <div class="space-y-4">
-                        <div
-                            v-if="props.notes"
-                            class="rounded border border-surface-200 bg-surface-50 p-3 text-sm"
-                        >
-                            <span class="font-medium text-surface-700"
-                                >Order notes:</span
-                            >
-                            <p class="mt-1 text-surface-600">
-                                {{ props.notes }}
-                            </p>
-                        </div>
-
-                        <div class="space-y-1 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-surface-600">Subtotal</span>
-                                <span>{{
-                                    formatCurrency(props.subtotal_amount)
-                                }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-surface-600">Shipping</span>
-                                <span>{{
-                                    formatCurrency(props.shipping_amount ?? 0)
-                                }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-surface-600">Discount</span>
-                                <span>{{
-                                    formatCurrency(props.discount_amount ?? 0)
-                                }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-surface-600">Tax</span>
-                                <span>{{
-                                    formatCurrency(props.tax_amount ?? 0)
-                                }}</span>
-                            </div>
-                            <div
-                                class="flex justify-between border-t border-surface-200 pt-2 font-medium"
-                            >
-                                <span>Total</span>
-                                <span>{{
-                                    formatCurrency(props.total_amount)
-                                }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </UiCard>
+            </aside>
         </div>
     </StoreLayout>
 </template>

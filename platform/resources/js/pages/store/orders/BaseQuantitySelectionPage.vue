@@ -103,8 +103,7 @@ const skeinCount = computed(() => {
 function skeinCountForColorway(cw: ColorwayItem): number {
     return cw.bases.reduce(
         (sum, base) =>
-            sum +
-            (quantities.value[getQuantityKey(cw.id, base.id)] ?? 0),
+            sum + (quantities.value[getQuantityKey(cw.id, base.id)] ?? 0),
         0,
     );
 }
@@ -182,7 +181,7 @@ function goBack(): void {
 
 function isInputDisabled(base: BaseItem): boolean {
     console.log('base.inventory_quantity', base.inventory_quantity);
-    
+
     if (base.inventory_quantity === 0) {
         console.log('isInputDisabled', props.wholesale_terms.allows_preorders);
         return !props.wholesale_terms.allows_preorders;
@@ -288,15 +287,10 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
             <!-- Left panel: base quantity selection -->
             <div class="flex flex-col gap-4 lg:col-span-2">
                 <UiCard>
-                    <template #title>
-                        Base &amp; Quantity Selection
-                    </template>
+                    <template #title> Base &amp; Quantity Selection </template>
 
                     <template #content>
-                        <div
-                            v-if="!hasVisibleColorways"
-                            class="space-y-4"
-                        >
+                        <div v-if="!hasVisibleColorways" class="space-y-4">
                             <div
                                 class="rounded-lg border border-dashed border-surface-300 py-12 text-center text-sm text-surface-500"
                             >
@@ -320,14 +314,18 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                     <div
                                         class="flex items-center justify-between gap-4"
                                     >
-                                        <div class="font-semibold text-surface-900">
+                                        <div
+                                            class="font-semibold text-surface-900"
+                                        >
                                             {{ cw.name }}
                                             <span class="text-surface-500">
-                                                ({{ skeinCountForColorway(cw) }})
+                                                ({{
+                                                    skeinCountForColorway(cw)
+                                                }})
                                             </span>
                                             <span
                                                 v-if="cw.per_pan > 0"
-                                                class="ml-2 text-surface-500 font-normal"
+                                                class="ml-2 font-normal text-surface-500"
                                             >
                                                 {{ cw.per_pan }} skeins per pan
                                             </span>
@@ -362,7 +360,8 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                             <div
                                                 class="text-sm font-medium"
                                                 :class="
-                                                    base.inventory_quantity === 0
+                                                    base.inventory_quantity ===
+                                                    0
                                                         ? 'text-surface-500'
                                                         : 'text-surface-700'
                                                 "
@@ -373,9 +372,7 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                                     class="font-normal text-surface-500"
                                                 >
                                                     ({{
-                                                        formatEnum(
-                                                            base.weight,
-                                                        )
+                                                        formatEnum(base.weight)
                                                     }})
                                                 </span>
                                             </div>
@@ -407,16 +404,18 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                                                 cw.id,
                                                                 base.id,
                                                             )
-                                                        ] =
-                                                            $event ?? 0
+                                                        ] = $event ?? 0
                                                     "
                                                 />
                                             </div>
-                                            <div class="flex justify-between items-center">
+                                            <div
+                                                class="flex items-center justify-between"
+                                            >
                                                 <p
                                                     class="text-sm"
                                                     :class="
-                                                        base.inventory_quantity === 0
+                                                        base.inventory_quantity ===
+                                                        0
                                                             ? 'text-surface-500'
                                                             : 'text-primary-600'
                                                     "
@@ -446,9 +445,7 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
             </div>
 
             <!-- Right panel: order details -->
-            <div
-                class="lg:sticky lg:top-4 lg:col-span-1 lg:self-start"
-            >
+            <div class="lg:sticky lg:top-4 lg:col-span-1 lg:self-start">
                 <UiCard>
                     <template #title>Order Details</template>
                     <template #content>
@@ -480,15 +477,17 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                             <span class="text-surface-600"
                                                 >Minimum Order</span
                                             >
-                                            <span>{{
-                                                wholesale_terms.minimum_order_quantity
-                                            }}
+                                            <span
+                                                >{{
+                                                    wholesale_terms.minimum_order_quantity
+                                                }}
                                                 skeins /
                                                 {{
                                                     formatCurrency(
                                                         wholesale_terms.minimum_order_value,
                                                     )
-                                                }}</span>
+                                                }}</span
+                                            >
                                         </div>
                                         <div
                                             v-if="
@@ -526,15 +525,15 @@ const hasVisibleColorways = computed(() => visibleColorwayIds.value.length > 0);
                                             <span class="text-surface-600"
                                                 >Lead Time</span
                                             >
-                                            <span>{{
-                                                wholesale_terms.lead_time_days
-                                            }}
-                                                days</span>
+                                            <span
+                                                >{{
+                                                    wholesale_terms.lead_time_days
+                                                }}
+                                                days</span
+                                            >
                                         </div>
                                         <div
-                                            v-if="
-                                                wholesale_terms.payment_terms
-                                            "
+                                            v-if="wholesale_terms.payment_terms"
                                             class="flex justify-between"
                                         >
                                             <span class="text-surface-600"
