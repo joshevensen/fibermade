@@ -4,6 +4,10 @@ import UiTabs from '@/components/ui/UiTabs.vue';
 import StoreLayout from '@/layouts/StoreLayout.vue';
 import { router, usePage } from '@inertiajs/vue3';
 import { ref, watch } from 'vue';
+import AccountForm from './components/AccountForm.vue';
+import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
+import PasswordForm from './components/PasswordForm.vue';
+import ProfileForm from './components/ProfileForm.vue';
 
 const page = usePage();
 const user = page.props.auth.user as {
@@ -29,9 +33,8 @@ const business = page.props.business as
     | undefined;
 
 const tabs = [
-    { value: 'account', label: 'Account' },
     { value: 'profile', label: 'Profile' },
-    // { value: 'dyes', label: 'Dyes' },
+    { value: 'account', label: 'Account' },
 ];
 
 function getTabFromUrl(): string {
@@ -76,17 +79,6 @@ watch(
 <template>
     <StoreLayout page-title="Settings">
         <UiTabs :value="activeTab" :tabs="tabs" @update:value="handleTabChange">
-            <UiTabPanel value="account">
-                <div class="space-y-4">
-                    <AccountForm v-if="business" :account="business" />
-                    <!-- <AccountUsersCard
-                        v-if="account && user.role === 'owner' && account.users"
-                        :users="account.users"
-                    /> -->
-                    <DeleteAccountDialog />
-                </div>
-            </UiTabPanel>
-
             <UiTabPanel value="profile">
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <ProfileForm :user="user" />
@@ -94,11 +86,16 @@ watch(
                 </div>
             </UiTabPanel>
 
-            <!-- <UiTabPanel value="dyes">
-                <div class="space-y-4">
-                    <DyesTab :dyes="dyes" />
+            <UiTabPanel value="account">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="lg:col-span-2">
+                        <AccountForm v-if="business" :account="business" />
+                    </div>
+                    <div class="space-y-4">
+                        <DeleteAccountDialog />
+                    </div>
                 </div>
-            </UiTabPanel> -->
+            </UiTabPanel>
         </UiTabs>
     </StoreLayout>
 </template>

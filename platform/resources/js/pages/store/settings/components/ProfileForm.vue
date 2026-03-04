@@ -31,7 +31,9 @@ const { form, onSubmit } = useFormSubmission({
 <template>
     <UiCard>
         <template #title>Profile Information</template>
-        <template #subtitle>Update your name and email address</template>
+        <template #subtitle
+            >Update your name and email for this store account</template
+        >
         <template #content>
             <UiForm
                 :initialValues="{

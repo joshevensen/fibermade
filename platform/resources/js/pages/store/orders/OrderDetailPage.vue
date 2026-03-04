@@ -39,12 +39,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const STATUS_STEPS = [
-    'open',
-    'accepted',
-    'fulfilled',
-    'delivered',
-] as const;
+const STATUS_STEPS = ['open', 'accepted', 'fulfilled', 'delivered'] as const;
 
 function formatEnum(value: string | null | undefined): string {
     if (!value) return '';
@@ -115,7 +110,7 @@ function isStepActive(stepIndex: number): boolean {
                                     —
                                 </div>
                             </div>
-                            <div class="min-w-0 flex-1 flex flex-col gap-1">
+                            <div class="flex min-w-0 flex-1 flex-col gap-1">
                                 <span class="font-medium">{{
                                     group.colorway.name
                                 }}</span>
@@ -126,16 +121,21 @@ function isStepActive(stepIndex: number): boolean {
                                     >
                                         <span v-if="idx > 0"> · </span>
                                         <span>
-                                            {{ base.descriptor }}<span
+                                            {{ base.descriptor
+                                            }}<span
                                                 v-if="base.weight"
                                                 class="text-surface-500"
                                             >
                                                 ({{ formatEnum(base.weight) }})
                                             </span>
                                             {{ base.quantity }} ×
-                                            {{ formatCurrency(base.unit_price) }}
+                                            {{
+                                                formatCurrency(base.unit_price)
+                                            }}
                                             =
-                                            {{ formatCurrency(base.line_total) }}
+                                            {{
+                                                formatCurrency(base.line_total)
+                                            }}
                                         </span>
                                     </template>
                                 </p>
@@ -168,9 +168,7 @@ function isStepActive(stepIndex: number): boolean {
                                     <span>{{ props.colorway_count }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-surface-600"
-                                        >Skeins</span
-                                    >
+                                    <span class="text-surface-600">Skeins</span>
                                     <span>{{ props.skein_count }}</span>
                                 </div>
                             </div>
@@ -217,8 +215,7 @@ function isStepActive(stepIndex: number): boolean {
                                 v-if="props.notes"
                                 class="rounded border border-surface-200 bg-surface-50 p-3 text-sm"
                             >
-                                <span
-                                    class="font-medium text-surface-700"
+                                <span class="font-medium text-surface-700"
                                     >Order notes:</span
                                 >
                                 <p class="mt-1 text-surface-600">
@@ -226,7 +223,9 @@ function isStepActive(stepIndex: number): boolean {
                                 </p>
                             </div>
 
-                            <div class="space-y-1 border-t border-surface-200 pt-4 text-sm">
+                            <div
+                                class="space-y-1 border-t border-surface-200 pt-4 text-sm"
+                            >
                                 <div class="flex justify-between">
                                     <span class="text-surface-600"
                                         >Subtotal</span
@@ -246,9 +245,7 @@ function isStepActive(stepIndex: number): boolean {
                                     }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-surface-600"
-                                        >Tax</span
-                                    >
+                                    <span class="text-surface-600">Tax</span>
                                     <span>{{
                                         formatCurrency(props.tax_amount ?? 0)
                                     }}</span>
