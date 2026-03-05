@@ -45,18 +45,21 @@ const errorFor = computed(() => (field: string): string | undefined => {
         :server-error="errorFor('city')"
     />
 
-    <div class="grid grid-cols-2 gap-4">
-        <UiFormFieldInput
-            name="state_region"
-            label="State"
-            :server-error="errorFor('state_region')"
-        />
-
-        <UiFormFieldInput
-            name="postal_code"
-            label="Zipcode"
-            :server-error="errorFor('postal_code')"
-        />
+    <div class="grid grid-cols-2 gap-4 min-w-0">
+        <div class="min-w-0">
+            <UiFormFieldInput
+                name="state_region"
+                label="State"
+                :server-error="errorFor('state_region')"
+            />
+        </div>
+        <div class="min-w-0">
+            <UiFormFieldInput
+                name="postal_code"
+                label="Zipcode"
+                :server-error="errorFor('postal_code')"
+            />
+        </div>
     </div>
 
     <UiFormFieldSelect

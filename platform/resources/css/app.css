@@ -15,6 +15,14 @@ html {
     scroll-behavior: smooth;
 }
 
+/* PrimeVue sets width: 1% on .p-inputgroup .p-inputwrapper; override so the input-number wrapper fills the group. */
+@layer utilities {
+    .p-inputgroup .p-inputnumber-fluid.p-inputwrapper {
+        width: 100% !important;
+        min-width: 0;
+    }
+}
+
 .inventory-input-number .p-inputnumber-input {
     @apply w-10 text-center;
 }

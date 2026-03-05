@@ -64,6 +64,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+    fluid: true,
     step: 1,
 });
 
@@ -72,7 +73,7 @@ defineOptions({
 });
 
 const overflowFixPt = computed(() => ({
-    root: { class: 'min-w-0' },
+    root: { class: props.fluid ? 'min-w-0 w-full' : 'min-w-0' },
 }));
 
 type PtRoot = { root?: { class?: string }; [key: string]: unknown };
@@ -91,12 +92,10 @@ const mergePt = computed(() => {
         },
     };
 });
-
-console.log('disabled', props.disabled);
 </script>
 
 <template>
-    <div class="min-w-0 max-w-full">
+    <div :class="['min-w-0 max-w-full', fluid && 'w-full']">
         <PrimeInputNumber
             v-bind="$attrs"
             :modelValue="modelValue"

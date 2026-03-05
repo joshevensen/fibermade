@@ -53,10 +53,13 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
         :validateOnMount="validateOnMount"
     >
         <template v-slot="$field">
-            <div :class="{
-                'flex items-center': isHorizontal,
-                'gap-2': isHorizontal,
-            }">
+            <div
+                :class="{
+                    'flex items-center': isHorizontal,
+                    'gap-2': isHorizontal,
+                    'min-w-0 w-full': true,
+                }"
+            >
                 <!-- Label positioned based on labelPosition prop -->
                 <label
                     v-if="label || $slots.label"
@@ -68,20 +71,23 @@ const isLabelRight = computed(() => props.labelPosition === 'right');
                         'text-sm': size === 'small',
                     }"
                 >
-                    <span>
+                    <span class="min-w-0">
                         <slot name="label">{{ label }}</slot>
                         <small v-if="required" class="text-surface-500">(required)</small>
                     </span>
-                    <span v-if="labelPosition === 'top'">
-                        <slot name="extra"/>
+                    <span v-if="labelPosition === 'top'" class="shrink-0">
+                        <slot name="extra" />
                     </span>
                 </label>
-                
+
                 <!-- Input wrapper with proper order for right-side labels -->
-                <div :class="{
-                    'flex-1': isHorizontal && !isLabelRight,
-                    'order-1': isHorizontal && isLabelRight,
-                }">
+                <div
+                    :class="{
+                        'flex-1 min-w-0 w-full': isHorizontal && !isLabelRight,
+                        'order-1': isHorizontal && isLabelRight,
+                        'min-w-0 w-full': labelPosition === 'top',
+                    }"
+                >
                     <slot v-bind="{ ...$field, id: fieldId }" />
                 </div>
             </div>

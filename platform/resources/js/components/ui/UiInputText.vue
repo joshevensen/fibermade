@@ -44,6 +44,7 @@ export const inputTextRoot: InputTextTokenSections.Root = {
 import PrimeInputText from 'primevue/inputtext';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
+import { computed } from 'vue';
 
 interface Props {
     modelValue?: string | null;
@@ -58,44 +59,50 @@ interface Props {
     iconPos?: 'start' | 'end';
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     fluid: true,
 });
 
 defineOptions({
     inheritAttrs: false,
 });
+
+const inputTextPt = computed(() =>
+    props.fluid ? { root: { class: 'min-w-0 w-full' } } : undefined,
+);
 </script>
 
 <template>
-    <IconField v-if="icon">
-        <InputIcon v-if="iconPos !== 'end'" :class="icon" />
+    <IconField v-if="props.icon" class="min-w-0 w-full">
+        <InputIcon v-if="props.iconPos !== 'end'" :class="props.icon" />
         <PrimeInputText
             v-bind="$attrs"
-            :modelValue="modelValue"
-            :size="size"
-            :invalid="invalid"
-            :variant="variant"
-            :disabled="disabled"
-            :placeholder="placeholder"
-            :required="required"
-            :fluid="fluid"
+            :modelValue="props.modelValue"
+            :size="props.size"
+            :invalid="props.invalid"
+            :variant="props.variant"
+            :disabled="props.disabled"
+            :placeholder="props.placeholder"
+            :required="props.required"
+            :fluid="props.fluid"
+            :pt="inputTextPt"
         >
             <slot />
         </PrimeInputText>
-        <InputIcon v-if="iconPos === 'end'" :class="icon" />
+        <InputIcon v-if="props.iconPos === 'end'" :class="props.icon" />
     </IconField>
     <PrimeInputText
         v-else
         v-bind="$attrs"
-        :modelValue="modelValue"
-        :size="size"
-        :invalid="invalid"
-        :variant="variant"
-        :disabled="disabled"
-        :placeholder="placeholder"
-        :required="required"
-        :fluid="fluid"
+        :modelValue="props.modelValue"
+        :size="props.size"
+        :invalid="props.invalid"
+        :variant="props.variant"
+        :disabled="props.disabled"
+        :placeholder="props.placeholder"
+        :required="props.required"
+        :fluid="props.fluid"
+        :pt="inputTextPt"
     >
         <slot />
     </PrimeInputText>
