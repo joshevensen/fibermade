@@ -3,6 +3,7 @@
 namespace App\Http\Responses;
 
 use App\Enums\AccountType;
+use App\Jobs\SyncAccountSubscriptionJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
@@ -20,7 +21,12 @@ class LoginResponse implements LoginResponseContract
         $user = $request->user();
         $user->load('account');
 
-        $home = $user->account?->type === AccountType::Store
+        $account = $user->account;
+        if ($account && $account->requiresSubscription() && $account->stripe_id) {
+            SyncAccountSubscriptionJob::dispatch($account);
+        }
+
+        $home = $account?->type === AccountType::Store
             ? route('store.home')
             : route('dashboard');
 

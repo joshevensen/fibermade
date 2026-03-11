@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
 use App\Models\Account;
@@ -143,6 +144,39 @@ test('store creates colorway with account_id and created_by', function () {
         'name' => 'API Test Colorway',
         'created_by' => $user->id,
     ]);
+});
+
+test('store with invalid colors returns 422', function () {
+    $user = User::factory()->create(['account_id' => Account::factory()->create()->id]);
+    $token = getApiToken($user);
+
+    $response = $this->postJson('/api/v1/colorways', [
+        'name' => 'Test',
+        'status' => ColorwayStatus::Active->value,
+        'per_pan' => 1,
+        'colors' => ['invalid', 'red'],
+    ], withBearer($token));
+
+    $response->assertStatus(422);
+    $response->assertJsonValidationErrors(['colors.0']);
+});
+
+test('store with valid Color enum values in colors succeeds', function () {
+    $account = Account::factory()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+    $token = getApiToken($user);
+
+    $response = $this->postJson('/api/v1/colorways', [
+        'name' => 'API Colorway With Colors',
+        'status' => ColorwayStatus::Active->value,
+        'per_pan' => 1,
+        'colors' => [Color::Red->value, Color::Blue->value],
+    ], withBearer($token));
+
+    $response->assertStatus(201);
+    $colorway = Colorway::where('account_id', $account->id)->where('name', 'API Colorway With Colors')->first();
+    expect($colorway)->not->toBeNull();
+    expect($colorway->colors->map(fn ($c) => $c->value)->all())->toBe(['red', 'blue']);
 });
 
 test('store with invalid data returns 422', function () {

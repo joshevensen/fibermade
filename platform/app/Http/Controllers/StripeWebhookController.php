@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Models\WebhookEvent;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -76,9 +77,14 @@ class StripeWebhookController extends Controller
         $email = $metadata->email ?? null;
         $name = $metadata->name ?? null;
         $businessName = $metadata->business_name ?? null;
-        $passwordHash = $metadata->password_hash ?? null;
+        $registrationToken = $metadata->registration_token ?? null;
 
-        if (! $email || ! $name || ! $businessName || ! $passwordHash) {
+        if (! $email || ! $name || ! $businessName || ! $registrationToken) {
+            return;
+        }
+
+        $pending = Cache::get('registration_pending:'.$registrationToken);
+        if (! is_array($pending) || empty($pending['password_hash'])) {
             return;
         }
 
@@ -86,7 +92,9 @@ class StripeWebhookController extends Controller
             return;
         }
 
-        DB::transaction(function () use ($session, $email, $name, $businessName, $passwordHash) {
+        $passwordHash = $pending['password_hash'];
+
+        DB::transaction(function () use ($session, $email, $name, $businessName, $passwordHash, $registrationToken) {
             $account = Account::create([
                 'status' => BaseStatus::Active,
                 'type' => AccountType::Creator,
@@ -112,6 +120,8 @@ class StripeWebhookController extends Controller
                 'marketing_opt_in' => false,
             ]);
             DB::table('users')->where('id', $user->id)->update(['password' => $passwordHash]);
+
+            Cache::forget('registration_pending:'.$registrationToken);
 
             Mail::to($user->email)->send(new WelcomeMail($user));
         });

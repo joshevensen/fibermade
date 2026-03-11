@@ -287,7 +287,33 @@ export class ProductSyncService {
 
     const primaryImageUrl = product.featuredImage?.url ?? null;
     if (primaryImageUrl) {
-      // TODO: Create Media record when platform exposes a Media create endpoint (file_path = CDN URL, metadata = { source: "shopify", original_url }).
+      try {
+        const filePath = primaryImageUrl;
+        const fileName =
+          primaryImageUrl.split("/").filter(Boolean).pop()?.split("?")[0] ??
+          "image.jpg";
+        await this.client.createMedia({
+          mediable_type: "App\\Models\\Colorway",
+          mediable_id: colorwayId,
+          file_path: filePath,
+          file_name: fileName,
+          is_primary: true,
+          metadata: {
+            source: "shopify",
+            original_url: primaryImageUrl,
+          },
+        });
+      } catch (err) {
+        await this.logIntegration(
+          colorwayId,
+          "warning",
+          err instanceof Error ? err.message : String(err),
+          {
+            shopify_gid: product.id,
+            image_url: primaryImageUrl,
+          }
+        );
+      }
     }
 
     const productNumericId = parseNumericIdFromGid(product.id);

@@ -13,10 +13,11 @@ export type SettingsActionData =
   | { success: false; error: string };
 
 export type SettingsLoaderData = {
-  integration: IntegrationData;
+  integration: IntegrationData | null;
   collections: CollectionData[];
   autoSync: boolean;
   excludedCollectionIds: number[];
+  loadError?: string;
 };
 
 function parseSettings(integration: IntegrationData | null) {
@@ -45,19 +46,30 @@ export const loader = async ({
   const client = new FibermadeClient(baseUrl);
   client.setToken(connection.fibermadeApiToken);
 
-  const [integration, collectionsResponse] = await Promise.all([
-    client.getIntegration(connection.fibermadeIntegrationId),
-    client.listCollections({ limit: 100 }),
-  ]);
+  try {
+    const [integration, collectionsResponse] = await Promise.all([
+      client.getIntegration(connection.fibermadeIntegrationId),
+      client.listCollections({ limit: 100 }),
+    ]);
 
-  const { autoSync, excludedCollectionIds } = parseSettings(integration);
+    const { autoSync, excludedCollectionIds } = parseSettings(integration);
 
-  return {
-    integration,
-    collections: collectionsResponse.data,
-    autoSync,
-    excludedCollectionIds,
-  };
+    return {
+      integration,
+      collections: collectionsResponse.data,
+      autoSync,
+      excludedCollectionIds,
+    };
+  } catch {
+    return {
+      integration: null,
+      collections: [],
+      autoSync: true,
+      excludedCollectionIds: [],
+      loadError:
+        "Could not load settings. Check your connection and try again.",
+    };
+  }
 };
 
 export const action = async ({
@@ -119,7 +131,7 @@ export const action = async ({
 };
 
 export default function SettingsRoute() {
-  const { collections, autoSync, excludedCollectionIds } =
+  const { collections, autoSync, excludedCollectionIds, loadError } =
     useLoaderData<SettingsLoaderData>();
   const fetcher = useFetcher<SettingsActionData>();
   const isSaving =
@@ -132,6 +144,11 @@ export default function SettingsRoute() {
 
   return (
     <s-page heading="Settings">
+      {loadError && (
+        <s-banner tone="critical" slot="aside">
+          {loadError}
+        </s-banner>
+      )}
       {showSuccess && (
         <s-banner tone="success" slot="aside">
           Settings saved successfully.

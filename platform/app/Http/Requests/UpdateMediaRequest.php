@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,7 +14,7 @@ class UpdateMediaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('update', $this->route('media'));
+        return $this->user()->can('update', $this->route('medium'));
     }
 
     /**
@@ -24,7 +25,7 @@ class UpdateMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mediable_type' => ['sometimes', 'string', 'max:255'],
+            'mediable_type' => ['sometimes', 'string', 'max:255', Rule::in(Media::mediableTypes())],
             'mediable_id' => ['sometimes', 'integer'],
             'file_path' => ['sometimes', 'string', 'max:255'],
             'file_name' => ['sometimes', 'string', 'max:255'],

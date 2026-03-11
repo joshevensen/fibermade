@@ -3,7 +3,6 @@ import UserController from '@/actions/App/Http/Controllers/UserController';
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import UiForm from '@/components/ui/UiForm.vue';
-import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 

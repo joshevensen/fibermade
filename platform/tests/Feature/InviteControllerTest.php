@@ -225,6 +225,28 @@ test('creator cannot resend expired invite', function () {
     Mail::assertNotQueued(StoreInviteMail::class);
 });
 
+test('resend returns error flash when mail fails', function () {
+    $creator = Creator::factory()->create();
+    $user = User::factory()->create(['account_id' => $creator->account_id]);
+    $invite = Invite::create([
+        'invite_type' => InviteType::Store,
+        'email' => 'store@example.com',
+        'token' => str()->random(64),
+        'expires_at' => now()->addDays(7),
+        'inviter_type' => Creator::class,
+        'inviter_id' => $creator->id,
+        'metadata' => [],
+    ]);
+
+    Mail::shouldReceive('send')->andThrow(new \Exception('Mail server unavailable'));
+
+    $response = $this->actingAs($user)->post(route('invites.resend', $invite));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('error');
+    expect(session('error'))->toContain('Failed to send');
+});
+
 test('accept store invite creates account and redirects to store dashboard', function () {
     $creator = Creator::factory()->create();
     $invite = Invite::create([

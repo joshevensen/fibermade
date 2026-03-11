@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
 use App\Models\User;
@@ -30,7 +31,7 @@ class StoreColorwayRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'technique' => ['nullable', Rule::enum(Technique::class)],
             'colors' => ['nullable', 'array'],
-            'colors.*' => ['string'],
+            'colors.*' => [Rule::enum(Color::class)],
             'per_pan' => ['required', 'integer', 'min:1', 'max:6'],
             'recipe' => ['nullable', 'string'],
             'notes' => ['nullable', 'string'],

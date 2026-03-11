@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Store Invite Default Country Code
+    |--------------------------------------------------------------------------
+    |
+    | When a store accepts an invite, the new store's country_code is set from
+    | this value. Beta launch is US-only; international support can use
+    | request/validation later.
+    |
+    */
+
+    'store_invite_country_code' => env('STORE_INVITE_COUNTRY_CODE', 'US'),
+
 ];

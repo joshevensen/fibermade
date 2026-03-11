@@ -12,6 +12,7 @@ import type {
   CreateIntegrationLogPayload,
   CreateIntegrationPayload,
   CreateInventoryPayload,
+  CreateMediaPayload,
   CreateOrderItemPayload,
   CreateOrderPayload,
   CustomerData,
@@ -21,6 +22,7 @@ import type {
   InventoryData,
   ListParams,
   LookupExternalIdentifierParams,
+  MediaData,
   OrderData,
   OrderItemData,
   PaginatedResponse,
@@ -65,6 +67,7 @@ export type {
   CreateIntegrationLogPayload,
   CreateIntegrationPayload,
   CreateInventoryPayload,
+  CreateMediaPayload,
   CreateOrderItemPayload,
   CreateOrderPayload,
   CustomerData,
@@ -73,6 +76,7 @@ export type {
   IntegrationLogData,
   InventoryData,
   LookupExternalIdentifierParams,
+  MediaData,
   OrderData,
   OrderItemData,
   UpdateBasePayload,
@@ -405,6 +409,10 @@ export class FibermadeClient {
 
   async createColorway(data: CreateColorwayPayload): Promise<ColorwayData> {
     return this.postResource<ColorwayData>("/api/v1/colorways", data);
+  }
+
+  async createMedia(data: CreateMediaPayload): Promise<MediaData> {
+    return this.postResource<MediaData>("/api/v1/media", data);
   }
 
   async getColorway(id: number): Promise<ColorwayData> {

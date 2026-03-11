@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -13,7 +14,7 @@ class StoreMediaRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->can('create', \App\Models\Media::class);
+        return $this->user()->can('create', Media::class);
     }
 
     /**
@@ -24,7 +25,7 @@ class StoreMediaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'mediable_type' => ['required', 'string', 'max:255'],
+            'mediable_type' => ['required', 'string', 'max:255', Rule::in(Media::mediableTypes())],
             'mediable_id' => ['required', 'integer'],
             'file_path' => ['required', 'string', 'max:255'],
             'file_name' => ['required', 'string', 'max:255'],

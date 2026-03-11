@@ -4,6 +4,7 @@ use App\Enums\IntegrationType;
 use App\Models\Account;
 use App\Models\Integration;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 test('unauthenticated index returns 401', function () {
     $this->getJson('/api/v1/integrations')
@@ -142,6 +143,25 @@ test('store creates integration with account_id from authenticated user and resp
     ]);
 });
 
+test('credentials are stored encrypted and getShopifyConfig returns decrypted value', function () {
+    $account = Account::factory()->create();
+    $integration = Integration::factory()->create([
+        'account_id' => $account->id,
+        'credentials' => json_encode(['access_token' => 'shp_secret_123']),
+        'settings' => ['shop' => 'mystore.myshopify.com'],
+    ]);
+
+    $rawCredentials = DB::table('integrations')->where('id', $integration->id)->value('credentials');
+    expect($rawCredentials)->not->toBe('shp_secret_123')
+        ->and($rawCredentials)->not->toContain('shp_secret_123');
+
+    $integration->refresh();
+    $config = $integration->getShopifyConfig();
+    expect($config)->not->toBeNull()
+        ->and($config['shop'])->toBe('mystore.myshopify.com')
+        ->and($config['access_token'])->toBe('shp_secret_123');
+});
+
 test('store with invalid data returns 422', function () {
     $user = User::factory()->create(['account_id' => Account::factory()->create()->id]);
     $token = getApiToken($user);
@@ -209,6 +229,25 @@ test('destroy soft-deletes integration', function () {
     $response->assertStatus(204);
     expect(Integration::find($integration->id))->toBeNull();
     $this->assertSoftDeleted('integrations', ['id' => $integration->id]);
+});
+
+test('update ignores account_id in payload and cannot reassign integration to another account', function () {
+    $accountA = Account::factory()->create();
+    $accountB = Account::factory()->create();
+    $userA = User::factory()->create(['account_id' => $accountA->id]);
+    $integration = Integration::factory()->create(['account_id' => $accountA->id]);
+    $token = getApiToken($userA);
+
+    $response = $this->patchJson("/api/v1/integrations/{$integration->id}", [
+        'account_id' => $accountB->id,
+        'active' => false,
+    ], withBearer($token));
+
+    $response->assertSuccessful();
+    $this->assertDatabaseHas('integrations', [
+        'id' => $integration->id,
+        'account_id' => $accountA->id,
+    ]);
 });
 
 test('destroy for another account integration returns 403', function () {

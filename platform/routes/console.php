@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('creators:inactive-retention')->daily();
+Schedule::command('subscriptions:sync')->hourly();

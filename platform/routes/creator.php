@@ -10,6 +10,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DyeController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\InviteController;
+use App\Http\Controllers\MediaController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ShowController;
@@ -64,6 +65,9 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
     // Collections routes
     Route::patch('collections/{collection}/colorways', [CollectionController::class, 'updateColorways'])->name('collections.colorways.update');
     Route::resource('collections', CollectionController::class)->except(['create']);
+
+    // Media routes
+    Route::resource('media', MediaController::class)->except(['create']);
 
     // Inventory routes
     Route::get('inventory', [InventoryController::class, 'index'])->name('inventory.index');

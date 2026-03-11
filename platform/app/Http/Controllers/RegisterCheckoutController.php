@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\RegisterCheckoutRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Stripe\Checkout\Session as StripeSession;
 use Stripe\Exception\ApiErrorException;
 use Stripe\PromotionCode;
@@ -13,23 +15,35 @@ use Stripe\Stripe;
 
 class RegisterCheckoutController extends Controller
 {
+    private const REGISTRATION_CACHE_PREFIX = 'registration_pending:';
+
+    private const REGISTRATION_CACHE_TTL_MINUTES = 30;
+
     /**
-     * Validate registration, store data in session, create Stripe Checkout Session, return redirect URL.
+     * Validate registration, store data in cache (password never leaves server), create Stripe Checkout Session, return redirect URL.
      */
     public function __invoke(RegisterCheckoutRequest $request): JsonResponse
     {
         $validated = $request->validated();
         $promo = $request->query('promo');
 
-        $registration = [
+        $passwordHash = Hash::make($validated['password']);
+        $token = Str::random(64);
+
+        Cache::put(self::REGISTRATION_CACHE_PREFIX.$token, [
+            'email' => $validated['email'],
+            'name' => $validated['name'],
+            'business_name' => $validated['business_name'],
+            'password_hash' => $passwordHash,
+            'promo_code' => $promo,
+        ], now()->addMinutes(self::REGISTRATION_CACHE_TTL_MINUTES));
+
+        $request->session()->put('registration', [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'business_name' => $validated['business_name'],
-            'password' => Hash::make($validated['password']),
             'promo_code' => $promo,
-        ];
-
-        $request->session()->put('registration', $registration);
+        ]);
 
         Stripe::setApiKey(config('services.stripe.secret'));
 
@@ -44,16 +58,16 @@ class RegisterCheckoutController extends Controller
             'success_url' => URL::route('register.success', [], true).'?session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => URL::route('register', [], true),
             'metadata' => [
-                'email' => $registration['email'],
-                'name' => $registration['name'],
-                'business_name' => $registration['business_name'],
-                'password_hash' => $registration['password'],
-                'promo_code' => $registration['promo_code'] ?? '',
+                'email' => $validated['email'],
+                'name' => $validated['name'],
+                'business_name' => $validated['business_name'],
+                'registration_token' => $token,
+                'promo_code' => $promo ?? '',
             ],
         ];
 
-        if (! empty($registration['promo_code'])) {
-            $promotionCodeId = $this->findPromotionCodeId($registration['promo_code']);
+        if (! empty($promo)) {
+            $promotionCodeId = $this->findPromotionCodeId($promo);
             if ($promotionCodeId !== null) {
                 $params['discounts'] = [['promotion_code' => $promotionCodeId]];
             } else {

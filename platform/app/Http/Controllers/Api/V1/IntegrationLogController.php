@@ -19,15 +19,13 @@ class IntegrationLogController extends ApiController
     {
         $this->authorize('view', $integration);
 
-        $limit = min((int) $request->input('limit', 50), 100);
-
+        $perPage = min((int) $request->input('per_page', 50), 100);
         $logs = $integration->logs()
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->limit($limit)
-            ->get();
+            ->paginate($perPage);
 
-        return $this->successResponse(IntegrationLogResource::collection($logs));
+        return IntegrationLogResource::collection($logs)->response();
     }
 
     /**

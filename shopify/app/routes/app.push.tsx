@@ -5,7 +5,10 @@ import db from "../db.server";
 import { FibermadeClient } from "../services/fibermade-client.server";
 import { FibermadeNotFoundError } from "../services/fibermade-client.types";
 import { ProductPushService } from "../services/sync/product-push.server";
-import type { ShopifyGraphqlRunner } from "../services/sync/metafields.server";
+import {
+  assertNoGraphqlErrors,
+  type ShopifyGraphqlRunner,
+} from "../services/sync/metafields.server";
 import { parseNumericIdFromGid } from "../services/sync/product-sync.server";
 
 export type PushLoaderData = {
@@ -85,6 +88,7 @@ export const action = async ({
       (err as Error & { status?: number }).status = response.status;
       throw err;
     }
+    assertNoGraphqlErrors(json);
     return { data: json.data, errors: json.errors };
   };
 

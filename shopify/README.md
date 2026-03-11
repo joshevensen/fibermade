@@ -19,15 +19,16 @@ Installable Shopify app that links a merchant’s store to their Fibermade accou
    ```
 
 2. **Environment**
-   - Shopify-related env (tunnel, app URL, etc.) is provided by the Shopify CLI when you run `shopify app dev` or by your deployment platform.
+   - Copy `shopify/.env.example` to `.env` and set `DATABASE_URL` (PostgreSQL), `FIBERMADE_API_URL`, and `PRISMA_FIELD_ENCRYPTION_KEY`. Shopify-related env (tunnel, app URL, etc.) is provided by the Shopify CLI when you run `shopify app dev` or by your deployment platform.
    - **Fibermade:** set `FIBERMADE_API_URL` to your Fibermade platform API base URL (e.g. `https://platform.test` for local, or your production API URL). The app uses this to create and manage the Integration record and for future sync features.
+   - **Encryption:** set `PRISMA_FIELD_ENCRYPTION_KEY` for at-rest encryption of Session and FibermadeConnection tokens. Generate a key with `npx cloak generate` (from the prisma-field-encryption dependency). The app fails to start if this is missing or too short.
 
 3. **Database (Prisma)**  
-   See [Using Prisma](#using-prisma) below. To get going:
+   See [Using Prisma](#using-prisma) below. Set `DATABASE_URL` in `.env` to your PostgreSQL connection string (e.g. a local database named `shopify`). Then:
    ```bash
    npm run setup
    ```
-   This runs `prisma generate` and `prisma migrate deploy` (creates/updates the SQLite DB and session + Fibermade connection tables).
+   This runs `prisma generate` and `prisma migrate deploy` (creates/updates the Postgres DB and session + Fibermade connection tables).
 
 ---
 
@@ -60,7 +61,7 @@ The app uses [Prisma](https://www.prisma.io/) for session storage and the Fiberm
   - Apply migrations (e.g. in production or after pull): `npx prisma migrate deploy`. The `npm run setup` script runs `prisma generate` and `prisma migrate deploy`.
 - **Inspect data:** `npx prisma studio` opens the Prisma Studio UI for the current database.
 
-Default local DB is SQLite (`file:dev.sqlite`). For production, you can switch the datasource in `schema.prisma` to a hosted database (e.g. PostgreSQL) and run `prisma migrate deploy` in your deploy pipeline.
+The app uses PostgreSQL; set `DATABASE_URL` in `.env` (see `.env.example`). Run `prisma migrate deploy` in your deploy pipeline so the database is up to date.
 
 ---
 
@@ -88,6 +89,12 @@ Default local DB is SQLite (`file:dev.sqlite`). For production, you can switch t
 ## Shopify template and docs
 
 This app is based on the [Shopify React Router app template](https://github.com/Shopify/shopify-app-template-react-router). Auth, session storage (Prisma), and embedding use `@shopify/shopify-app-react-router`. For auth, GraphQL, webhooks, and deployment details, see the [Shopify App React Router docs](https://shopify.dev/docs/api/shopify-app-react-router) and the template repo.
+
+---
+
+## Scope updates
+
+The app requests `write_products` and `write_product_media` so it can create/update products and push product images. If you add or change scopes in `shopify.app.toml`, existing installs may need to re-authorize: merchants might be prompted to approve the new scopes, or in some cases they may need to reinstall the app.
 
 ---
 

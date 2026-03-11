@@ -11,8 +11,8 @@ import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import { useToast } from '@/composables/useToast';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import { index as storesIndex } from '@/routes/stores';
-import { router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { router, usePage } from '@inertiajs/vue3';
+import { ref, watch } from 'vue';
 
 interface StoreOrInviteItem {
     id: number;
@@ -52,7 +52,18 @@ const getInitialStatusFilter = (): string => {
 
 const statusFilter = ref<string>(getInitialStatusFilter());
 const resendingInviteId = ref<number | null>(null);
-const { showSuccess } = useToast();
+const page = usePage();
+const { showSuccess, showError } = useToast();
+
+watch(
+    () => (page.props.flash as { error?: string } | undefined)?.error,
+    (error) => {
+        if (error) {
+            showError(error);
+        }
+    },
+    { immediate: true },
+);
 
 const statusOptions = [
     { label: 'All', value: 'all' },

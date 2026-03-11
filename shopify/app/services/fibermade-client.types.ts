@@ -245,6 +245,31 @@ export interface CreateColorwayPayload {
   updated_by?: number | null;
 }
 
+export interface MediaData {
+  id: number;
+  mediable_type: string;
+  mediable_id: number;
+  file_path: string;
+  file_name: string;
+  mime_type: string | null;
+  size: number | null;
+  is_primary: boolean;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateMediaPayload {
+  mediable_type: string;
+  mediable_id: number;
+  file_path: string;
+  file_name: string;
+  mime_type?: string | null;
+  size?: number | null;
+  is_primary: boolean;
+  metadata?: Record<string, unknown> | null;
+}
+
 export interface UpdateColorwayPayload {
   account_id?: number;
   name?: string;

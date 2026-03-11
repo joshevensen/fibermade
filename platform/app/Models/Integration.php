@@ -54,6 +54,7 @@ class Integration extends Model
     {
         return [
             'type' => IntegrationType::class,
+            'credentials' => 'encrypted',
             'settings' => 'array',
             'active' => 'boolean',
         ];

@@ -21,9 +21,10 @@ export default function App() {
   return (
     <div className={styles.index}>
       <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
+        <h1 className={styles.heading}>Connect your Shopify store to Fibermade</h1>
         <p className={styles.text}>
-          A tagline about [your app] that describes your value proposition.
+          Link your store to Fibermade to sync products, collections, and
+          inventory with your wholesale platform.
         </p>
         {showForm && (
           <Form className={styles.form} method="post" action="/auth/login">
@@ -39,16 +40,16 @@ export default function App() {
         )}
         <ul className={styles.list}>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Connect once</strong> — Link your Shopify store to your
+            Fibermade account; we create and manage the connection for you.
           </li>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Sync catalog</strong> — Keep products and collections in
+            sync between Shopify and Fibermade automatically.
           </li>
           <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
+            <strong>Manage inventory</strong> — Use Fibermade for wholesale
+            while your Shopify store stays up to date.
           </li>
         </ul>
       </div>

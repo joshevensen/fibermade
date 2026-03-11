@@ -11,6 +11,7 @@ import UiFormField from '@/components/ui/UiFormField.vue';
 import UiInputNumber from '@/components/ui/UiInputNumber.vue';
 import { useFormSubmission } from '@/composables/useFormSubmission';
 import StoreLayout from '@/layouts/StoreLayout.vue';
+import { devLog } from '@/utils/devLog';
 import { router, usePage } from '@inertiajs/vue3';
 import { computed, onMounted, ref, watch } from 'vue';
 
@@ -180,13 +181,13 @@ function goBack(): void {
 }
 
 function isInputDisabled(base: BaseItem): boolean {
-    console.log('base.inventory_quantity', base.inventory_quantity);
+    devLog('base.inventory_quantity', base.inventory_quantity);
 
     if (base.inventory_quantity === 0) {
-        console.log('isInputDisabled', props.wholesale_terms.allows_preorders);
+        devLog('isInputDisabled', props.wholesale_terms.allows_preorders);
         return !props.wholesale_terms.allows_preorders;
     }
-    console.log('isInputDisabled: false');
+    devLog('isInputDisabled: false');
     return false;
 }
 

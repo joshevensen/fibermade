@@ -1,7 +1,9 @@
 <?php
 
+use App\Jobs\SyncAccountSubscriptionJob;
 use App\Models\Account;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 test('login screen can be rendered', function () {
     $response = $this->get(route('login'));
@@ -32,6 +34,22 @@ test('store users redirect to store home on login', function () {
 
     $this->assertAuthenticated();
     $response->assertRedirect(route('store.home', absolute: false));
+});
+
+test('creator with stripe_id dispatches SyncAccountSubscriptionJob on login', function () {
+    Queue::fake();
+
+    $account = Account::factory()->creator()->create(['stripe_id' => 'cus_test123']);
+    $user = User::factory()->create(['account_id' => $account->id]);
+
+    $this->post(route('login.store'), [
+        'email' => $user->email,
+        'password' => 'password',
+    ]);
+
+    Queue::assertPushed(SyncAccountSubscriptionJob::class, function (SyncAccountSubscriptionJob $job) use ($account) {
+        return $job->account->id === $account->id;
+    });
 });
 
 test('users can not authenticate with invalid password', function () {

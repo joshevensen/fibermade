@@ -32,9 +32,9 @@ Route::get('privacy', function () {
 ]);
 
 Route::get('invites/accept/{token}', [InviteController::class, 'accept'])->name('invites.accept');
-Route::post('invites/accept/{token}', [InviteController::class, 'acceptStore'])->name('invites.accept.store');
+Route::post('invites/accept/{token}', [InviteController::class, 'acceptStore'])->middleware('throttle:10,1')->name('invites.accept.store');
 
-Route::post('register/checkout', RegisterCheckoutController::class)->name('register.checkout');
+Route::post('register/checkout', RegisterCheckoutController::class)->middleware('throttle:10,1')->name('register.checkout');
 Route::get('register/success', fn () => Inertia::render('auth/RegisterSuccessPage'))->name('register.success');
 Route::get('register/cancel', fn () => redirect()->route('register'))->name('register.cancel');
 

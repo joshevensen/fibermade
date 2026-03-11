@@ -85,22 +85,31 @@ function mapStatus(status: string): "ACTIVE" | "DRAFT" | "ARCHIVED" {
   return status in STATUS_MAP ? STATUS_MAP[status] : "ACTIVE";
 }
 
-function isPubliclyAccessibleUrl(url: string): boolean {
+export function isPubliclyAccessibleUrl(url: string): boolean {
   try {
     const imageUrl = new URL(url);
-    const hostname = imageUrl.hostname.toLowerCase();
+    let hostname = imageUrl.hostname.toLowerCase();
+    if (hostname.startsWith("[") && hostname.endsWith("]")) {
+      hostname = hostname.slice(1, -1);
+    }
 
     // Reject localhost variants
     if (
       hostname === "localhost" ||
       hostname === "127.0.0.1" ||
       hostname === "::1" ||
+      hostname === "0.0.0.0" ||
       hostname.startsWith("127.")
     ) {
       return false;
     }
 
-    // Reject private IP ranges
+    // Reject link-local (169.254.0.0/16), including AWS/cloud metadata
+    if (hostname.startsWith("169.254.")) {
+      return false;
+    }
+
+    // Reject private IP ranges (IPv4)
     if (hostname.startsWith("10.")) {
       return false;
     }
@@ -115,6 +124,11 @@ function isPubliclyAccessibleUrl(url: string): boolean {
           return false;
         }
       }
+    }
+
+    // Reject IPv6 link-local (fe80::/10) and unique local (fc00::/7)
+    if (hostname.startsWith("fe80:") || hostname.startsWith("fc") || hostname.startsWith("fd")) {
+      return false;
     }
 
     // Allow URLs matching Fibermade platform domain

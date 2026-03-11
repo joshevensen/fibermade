@@ -44,7 +44,7 @@ test('returns logs for integration newest first', function () {
     expect($data[0])->toHaveKeys(['id', 'integration_id', 'status', 'message', 'created_at']);
 });
 
-test('limit parameter restricts number of logs returned', function () {
+test('per_page parameter restricts number of logs returned', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
     $integration = Integration::factory()->create(['account_id' => $account->id]);
@@ -59,15 +59,19 @@ test('limit parameter restricts number of logs returned', function () {
     }
     $token = getApiToken($user);
 
-    $response = $this->getJson("/api/v1/integrations/{$integration->id}/logs?limit=10", withBearer($token));
+    $response = $this->getJson("/api/v1/integrations/{$integration->id}/logs?per_page=10", withBearer($token));
 
     $response->assertStatus(200);
     $data = $response->json('data');
     expect($data)->toBeArray()
         ->and(count($data))->toBe(10);
+    expect($response->json('links'))->toBeArray()
+        ->toHaveKeys(['first', 'last', 'prev', 'next']);
+    expect($response->json('meta'))->toBeArray()
+        ->toHaveKeys(['current_page', 'last_page', 'per_page', 'total']);
 });
 
-test('default limit is 50', function () {
+test('default per_page is 50', function () {
     $account = Account::factory()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
     $integration = Integration::factory()->create(['account_id' => $account->id]);
@@ -88,6 +92,35 @@ test('default limit is 50', function () {
     $data = $response->json('data');
     expect($data)->toBeArray()
         ->and(count($data))->toBe(50);
+    expect($response->json('meta.per_page'))->toBe(50);
+    expect($response->json('meta.last_page'))->toBe(2);
+});
+
+test('page parameter returns correct page of results', function () {
+    $account = Account::factory()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+    $integration = Integration::factory()->create(['account_id' => $account->id]);
+    for ($i = 0; $i < 20; $i++) {
+        IntegrationLog::create([
+            'integration_id' => $integration->id,
+            'loggable_type' => \App\Models\Order::class,
+            'loggable_id' => $i,
+            'status' => IntegrationLogStatus::Success,
+            'message' => "Log {$i}",
+        ]);
+    }
+    $token = getApiToken($user);
+
+    $response = $this->getJson("/api/v1/integrations/{$integration->id}/logs?per_page=10&page=2", withBearer($token));
+
+    $response->assertStatus(200);
+    $data = $response->json('data');
+    expect($data)->toBeArray()
+        ->and(count($data))->toBe(10);
+    expect($response->json('meta.current_page'))->toBe(2);
+    expect($response->json('meta.last_page'))->toBe(2);
+    expect($response->json('links.prev'))->not->toBeNull();
+    expect($response->json('links.next'))->toBeNull();
 });
 
 test('accessing logs for another account integration returns 403', function () {

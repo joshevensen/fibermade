@@ -184,16 +184,34 @@ describe("app.settings", () => {
       });
     });
 
-    it("propagates error when getIntegration throws", async () => {
+    it("returns loadError when getIntegration throws", async () => {
       mockGetIntegration.mockRejectedValue(new Error("Network error"));
 
-      await expect(loader(loaderArgs())).rejects.toThrow("Network error");
+      const result = await loader(loaderArgs());
+
+      expect(result).toEqual({
+        integration: null,
+        collections: [],
+        autoSync: true,
+        excludedCollectionIds: [],
+        loadError:
+          "Could not load settings. Check your connection and try again.",
+      });
     });
 
-    it("propagates error when listCollections throws", async () => {
+    it("returns loadError when listCollections throws", async () => {
       mockListCollections.mockRejectedValue(new Error("API error"));
 
-      await expect(loader(loaderArgs())).rejects.toThrow("API error");
+      const result = await loader(loaderArgs());
+
+      expect(result).toEqual({
+        integration: null,
+        collections: [],
+        autoSync: true,
+        excludedCollectionIds: [],
+        loadError:
+          "Could not load settings. Check your connection and try again.",
+      });
     });
   });
 

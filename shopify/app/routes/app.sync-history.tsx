@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { redirect, useLoaderData, useNavigation } from "react-router";
+import { Link, redirect, useLoaderData, useNavigation } from "react-router";
 import { useState, useMemo } from "react";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
@@ -9,6 +9,19 @@ import { formatSyncedAt, formatLoggableType } from "../utils/date";
 
 export type SyncHistoryLoaderData = {
   logs: IntegrationLogData[];
+  links?: {
+    first: string;
+    last: string;
+    prev: string | null;
+    next: string | null;
+  };
+  meta?: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+  loadError?: string;
 };
 
 export const loader = async ({
@@ -25,13 +38,30 @@ export const loader = async ({
   if (!baseUrl?.trim()) {
     throw redirect("/app");
   }
+  const url = new URL(request.url);
+  const page = Math.max(1, parseInt(url.searchParams.get("page") ?? "1", 10) || 1);
+  const perPage = 50;
+
   const client = new FibermadeClient(baseUrl);
   client.setToken(connection.fibermadeApiToken);
-  const response = await client.getIntegrationLogs(
-    connection.fibermadeIntegrationId,
-    { limit: 100 }
-  );
-  return { logs: response.data };
+
+  try {
+    const response = await client.getIntegrationLogs(
+      connection.fibermadeIntegrationId,
+      { page, per_page: perPage }
+    );
+    return {
+      logs: response.data,
+      links: response.links,
+      meta: response.meta,
+    };
+  } catch {
+    return {
+      logs: [],
+      loadError:
+        "Could not load sync history. Check your connection and try again.",
+    };
+  }
 };
 
 type StatusFilter = "all" | "success" | "error" | "warning";
@@ -52,7 +82,7 @@ function statusBadgeTone(
 }
 
 export default function SyncHistoryRoute() {
-  const { logs } = useLoaderData<SyncHistoryLoaderData>();
+  const { logs, links, meta, loadError } = useLoaderData<SyncHistoryLoaderData>();
   const navigation = useNavigation();
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
@@ -62,9 +92,16 @@ export default function SyncHistoryRoute() {
   }, [logs, statusFilter]);
 
   const isLoading = navigation.state === "loading";
+  const hasPrev = meta && meta.current_page > 1;
+  const hasNext = meta && meta.current_page < meta.last_page;
 
   return (
     <s-page heading="Sync History">
+      {loadError && (
+        <s-banner tone="critical" slot="aside">
+          {loadError}
+        </s-banner>
+      )}
       {isLoading && (
         <s-section>
           <s-paragraph>Loading…</s-paragraph>
@@ -125,6 +162,28 @@ export default function SyncHistoryRoute() {
               </table>
               {filteredLogs.length === 0 && (
                 <s-paragraph>No logs match the selected filter.</s-paragraph>
+              )}
+              {meta && meta.last_page > 1 && (
+                <s-stack direction="inline" gap="base" style={{ marginTop: "1rem" }}>
+                  {hasPrev ? (
+                    <Link to={`/app/sync-history?page=${meta.current_page - 1}`}>
+                      Previous
+                    </Link>
+                  ) : (
+                    <span aria-hidden>Previous</span>
+                  )}
+                  <span>
+                    Page {meta.current_page} of {meta.last_page}
+                    {meta.total != null && ` (${meta.total} total)`}
+                  </span>
+                  {hasNext ? (
+                    <Link to={`/app/sync-history?page=${meta.current_page + 1}`}>
+                      Next
+                    </Link>
+                  ) : (
+                    <span aria-hidden>Next</span>
+                  )}
+                </s-stack>
               )}
             </s-card>
           </s-section>

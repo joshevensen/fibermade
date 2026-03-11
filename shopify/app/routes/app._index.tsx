@@ -13,7 +13,10 @@ import { FibermadeAuthError, FibermadeNotFoundError } from "../services/fibermad
 import { BulkImportService } from "../services/sync/bulk-import.server";
 import { EXTERNAL_TYPES } from "../services/sync/constants";
 import { mappingExists } from "../services/sync/mapping.server";
-import type { ShopifyGraphqlRunner } from "../services/sync/metafields.server";
+import {
+  assertNoGraphqlErrors,
+  type ShopifyGraphqlRunner,
+} from "../services/sync/metafields.server";
 import { ProductSyncService } from "../services/sync/product-sync.server";
 import type {
   BulkImportProgress,
@@ -240,6 +243,7 @@ export const action = async ({
         err.status = response.status;
         throw err;
       }
+      assertNoGraphqlErrors(json);
       return { data: json.data, errors: json.errors };
     };
 
@@ -297,6 +301,7 @@ export const action = async ({
         err.status = response.status;
         throw err;
       }
+      assertNoGraphqlErrors(json);
       return { data: json.data, errors: json.errors };
     };
 
@@ -453,6 +458,10 @@ export default function Index() {
 
   const handleDisconnect = () => {
     fetcher.submit({ intent: "disconnect" }, { method: "POST" });
+  };
+
+  const handleReconnect = () => {
+    navigate("/app/connect", { replace: true });
   };
 
   const handleResyncConfirm = () => {
@@ -655,8 +664,7 @@ export default function Index() {
           <s-button
             slot="secondary-actions"
             variant="secondary"
-            onClick={() => handleDisconnect()}
-            loading={isDisconnecting}
+            onClick={() => handleReconnect()}
           >
             Reconnect
           </s-button>

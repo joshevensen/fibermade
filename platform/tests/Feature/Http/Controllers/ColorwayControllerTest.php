@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
 use App\Models\Account;
@@ -49,4 +50,37 @@ test('user can update a colorway without slug', function () {
         'id' => $colorway->id,
         'name' => 'Updated Colorway',
     ]);
+});
+
+test('store rejects invalid colors', function () {
+    $account = Account::factory()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+
+    $response = $this->actingAs($user)->post(route('colorways.store'), [
+        'name' => 'Test Colorway',
+        'status' => ColorwayStatus::Active->value,
+        'technique' => Technique::Solid->value,
+        'per_pan' => 3,
+        'colors' => ['invalid', 'red'],
+    ]);
+
+    $response->assertSessionHasErrors('colors.0');
+});
+
+test('store accepts valid Color enum values in colors', function () {
+    $account = Account::factory()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+
+    $response = $this->actingAs($user)->post(route('colorways.store'), [
+        'name' => 'Test Colorway',
+        'status' => ColorwayStatus::Active->value,
+        'technique' => Technique::Solid->value,
+        'per_pan' => 3,
+        'colors' => [Color::Red->value, Color::Blue->value],
+    ]);
+
+    $response->assertRedirect(route('colorways.index'));
+    $colorway = Colorway::where('account_id', $account->id)->where('name', 'Test Colorway')->first();
+    expect($colorway)->not->toBeNull();
+    expect($colorway->colors->map(fn ($c) => $c->value)->all())->toBe(['red', 'blue']);
 });

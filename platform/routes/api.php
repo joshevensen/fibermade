@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\ExternalIdentifierController;
 use App\Http\Controllers\Api\V1\IntegrationController;
 use App\Http\Controllers\Api\V1\IntegrationLogController;
 use App\Http\Controllers\Api\V1\InventoryController;
+use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\OrderItemController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,8 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(functio
         ->name('api.v1.integrations.logs.index');
     Route::post('integrations/{integration}/logs', [IntegrationLogController::class, 'store'])
         ->name('api.v1.integrations.logs.store');
+    Route::post('media', [MediaController::class, 'store'])
+        ->name('api.v1.media.store');
     Route::get('external-identifiers', [ExternalIdentifierController::class, 'index'])
         ->name('api.v1.external-identifiers.index');
     Route::post('external-identifiers', [ExternalIdentifierController::class, 'store'])

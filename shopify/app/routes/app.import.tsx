@@ -1,11 +1,16 @@
+import { useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "react-router";
-import { redirect, useFetcher, useLoaderData } from "react-router";
+import { redirect, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import { FibermadeClient } from "../services/fibermade-client.server";
 import { BulkImportService } from "../services/sync/bulk-import.server";
 import type { BulkImportProgress } from "../services/sync/types";
-import type { ShopifyGraphqlRunner } from "../services/sync/metafields.server";
+import {
+  assertNoGraphqlErrors,
+  type ShopifyGraphqlRunner,
+} from "../services/sync/metafields.server";
 
 function parseProgress(json: string | null): BulkImportProgress {
   if (!json?.trim()) return { total: 0, imported: 0, failed: 0 };
@@ -45,7 +50,9 @@ export const loader = async ({
 
 export const action = async ({
   request,
-}: ActionFunctionArgs): Promise<Response | { error: string }> => {
+}: ActionFunctionArgs): Promise<
+  Response | { error: string } | { started: true }
+> => {
   if (request.method !== "POST") {
     return { error: "Method not allowed" };
   }
@@ -79,6 +86,7 @@ export const action = async ({
       err.status = response.status;
       throw err;
     }
+    assertNoGraphqlErrors(json);
     return { data: json.data, errors: json.errors };
   };
 
@@ -106,16 +114,39 @@ export const action = async ({
     updateConnection
   );
 
-  await bulkImport.runImport();
-  throw redirect("/app");
+  await updateConnection({
+    initialImportStatus: "in_progress",
+    initialImportProgress: JSON.stringify({
+      total: 0,
+      imported: 0,
+      failed: 0,
+      errors: [],
+    }),
+  });
+
+  void bulkImport.runImport().catch(() => {
+    // runImport already updates connection to "failed" on error; avoid unhandled rejection
+  });
+
+  return { started: true };
 };
 
 export default function ImportRoute() {
   const { initialImportStatus, initialImportProgress } =
     useLoaderData<ImportLoaderData>();
-  const fetcher = useFetcher<{ error?: string }>();
+  const fetcher = useFetcher<{ error?: string; started?: boolean }>();
+  const navigate = useNavigate();
+  const shopify = useAppBridge();
   const isSubmitting =
     fetcher.state === "loading" || fetcher.state === "submitting";
+
+  useEffect(() => {
+    const data = fetcher.data;
+    if (data?.started && !data?.error) {
+      shopify.toast.show("Import started");
+      navigate("/app");
+    }
+  }, [fetcher.data, navigate, shopify]);
 
   return (
     <s-page heading="Import products">

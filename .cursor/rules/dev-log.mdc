@@ -1,0 +1,22 @@
+---
+description: Use devLog instead of console.log in platform frontend
+globs: platform/resources/js/**
+---
+
+# Debug Logging in Platform Frontend
+
+In platform frontend code (Vue, TypeScript, JavaScript), use `devLog` from `@/utils/devLog` instead of `console.log` for debug logging. This ensures logs never run in production and internal state is not leaked to the browser console.
+
+- **Import:** `import { devLog } from '@/utils/devLog';`
+- **Usage:** Call `devLog(...)` with the same arguments you would pass to `console.log`.
+
+**Example**
+
+```ts
+// ❌ BAD — leaks to browser console in production
+console.log('value', x);
+
+// ✅ GOOD — only logs in development
+import { devLog } from '@/utils/devLog';
+devLog('value', x);
+```

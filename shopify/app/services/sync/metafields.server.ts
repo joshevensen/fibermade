@@ -22,6 +22,28 @@ export type ShopifyGraphqlRunner = (
   variables: unknown
 ) => Promise<{ data?: unknown; errors?: unknown }>;
 
+/**
+ * Throws if the GraphQL response body contains top-level errors (e.g. 200 OK with errors array).
+ * Call after parsing response.json() so sync paths fail instead of treating as success.
+ */
+export function assertNoGraphqlErrors(json: {
+  data?: unknown;
+  errors?: unknown;
+}): void {
+  const errors = json?.errors;
+  if (Array.isArray(errors) && errors.length > 0) {
+    const first = errors[0];
+    const message =
+      first != null &&
+      typeof first === "object" &&
+      "message" in first &&
+      typeof (first as { message: unknown }).message === "string"
+        ? (first as { message: string }).message
+        : JSON.stringify(errors);
+    throw new Error(message);
+  }
+}
+
 export interface VariantMetafieldInput {
   variantGid: string;
   baseId: number;

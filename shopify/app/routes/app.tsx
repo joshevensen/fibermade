@@ -4,17 +4,12 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { AppProvider } from "@shopify/shopify-app-react-router/react";
 
 import { authenticate } from "../shopify.server";
-import db from "../db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { session } = await authenticate.admin(request);
-  const connection = await db.fibermadeConnection.findUnique({
-    where: { shop: session.shop },
-  });
+  await authenticate.admin(request);
 
   return {
     apiKey: process.env.SHOPIFY_API_KEY || "",
-    connected: !!connection,
   };
 };
 
@@ -25,6 +20,8 @@ export default function App() {
     <AppProvider embedded apiKey={apiKey}>
       <s-app-nav>
         <s-link href="/app">Home</s-link>
+        <s-link href="/app/import">Import</s-link>
+        <s-link href="/app/push">Push</s-link>
         <s-link href="/app/sync-history">Sync History</s-link>
         <s-link href="/app/settings">Settings</s-link>
       </s-app-nav>

@@ -135,6 +135,7 @@ class InviteController extends Controller
                 'type' => AccountType::Store,
             ]);
 
+            // Beta is US-only; country_code is configurable for future international support.
             $store = Store::create([
                 'account_id' => $account->id,
                 'name' => $validated['store_name'],
@@ -145,7 +146,7 @@ class InviteController extends Controller
                 'city' => $validated['city'],
                 'state_region' => $validated['state_region'],
                 'postal_code' => $validated['postal_code'],
-                'country_code' => 'US',
+                'country_code' => config('app.store_invite_country_code', 'US'),
             ]);
 
             $user = User::create([
@@ -195,12 +196,23 @@ class InviteController extends Controller
 
         $invite->update(['expires_at' => now()->addDays(7)]);
 
-        Mail::to($email)->send(new StoreInviteMail(
-            email: $email,
-            creatorName: $creator->name,
-            inviteToken: $invite->token,
-            inviteMetadata: $invite->metadata ?? [],
-        ));
+        try {
+            Mail::to($email)->send(new StoreInviteMail(
+                email: $email,
+                creatorName: $creator->name,
+                inviteToken: $invite->token,
+                inviteMetadata: $invite->metadata ?? [],
+            ));
+        } catch (\Throwable $e) {
+            Log::error('Store invite resend: failed to send email', [
+                'invite_id' => $invite->id,
+                'email' => $email,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return back()->with('error', 'Failed to send the invite email. Please try again.');
+        }
 
         return back()->with('success', 'Invite resent.');
     }

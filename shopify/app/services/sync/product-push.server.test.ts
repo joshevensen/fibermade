@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FibermadeClient } from "../fibermade-client.server";
 import type { BaseData } from "../fibermade-client.types";
 import type { ShopifyGraphqlRunner } from "./metafields.server";
-import { ProductPushService } from "./product-push.server";
+import { isPubliclyAccessibleUrl, ProductPushService } from "./product-push.server";
 
 vi.mock("./mapping.server", () => ({
   createMapping: vi.fn().mockResolvedValue({}),
@@ -1061,5 +1061,60 @@ describe("ProductPushService#pushColorway", () => {
       expect(result.imageError).toBe("Network timeout");
       expect(result.imageGid).toBeUndefined();
     });
+  });
+});
+
+describe("isPubliclyAccessibleUrl", () => {
+  const originalEnv = process.env.FIBERMADE_API_URL;
+
+  afterEach(() => {
+    process.env.FIBERMADE_API_URL = originalEnv;
+  });
+
+  it("rejects localhost and 127.x", () => {
+    expect(isPubliclyAccessibleUrl("http://localhost/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://127.0.0.1/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://127.1.2.3/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://[::1]/path")).toBe(false);
+  });
+
+  it("rejects 0.0.0.0", () => {
+    expect(isPubliclyAccessibleUrl("http://0.0.0.0/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("https://0.0.0.0:8443/path")).toBe(false);
+  });
+
+  it("rejects 169.254.x.x link-local and AWS metadata", () => {
+    expect(isPubliclyAccessibleUrl("http://169.254.0.1/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://169.254.169.254/latest/meta-data/")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://169.254.1.1/path")).toBe(false);
+  });
+
+  it("rejects private IPv4 ranges", () => {
+    expect(isPubliclyAccessibleUrl("http://10.0.0.1/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://192.168.1.1/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://172.16.0.1/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://172.31.255.255/path")).toBe(false);
+  });
+
+  it("rejects IPv6 link-local (fe80::/10) and ULA (fc00::/7)", () => {
+    expect(isPubliclyAccessibleUrl("http://[fe80::1]/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://[fe80::abcd:1234]/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://[fc00::1]/path")).toBe(false);
+    expect(isPubliclyAccessibleUrl("http://[fd12:3456::1]/path")).toBe(false);
+  });
+
+  it("allows public hostnames", () => {
+    expect(isPubliclyAccessibleUrl("https://cdn.shopify.com/image.jpg")).toBe(true);
+    expect(isPubliclyAccessibleUrl("https://example.com/photo.png")).toBe(true);
+  });
+
+  it("allows Fibermade platform domain when FIBERMADE_API_URL is set", () => {
+    process.env.FIBERMADE_API_URL = "https://platform.test";
+    expect(isPubliclyAccessibleUrl("https://platform.test/storage/image.jpg")).toBe(true);
+  });
+
+  it("rejects invalid URL format", () => {
+    expect(isPubliclyAccessibleUrl("not-a-url")).toBe(false);
+    expect(isPubliclyAccessibleUrl("")).toBe(false);
   });
 });

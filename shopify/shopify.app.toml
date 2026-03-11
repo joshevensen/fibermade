@@ -46,7 +46,7 @@ api_version = "2026-04"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products"
+scopes = "write_products,write_product_media"
 
 [auth]
 redirect_urls = [ "https://shopify.fibermade.app/auth/callback" ]

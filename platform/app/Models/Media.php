@@ -64,6 +64,18 @@ class Media extends Model
     }
 
     /**
+     * Model class names that may have media attached (morphMany Media, 'mediable').
+     *
+     * @return list<string>
+     */
+    public static function mediableTypes(): array
+    {
+        return [
+            Colorway::class,
+        ];
+    }
+
+    /**
      * Get the parent mediable model.
      */
     public function mediable(): MorphTo

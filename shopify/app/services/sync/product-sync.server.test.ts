@@ -198,6 +198,7 @@ describe("ProductSyncService#importProduct", () => {
     createBase: ReturnType<typeof vi.fn>;
     createInventory: ReturnType<typeof vi.fn>;
     createIntegrationLog: ReturnType<typeof vi.fn>;
+    createMedia: ReturnType<typeof vi.fn>;
     getColorway: ReturnType<typeof vi.fn>;
     listBases: ReturnType<typeof vi.fn>;
   };
@@ -258,6 +259,7 @@ describe("ProductSyncService#importProduct", () => {
           })
         ),
       createIntegrationLog: vi.fn().mockResolvedValue({}),
+      createMedia: vi.fn().mockResolvedValue({ id: 1, file_path: "https://cdn.shopify.com/image.jpg" }),
       getColorway: vi.fn().mockResolvedValue({
         id: 10,
         name: "Merino DK",
@@ -310,6 +312,28 @@ describe("ProductSyncService#importProduct", () => {
         }),
       })
     );
+  });
+
+  it("calls createMedia when product has featuredImage", async () => {
+    const service = new ProductSyncService(client, integrationId, shopDomain);
+    const product = standardProduct({
+      featuredImage: { url: "https://cdn.shopify.com/s/files/1/0123/4567/image.jpg" },
+    });
+
+    await service.importProduct(product);
+
+    expect(mockClient.createMedia).toHaveBeenCalledTimes(1);
+    expect(mockClient.createMedia).toHaveBeenCalledWith({
+      mediable_type: "App\\Models\\Colorway",
+      mediable_id: 10,
+      file_path: "https://cdn.shopify.com/s/files/1/0123/4567/image.jpg",
+      file_name: "image.jpg",
+      is_primary: true,
+      metadata: {
+        source: "shopify",
+        original_url: "https://cdn.shopify.com/s/files/1/0123/4567/image.jpg",
+      },
+    });
   });
 
   it("multi-variant product creates multiple Bases and Inventory records", async () => {

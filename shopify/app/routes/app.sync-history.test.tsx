@@ -66,7 +66,21 @@ describe("app.sync-history", () => {
     vi.mocked(authenticate.admin).mockResolvedValue({
       session: mockSession,
     } as never);
-    mockGetIntegrationLogs.mockResolvedValue({ data: mockLogs });
+    mockGetIntegrationLogs.mockResolvedValue({
+      data: mockLogs,
+      links: {
+        first: "https://api.fibermade.test/api/v1/integrations/1/logs?page=1",
+        last: "https://api.fibermade.test/api/v1/integrations/1/logs?page=1",
+        prev: null,
+        next: null,
+      },
+      meta: {
+        current_page: 1,
+        last_page: 1,
+        per_page: 50,
+        total: 2,
+      },
+    });
     process.env.FIBERMADE_API_URL = "https://api.fibermade.test";
   });
 
@@ -125,7 +139,7 @@ describe("app.sync-history", () => {
       expect(response.headers.get("Location")).toContain("/app");
     });
 
-    it("returns logs when connected and calls getIntegrationLogs with limit 100", async () => {
+    it("returns logs when connected and calls getIntegrationLogs with page and per_page", async () => {
       const connection = {
         id: "conn-1",
         shop: "test.myshopify.com",
@@ -144,9 +158,39 @@ describe("app.sync-history", () => {
         unstable_pattern: "/",
       });
 
-      expect(result).toEqual({ logs: mockLogs });
+      expect(result).toMatchObject({ logs: mockLogs });
+      expect(result).toHaveProperty("links");
+      expect(result).toHaveProperty("meta");
       expect(mockGetIntegrationLogs).toHaveBeenCalledTimes(1);
-      expect(mockGetIntegrationLogs).toHaveBeenCalledWith(42, { limit: 100 });
+      expect(mockGetIntegrationLogs).toHaveBeenCalledWith(42, {
+        page: 1,
+        per_page: 50,
+      });
+    });
+
+    it("passes page from URL to getIntegrationLogs", async () => {
+      const connection = {
+        id: "conn-1",
+        shop: "test.myshopify.com",
+        fibermadeApiToken: "token",
+        fibermadeIntegrationId: 1,
+        connectedAt: new Date("2024-01-15T10:00:00Z"),
+      };
+      vi.mocked(db.fibermadeConnection.findUnique).mockResolvedValue(
+        connection as never
+      );
+
+      await loader({
+        request: new Request("http://localhost/app/sync-history?page=3"),
+        params: {},
+        context: {},
+        unstable_pattern: "/",
+      });
+
+      expect(mockGetIntegrationLogs).toHaveBeenCalledWith(1, {
+        page: 3,
+        per_page: 50,
+      });
     });
 
     it("propagates error when getIntegrationLogs throws", async () => {
@@ -162,14 +206,18 @@ describe("app.sync-history", () => {
       );
       mockGetIntegrationLogs.mockRejectedValue(new Error("Network error"));
 
-      await expect(
-        loader({
-          request: new Request("http://localhost/app/sync-history"),
-          params: {},
-          context: {},
-          unstable_pattern: "/",
-        })
-      ).rejects.toThrow("Network error");
+      const result = await loader({
+        request: new Request("http://localhost/app/sync-history"),
+        params: {},
+        context: {},
+        unstable_pattern: "/",
+      });
+
+      expect(result).toEqual({
+        logs: [],
+        loadError:
+          "Could not load sync history. Check your connection and try again.",
+      });
     });
   });
 });
