@@ -27,7 +27,7 @@ Forge > Create Server:
 | Type | **Application** |
 | Region | Your preferred DO region |
 | Size | 4GB RAM minimum |
-| PHP Version | 8.3 |
+| PHP Version | 8.4 |
 | Database | PostgreSQL |
 | Node.js | Yes |
 
@@ -62,7 +62,7 @@ Forge > Server > Sites > Add Site:
 | Project Type | PHP/Laravel |
 | Root Directory | `/platform` |
 | Web Directory | `/public` |
-| PHP Version | 8.3 |
+| PHP Version | 8.4 |
 
 ### Connect Repository
 
@@ -84,6 +84,10 @@ $CREATE_RELEASE()
 cd $FORGE_RELEASE_DIRECTORY/platform
 
 $FORGE_COMPOSER install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+mkdir -p storage/framework/{sessions,views,cache/data}
+mkdir -p storage/logs
+
 $FORGE_PHP artisan optimize
 $FORGE_PHP artisan storage:link
 $FORGE_PHP artisan migrate --force
@@ -98,14 +102,17 @@ $RESTART_QUEUES()
 
 ### Queue Worker
 
-Forge > Site > Queues > Add Worker:
+Forge > Site > Processes > Background Processes > Add background process:
 
-| Setting | Value |
+| Field | Value |
 |---|---|
-| Connection | `redis` |
-| Queue | `default` |
-| Processes | 1 |
-| Timeout | 60 |
+| Name | `queue` |
+| php | PHP 8.4 |
+| connection | `redis` |
+| processes | 1 |
+| --queue | `default` |
+| --timeout | 60 |
+| --tries | 3 |
 
 ### Scheduler
 
@@ -113,6 +120,7 @@ Forge > Server > Scheduler > Add Job:
 
 | Setting | Value |
 |---|---|
+| Name | `scheduler` |
 | Command | `php /home/forge/staging.fibermade.app/platform/artisan schedule:run` |
 | User | `forge` |
 | Frequency | Every Minute |
@@ -134,7 +142,11 @@ Forge > Server > Sites > Add Site:
 |---|---|
 | Domain | `staging.shopify.fibermade.app` |
 | Project Type | Static / HTML |
+| Root Directory | `/shopify` |
 | Web Directory | `/` |
+
+In Advanced settings:
+- **Zero downtime deployments**: Off (the deploy script uses `git pull`, not Forge's release macros)
 
 ### Connect Repository
 
@@ -163,31 +175,32 @@ PRISMA_FIELD_ENCRYPTION_KEY=
 
 ### Create the Daemon
 
-Before writing the deployment script, create the Supervisor daemon so you have its ID.
+Before writing the deployment script, create the background process so you have its ID.
 
-Forge > Server > Daemons > New Daemon:
+Forge > Server > Processes > Background Processes > Add background process:
 
 | Setting | Value |
 |---|---|
+| Name | `shopify` |
 | Command | `node /home/forge/staging.shopify.fibermade.app/shopify/build/server/index.js` |
 | Working Directory | `/home/forge/staging.shopify.fibermade.app/shopify` |
 | User | `forge` |
 | Processes | 1 |
 
-Note the daemon ID shown in the list (e.g., `12345`).
+Note the numeric ID shown in the list after saving (e.g., `12345`). You'll need it for the deployment script.
 
 ### Deployment Script
 
 Forge > Site > App > Deployment Script. Replace `DAEMON_ID` with the actual daemon ID:
 
 ```bash
-cd $FORGE_SITE_PATH
+REPO_ROOT="/home/forge/staging.shopify.fibermade.app"
+SHOPIFY_DIR="$REPO_ROOT/shopify"
+
+cd $REPO_ROOT
 git pull origin $FORGE_SITE_BRANCH
 
-# Forge writes .env to the site root; copy it into the shopify subdirectory
-cp $FORGE_SITE_PATH/.env $FORGE_SITE_PATH/shopify/.env
-
-cd $FORGE_SITE_PATH/shopify
+cd $SHOPIFY_DIR
 
 npm ci
 npm run build
@@ -198,15 +211,25 @@ sudo -S supervisorctl restart daemon-DAEMON_ID:*
 
 ### Nginx Configuration
 
-Forge > Site > Nginx. Replace the generated config with:
+Forge > Site > Domains > Nginx configuration > select `staging.shopify.fibermade.app` from the File dropdown.
+
+Keep the Forge `include` lines (they handle SSL injection) but replace the `include forge-conf/.../site.conf;` line with the proxy location block:
 
 ```nginx
+# FORGE CONFIG (DO NOT REMOVE!)
+include forge-conf/SERVER_ID/before/*;
+include forge-conf/SERVER_ID/staging.shopify.fibermade.app/before/*;
+
 server {
     listen 80;
     listen [::]:80;
-
     server_name staging.shopify.fibermade.app;
-    root /home/forge/staging.shopify.fibermade.app;
+    server_tokens off;
+    root /home/forge/staging.shopify.fibermade.app/shopify;
+
+    # FORGE SSL (DO NOT REMOVE!)
+    # ssl_certificate;
+    # ssl_certificate_key;
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -220,9 +243,13 @@ server {
         proxy_cache_bypass $http_upgrade;
     }
 }
+
+# FORGE CONFIG (DO NOT REMOVE!)
+include forge-conf/SERVER_ID/after/*;
+include forge-conf/SERVER_ID/staging.shopify.fibermade.app/after/*;
 ```
 
-Forge will append the SSL server block after the certificate is provisioned.
+Replace `SERVER_ID` with the numeric ID already present in the generated config.
 
 ### SSL
 

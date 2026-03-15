@@ -64,7 +64,7 @@ Provision two identical servers:
 | Type | **Web** |
 | Region | Same DO region |
 | Size | 2GB+ RAM |
-| PHP Version | 8.3 |
+| PHP Version | 8.4 |
 | Database | None (using managed PostgreSQL) |
 | Node.js | Yes (for `npm run build` in deploy script) |
 | Names | `platform-web-1`, `platform-web-2` |
@@ -76,7 +76,7 @@ Provision two identical servers:
 | Type | **Application** |
 | Region | Same DO region |
 | Size | 2GB+ RAM |
-| PHP Version | 8.3 |
+| PHP Version | 8.4 |
 | Database | None (using managed PostgreSQL) |
 | Node.js | Yes |
 | Name | `platform-prime` |

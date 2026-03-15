@@ -20,7 +20,7 @@ Forge > Server > Sites > Add Site:
 | Project Type | PHP/Laravel |
 | Root Directory | `/platform` |
 | Web Directory | `/public` |
-| PHP Version | 8.3 |
+| PHP Version | 8.4 |
 
 ### Connect Repository
 
@@ -65,6 +65,10 @@ $CREATE_RELEASE()
 cd $FORGE_RELEASE_DIRECTORY/platform
 
 $FORGE_COMPOSER install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+mkdir -p storage/framework/{sessions,views,cache/data}
+mkdir -p storage/logs
+
 $FORGE_PHP artisan optimize
 $FORGE_PHP artisan storage:link
 
@@ -92,7 +96,7 @@ Forge > `platform-prime` > Sites > Add Site:
 | Project Type | PHP/Laravel |
 | Root Directory | `/platform` |
 | Web Directory | `/public` |
-| PHP Version | 8.3 |
+| PHP Version | 8.4 |
 
 ### Connect Repository
 
@@ -116,6 +120,10 @@ $CREATE_RELEASE()
 cd $FORGE_RELEASE_DIRECTORY/platform
 
 $FORGE_COMPOSER install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+mkdir -p storage/framework/{sessions,views,cache/data}
+mkdir -p storage/logs
+
 $FORGE_PHP artisan optimize
 $FORGE_PHP artisan storage:link
 $FORGE_PHP artisan migrate --force
@@ -130,15 +138,17 @@ $RESTART_QUEUES()
 
 ### Queue Workers
 
-Forge > Site > Queues > Add Worker:
+Forge > Site > Processes > Background Processes > Add background process:
 
-| Setting | Value |
+| Field | Value |
 |---|---|
-| Connection | `redis` |
-| Queue | `default` |
-| Processes | 2 (adjust based on load) |
-| Timeout | 60 |
-| Max Tries | 3 |
+| Name | `queue` |
+| php | PHP 8.4 |
+| connection | `redis` |
+| processes | 2 (adjust based on load) |
+| --queue | `default` |
+| --timeout | 60 |
+| --tries | 3 |
 
 Add additional workers for other queues (e.g., `high`, `low`) as needed.
 
@@ -148,6 +158,7 @@ Forge > Server > Scheduler > Add Job:
 
 | Setting | Value |
 |---|---|
+| Name | `scheduler` |
 | Command | `php /home/forge/prime.fibermade.app/platform/artisan schedule:run` |
 | User | `forge` |
 | Frequency | Every Minute |
