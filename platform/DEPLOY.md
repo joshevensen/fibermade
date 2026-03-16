@@ -55,6 +55,28 @@ CACHE_DRIVER=redis
 # Add remaining app-specific keys (mail, Stripe, etc.)
 ```
 
+### Stripe webhook
+
+The app creates accounts and users only when Stripe sends **`checkout.session.completed`** to your webhook. It also uses other events for subscription status. Configure the webhook in the [Stripe Dashboard](https://dashboard.stripe.com/webhooks) (use the same Stripe account as your live keys).
+
+1. **Environment variables** (Forge > Site > Environment) — set for each site that serves HTTP (web and optionally prime if it receives webhooks):
+   - `STRIPE_KEY` — publishable key (live mode for production).
+   - `STRIPE_SECRET` — secret key (live mode).
+   - `STRIPE_WEBHOOK_SECRET` — signing secret from the webhook endpoint (step 2).
+   - `STRIPE_PRICE_ID` — Stripe Price ID for the subscription used at registration (e.g. `price_xxx`).
+
+2. **Webhook endpoint** — In Stripe: Developers → Webhooks → Add endpoint.
+   - **Endpoint URL:** `https://fibermade.app/webhooks/stripe` (production). For staging use your staging URL, e.g. `https://staging.fibermade.app/webhooks/stripe`.
+   - **Events to send:** Subscribe to at least:
+     - `checkout.session.completed` — required for registration (creates Account, Creator, User).
+     - `invoice.payment_succeeded` — sets subscription status to Active.
+     - `invoice.payment_failed` — sets subscription status to Past due.
+     - `customer.subscription.deleted` — sets subscription status to Inactive.
+     - `charge.refunded` — sets subscription status to Refunded (charges within 30 days).
+   - After creating the endpoint, open it and reveal **Signing secret**; put that value in `STRIPE_WEBHOOK_SECRET` in your `.env`.
+
+If the webhook is missing or the signing secret is wrong, checkout will succeed in Stripe but no user or account will be created in your database.
+
 ### Deployment Script
 
 Forge > Site > App > Deployment Script (zero-downtime). Migrations are excluded — they run only on the prime server (see section 2).
@@ -186,7 +208,7 @@ DNS for `fibermade.app` must point to the **load balancer's public IP** before r
 
 ---
 
-## 4. GitHub Actions — Deploy to Production
+## 5. GitHub Actions — Deploy to Production
 
 Production deploys are triggered manually from the GitHub Actions UI (not on every push).
 
@@ -228,7 +250,7 @@ Trigger it from GitHub > Actions > "Deploy to Production" > Run workflow.
 
 ---
 
-## 5. First Deploy Checklist
+## 6. First Deploy Checklist
 
 Before going live, verify on each server:
 
