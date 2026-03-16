@@ -53,10 +53,10 @@ export const checkboxIcon: CheckboxTokenSections.Icon = {
 </script>
 
 <script setup lang="ts">
-import PrimeCheckbox from 'primevue/checkbox';
+import { useAttrs, computed } from 'vue';
 
-interface Props {
-    modelValue?: any;
+const props = defineProps<{
+    modelValue?: unknown;
     binary?: boolean;
     indeterminate?: boolean;
     size?: 'small' | 'large';
@@ -65,9 +65,32 @@ interface Props {
     variant?: 'outlined' | 'filled';
     readonly?: boolean;
     required?: boolean;
+}>();
+
+const attrs = useAttrs();
+const emit = defineEmits<{ 'update:modelValue': [value: unknown] }>();
+
+const effectiveModelValue = computed(() => {
+    const formValue = (attrs as { value?: unknown }).value;
+    if (formValue !== undefined && formValue !== null) {
+        if (typeof formValue === 'boolean') return formValue;
+        if (props.binary) return formValue === true || formValue === 'on' || formValue === 1;
+        return formValue;
+    }
+    return props.modelValue;
+});
+
+function isChecked(value: unknown): boolean {
+    return value === true || value === 1 || value === 'on';
 }
 
-defineProps<Props>();
+const inputAttrs = computed(() => {
+    const { onChange: _onChange, value: _value, ...rest } = attrs as Record<string, unknown> & {
+        onChange?: (e: Event) => void;
+        value?: unknown;
+    };
+    return rest;
+});
 
 defineOptions({
     inheritAttrs: false,
@@ -75,9 +98,11 @@ defineOptions({
 </script>
 
 <template>
+    <!-- PrimeVue Checkbox replaced with native HTML checkbox (form state sync issues with d_value). -->
+    <!--
     <PrimeCheckbox
-        v-bind="$attrs"
-        :modelValue="modelValue"
+        v-bind="checkboxAttrs"
+        :modelValue="effectiveModelValue"
         :binary="binary"
         :indeterminate="indeterminate"
         :size="size"
@@ -86,8 +111,25 @@ defineOptions({
         :variant="variant"
         :readonly="readonly"
         :required="required"
+        @update:modelValue="(v: unknown) => emit('update:modelValue', v)"
     >
         <slot />
     </PrimeCheckbox>
+    -->
+    <input
+        type="checkbox"
+        v-bind="inputAttrs"
+        :checked="isChecked(effectiveModelValue)"
+        :disabled="disabled"
+        :readonly="readonly"
+        :required="required"
+        :aria-invalid="invalid || undefined"
+        class="h-4 w-4 rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+        @change="
+            (e: Event) => {
+                const target = (e?.target ?? null) as HTMLInputElement | null;
+                emit('update:modelValue', target ? target.checked : false);
+            }
+        "
+    />
 </template>
-

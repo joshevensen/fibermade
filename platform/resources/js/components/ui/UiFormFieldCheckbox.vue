@@ -3,7 +3,6 @@ import UiFormField from '@/components/ui/UiFormField.vue';
 import UiCheckbox from '@/components/ui/UiCheckbox.vue';
 
 interface Props {
-    // UiFormField props
     name: string;
     label?: string;
     serverError?: string;
@@ -18,7 +17,6 @@ interface Props {
     validateOnValueUpdate?: boolean;
     validateOnMount?: boolean;
     labelPosition?: 'top' | 'left' | 'right';
-    // UiCheckbox props
     binary?: boolean;
     indeterminate?: boolean;
     size?: 'small' | 'large';
@@ -55,11 +53,11 @@ defineOptions({
         <template v-if="$slots.label" #label>
             <slot name="label" />
         </template>
-        <template #default="{ props: fieldProps, id }">
+        <template #default="{ props: fieldProps, id, value }">
             <UiCheckbox
-                v-bind="{ ...fieldProps, ...$attrs }"
+                v-bind="{ ...fieldProps, value, ...$attrs }"
                 :id="id"
-                :binary="binary"
+                :binary="binary ?? true"
                 :indeterminate="indeterminate"
                 :size="size"
                 :invalid="invalid"
@@ -67,8 +65,8 @@ defineOptions({
                 :variant="variant"
                 :readonly="readonly"
                 :required="required"
+                @update:modelValue="(v: unknown) => fieldProps.onChange({ value: v })"
             />
         </template>
     </UiFormField>
 </template>
-

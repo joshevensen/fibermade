@@ -182,7 +182,7 @@ Forge > Server > Processes > Background Processes > Add background process:
 | Setting | Value |
 |---|---|
 | Name | `shopify` |
-| Command | `node /home/forge/staging.shopify.fibermade.app/shopify/build/server/index.js` |
+| Command | `/usr/bin/node /home/forge/staging.shopify.fibermade.app/shopify/node_modules/@react-router/serve/dist/cli.js ./build/server/index.js` |
 | Working Directory | `/home/forge/staging.shopify.fibermade.app/shopify` |
 | User | `forge` |
 | Processes | 1 |
@@ -213,12 +213,11 @@ sudo -S supervisorctl restart daemon-DAEMON_ID:*
 
 Forge > Site > Domains > Nginx configuration > select `staging.shopify.fibermade.app` from the File dropdown.
 
-Keep the Forge `include` lines (they handle SSL injection) but replace the `include forge-conf/.../site.conf;` line with the proxy location block:
+Replace the generated config entirely. The key line is `include forge-conf/SERVER_ID/server/*;` — Forge writes SSL certificates and challenge tokens there, so it must stay inside the server block:
 
 ```nginx
 # FORGE CONFIG (DO NOT REMOVE!)
 include forge-conf/SERVER_ID/before/*;
-include forge-conf/SERVER_ID/staging.shopify.fibermade.app/before/*;
 
 server {
     listen 80;
@@ -230,6 +229,28 @@ server {
     # FORGE SSL (DO NOT REMOVE!)
     # ssl_certificate;
     # ssl_certificate_key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    ssl_prefer_server_ciphers off;
+    ssl_dhparam /etc/nginx/dhparams.pem;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options "nosniff";
+
+    charset utf-8;
+
+    # FORGE CONFIG (DO NOT REMOVE!) - Forge writes SSL certs and challenge tokens here
+    include forge-conf/SERVER_ID/server/*;
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /favicon.svg { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
 
     location / {
         proxy_pass http://127.0.0.1:3000;
@@ -246,10 +267,9 @@ server {
 
 # FORGE CONFIG (DO NOT REMOVE!)
 include forge-conf/SERVER_ID/after/*;
-include forge-conf/SERVER_ID/staging.shopify.fibermade.app/after/*;
 ```
 
-Replace `SERVER_ID` with the numeric ID already present in the generated config.
+Replace `SERVER_ID` with the numeric server ID in the generated config (e.g. `3078639`).
 
 ### SSL
 

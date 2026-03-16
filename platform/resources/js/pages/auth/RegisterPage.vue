@@ -30,6 +30,8 @@ const initialValues = {
     marketing_opt_in: false,
 };
 
+console.log('[RegisterPage] initialValues', { ...initialValues });
+
 const form = useForm(initialValues);
 
 function getPromoFromUrl(): string | null {
@@ -44,6 +46,7 @@ async function onSubmit({
     valid: boolean;
     values: Record<string, unknown>;
 }): Promise<void> {
+    console.log('[RegisterPage] onSubmit', { valid, values });
     if (!valid) return;
 
     const promo = getPromoFromUrl();
