@@ -7,7 +7,7 @@ import type {
   BulkImportResult,
   ShopifyProduct,
   ShopifyVariant,
-  ShopifyWeightUnit,
+
 } from "./types";
 
 const PRODUCTS_PAGE_SIZE = 50;
@@ -36,8 +36,6 @@ const PRODUCTS_QUERY = `#graphql
                 title
                 sku
                 price
-                weight
-                weightUnit
               }
             }
           }
@@ -270,8 +268,8 @@ export class BulkImportService {
       title: String(node.title ?? ""),
       sku: node.sku != null ? String(node.sku) : null,
       price: String(node.price ?? ""),
-      weight: typeof node.weight === "number" ? node.weight : null,
-      weightUnit: (node.weightUnit as ShopifyWeightUnit | null) ?? null,
+      weight: null,
+      weightUnit: null,
     };
   }
 

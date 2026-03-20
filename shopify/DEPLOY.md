@@ -41,7 +41,7 @@ DATABASE_URL=postgresql://<user>:<pass>@<DO private hostname>:25060/fibermade_sh
 
 SHOPIFY_API_KEY=<production app key from Shopify Partners>
 SHOPIFY_API_SECRET=<production app secret from Shopify Partners>
-SCOPES=write_products,write_product_media
+SCOPES=write_products
 SHOPIFY_APP_URL=https://shopify.fibermade.app
 
 # Generate with: npx cloak generate — must be identical on both web servers.
