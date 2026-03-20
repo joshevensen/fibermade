@@ -5,10 +5,10 @@ import UiFormFieldCheckbox from '@/components/ui/UiFormFieldCheckbox.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldPassword from '@/components/ui/UiFormFieldPassword.vue';
 import UiLink from '@/components/ui/UiLink.vue';
-import { IconList } from '@/composables/useIcon';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import { login } from '@/routes';
 import { useForm } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 const features = [
     'Wholesale catalog with fiber-specific terminology',
@@ -33,6 +33,9 @@ const initialValues = {
 console.log('[RegisterPage] initialValues', { ...initialValues });
 
 const form = useForm(initialValues);
+const formError = computed(
+    () => (form.errors as Record<string, string>).form ?? '',
+);
 
 function getPromoFromUrl(): string | null {
     if (typeof window === 'undefined') return null;
@@ -111,17 +114,13 @@ async function onSubmit({
 <template>
     <AuthLayout title="Create an account" page-title="Register" wide>
         <UiForm :initialValues="initialValues" @submit="onSubmit">
-            <p
-                v-if="(form.errors as Record<string, string>)['form']"
-                class="text-destructive text-sm"
-                role="alert"
-            >
-                {{ (form.errors as Record<string, string>)['form'] }}
-            </p>
+            <div v-if="formError" class="text-destructive text-sm" role="alert">
+                {{ formError }}
+            </div>
 
             <div class="grid gap-8 lg:grid-cols-5">
                 <!-- Left column: Form fields -->
-                <div class="space-y-4 lg:col-span-3">   
+                <div class="space-y-4 lg:col-span-3">
                     <UiFormFieldInput
                         name="business_name"
                         label="Business name"
@@ -177,15 +176,13 @@ async function onSubmit({
                 </div>
 
                 <!-- Right column: Pricing + checkboxes -->
-                <div class="lg:col-span-2 flex flex-col gap-6">
+                <div class="flex flex-col gap-6 lg:col-span-2">
                     <!-- Pricing card -->
                     <div
-                        class="rounded-2xl bg-surface-200 py-8 text-center inset-ring inset-ring-surface-900/5 flex flex-col justify-center"
+                        class="flex flex-col justify-center rounded-2xl bg-surface-200 py-8 text-center inset-ring inset-ring-surface-900/5"
                     >
                         <div class="mx-auto max-w-xs px-4">
-                            <p
-                                class="text-lg font-semibold text-surface-600"
-                            >
+                            <p class="text-lg font-semibold text-surface-600">
                                 One Price, No Hidden Fees
                             </p>
                             <p

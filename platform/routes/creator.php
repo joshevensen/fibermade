@@ -35,6 +35,7 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
     // Settings routes
     Route::get('settings', [UserController::class, 'edit'])->name('user.edit');
     Route::patch('settings/profile', [UserController::class, 'update'])->name('user.update');
+    Route::post('settings/api-token', [UserController::class, 'storeApiToken'])->name('user.api-token.store');
     Route::put('settings/password', [UserController::class, 'updatePassword'])
         ->middleware('throttle:6,1')
         ->name('user-password.update');

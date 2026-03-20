@@ -9,6 +9,7 @@ import BillingCard from './components/BillingCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
+import ShopifyApiCard from './components/ShopifyApiCard.vue';
 
 const page = usePage();
 const user = page.props.auth.user as {
@@ -36,6 +37,7 @@ const business = page.props.business as
 const tabs = [
     { value: 'profile', label: 'Profile' },
     { value: 'account', label: 'Account' },
+    { value: 'shopify-api', label: 'Shopify API' },
 ];
 
 function getTabFromUrl(): string {
@@ -96,6 +98,12 @@ watch(
                         <BillingCard />
                         <DeleteAccountDialog />
                     </div>
+                </div>
+            </UiTabPanel>
+
+            <UiTabPanel value="shopify-api">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                    <ShopifyApiCard />
                 </div>
             </UiTabPanel>
         </UiTabs>
