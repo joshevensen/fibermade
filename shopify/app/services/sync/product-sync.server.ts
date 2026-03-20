@@ -286,6 +286,7 @@ export class ProductSyncService {
     const colorwayId = colorway.id;
 
     const primaryImageUrl = product.featuredImage?.url ?? null;
+    const subErrors: Array<{ variantId?: string; message: string }> = [];
     if (primaryImageUrl) {
       try {
         const filePath = primaryImageUrl;
@@ -304,10 +305,12 @@ export class ProductSyncService {
           },
         });
       } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        subErrors.push({ message: `Image upload failed: ${message}` });
         await this.logIntegration(
-          colorwayId,
+          product.id,
           "warning",
-          err instanceof Error ? err.message : String(err),
+          message,
           {
             shopify_gid: product.id,
             image_url: primaryImageUrl,
@@ -385,10 +388,9 @@ export class ProductSyncService {
         );
       } catch (err) {
         variantFailures += 1;
-        console.error(
-          `ProductSyncService: failed to sync variant ${variant.id}:`,
-          err instanceof Error ? err.message : String(err)
-        );
+        const msg = err instanceof Error ? err.message : String(err);
+        subErrors.push({ variantId: variant.id, message: msg });
+        console.error(`ProductSyncService: failed to sync variant ${variant.id}:`, msg);
       }
     }
 
@@ -435,6 +437,7 @@ export class ProductSyncService {
       colorwayId,
       bases,
       inventoryRecords,
+      ...(subErrors.length > 0 ? { subErrors } : {}),
     };
   }
 

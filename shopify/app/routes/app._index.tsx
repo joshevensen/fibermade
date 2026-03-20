@@ -229,6 +229,13 @@ export default function Index() {
     }
   }, [fetcher.data, navigate, shopify]);
 
+  useEffect(() => {
+    if (syncFetcher.data) {
+      const modal = document.getElementById("sync-modal") as HTMLElement & { hide?: () => void };
+      modal?.hide?.();
+    }
+  }, [syncFetcher.data]);
+
   if (!connected && !connectionError) {
     return <Navigate to="/app/connect" replace />;
   }
@@ -316,11 +323,19 @@ export default function Index() {
           </s-banner>
         )}
         {syncSuccess && (
-          <s-banner tone="success" slot="aside">
+          <s-banner tone={syncSuccess.progress.failed > 0 || (syncSuccess.progress.errors?.length ?? 0) > 0 ? "warning" : "success"} slot="aside">
             Sync complete — {syncSuccess.progress.imported} products imported
-            {syncSuccess.progress.failed > 0 &&
-              `, ${syncSuccess.progress.failed} failed`}
-            .
+            {syncSuccess.progress.failed > 0 && `, ${syncSuccess.progress.failed} failed`}.
+            {syncSuccess.progress.errors && syncSuccess.progress.errors.length > 0 && (
+              <ul style={{ marginTop: "8px", paddingLeft: "16px" }}>
+                {syncSuccess.progress.errors.slice(0, 5).map((e, i) => (
+                  <li key={i}>{e.message}</li>
+                ))}
+                {syncSuccess.progress.errors.length > 5 && (
+                  <li>…and {syncSuccess.progress.errors.length - 5} more errors</li>
+                )}
+              </ul>
+            )}
           </s-banner>
         )}
 

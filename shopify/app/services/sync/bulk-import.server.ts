@@ -119,10 +119,17 @@ export class BulkImportService {
           const product = this.normalizeProduct(node);
           try {
             const syncResult = await productSync.importProduct(product);
-            if (syncResult.skipped) {
-              progress.imported += 1;
-            } else {
-              progress.imported += 1;
+            progress.imported += 1;
+            if (syncResult.subErrors && syncResult.subErrors.length > 0) {
+              const list = progress.errors ?? [];
+              for (const e of syncResult.subErrors) {
+                const label = e.variantId ? `Variant ${e.variantId}` : "Product";
+                list.push({ productId: product.id, message: `${label}: ${e.message}` });
+              }
+              if (list.length > MAX_ERRORS_STORED) {
+                list.splice(0, list.length - MAX_ERRORS_STORED);
+              }
+              progress.errors = list;
             }
           } catch (err) {
             progress.failed += 1;
@@ -166,7 +173,17 @@ export class BulkImportService {
             this.shopDomain,
             this.graphql
           );
-          await collectionSync.importAllCollections();
+          const { errors: collectionErrors } = await collectionSync.importAllCollections();
+          if (collectionErrors.length > 0) {
+            const list = progress.errors ?? [];
+            for (const msg of collectionErrors) {
+              list.push({ message: `Collection sync: ${msg}` });
+            }
+            if (list.length > MAX_ERRORS_STORED) {
+              list.splice(0, list.length - MAX_ERRORS_STORED);
+            }
+            progress.errors = list;
+          }
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           const list = progress.errors ?? [];

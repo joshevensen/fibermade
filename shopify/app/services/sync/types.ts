@@ -35,6 +35,8 @@ export interface ProductSyncResultBase {
   colorwayId: number;
   bases: { id: number }[];
   inventoryRecords: { id: number; base_id: number }[];
+  /** Non-fatal errors from sub-operations (media upload, variant sync) */
+  subErrors?: Array<{ variantId?: string; message: string }>;
 }
 
 export interface ProductSyncResultCreated extends ProductSyncResultBase {

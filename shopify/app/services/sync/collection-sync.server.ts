@@ -106,8 +106,9 @@ export class CollectionSyncService {
     }
   }
 
-  async importAllCollections(): Promise<CollectionSyncResult[]> {
+  async importAllCollections(): Promise<{ results: CollectionSyncResult[]; errors: string[] }> {
     const results: CollectionSyncResult[] = [];
+    const errors: string[] = [];
     let cursor: string | null = null;
     let hasNextPage = true;
 
@@ -127,6 +128,7 @@ export class CollectionSyncService {
           results.push(result);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
+          errors.push(`Collection '${collection.title ?? collection.id}': ${message}`);
           await this.logIntegration(
             collection.id,
             "error",
@@ -140,7 +142,7 @@ export class CollectionSyncService {
       hasNextPage = hasNext;
     }
 
-    return results;
+    return { results, errors };
   }
 
   async updateCollection(shopifyCollection: ShopifyCollection): Promise<CollectionSyncResult> {

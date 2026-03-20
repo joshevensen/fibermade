@@ -614,7 +614,7 @@ describe("CollectionSyncService#importAllCollections", () => {
       shopDomain,
       graphqlRunner
     );
-    const results = await service.importAllCollections();
+    const { results } = await service.importAllCollections();
 
     expect(results).toHaveLength(2);
     expect(mockClient.createCollection).toHaveBeenCalledTimes(2);
@@ -631,9 +631,10 @@ describe("CollectionSyncService#importAllCollections", () => {
       shopDomain,
       graphqlRunner
     );
-    const results = await service.importAllCollections();
+    const { results, errors } = await service.importAllCollections();
 
     expect(results).toHaveLength(1);
+    expect(errors).toHaveLength(1);
     expect(mockClient.createIntegrationLog).toHaveBeenCalledWith(
       integrationId,
       expect.objectContaining({
