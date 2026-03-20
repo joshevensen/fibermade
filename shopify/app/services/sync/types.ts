@@ -68,6 +68,7 @@ export interface BulkImportProgress {
   imported: number;
   failed: number;
   errors?: Array<{ productId?: string; message: string }>;
+  criticalError?: string;
 }
 
 export type BulkImportResult = BulkImportProgress;

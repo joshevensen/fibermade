@@ -21,6 +21,7 @@ function parseProgress(json: string | null): BulkImportProgress {
       imported: Number(parsed.imported) || 0,
       failed: Number(parsed.failed) || 0,
       errors: Array.isArray(parsed.errors) ? parsed.errors : undefined,
+      criticalError: typeof parsed.criticalError === "string" ? parsed.criticalError : undefined,
     };
   } catch {
     return { total: 0, imported: 0, failed: 0 };
@@ -185,6 +186,9 @@ export default function ImportRoute() {
       {initialImportStatus === "failed" && (
         <s-card>
           <p>Import failed.</p>
+          {initialImportProgress.criticalError && (
+            <p style={{ color: "red" }}>Error: {initialImportProgress.criticalError}</p>
+          )}
           <fetcher.Form method="post">
             <s-button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Retrying…" : "Retry"}

@@ -36,6 +36,7 @@ function parseImportProgress(json: string | null): BulkImportProgress {
       imported: Number(parsed.imported) || 0,
       failed: Number(parsed.failed) || 0,
       errors: Array.isArray(parsed.errors) ? parsed.errors : undefined,
+      criticalError: typeof parsed.criticalError === "string" ? parsed.criticalError : undefined,
     };
   } catch {
     return { total: 0, imported: 0, failed: 0 };
@@ -563,6 +564,11 @@ export default function Index() {
               The import did not complete. You can retry; already-imported
               products will be skipped.
             </s-paragraph>
+            {initialImportProgress?.criticalError && (
+              <s-banner tone="critical" slot="aside">
+                Error: {initialImportProgress.criticalError}
+              </s-banner>
+            )}
             {importFetcher.data?.error && (
               <s-banner tone="critical" slot="aside">
                 {importFetcher.data.error}
