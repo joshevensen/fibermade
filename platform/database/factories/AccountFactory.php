@@ -5,10 +5,12 @@ namespace Database\Factories;
 use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use App\Enums\SubscriptionStatus;
+use App\Models\Account;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Account>
+ * @extends Factory<Account>
  */
 class AccountFactory extends Factory
 {
@@ -24,6 +26,7 @@ class AccountFactory extends Factory
             'type' => AccountType::Creator,
             'subscription_status' => SubscriptionStatus::Active,
             'onboarded_at' => null,
+            'shopify_connect_token' => (string) Str::uuid(),
         ];
     }
 

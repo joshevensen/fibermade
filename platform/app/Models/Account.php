@@ -5,11 +5,14 @@ namespace App\Models;
 use App\Enums\AccountType;
 use App\Enums\BaseStatus;
 use App\Enums\SubscriptionStatus;
+use Database\Factories\AccountFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Laravel\Cashier\Billable;
 
 /**
@@ -20,17 +23,17 @@ use Laravel\Cashier\Billable;
  * data is stored in the respective tables (creators, stores, etc.).
  *
  * @property int $id
- * @property \App\Enums\BaseStatus $status
- * @property \App\Enums\AccountType $type
- * @property \Illuminate\Support\Carbon|null $onboarded_at
- * @property \App\Enums\SubscriptionStatus|null $subscription_status
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property BaseStatus $status
+ * @property AccountType $type
+ * @property Carbon|null $onboarded_at
+ * @property SubscriptionStatus|null $subscription_status
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Account extends Model
 {
-    /** @use HasFactory<\Database\Factories\AccountFactory> */
+    /** @use HasFactory<AccountFactory> */
     use Billable, HasFactory, SoftDeletes;
 
     /**
@@ -43,7 +46,28 @@ class Account extends Model
         'type',
         'subscription_status',
         'onboarded_at',
+        'shopify_connect_token',
     ];
+
+    /**
+     * Auto-generate a connect token when creating a new account.
+     */
+    protected static function booting(): void
+    {
+        static::creating(function (Account $account) {
+            if (empty($account->shopify_connect_token)) {
+                $account->shopify_connect_token = (string) Str::uuid();
+            }
+        });
+    }
+
+    /**
+     * Generate a new connect token, replacing the existing one.
+     */
+    public function generateConnectToken(): void
+    {
+        $this->update(['shopify_connect_token' => (string) Str::uuid()]);
+    }
 
     /**
      * Get the attributes that should be cast.
