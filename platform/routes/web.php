@@ -2,40 +2,44 @@
 
 use App\Http\Controllers\InviteController;
 use App\Http\Controllers\RegisterCheckoutController;
+use App\Http\Controllers\RegisterSuccessController;
 use App\Http\Controllers\ShopifyWebhookController;
 use App\Http\Controllers\StripeWebhookController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Route;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('website/HomePage');
 })->name('home')->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    VerifyCsrfToken::class,
 ]);
 
 Route::get('terms', function () {
     return Inertia::render('website/TermsPage');
 })->name('terms')->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    VerifyCsrfToken::class,
 ]);
 
 Route::get('privacy', function () {
     return Inertia::render('website/PrivacyPage');
 })->name('privacy')->withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class,
+    StartSession::class,
+    ShareErrorsFromSession::class,
+    VerifyCsrfToken::class,
 ]);
 
 Route::get('invites/accept/{token}', [InviteController::class, 'accept'])->name('invites.accept');
 Route::post('invites/accept/{token}', [InviteController::class, 'acceptStore'])->middleware('throttle:10,1')->name('invites.accept.store');
 
 Route::post('register/checkout', RegisterCheckoutController::class)->middleware('throttle:10,1')->name('register.checkout');
-Route::get('register/success', fn () => Inertia::render('auth/RegisterSuccessPage'))->name('register.success');
+Route::get('register/success', RegisterSuccessController::class)->name('register.success');
 Route::get('register/cancel', fn () => redirect()->route('register'))->name('register.cancel');
 
 Route::post('webhooks/stripe', StripeWebhookController::class)->name('webhooks.stripe');
