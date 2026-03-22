@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AccountType;
+use App\Enums\IntegrationLogStatus;
+use App\Enums\IntegrationType;
 use App\Enums\SubscriptionStatus;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\Account;
 use App\Models\Dye;
+use App\Models\Integration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,6 +53,8 @@ class UserController extends Controller
             }
         }
 
+        $shopify = $this->buildShopifyProp($user->account_id);
+
         $routeName = $request->route()->getName();
         $page = $routeName === 'store.settings'
             ? 'store/settings/SettingsPage'
@@ -60,7 +65,59 @@ class UserController extends Controller
             'business' => $business,
             'dyes' => $dyes,
             'next_billing_date' => $nextBillingDate,
+            'shopify' => $shopify,
         ]);
+    }
+
+    /**
+     * Build the shopify integration state prop for the settings page.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function buildShopifyProp(?int $accountId): ?array
+    {
+        if (! $accountId) {
+            return null;
+        }
+
+        $integration = Integration::where('account_id', $accountId)
+            ->where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->first();
+
+        if (! $integration) {
+            return [
+                'connected' => false,
+                'shop' => null,
+                'connected_since' => null,
+                'auto_sync' => false,
+                'sync' => ['status' => 'idle'],
+                'recent_errors' => [],
+            ];
+        }
+
+        $settings = $integration->settings ?? [];
+
+        $recentErrors = $integration->logs()
+            ->where('status', IntegrationLogStatus::Error)
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(fn (object $log) => [
+                'id' => $log->id,
+                'message' => $log->message,
+                'created_at' => $log->created_at?->toIso8601String(),
+            ])
+            ->toArray();
+
+        return [
+            'connected' => true,
+            'shop' => $settings['shop'] ?? null,
+            'connected_since' => $integration->created_at?->toDateString(),
+            'auto_sync' => $settings['auto_sync'] ?? false,
+            'sync' => $settings['sync'] ?? ['status' => 'idle'],
+            'recent_errors' => $recentErrors,
+        ];
     }
 
     /**

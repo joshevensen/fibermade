@@ -9,7 +9,8 @@ import BillingCard from './components/BillingCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
-import ShopifyApiCard from './components/ShopifyApiCard.vue';
+import ShopifyConnectionCard from './components/ShopifyConnectionCard.vue';
+import ShopifySyncCard from './components/ShopifySyncCard.vue';
 
 const page = usePage();
 const user = page.props.auth.user as {
@@ -19,6 +20,28 @@ const user = page.props.auth.user as {
     role?: string;
     account_id?: number | null;
 };
+const shopify = page.props.shopify as
+    | {
+          connected: boolean;
+          shop: string | null;
+          connected_since: string | null;
+          auto_sync: boolean;
+          sync: {
+              status: 'idle' | 'running' | 'complete' | 'failed';
+              current_step?: string | null;
+              started_at?: string | null;
+              completed_at?: string | null;
+              last_result?: {
+                  products?: { created: number; updated: number; failed: number };
+                  collections?: { created: number; updated: number; failed: number };
+                  inventory?: { created: number; updated: number; failed: number };
+              };
+              errors?: { step: string; message: string; [key: string]: unknown }[];
+          };
+          recent_errors: { id: number; message: string; created_at: string | null }[];
+      }
+    | null
+    | undefined;
 const business = page.props.business as
     | {
           id: number;
@@ -103,7 +126,8 @@ watch(
 
             <UiTabPanel value="shopify-api">
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    <ShopifyApiCard />
+                    <ShopifyConnectionCard :shopify="shopify" />
+                    <ShopifySyncCard :shopify="shopify" />
                 </div>
             </UiTabPanel>
         </UiTabs>
