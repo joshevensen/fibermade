@@ -243,7 +243,7 @@ class ShopifyGraphqlClient
     {
         $query = <<<'GRAPHQL'
             query GetCollections($first: Int!, $after: String) {
-                collections(first: $first, after: $after) {
+                collections(first: $first, after: $after, query: "published_status:published") {
                     edges {
                         node {
                             id

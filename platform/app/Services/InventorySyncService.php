@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Data\Shopify\SyncResult;
+use App\Enums\BaseStatus;
 use App\Enums\IntegrationLogStatus;
 use App\Models\Colorway;
 use App\Models\ExternalIdentifier;
@@ -11,6 +13,7 @@ use App\Models\Inventory;
 use App\Services\Shopify\ShopifyApiException;
 use App\Services\Shopify\ShopifyGraphqlClient;
 use App\Services\Shopify\ShopifySyncService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,7 +22,8 @@ use Illuminate\Support\Facades\DB;
 class InventorySyncService
 {
     public function __construct(
-        private readonly ?ShopifySyncService $shopifySyncOverride = null
+        private readonly ?ShopifySyncService $shopifySyncOverride = null,
+        private readonly ?ShopifyGraphqlClient $graphqlClientOverride = null,
     ) {}
 
     /**
@@ -153,7 +157,7 @@ class InventorySyncService
     }
 
     /**
-     * @return array{product_id: string, variant_ids: array<string>, inventories: \Illuminate\Support\Collection}
+     * @return array{product_id: string, variant_ids: array<string>, inventories: Collection}
      */
     private function createProductAndVariants(Colorway $colorway, Integration $integration, ShopifySyncService $shopifySync, string $syncSource): array
     {
@@ -174,7 +178,7 @@ class InventorySyncService
             ->get();
 
         $bases = $colorway->account->bases()
-            ->where('status', \App\Enums\BaseStatus::Active)
+            ->where('status', BaseStatus::Active)
             ->orderBy('id')
             ->get();
         $variantIds = $created['variant_ids'];
@@ -217,6 +221,48 @@ class InventorySyncService
             'variant_ids' => $variantIds,
             'inventories' => $inventories,
         ];
+    }
+
+    /**
+     * Pull current inventory for all known Shopify variant mappings into Fibermade.
+     *
+     * Intended for a full manual re-sync. Runs after product sync so all
+     * variant → inventory mappings should already exist.
+     */
+    public function syncAll(Integration $integration): SyncResult
+    {
+        $result = new SyncResult;
+
+        $client = $this->graphqlClientOverride ?? self::createShopifyClient($integration);
+        if (! $client) {
+            throw new \RuntimeException('Shopify integration not configured.');
+        }
+
+        $identifiers = ExternalIdentifier::where('integration_id', $integration->id)
+            ->where('external_type', 'shopify_variant')
+            ->where('identifiable_type', Inventory::class)
+            ->get();
+
+        foreach ($identifiers as $identifier) {
+            $variantGid = $identifier->external_id;
+
+            try {
+                $data = $client->getVariantInventory($variantGid);
+                $quantity = $data['inventoryQuantity'];
+
+                $pulled = $this->pullInventoryFromShopify($variantGid, $quantity, $integration, 'manual_sync');
+
+                if ($pulled) {
+                    $result->updated++;
+                } else {
+                    $result->skipped++;
+                }
+            } catch (\Throwable $e) {
+                $result->addError($variantGid, $e->getMessage());
+            }
+        }
+
+        return $result;
     }
 
     /**
