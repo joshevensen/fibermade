@@ -15,21 +15,20 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const baseUrl = process.env.FIBERMADE_API_URL;
     if (baseUrl?.trim()) {
       try {
-        await fetch(
-          `${baseUrl.replace(/\/$/, "")}/api/v1/integrations/${connection.fibermadeIntegrationId}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Accept: "application/json",
-              Authorization: `Bearer ${connection.fibermadeApiToken}`,
-            },
-            body: JSON.stringify({ active: false }),
-          }
-        );
+        await fetch(`${baseUrl.replace(/\/$/, "")}/api/v1/shopify/disconnect`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            connect_token: connection.connectToken,
+            shop: connection.shop,
+          }),
+        });
       } catch (e) {
         console.error(
-          `[webhooks.app.uninstalled] Failed to deactivate integration ${connection.fibermadeIntegrationId} for ${shop}:`,
+          `[webhooks.app.uninstalled] Failed to disconnect integration ${connection.fibermadeIntegrationId} for ${shop}:`,
           e
         );
       }

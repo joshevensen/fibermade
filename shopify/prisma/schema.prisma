@@ -9,7 +9,7 @@ generator client {
 // enough when changing adapters.
 // See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -38,7 +38,7 @@ model Session {
 model FibermadeConnection {
   id                     Int      @id @default(autoincrement())
   shop                   String   @unique
-  fibermadeApiToken      String   /// @encrypted
+  connectToken           String
   fibermadeIntegrationId Int
   connectedAt            DateTime @default(now())
 }

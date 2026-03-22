@@ -17,7 +17,6 @@ export const headers: HeadersFunction = (headersArgs) => {
 async function fibermadeRequest(
   baseUrl: string,
   path: string,
-  token: string,
   options: { method?: string; body?: unknown } = {}
 ): Promise<{ ok: boolean; status: number; data: unknown }> {
   const url = `${baseUrl.replace(/\/$/, "")}${path}`;
@@ -26,7 +25,6 @@ async function fibermadeRequest(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
     },
     ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
   });
@@ -50,7 +48,7 @@ function formatConnectedAt(date: Date): string {
 }
 
 export type ConnectionStatus =
-  | { connected: false; connectionError?: "integration_inactive" | "token_invalid"; shop?: string; connectedAt?: string; fibermadeUrl: string }
+  | { connected: false; connectionError?: "integration_inactive"; shop?: string; connectedAt?: string; fibermadeUrl: string }
   | { connected: true; shop: string; connectedAt: string; fibermadeUrl: string };
 
 export type ConnectActionData =
@@ -86,36 +84,15 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<Connectio
   try {
     const result = await fibermadeRequest(
       baseUrl,
-      `/api/v1/integrations/${connection.fibermadeIntegrationId}`,
-      connection.fibermadeApiToken
+      `/api/v1/shopify/status?connect_token=${connection.connectToken}&shop=${session.shop}`
     );
-
-    if (result.status === 401 || result.status === 403) {
-      return {
-        connected: false,
-        connectionError: "token_invalid",
-        shop: connection.shop,
-        connectedAt: connection.connectedAt.toISOString(),
-        fibermadeUrl,
-      };
-    }
-
-    if (result.status === 404) {
-      return {
-        connected: false,
-        connectionError: "integration_inactive",
-        shop: connection.shop,
-        connectedAt: connection.connectedAt.toISOString(),
-        fibermadeUrl,
-      };
-    }
 
     if (!result.ok) {
       return connectedPayload;
     }
 
-    const integration = (result.data as { data?: { active?: boolean } } | null)?.data;
-    if (integration && integration.active === false) {
+    const status = (result.data as { data?: { active?: boolean } } | null)?.data;
+    if (status?.active === false) {
       return {
         connected: false,
         connectionError: "integration_inactive",
@@ -146,9 +123,9 @@ export const action = async ({ request }: ActionFunctionArgs): Promise<ConnectAc
       return { intent: "connect", success: false, error: "Shopify session is missing access token." };
     }
 
-    const apiToken = formData.get("apiToken");
-    if (typeof apiToken !== "string" || !apiToken.trim()) {
-      return { intent: "connect", success: false, error: "API token is required.", field: "apiToken" };
+    const connectToken = formData.get("connectToken");
+    if (typeof connectToken !== "string" || !connectToken.trim()) {
+      return { intent: "connect", success: false, error: "Connect token is required.", field: "connectToken" };
     }
 
     const existing = await db.fibermadeConnection.findUnique({ where: { shop: session.shop } });
@@ -166,44 +143,38 @@ export const action = async ({ request }: ActionFunctionArgs): Promise<ConnectAc
       return { intent: "connect", success: false, error: "Fibermade API is not configured. Please contact support." };
     }
 
-    const healthResult = await fibermadeRequest(baseUrl, "/api/v1/health", apiToken.trim());
-    if (healthResult.status === 401 || healthResult.status === 403) {
-      return {
-        intent: "connect",
-        success: false,
-        error: "Invalid Fibermade API token. Check your credentials and try again.",
-        field: "apiToken",
-      };
-    }
-    if (!healthResult.ok) {
-      return { intent: "connect", success: false, error: "Could not reach the Fibermade API. Check your connection and try again." };
-    }
-
-    const createResult = await fibermadeRequest(baseUrl, "/api/v1/integrations", apiToken.trim(), {
+    const connectResult = await fibermadeRequest(baseUrl, "/api/v1/shopify/connect", {
       method: "POST",
       body: {
-        type: "shopify",
-        credentials: shopifyAccessToken,
-        settings: { shop: session.shop },
-        active: true,
+        connect_token: connectToken.trim(),
+        shop: session.shop,
+        shopify_access_token: shopifyAccessToken,
       },
     });
 
-    if (!createResult.ok) {
+    if (!connectResult.ok) {
+      if (connectResult.status === 422 || connectResult.status === 404) {
+        return {
+          intent: "connect",
+          success: false,
+          error: "Invalid connect token. Check the token in Fibermade → Settings → Shopify API and try again.",
+          field: "connectToken",
+        };
+      }
       const message =
-        (createResult.data as { message?: string } | null)?.message ?? "Failed to create integration.";
+        (connectResult.data as { message?: string } | null)?.message ?? "Could not reach the Fibermade API. Check your connection and try again.";
       return { intent: "connect", success: false, error: message };
     }
 
-    const integrationId = (createResult.data as { data?: { id?: number } } | null)?.data?.id;
+    const integrationId = (connectResult.data as { data?: { integration_id?: number } } | null)?.data?.integration_id;
     if (!integrationId) {
-      return { intent: "connect", success: false, error: "Failed to create integration: unexpected response." };
+      return { intent: "connect", success: false, error: "Failed to connect: unexpected response." };
     }
 
     await db.fibermadeConnection.create({
       data: {
         shop: session.shop,
-        fibermadeApiToken: apiToken.trim(),
+        connectToken: connectToken.trim(),
         fibermadeIntegrationId: integrationId,
         connectedAt: new Date(),
       },
@@ -221,12 +192,13 @@ export const action = async ({ request }: ActionFunctionArgs): Promise<ConnectAc
     const baseUrl = process.env.FIBERMADE_API_URL;
     if (baseUrl?.trim()) {
       try {
-        await fibermadeRequest(
-          baseUrl,
-          `/api/v1/integrations/${connection.fibermadeIntegrationId}`,
-          connection.fibermadeApiToken,
-          { method: "PATCH", body: { active: false } }
-        );
+        await fibermadeRequest(baseUrl, "/api/v1/shopify/disconnect", {
+          method: "POST",
+          body: {
+            connect_token: connection.connectToken,
+            shop: connection.shop,
+          },
+        });
       } catch (e) {
         console.error(
           `[disconnect] Failed to deactivate integration ${connection.fibermadeIntegrationId}:`,
@@ -247,7 +219,7 @@ export default function Index() {
   const fetcher = useFetcher<ConnectActionData>();
   const navigate = useNavigate();
   const shopify = useAppBridge();
-  const [token, setToken] = useState("");
+  const [connectToken, setConnectToken] = useState("");
 
   const data = fetcher.data;
   const submittingIntent =
@@ -272,11 +244,11 @@ export default function Index() {
   const connectedAt = loaderData.connectedAt;
 
   const tokenError =
-    data?.intent === "connect" && !data.success && data.field === "apiToken"
+    data?.intent === "connect" && !data.success && data.field === "connectToken"
       ? data.error
       : undefined;
   const connectError =
-    data?.intent === "connect" && !data.success && data.field !== "apiToken"
+    data?.intent === "connect" && !data.success && data.field !== "connectToken"
       ? data.error
       : undefined;
   const disconnectError =
@@ -286,7 +258,7 @@ export default function Index() {
     e.preventDefault();
     const formData = new FormData();
     formData.set("intent", "connect");
-    formData.set("apiToken", token);
+    formData.set("connectToken", connectToken);
     fetcher.submit(formData, { method: "POST" });
   };
 
@@ -377,16 +349,11 @@ export default function Index() {
             style={{ height: "40px", marginBottom: "12px", display: "block" }}
           />
           <s-banner
-            heading={
-              connectionError === "token_invalid"
-                ? "API token no longer valid"
-                : "Integration deactivated"
-            }
+            heading="Integration deactivated"
             tone="critical"
             slot="aside"
           >
-            Reconnect with a new API token from the Fibermade platform, or disconnect to remove the
-            link.
+            Reconnect using your connect token from Fibermade → Settings → Shopify API, or disconnect to remove the link.
           </s-banner>
           <s-paragraph>
             {shop} — disconnected
@@ -426,10 +393,11 @@ export default function Index() {
         <form onSubmit={handleConnect}>
           <s-stack direction="block" gap="base">
             <s-text-field
-              name="apiToken"
-              label="Fibermade API token"
-              value={token}
-              onChange={(e) => setToken(e.currentTarget?.value ?? "")}
+              name="connectToken"
+              label="Fibermade Connect Token"
+              helpText="Find this in Fibermade → Settings → Shopify API"
+              value={connectToken}
+              onChange={(e) => setConnectToken(e.currentTarget?.value ?? "")}
               autocomplete="off"
               error={tokenError}
               disabled={isConnecting}
