@@ -5,6 +5,7 @@ use App\Http\Controllers\BaseController;
 use App\Http\Controllers\BillingPortalController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\ColorwayController;
+use App\Http\Controllers\Creator\ShopifySyncController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DyeController;
@@ -96,4 +97,14 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
 
     // Shows routes
     Route::resource('shows', ShowController::class)->except(['create']);
+
+    // Shopify sync routes
+    Route::prefix('shopify')->name('shopify.')->group(function () {
+        Route::post('sync/all', [ShopifySyncController::class, 'syncAll'])->name('sync.all');
+        Route::post('sync/products', [ShopifySyncController::class, 'syncProducts'])->name('sync.products');
+        Route::post('sync/collections', [ShopifySyncController::class, 'syncCollections'])->name('sync.collections');
+        Route::post('sync/inventory', [ShopifySyncController::class, 'syncInventory'])->name('sync.inventory');
+        Route::get('sync/status', [ShopifySyncController::class, 'status'])->name('sync.status');
+        Route::patch('settings', [ShopifySyncController::class, 'updateSettings'])->name('settings.update');
+    });
 });
