@@ -34,8 +34,15 @@ class IntegrationController extends ApiController
 
     public function store(StoreIntegrationRequest $request): JsonResponse
     {
+        $validated = $request->validated();
+
+        Integration::query()
+            ->where('account_id', $request->user()->account_id)
+            ->where('type', $validated['type'])
+            ->delete();
+
         $integration = Integration::create([
-            ...$request->validated(),
+            ...$validated,
             'account_id' => $request->user()->account_id,
         ]);
 

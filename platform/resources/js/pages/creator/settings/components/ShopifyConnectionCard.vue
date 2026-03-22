@@ -141,20 +141,20 @@ async function copyToken(): Promise<void> {
             <div class="flex flex-col gap-4">
                 <!-- Connection status -->
                 <div
-                    class="flex items-center gap-3 rounded-lg border border-surface-200 bg-surface-50 p-3 dark:border-surface-700 dark:bg-surface-800"
+                    class="flex items-center gap-3 rounded-lg border border-surface-200 bg-surface-50 p-3"
                 >
                     <span
                         class="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
                         :class="
                             shopify?.connected
                                 ? 'bg-green-500'
-                                : 'bg-surface-400 dark:bg-surface-500'
+                                : 'bg-surface-400'
                         "
                     />
                     <div class="min-w-0 flex-1">
                         <template v-if="shopify?.connected">
                             <p
-                                class="truncate text-sm font-medium text-surface-900 dark:text-surface-100"
+                                class="truncate text-sm font-medium text-surface-900"
                             >
                                 {{ shopify.shop }}
                             </p>
@@ -166,9 +166,7 @@ async function copyToken(): Promise<void> {
                             </p>
                         </template>
                         <template v-else>
-                            <p
-                                class="text-sm text-surface-500 dark:text-surface-400"
-                            >
+                            <p class="text-sm text-surface-500">
                                 Not connected
                             </p>
                         </template>
@@ -189,19 +187,19 @@ async function copyToken(): Promise<void> {
                     <div v-if="hasToken" class="flex flex-col gap-2">
                         <label
                             for="shopify-api-token"
-                            class="text-sm font-medium text-surface-700 dark:text-surface-300"
+                            class="text-sm font-medium text-surface-700"
                         >
                             Shopify API token
                         </label>
-                        <div class="flex flex-col gap-2 lg:flex-row">
+                        <div class="flex gap-2">
                             <input
                                 id="shopify-api-token"
                                 :value="token"
                                 readonly
                                 spellcheck="false"
-                                class="w-full rounded-md border border-surface-300 bg-surface-0 px-3 py-2 font-mono text-xs text-surface-800 dark:border-surface-600 dark:bg-surface-900 dark:text-surface-100"
+                                class="min-w-0 flex-1 rounded-md border border-surface-300 bg-surface-50 px-3 py-2 font-mono text-xs text-surface-800"
                             />
-                            <UiButton @click="copyToken">Copy token</UiButton>
+                            <UiButton class="shrink-0" @click="copyToken">Copy token</UiButton>
                         </div>
                         <p class="text-muted-foreground text-xs">
                             This token is shown only once. Store it securely

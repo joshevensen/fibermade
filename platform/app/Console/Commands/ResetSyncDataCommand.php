@@ -45,14 +45,24 @@ class ResetSyncDataCommand extends Command
             return self::FAILURE;
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        $isPostgres = DB::getDriverName() === 'pgsql';
+
+        if ($isPostgres) {
+            DB::statement('SET session_replication_role = replica;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
 
         foreach ($this->tables as $table) {
             DB::table($table)->truncate();
             $this->line("  Truncated: {$table}");
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if ($isPostgres) {
+            DB::statement('SET session_replication_role = DEFAULT;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
 
         $this->info('Sync data reset complete.');
 

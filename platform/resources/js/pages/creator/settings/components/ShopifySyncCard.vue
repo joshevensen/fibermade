@@ -287,7 +287,7 @@ function formatStepCount(result: SyncStepResult): string {
                 <!-- Not connected notice -->
                 <div
                     v-if="!shopify?.connected"
-                    class="rounded-lg border border-surface-200 bg-surface-50 p-4 text-sm text-surface-500 dark:border-surface-700 dark:bg-surface-800 dark:text-surface-400"
+                    class="rounded-lg border border-surface-200 bg-surface-50 p-4 text-sm text-surface-500"
                 >
                     Connect your Shopify store to enable sync controls.
                 </div>

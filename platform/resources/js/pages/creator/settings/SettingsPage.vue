@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import UiButton from '@/components/ui/UiButton.vue';
 import UiTabPanel from '@/components/ui/UiTabPanel.vue';
 import UiTabs from '@/components/ui/UiTabs.vue';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
@@ -100,10 +101,33 @@ watch(
         }
     },
 );
+
+const refreshing = ref(false);
+
+function refreshShopifyStatus(): void {
+    refreshing.value = true;
+    router.reload({
+        only: ['shopify'],
+        onFinish: () => {
+            refreshing.value = false;
+        },
+    });
+}
 </script>
 
 <template>
     <CreatorLayout page-title="Settings">
+        <template v-if="activeTab === 'shopify-api'" #header-actions>
+            <UiButton
+                severity="secondary"
+                size="small"
+                :loading="refreshing"
+                @click="refreshShopifyStatus"
+            >
+                Refresh status
+            </UiButton>
+        </template>
+
         <UiTabs :value="activeTab" :tabs="tabs" @update:value="handleTabChange">
             <UiTabPanel value="profile">
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">

@@ -26,6 +26,8 @@ These are the only scopes the app needs. All sync logic runs in the Laravel plat
 - `read_inventory` — query inventory quantities and inventory item GIDs
 - `read_locations` — query store locations (needed for inventory sync)
 
+`read_products,read_inventory,read_locations`
+
 **Optional scopes:** leave empty.
 
 **Use legacy install flow:** unchecked.
