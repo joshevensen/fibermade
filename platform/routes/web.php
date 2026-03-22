@@ -43,7 +43,14 @@ Route::get('register/success', RegisterSuccessController::class)->name('register
 Route::get('register/cancel', fn () => redirect()->route('register'))->name('register.cancel');
 
 Route::post('webhooks/stripe', StripeWebhookController::class)->name('webhooks.stripe');
-Route::post('webhooks/shopify/inventory', ShopifyWebhookController::class)->name('webhooks.shopify.inventory');
+
+Route::post('webhooks/shopify/inventory', [ShopifyWebhookController::class, 'inventory'])->name('webhooks.shopify.inventory');
+Route::post('webhooks/shopify/products/create', [ShopifyWebhookController::class, 'productCreate'])->name('webhooks.shopify.products.create');
+Route::post('webhooks/shopify/products/update', [ShopifyWebhookController::class, 'productUpdate'])->name('webhooks.shopify.products.update');
+Route::post('webhooks/shopify/products/delete', [ShopifyWebhookController::class, 'productDelete'])->name('webhooks.shopify.products.delete');
+Route::post('webhooks/shopify/collections/create', [ShopifyWebhookController::class, 'collectionCreate'])->name('webhooks.shopify.collections.create');
+Route::post('webhooks/shopify/collections/update', [ShopifyWebhookController::class, 'collectionUpdate'])->name('webhooks.shopify.collections.update');
+Route::post('webhooks/shopify/collections/delete', [ShopifyWebhookController::class, 'collectionDelete'])->name('webhooks.shopify.collections.delete');
 
 require __DIR__.'/creator.php';
 require __DIR__.'/store.php';

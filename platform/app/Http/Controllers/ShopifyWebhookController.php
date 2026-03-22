@@ -3,20 +3,35 @@
 namespace App\Http\Controllers;
 
 use App\Enums\IntegrationLogStatus;
+use App\Jobs\ProcessShopifyCollectionWebhookJob;
+use App\Jobs\ProcessShopifyProductWebhookJob;
 use App\Models\Integration;
 use App\Models\IntegrationLog;
+use App\Models\Inventory;
 use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyGraphqlClient;
+use App\Services\Shopify\ShopifyWebhookNormalizer;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Handles Shopify webhooks. inventory_levels/update pulls inventory into Fibermade.
+ * Handles Shopify webhooks received directly from Shopify.
+ *
+ * All routes are public (no auth) but require valid HMAC signatures.
+ * Product and collection webhooks are dispatched as queued jobs so Shopify
+ * gets a fast 200 response. Processing happens asynchronously.
  */
 class ShopifyWebhookController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __construct(
+        private readonly ShopifyWebhookNormalizer $normalizer = new ShopifyWebhookNormalizer,
+    ) {}
+
+    /**
+     * Handle inventory_levels/update webhooks.
+     */
+    public function inventory(Request $request): Response
     {
         $topic = $request->header('X-Shopify-Topic');
         if ($topic !== 'inventory_levels/update') {
@@ -78,7 +93,7 @@ class ShopifyWebhookController extends Controller
             if (! $variantGid) {
                 IntegrationLog::create([
                     'integration_id' => $integration->id,
-                    'loggable_type' => \App\Models\Inventory::class,
+                    'loggable_type' => Inventory::class,
                     'loggable_id' => 0,
                     'status' => IntegrationLogStatus::Warning,
                     'message' => 'Webhook: inventory_item has no variant or variant not found',
@@ -99,7 +114,7 @@ class ShopifyWebhookController extends Controller
             if (! $updated) {
                 IntegrationLog::create([
                     'integration_id' => $integration->id,
-                    'loggable_type' => \App\Models\Inventory::class,
+                    'loggable_type' => Inventory::class,
                     'loggable_id' => 0,
                     'status' => IntegrationLogStatus::Warning,
                     'message' => 'Webhook: no Fibermade Inventory for Shopify variant',
@@ -122,7 +137,7 @@ class ShopifyWebhookController extends Controller
 
             IntegrationLog::create([
                 'integration_id' => $integration->id,
-                'loggable_type' => \App\Models\Inventory::class,
+                'loggable_type' => Inventory::class,
                 'loggable_id' => 0,
                 'status' => IntegrationLogStatus::Error,
                 'message' => 'Webhook processing failed: '.$e->getMessage(),
@@ -136,6 +151,139 @@ class ShopifyWebhookController extends Controller
 
             return response('', 500);
         }
+    }
+
+    /**
+     * Handle products/create webhooks.
+     */
+    public function productCreate(Request $request): Response
+    {
+        return $this->handleProductWebhook($request, 'create');
+    }
+
+    /**
+     * Handle products/update webhooks.
+     */
+    public function productUpdate(Request $request): Response
+    {
+        return $this->handleProductWebhook($request, 'update');
+    }
+
+    /**
+     * Handle products/delete webhooks.
+     */
+    public function productDelete(Request $request): Response
+    {
+        return $this->handleProductWebhook($request, 'delete');
+    }
+
+    /**
+     * Handle collections/create webhooks.
+     */
+    public function collectionCreate(Request $request): Response
+    {
+        return $this->handleCollectionWebhook($request, 'create');
+    }
+
+    /**
+     * Handle collections/update webhooks.
+     */
+    public function collectionUpdate(Request $request): Response
+    {
+        return $this->handleCollectionWebhook($request, 'update');
+    }
+
+    /**
+     * Handle collections/delete webhooks.
+     */
+    public function collectionDelete(Request $request): Response
+    {
+        return $this->handleCollectionWebhook($request, 'delete');
+    }
+
+    private function handleProductWebhook(Request $request, string $action): Response
+    {
+        $payload = $request->getContent();
+        if (! $this->verifyHmac($payload, $request->header('X-Shopify-Hmac-Sha256'))) {
+            Log::warning("Shopify products/{$action} webhook rejected: invalid HMAC");
+
+            return response('', 401);
+        }
+
+        $data = json_decode($payload, true);
+        if (! is_array($data)) {
+            return response('', 400);
+        }
+
+        $shopDomain = $request->header('X-Shopify-Shop-Domain');
+        $integration = $this->resolveIntegration($shopDomain);
+        if (! $integration) {
+            return response('', 200);
+        }
+
+        if (! $this->isAutoSyncEnabled($integration)) {
+            return response('', 200);
+        }
+
+        $normalized = $action === 'delete'
+            ? ['gid' => $this->normalizer->extractProductGid($data)]
+            : $this->normalizer->normalizeProduct($data);
+
+        ProcessShopifyProductWebhookJob::dispatch($integration, $action, $normalized);
+
+        return response('', 200);
+    }
+
+    private function handleCollectionWebhook(Request $request, string $action): Response
+    {
+        $payload = $request->getContent();
+        if (! $this->verifyHmac($payload, $request->header('X-Shopify-Hmac-Sha256'))) {
+            Log::warning("Shopify collections/{$action} webhook rejected: invalid HMAC");
+
+            return response('', 401);
+        }
+
+        $data = json_decode($payload, true);
+        if (! is_array($data)) {
+            return response('', 400);
+        }
+
+        $shopDomain = $request->header('X-Shopify-Shop-Domain');
+        $integration = $this->resolveIntegration($shopDomain);
+        if (! $integration) {
+            return response('', 200);
+        }
+
+        if (! $this->isAutoSyncEnabled($integration)) {
+            return response('', 200);
+        }
+
+        $normalized = $action === 'delete'
+            ? ['gid' => $this->normalizer->extractCollectionGid($data)]
+            : $this->normalizer->normalizeCollection($data);
+
+        ProcessShopifyCollectionWebhookJob::dispatch($integration, $action, $normalized);
+
+        return response('', 200);
+    }
+
+    private function resolveIntegration(?string $shopDomain): ?Integration
+    {
+        if (empty($shopDomain)) {
+            return null;
+        }
+
+        $integration = Integration::findShopifyByShopDomain($shopDomain);
+        if (! $integration) {
+            Log::info('Shopify webhook: no integration found for shop', ['shop' => $shopDomain]);
+        }
+
+        return $integration;
+    }
+
+    private function isAutoSyncEnabled(Integration $integration): bool
+    {
+        return (bool) ($integration->settings['auto_sync'] ?? false);
     }
 
     private function verifyHmac(string $body, ?string $headerHmac): bool

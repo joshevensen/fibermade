@@ -22,27 +22,27 @@ api_version = "2026-04"
 
   [[webhooks.subscriptions]]
   topics = ["products/create"]
-  uri = "/webhooks/products/create"
+  uri = "https://fibermade.app/webhooks/shopify/products/create"
 
   [[webhooks.subscriptions]]
   topics = ["products/update"]
-  uri = "/webhooks/products/update"
+  uri = "https://fibermade.app/webhooks/shopify/products/update"
 
   [[webhooks.subscriptions]]
   topics = ["products/delete"]
-  uri = "/webhooks/products/delete"
+  uri = "https://fibermade.app/webhooks/shopify/products/delete"
 
   [[webhooks.subscriptions]]
   topics = ["collections/create"]
-  uri = "/webhooks/collections/create"
+  uri = "https://fibermade.app/webhooks/shopify/collections/create"
 
   [[webhooks.subscriptions]]
   topics = ["collections/update"]
-  uri = "/webhooks/collections/update"
+  uri = "https://fibermade.app/webhooks/shopify/collections/update"
 
   [[webhooks.subscriptions]]
   topics = ["collections/delete"]
-  uri = "/webhooks/collections/delete"
+  uri = "https://fibermade.app/webhooks/shopify/collections/delete"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
