@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Http\Requests\StoreIntegrationRequest;
 use App\Http\Requests\UpdateIntegrationRequest;
 use App\Http\Resources\Api\V1\IntegrationResource;
+use App\Models\ExternalIdentifier;
 use App\Models\Integration;
 use Illuminate\Http\JsonResponse;
 
@@ -36,15 +37,22 @@ class IntegrationController extends ApiController
     {
         $validated = $request->validated();
 
-        Integration::query()
+        $oldIds = Integration::query()
             ->where('account_id', $request->user()->account_id)
             ->where('type', $validated['type'])
-            ->delete();
+            ->pluck('id');
 
         $integration = Integration::create([
             ...$validated,
             'account_id' => $request->user()->account_id,
         ]);
+
+        if ($oldIds->isNotEmpty()) {
+            ExternalIdentifier::whereIn('integration_id', $oldIds)
+                ->update(['integration_id' => $integration->id]);
+
+            Integration::whereIn('id', $oldIds)->delete();
+        }
 
         return $this->createdResponse(new IntegrationResource($integration));
     }

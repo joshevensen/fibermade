@@ -61,7 +61,7 @@ const business = page.props.business as
 const tabs = [
     { value: 'profile', label: 'Profile' },
     { value: 'account', label: 'Account' },
-    { value: 'shopify-api', label: 'Shopify API' },
+    { value: 'shopify-api', label: 'Shopify' },
 ];
 
 function getTabFromUrl(): string {

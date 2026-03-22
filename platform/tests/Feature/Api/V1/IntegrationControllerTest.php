@@ -2,6 +2,8 @@
 
 use App\Enums\IntegrationType;
 use App\Models\Account;
+use App\Models\Colorway;
+use App\Models\ExternalIdentifier;
 use App\Models\Integration;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -218,6 +220,43 @@ test('store does not delete integrations belonging to another account', function
     ], withBearer($token))->assertStatus(201);
 
     expect(Integration::find($integrationB->id))->not->toBeNull();
+});
+
+test('store re-associates external identifiers from old integration to new one', function () {
+    $account = Account::factory()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+    $oldIntegration = Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+    ]);
+    $colorway = Colorway::factory()->create(['account_id' => $account->id]);
+    ExternalIdentifier::create([
+        'integration_id' => $oldIntegration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/123',
+    ]);
+    $token = getApiToken($user);
+
+    $response = $this->postJson('/api/v1/integrations', [
+        'type' => IntegrationType::Shopify->value,
+        'credentials' => 'new-api-token',
+        'active' => true,
+    ], withBearer($token));
+
+    $response->assertStatus(201);
+    $newIntegrationId = $response->json('data.id');
+
+    expect(
+        ExternalIdentifier::where('integration_id', $newIntegrationId)
+            ->where('external_id', 'gid://shopify/Product/123')
+            ->exists()
+    )->toBeTrue();
+
+    expect(
+        ExternalIdentifier::where('integration_id', $oldIntegration->id)->exists()
+    )->toBeFalse();
 });
 
 test('store with invalid data returns 422', function () {
