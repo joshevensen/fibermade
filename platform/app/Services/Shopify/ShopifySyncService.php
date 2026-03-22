@@ -2,10 +2,12 @@
 
 namespace App\Services\Shopify;
 
+use App\Enums\BaseStatus;
 use App\Models\Base;
 use App\Models\Colorway;
 use App\Models\Integration;
 use App\Models\Inventory;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Handles Shopify API mutations for products, variants, images, and inventory.
@@ -124,7 +126,7 @@ class ShopifySyncService
     {
         $account = $integration->account;
         $bases = Base::where('account_id', $account->id)
-            ->where('status', \App\Enums\BaseStatus::Active)
+            ->where('status', BaseStatus::Active)
             ->orderBy('id')
             ->get();
 
@@ -224,6 +226,38 @@ class ShopifySyncService
             'product_id' => $product['id'],
             'variant_ids' => $variantIds,
         ];
+    }
+
+    /**
+     * Archive a Shopify product by setting its status to ARCHIVED.
+     *
+     * @throws ShopifyApiException
+     */
+    public function archiveProduct(string $productGid): void
+    {
+        $mutation = <<<'GQL'
+        mutation productUpdate($input: ProductInput!) {
+          productUpdate(input: $input) {
+            product { id status }
+            userErrors { field message }
+          }
+        }
+        GQL;
+
+        $result = $this->client->request($mutation, [
+            'input' => [
+                'id' => $productGid,
+                'status' => 'ARCHIVED',
+            ],
+        ]);
+
+        $payload = $result['data']['productUpdate'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException($message, $userErrors);
+        }
     }
 
     /**
@@ -381,7 +415,7 @@ class ShopifySyncService
         $this->deleteExistingProductMedia($productGid);
 
         foreach ($media as $m) {
-            $url = \Illuminate\Support\Facades\Storage::disk('public')->url($m->file_path);
+            $url = Storage::disk('public')->url($m->file_path);
             $fullUrl = str_starts_with($url, 'http') ? $url : url($url);
             $this->createProductMedia($productGid, $fullUrl);
         }

@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationType;
+use App\Enums\Technique;
 use App\Jobs\SyncBaseDeletedToShopifyJob;
 use App\Jobs\SyncBaseToShopifyJob;
 use App\Jobs\SyncColorwayCatalogToShopifyJob;
@@ -32,17 +34,21 @@ test('Colorway name change dispatches SyncColorwayCatalogToShopifyJob', function
 
 test('Colorway catalog field changes dispatch SyncColorwayCatalogToShopifyJob', function () {
     $account = Account::factory()->creator()->create();
-    $colorway = Colorway::factory()->create(['account_id' => $account->id]);
+    $colorway = Colorway::factory()->create([
+        'account_id' => $account->id,
+        'status' => ColorwayStatus::Active,
+        'technique' => Technique::Solid,
+    ]);
 
     $colorway->update(['description' => 'New description']);
     Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class);
 
     Queue::fake();
-    $colorway->update(['status' => \App\Enums\ColorwayStatus::Retired]);
+    $colorway->update(['status' => ColorwayStatus::Retired]);
     Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class);
 
     Queue::fake();
-    $colorway->update(['technique' => \App\Enums\Technique::Variegated]);
+    $colorway->update(['technique' => Technique::Variegated]);
     Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class);
 });
 
@@ -157,6 +163,48 @@ test('observer does not dispatch when catalog_sync_enabled is false', function (
     $account = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
     $colorway->update(['name' => 'New Name']);
+
+    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+});
+
+test('ColorwayObserver created dispatches SyncColorwayCatalogToShopifyJob with action created', function () {
+    $account = Account::factory()->creator()->create();
+    Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'token']),
+        'settings' => ['shop' => 'test.myshopify.com'],
+    ]);
+
+    $colorway = Colorway::factory()->create(['account_id' => $account->id]);
+
+    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+        return $job->colorway->id === $colorway->id && $job->action === 'created';
+    });
+});
+
+test('ColorwayObserver created does not dispatch when no Shopify integration exists', function () {
+    $account = Account::factory()->creator()->create();
+
+    Colorway::factory()->create(['account_id' => $account->id]);
+
+    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+});
+
+test('ColorwayObserver created does not dispatch when catalog sync is disabled', function () {
+    Config::set('services.shopify.catalog_sync_enabled', false);
+
+    $account = Account::factory()->creator()->create();
+    Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'token']),
+        'settings' => ['shop' => 'test.myshopify.com'],
+    ]);
+
+    Colorway::factory()->create(['account_id' => $account->id]);
 
     Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
 });

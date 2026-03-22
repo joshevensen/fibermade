@@ -7,8 +7,11 @@ use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
 use App\Models\Integration;
+use App\Services\Shopify\ShopifyApiException;
 use App\Services\Shopify\ShopifyGraphqlClient;
 use App\Services\Shopify\ShopifySyncService;
+
+afterEach(fn () => Mockery::close());
 
 beforeEach(function () {
     $this->account = Account::factory()->creator()->create();
@@ -37,10 +40,10 @@ test('createProduct sends correct Colorway to Product field mapping', function (
     ]);
 
     $captured = [];
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')
         ->once()
-        ->with(\Mockery::type('string'), \Mockery::on(function ($vars) use (&$captured) {
+        ->with(Mockery::type('string'), Mockery::on(function ($vars) use (&$captured) {
             $captured = $vars;
 
             return isset($vars['product']);
@@ -73,7 +76,7 @@ test('createProduct sends correct Colorway to Product field mapping', function (
 
 test('createProduct maps ColorwayStatus to Shopify status', function () {
     $captured = [];
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
         $captured = $vars;
 
@@ -114,7 +117,7 @@ test('createProduct adds per_pan metafield when per_pan greater than zero', func
     Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering']);
 
     $captured = [];
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
         $captured = $vars;
 
@@ -152,7 +155,7 @@ test('createProduct omits per_pan metafield when per_pan is zero', function () {
     Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering']);
 
     $captured = [];
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
         $captured = $vars;
 
@@ -188,14 +191,14 @@ test('syncImages orders media with is_primary first', function () {
         'is_primary' => true,
     ]);
 
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')
-        ->with(\Mockery::type('string'), \Mockery::on(function ($vars) {
+        ->with(Mockery::type('string'), Mockery::on(function ($vars) {
             return isset($vars['id']);
         }))
         ->andReturn(['data' => ['product' => ['media' => ['edges' => []]]]]);
     $mockClient->shouldReceive('request')
-        ->with(\Mockery::type('string'), \Mockery::on(function ($vars) {
+        ->with(Mockery::type('string'), Mockery::on(function ($vars) {
             return isset($vars['productId']) && isset($vars['media']);
         }))
         ->andReturn(['data' => ['productCreateMedia' => ['mediaUserErrors' => []]]]);
@@ -206,4 +209,51 @@ test('syncImages orders media with is_primary first', function () {
     $mediaOrder = $colorway->fresh()->media()->orderByDesc('is_primary')->orderBy('id')->pluck('file_path')->all();
     expect($mediaOrder[0])->toBe('colorways/first.jpg');
     expect($mediaOrder[1])->toBe('colorways/second.jpg');
+});
+
+test('archiveProduct sends productUpdate mutation with status ARCHIVED', function () {
+    $productGid = 'gid://shopify/Product/99';
+    $captured = [];
+
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::type('string'), Mockery::on(function ($vars) use (&$captured) {
+            $captured = $vars;
+
+            return isset($vars['input']['id']) && isset($vars['input']['status']);
+        }))
+        ->andReturn([
+            'data' => [
+                'productUpdate' => [
+                    'product' => ['id' => $productGid, 'status' => 'ARCHIVED'],
+                    'userErrors' => [],
+                ],
+            ],
+        ]);
+
+    $service = new ShopifySyncService($mockClient);
+    $service->archiveProduct($productGid);
+
+    expect($captured['input']['id'])->toBe($productGid);
+    expect($captured['input']['status'])->toBe('ARCHIVED');
+});
+
+test('archiveProduct throws ShopifyApiException on userErrors', function () {
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->andReturn([
+            'data' => [
+                'productUpdate' => [
+                    'product' => null,
+                    'userErrors' => [['field' => 'id', 'message' => 'Product not found']],
+                ],
+            ],
+        ]);
+
+    $service = new ShopifySyncService($mockClient);
+
+    expect(fn () => $service->archiveProduct('gid://shopify/Product/99'))
+        ->toThrow(ShopifyApiException::class, 'Product not found');
 });
