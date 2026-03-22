@@ -1,49 +1,67 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type {
   ActionFunctionArgs,
   HeadersFunction,
   LoaderFunctionArgs,
 } from "react-router";
-import { Navigate, useFetcher, useLoaderData, useNavigate } from "react-router";
+import { useFetcher, useLoaderData, useNavigate } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
-import { FibermadeClient } from "../services/fibermade-client.server";
-import { FibermadeAuthError, FibermadeNotFoundError } from "../services/fibermade-client.types";
-import { BulkImportService } from "../services/sync/bulk-import.server";
-import {
-  assertNoGraphqlErrors,
-  type ShopifyGraphqlRunner,
-} from "../services/sync/metafields.server";
-import type { BulkImportProgress } from "../services/sync/types";
-import { formatConnectedAt } from "../utils/date";
 import { boundary } from "@shopify/shopify-app-react-router/server";
-
-export type ConnectionStatus = {
-  connected: boolean;
-  connectionError?: "integration_inactive" | "token_invalid";
-  shop?: string;
-  connectedAt?: string;
-  fibermadeUrl: string;
-};
-
-export type DisconnectActionData = { success: true } | { success: false; error: string };
-
-export type SyncAllResult =
-  | { success: true; progress: BulkImportProgress }
-  | { success: false; error: string };
-
-export type IndexActionData = DisconnectActionData | SyncAllResult;
 
 export const headers: HeadersFunction = (headersArgs) => {
   return boundary.headers(headersArgs);
 };
 
-export const loader = async ({
-  request,
-}: LoaderFunctionArgs): Promise<ConnectionStatus> => {
+async function fibermadeRequest(
+  baseUrl: string,
+  path: string,
+  token: string,
+  options: { method?: string; body?: unknown } = {}
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const url = `${baseUrl.replace(/\/$/, "")}${path}`;
+  const response = await fetch(url, {
+    method: options.method ?? "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    ...(options.body !== undefined ? { body: JSON.stringify(options.body) } : {}),
+  });
+  let data: unknown = null;
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    const text = await response.text();
+    if (text.trim()) {
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // ignore parse errors
+      }
+    }
+  }
+  return { ok: response.ok, status: response.status, data };
+}
+
+function formatConnectedAt(date: Date): string {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(date);
+}
+
+export type ConnectionStatus =
+  | { connected: false; connectionError?: "integration_inactive" | "token_invalid"; shop?: string; connectedAt?: string; fibermadeUrl: string }
+  | { connected: true; shop: string; connectedAt: string; fibermadeUrl: string };
+
+export type ConnectActionData =
+  | { intent: "connect"; success: true }
+  | { intent: "connect"; success: false; error: string; field?: string }
+  | { intent: "disconnect"; success: true }
+  | { intent: "disconnect"; success: false; error: string };
+
+export const loader = async ({ request }: LoaderFunctionArgs): Promise<ConnectionStatus> => {
   const { session } = await authenticate.admin(request);
-  const fibermadeUrl = process.env.FIBERMADE_URL?.replace(/\/$/, "") || "";
+  const fibermadeUrl = process.env.FIBERMADE_URL?.replace(/\/$/, "") ?? "";
 
   const connection = await db.fibermadeConnection.findUnique({
     where: { shop: session.shop },
@@ -53,34 +71,26 @@ export const loader = async ({
     return { connected: false, fibermadeUrl };
   }
 
-  const baseUrl = process.env.FIBERMADE_API_URL;
-  const connectionPayload = {
+  const connectedPayload = {
     connected: true as const,
     shop: connection.shop,
     connectedAt: connection.connectedAt.toISOString(),
     fibermadeUrl,
   };
 
+  const baseUrl = process.env.FIBERMADE_API_URL;
   if (!baseUrl?.trim()) {
-    return connectionPayload;
+    return connectedPayload;
   }
 
   try {
-    const client = new FibermadeClient(baseUrl);
-    client.setToken(connection.fibermadeApiToken);
-    const integration = await client.getIntegration(connection.fibermadeIntegrationId);
-    if (!integration.active) {
-      return {
-        connected: false,
-        connectionError: "integration_inactive",
-        shop: connection.shop,
-        connectedAt: connection.connectedAt.toISOString(),
-        fibermadeUrl,
-      };
-    }
-    return connectionPayload;
-  } catch (e) {
-    if (e instanceof FibermadeAuthError) {
+    const result = await fibermadeRequest(
+      baseUrl,
+      `/api/v1/integrations/${connection.fibermadeIntegrationId}`,
+      connection.fibermadeApiToken
+    );
+
+    if (result.status === 401 || result.status === 403) {
       return {
         connected: false,
         connectionError: "token_invalid",
@@ -89,7 +99,8 @@ export const loader = async ({
         fibermadeUrl,
       };
     }
-    if (e instanceof FibermadeNotFoundError) {
+
+    if (result.status === 404) {
       return {
         connected: false,
         connectionError: "integration_inactive",
@@ -98,272 +109,227 @@ export const loader = async ({
         fibermadeUrl,
       };
     }
-    return connectionPayload;
+
+    if (!result.ok) {
+      return connectedPayload;
+    }
+
+    const integration = (result.data as { data?: { active?: boolean } } | null)?.data;
+    if (integration && integration.active === false) {
+      return {
+        connected: false,
+        connectionError: "integration_inactive",
+        shop: connection.shop,
+        connectedAt: connection.connectedAt.toISOString(),
+        fibermadeUrl,
+      };
+    }
+
+    return connectedPayload;
+  } catch {
+    return connectedPayload;
   }
 };
 
-export const action = async ({
-  request,
-}: ActionFunctionArgs): Promise<IndexActionData> => {
+export const action = async ({ request }: ActionFunctionArgs): Promise<ConnectActionData> => {
   if (request.method !== "POST") {
-    return { success: false, error: "Method not allowed" };
+    return { intent: "disconnect", success: false, error: "Method not allowed" };
   }
 
+  const { session } = await authenticate.admin(request);
   const formData = await request.formData();
   const intent = formData.get("intent");
 
-  if (intent !== "disconnect" && intent !== "sync-all") {
-    return { success: false, error: "Invalid intent" };
+  if (intent === "connect") {
+    const shopifyAccessToken = session.accessToken;
+    if (typeof shopifyAccessToken !== "string" || !shopifyAccessToken) {
+      return { intent: "connect", success: false, error: "Shopify session is missing access token." };
+    }
+
+    const apiToken = formData.get("apiToken");
+    if (typeof apiToken !== "string" || !apiToken.trim()) {
+      return { intent: "connect", success: false, error: "API token is required.", field: "apiToken" };
+    }
+
+    const existing = await db.fibermadeConnection.findUnique({ where: { shop: session.shop } });
+    if (existing) {
+      return {
+        intent: "connect",
+        success: false,
+        error: "This shop is already linked to a Fibermade account. Disconnect first to link a different account.",
+        field: "shop",
+      };
+    }
+
+    const baseUrl = process.env.FIBERMADE_API_URL;
+    if (!baseUrl?.trim()) {
+      return { intent: "connect", success: false, error: "Fibermade API is not configured. Please contact support." };
+    }
+
+    const healthResult = await fibermadeRequest(baseUrl, "/api/v1/health", apiToken.trim());
+    if (healthResult.status === 401 || healthResult.status === 403) {
+      return {
+        intent: "connect",
+        success: false,
+        error: "Invalid Fibermade API token. Check your credentials and try again.",
+        field: "apiToken",
+      };
+    }
+    if (!healthResult.ok) {
+      return { intent: "connect", success: false, error: "Could not reach the Fibermade API. Check your connection and try again." };
+    }
+
+    const createResult = await fibermadeRequest(baseUrl, "/api/v1/integrations", apiToken.trim(), {
+      method: "POST",
+      body: {
+        type: "shopify",
+        credentials: shopifyAccessToken,
+        settings: { shop: session.shop },
+        active: true,
+      },
+    });
+
+    if (!createResult.ok) {
+      const message =
+        (createResult.data as { message?: string } | null)?.message ?? "Failed to create integration.";
+      return { intent: "connect", success: false, error: message };
+    }
+
+    const integrationId = (createResult.data as { data?: { id?: number } } | null)?.data?.id;
+    if (!integrationId) {
+      return { intent: "connect", success: false, error: "Failed to create integration: unexpected response." };
+    }
+
+    await db.fibermadeConnection.create({
+      data: {
+        shop: session.shop,
+        fibermadeApiToken: apiToken.trim(),
+        fibermadeIntegrationId: integrationId,
+        connectedAt: new Date(),
+      },
+    });
+
+    return { intent: "connect", success: true };
   }
 
-  const { session, admin } = await authenticate.admin(request);
-  const connection = await db.fibermadeConnection.findUnique({
-    where: { shop: session.shop },
-  });
-
   if (intent === "disconnect") {
+    const connection = await db.fibermadeConnection.findUnique({ where: { shop: session.shop } });
     if (!connection) {
-      return { success: true };
+      return { intent: "disconnect", success: true };
     }
 
     const baseUrl = process.env.FIBERMADE_API_URL;
     if (baseUrl?.trim()) {
       try {
-        const client = new FibermadeClient(baseUrl);
-        client.setToken(connection.fibermadeApiToken);
-        await client.updateIntegration(connection.fibermadeIntegrationId, {
-          active: false,
-        });
+        await fibermadeRequest(
+          baseUrl,
+          `/api/v1/integrations/${connection.fibermadeIntegrationId}`,
+          connection.fibermadeApiToken,
+          { method: "PATCH", body: { active: false } }
+        );
       } catch (e) {
         console.error(
-          `[disconnect] Failed to deactivate Fibermade Integration ${connection.fibermadeIntegrationId}:`,
+          `[disconnect] Failed to deactivate integration ${connection.fibermadeIntegrationId}:`,
           e
         );
       }
     }
 
-    await db.fibermadeConnection.delete({
-      where: { id: connection.id },
-    });
-
-    return { success: true };
+    await db.fibermadeConnection.delete({ where: { id: connection.id } });
+    return { intent: "disconnect", success: true };
   }
 
-  // sync-all
-  if (!connection) {
-    return { success: false, error: "Not connected to Fibermade." };
-  }
-
-  const baseUrl = process.env.FIBERMADE_API_URL;
-  if (!baseUrl?.trim()) {
-    return { success: false, error: "Fibermade API is not configured." };
-  }
-
-  const graphqlRunner: ShopifyGraphqlRunner = async (query, variables) => {
-    const response = await admin.graphql(query, {
-      variables: variables as Record<string, unknown>,
-    });
-    const json = (await response.json()) as { data?: unknown; errors?: unknown };
-    if (!response.ok) {
-      const err = new Error(
-        typeof json?.errors === "string" ? json.errors : "GraphQL request failed"
-      ) as Error & { status?: number };
-      err.status = response.status;
-      throw err;
-    }
-    assertNoGraphqlErrors(json);
-    return { data: json.data, errors: json.errors };
-  };
-
-  const client = new FibermadeClient(baseUrl);
-  client.setToken(connection.fibermadeApiToken);
-
-  const updateConnection = async (data: {
-    initialImportStatus: string;
-    initialImportProgress?: string | null;
-  }) => {
-    await db.fibermadeConnection.update({
-      where: { id: connection.id },
-      data: {
-        initialImportStatus: data.initialImportStatus,
-        initialImportProgress: data.initialImportProgress ?? undefined,
-      },
-    });
-  };
-
-  const bulkImport = new BulkImportService(
-    client,
-    connection.fibermadeIntegrationId,
-    session.shop,
-    graphqlRunner,
-    updateConnection
-  );
-
-  try {
-    const progress = await bulkImport.runImport();
-    return { success: true, progress };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { success: false, error: message };
-  }
+  return { intent: "disconnect", success: false, error: "Invalid intent." };
 };
 
 export default function Index() {
-  const { connected, connectionError, shop, connectedAt, fibermadeUrl } =
-    useLoaderData<typeof loader>();
-  const fetcher = useFetcher<IndexActionData>();
-  const syncFetcher = useFetcher<IndexActionData>();
+  const loaderData = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<ConnectActionData>();
   const navigate = useNavigate();
   const shopify = useAppBridge();
+  const [token, setToken] = useState("");
+
+  const data = fetcher.data;
+  const submittingIntent =
+    fetcher.state !== "idle" ? fetcher.formData?.get("intent") : null;
+  const isConnecting = submittingIntent === "connect";
+  const isDisconnecting = submittingIntent === "disconnect";
 
   useEffect(() => {
-    const data = fetcher.data;
-    const isDisconnectSuccess =
-      data &&
-      "success" in data &&
-      data.success === true &&
-      !("progress" in data);
-    if (isDisconnectSuccess) {
+    if (!data?.success) return;
+    if (data.intent === "connect") {
+      shopify.toast.show("Connected to Fibermade");
+      navigate("/app", { replace: true });
+    } else if (data.intent === "disconnect") {
       shopify.toast.show("Disconnected from Fibermade");
-      navigate("/app/connect", { replace: true });
+      navigate("/app", { replace: true });
     }
-  }, [fetcher.data, navigate, shopify]);
+  }, [data, navigate, shopify]);
 
-  useEffect(() => {
-    if (syncFetcher.data) {
-      const modal = document.getElementById("sync-modal") as HTMLElement & { hide?: () => void };
-      modal?.hide?.();
-    }
-  }, [syncFetcher.data]);
+  const { connected, fibermadeUrl } = loaderData;
+  const connectionError = !connected ? loaderData.connectionError : undefined;
+  const shop = loaderData.shop;
+  const connectedAt = loaderData.connectedAt;
 
-  if (!connected && !connectionError) {
-    return <Navigate to="/app/connect" replace />;
-  }
+  const tokenError =
+    data?.intent === "connect" && !data.success && data.field === "apiToken"
+      ? data.error
+      : undefined;
+  const connectError =
+    data?.intent === "connect" && !data.success && data.field !== "apiToken"
+      ? data.error
+      : undefined;
+  const disconnectError =
+    data?.intent === "disconnect" && !data.success ? data.error : undefined;
 
-  const showDisconnected = !connected && !!connectionError;
-  const isDisconnecting =
-    (fetcher.state === "loading" || fetcher.state === "submitting") &&
-    fetcher.formMethod === "POST";
-  const isSyncing =
-    syncFetcher.state === "loading" || syncFetcher.state === "submitting";
+  const handleConnect = (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.set("intent", "connect");
+    formData.set("apiToken", token);
+    fetcher.submit(formData, { method: "POST" });
+  };
 
   const handleDisconnect = () => {
     fetcher.submit({ intent: "disconnect" }, { method: "POST" });
   };
 
-  const handleSyncConfirm = () => {
-    syncFetcher.submit({ intent: "sync-all" }, { method: "POST" });
-  };
-
-  const syncResult = syncFetcher.data;
-  const syncSuccess =
-    syncResult && "success" in syncResult && syncResult.success && "progress" in syncResult
-      ? syncResult
-      : null;
-  const syncError =
-    syncResult && "success" in syncResult && !syncResult.success && "error" in syncResult
-      ? syncResult.error
-      : null;
-
-  return (
-    <s-page heading="Fibermade">
-      {showDisconnected && (
-        <s-banner
-          heading={
-            connectionError === "token_invalid"
-              ? "API token no longer valid"
-              : "Integration deactivated"
-          }
-          tone="critical"
-          slot="aside"
-        >
-          Reconnect with a new API token from the Fibermade platform, or
-          disconnect to remove the link.
-          <s-button
-            slot="secondary-actions"
-            variant="secondary"
-            onClick={() => navigate("/app/connect", { replace: true })}
-          >
-            Reconnect
-          </s-button>
-          <s-button
-            slot="secondary-actions"
-            variant="secondary"
-            tone="critical"
-            commandFor="disconnect-modal"
-            command="--show"
-          >
-            Disconnect
-          </s-button>
-        </s-banner>
-      )}
-
-      <s-section>
-        <img
-          src="/logo.png"
-          alt="Fibermade"
-          style={{ height: "40px", marginBottom: "12px", display: "block" }}
-        />
-        <s-paragraph>
-          Fibermade is a commerce platform built for the fiber community. Manage
-          your colorways, bases, and inventory — then sync your products directly
-          to your Shopify store.
-        </s-paragraph>
-        {fibermadeUrl && (
+  if (connected) {
+    return (
+      <s-page heading="Fibermade">
+        <s-section>
+          <img
+            src="/logo.png"
+            alt="Fibermade"
+            style={{ height: "40px", marginBottom: "12px", display: "block" }}
+          />
           <s-paragraph>
-            <a href={`${fibermadeUrl}/login`} target="_blank" rel="noreferrer">
-              Log in to Fibermade →
-            </a>
+            Fibermade is a commerce platform built for the fiber community.
           </s-paragraph>
-        )}
-
-        {syncError && (
-          <s-banner tone="critical" slot="aside">
-            Sync failed: {syncError}
-          </s-banner>
-        )}
-        {syncSuccess && (
-          <s-banner tone={syncSuccess.progress.failed > 0 || (syncSuccess.progress.errors?.length ?? 0) > 0 ? "warning" : "success"} slot="aside">
-            Sync complete — {syncSuccess.progress.imported} products imported
-            {syncSuccess.progress.failed > 0 && `, ${syncSuccess.progress.failed} failed`}.
-            {syncSuccess.progress.errors && syncSuccess.progress.errors.length > 0 && (
-              <ul style={{ marginTop: "8px", paddingLeft: "16px" }}>
-                {syncSuccess.progress.errors.slice(0, 5).map((e, i) => (
-                  <li key={i}>{e.message}</li>
-                ))}
-                {syncSuccess.progress.errors.length > 5 && (
-                  <li>…and {syncSuccess.progress.errors.length - 5} more errors</li>
-                )}
-              </ul>
-            )}
-          </s-banner>
-        )}
-
-        {!showDisconnected && (
-          <s-button
-            variant="primary"
-            disabled={isSyncing}
-            loading={isSyncing}
-            commandFor="sync-modal"
-            command="--show"
-          >
-            {isSyncing ? "Syncing…" : "Sync Products to Fibermade"}
-          </s-button>
-        )}
-      </s-section>
-
-      {!showDisconnected && (
-        <s-section heading="Connected to Fibermade">
-          {shop && (
+          {fibermadeUrl && (
             <s-paragraph>
-              <strong>{shop}</strong>
-              {connectedAt &&
-                ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
+              <a
+                href={`${fibermadeUrl}/creator/settings?tab=shopify-api`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Log in to Fibermade →
+              </a>
             </s-paragraph>
           )}
+        </s-section>
+
+        <s-section heading="Connected to Fibermade">
+          {disconnectError && (
+            <s-banner tone="critical" slot="aside">
+              {disconnectError}
+            </s-banner>
+          )}
           <s-paragraph>
-            This store is linked to your Fibermade account.
+            <strong>{shop}</strong>
+            {connectedAt && ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
           </s-paragraph>
+          <s-paragraph>This store is linked to your Fibermade account.</s-paragraph>
           <s-button
             variant="secondary"
             tone="critical"
@@ -373,54 +339,115 @@ export default function Index() {
             Disconnect
           </s-button>
         </s-section>
-      )}
 
-      <s-modal id="sync-modal" heading="Sync products to Fibermade">
-        <s-paragraph>
-          This will import all products and collections from your Shopify store
-          into Fibermade. Already-imported products will be updated.
-        </s-paragraph>
-        <s-button
-          slot="primary-action"
-          variant="primary"
-          onClick={() => handleSyncConfirm()}
-          loading={isSyncing}
-        >
-          Sync Products
-        </s-button>
-        <s-button
-          slot="secondary-actions"
-          variant="secondary"
-          commandFor="sync-modal"
-          command="--hide"
-        >
-          Cancel
-        </s-button>
-      </s-modal>
+        <s-modal id="disconnect-modal" heading="Disconnect from Fibermade">
+          <s-paragraph>
+            Are you sure? This will remove the connection between your Shopify store and Fibermade
+            account.
+          </s-paragraph>
+          <s-button
+            slot="primary-action"
+            variant="primary"
+            tone="critical"
+            onClick={() => handleDisconnect()}
+            loading={isDisconnecting}
+          >
+            Disconnect
+          </s-button>
+          <s-button
+            slot="secondary-actions"
+            variant="secondary"
+            commandFor="disconnect-modal"
+            command="--hide"
+          >
+            Cancel
+          </s-button>
+        </s-modal>
+      </s-page>
+    );
+  }
 
-      <s-modal id="disconnect-modal" heading="Disconnect from Fibermade">
-        <s-paragraph>
-          Are you sure? This will remove the connection between your Shopify
-          store and Fibermade account.
-        </s-paragraph>
-        <s-button
-          slot="primary-action"
-          variant="primary"
-          tone="critical"
-          onClick={() => handleDisconnect()}
-          loading={isDisconnecting}
-        >
-          Disconnect
-        </s-button>
-        <s-button
-          slot="secondary-actions"
-          variant="secondary"
-          commandFor="disconnect-modal"
-          command="--hide"
-        >
-          Cancel
-        </s-button>
-      </s-modal>
+  if (connectionError) {
+    return (
+      <s-page heading="Fibermade">
+        <s-section>
+          <img
+            src="/logo.png"
+            alt="Fibermade"
+            style={{ height: "40px", marginBottom: "12px", display: "block" }}
+          />
+          <s-banner
+            heading={
+              connectionError === "token_invalid"
+                ? "API token no longer valid"
+                : "Integration deactivated"
+            }
+            tone="critical"
+            slot="aside"
+          >
+            Reconnect with a new API token from the Fibermade platform, or disconnect to remove the
+            link.
+          </s-banner>
+          <s-paragraph>
+            {shop} — disconnected
+          </s-paragraph>
+          <s-button
+            variant="secondary"
+            tone="critical"
+            onClick={() => handleDisconnect()}
+            loading={isDisconnecting}
+          >
+            Disconnect
+          </s-button>
+        </s-section>
+      </s-page>
+    );
+  }
+
+  return (
+    <s-page heading="Fibermade">
+      <s-section>
+        <img
+          src="/logo.png"
+          alt="Fibermade"
+          style={{ height: "40px", marginBottom: "12px", display: "block" }}
+        />
+        <s-text>Manage your fiber business from one place</s-text>
+        <s-list>
+          <s-list-item>Keep your colorways and inventory in sync</s-list-item>
+          <s-list-item>Manage collections across Shopify and Fibermade</s-list-item>
+          <s-list-item>Changes in Shopify automatically reflect in Fibermade</s-list-item>
+        </s-list>
+        {connectError && (
+          <s-banner tone="critical" slot="aside">
+            {connectError}
+          </s-banner>
+        )}
+        <form onSubmit={handleConnect}>
+          <s-stack direction="block" gap="base">
+            <s-text-field
+              name="apiToken"
+              label="Fibermade API token"
+              value={token}
+              onChange={(e) => setToken(e.currentTarget?.value ?? "")}
+              autocomplete="off"
+              error={tokenError}
+              disabled={isConnecting}
+            />
+            <s-button type="submit" variant="primary" loading={isConnecting}>
+              Connect Fibermade account
+            </s-button>
+          </s-stack>
+        </form>
+        {fibermadeUrl && (
+          <s-paragraph>
+            Don&apos;t have an account?{" "}
+            <a href={`${fibermadeUrl}/register`} target="_blank" rel="noreferrer">
+              Sign up at fibermade.app →
+            </a>
+          </s-paragraph>
+        )}
+      </s-section>
     </s-page>
   );
 }

@@ -19,19 +19,6 @@ vi.mock("../db.server", () => ({
   },
 }));
 
-const mockUpdateIntegration = vi.fn().mockResolvedValue({});
-
-vi.mock("../services/fibermade-client.server", () => ({
-  FibermadeClient: vi.fn().mockImplementation(function (this: {
-    setToken: ReturnType<typeof vi.fn>;
-    updateIntegration: ReturnType<typeof vi.fn>;
-  }) {
-    this.setToken = vi.fn();
-    this.updateIntegration = mockUpdateIntegration;
-    return this;
-  }),
-}));
-
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
 
@@ -46,6 +33,7 @@ describe("webhooks.app.uninstalled", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.unstubAllGlobals();
     vi.mocked(authenticate.webhook).mockResolvedValue({
       shop: "test.myshopify.com",
       session: { id: "sess-1" },
@@ -54,47 +42,68 @@ describe("webhooks.app.uninstalled", () => {
     vi.mocked(db.fibermadeConnection.findUnique).mockResolvedValue(mockConnection as never);
     vi.mocked(db.fibermadeConnection.delete).mockResolvedValue({} as never);
     vi.mocked(db.session.deleteMany).mockResolvedValue({ count: 1 } as never);
-    process.env.FIBERMADE_API_URL = "https://api.fibermade.test";
   });
 
-  it("deactivates integration and deletes connection and sessions", async () => {
-    const request = new Request("http://localhost/webhooks/app/uninstalled", {
-      method: "POST",
-    });
+  it("deactivates integration via PATCH, deletes connection and sessions", async () => {
+    const mockFetch = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ data: { id: 42, active: false } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    );
+    vi.stubGlobal("fetch", mockFetch);
+
+    const originalEnv = process.env.FIBERMADE_API_URL;
+    process.env.FIBERMADE_API_URL = "https://api.fibermade.test";
 
     const response = await action({
-      request,
+      request: new Request("http://localhost/webhooks/app/uninstalled", { method: "POST" }),
       params: {},
       context: {},
       unstable_pattern: "/",
     });
 
+    process.env.FIBERMADE_API_URL = originalEnv;
+
     expect(response.status).toBe(200);
-    expect(mockUpdateIntegration).toHaveBeenCalledWith(42, { active: false });
-    expect(db.fibermadeConnection.delete).toHaveBeenCalledWith({
-      where: { id: mockConnection.id },
-    });
-    expect(db.session.deleteMany).toHaveBeenCalledWith({
-      where: { shop: "test.myshopify.com" },
-    });
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://api.fibermade.test/api/v1/integrations/42",
+      expect.objectContaining({ method: "PATCH" })
+    );
+    expect(db.fibermadeConnection.delete).toHaveBeenCalledWith({ where: { id: mockConnection.id } });
+    expect(db.session.deleteMany).toHaveBeenCalledWith({ where: { shop: "test.myshopify.com" } });
   });
 
   it("returns 200 when no connection exists", async () => {
     vi.mocked(db.fibermadeConnection.findUnique).mockResolvedValue(null);
 
-    const request = new Request("http://localhost/webhooks/app/uninstalled", {
-      method: "POST",
-    });
-
     const response = await action({
-      request,
+      request: new Request("http://localhost/webhooks/app/uninstalled", { method: "POST" }),
       params: {},
       context: {},
       unstable_pattern: "/",
     });
 
     expect(response.status).toBe(200);
-    expect(mockUpdateIntegration).not.toHaveBeenCalled();
     expect(db.fibermadeConnection.delete).not.toHaveBeenCalled();
+  });
+
+  it("still deletes connection when Fibermade API call throws", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network error")));
+
+    const originalEnv = process.env.FIBERMADE_API_URL;
+    process.env.FIBERMADE_API_URL = "https://api.fibermade.test";
+
+    const response = await action({
+      request: new Request("http://localhost/webhooks/app/uninstalled", { method: "POST" }),
+      params: {},
+      context: {},
+      unstable_pattern: "/",
+    });
+
+    process.env.FIBERMADE_API_URL = originalEnv;
+
+    expect(response.status).toBe(200);
+    expect(db.fibermadeConnection.delete).toHaveBeenCalled();
   });
 });

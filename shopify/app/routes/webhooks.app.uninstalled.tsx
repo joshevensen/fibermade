@@ -1,7 +1,6 @@
 import type { ActionFunctionArgs } from "react-router";
 import { authenticate } from "../shopify.server";
 import db from "../db.server";
-import { FibermadeClient } from "../services/fibermade-client.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const { shop, session, topic } = await authenticate.webhook(request);
@@ -16,14 +15,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const baseUrl = process.env.FIBERMADE_API_URL;
     if (baseUrl?.trim()) {
       try {
-        const client = new FibermadeClient(baseUrl);
-        client.setToken(connection.fibermadeApiToken);
-        await client.updateIntegration(connection.fibermadeIntegrationId, {
-          active: false,
-        });
+        await fetch(
+          `${baseUrl.replace(/\/$/, "")}/api/v1/integrations/${connection.fibermadeIntegrationId}`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+              Authorization: `Bearer ${connection.fibermadeApiToken}`,
+            },
+            body: JSON.stringify({ active: false }),
+          }
+        );
       } catch (e) {
         console.error(
-          `[webhooks.app.uninstalled] Failed to deactivate Fibermade Integration ${connection.fibermadeIntegrationId} for ${shop}:`,
+          `[webhooks.app.uninstalled] Failed to deactivate integration ${connection.fibermadeIntegrationId} for ${shop}:`,
           e
         );
       }

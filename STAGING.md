@@ -28,7 +28,7 @@ Forge > Create Server:
 | Region | Your preferred DO region |
 | Size | 4GB RAM minimum |
 | PHP Version | 8.4 |
-| Database | PostgreSQL |
+| Database | PostgreSQL (for the platform — the Shopify app uses SQLite) |
 | Node.js | Yes |
 
 After provisioning, confirm the Node.js version meets the Shopify app requirement (`>=20.19 <22` or `>=22.12`):
@@ -43,10 +43,11 @@ If the version is wrong, install Node 22 via the [NodeSource installer](https://
 
 ## 2. Create Databases
 
-Forge > Server > Storage > Databases, create two databases:
+Forge > Server > Storage > Databases, create one database:
 
 - `platform`
-- `shopify`
+
+The Shopify app uses SQLite (file-based), not Postgres — no database entry needed for it.
 
 ---
 
@@ -162,14 +163,17 @@ Forge > Site > Environment:
 NODE_ENV=production
 PORT=3000
 
-DATABASE_URL=postgresql://forge:<password>@127.0.0.1:5432/shopify
+DATABASE_URL=file:./dev.sqlite
 
 SHOPIFY_API_KEY=<staging app key from Shopify Partners>
 SHOPIFY_API_SECRET=<staging app secret from Shopify Partners>
 SCOPES=write_products,write_product_media
 SHOPIFY_APP_URL=https://staging.shopify.fibermade.app
 
-# Generate with: npx cloak generate — must match on all servers sharing this database.
+FIBERMADE_API_URL=https://staging.fibermade.app
+FIBERMADE_URL=https://staging.fibermade.app
+
+# Generate with: npx cloak generate
 PRISMA_FIELD_ENCRYPTION_KEY=
 ```
 
