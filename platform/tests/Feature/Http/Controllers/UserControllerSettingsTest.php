@@ -2,6 +2,7 @@
 
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
+use App\Enums\UserRole;
 use App\Models\Account;
 use App\Models\Creator;
 use App\Models\Integration;
@@ -138,4 +139,69 @@ it('each recent error has id, message, and created_at fields', function () {
                 ->has('shopify.recent_errors.0.message')
                 ->has('shopify.recent_errors.0.created_at'),
         );
+});
+
+// ─── Shopify prop — connect_token ─────────────────────────────────────────────
+
+it('includes connect_token in shopify prop when not connected', function () {
+    $this->actingAs($this->user)
+        ->get(route('user.edit'))
+        ->assertInertia(
+            fn ($page) => $page
+                ->where('shopify.connected', false)
+                ->where('shopify.connect_token', $this->account->shopify_connect_token),
+        );
+});
+
+it('includes connect_token in shopify prop when connected', function () {
+    Integration::factory()->create([
+        'account_id' => $this->account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'shpat_test']),
+        'settings' => ['shop' => 'mystore.myshopify.com'],
+    ]);
+
+    $this->actingAs($this->user)
+        ->get(route('user.edit'))
+        ->assertInertia(
+            fn ($page) => $page
+                ->where('shopify.connected', true)
+                ->where('shopify.connect_token', $this->account->shopify_connect_token),
+        );
+});
+
+// ─── Reset connect token ───────────────────────────────────────────────────────
+
+it('redirects guests from reset connect token endpoint', function () {
+    $this->post(route('shopify-connect-token.reset'))
+        ->assertRedirect(route('login'));
+});
+
+it('resets the connect token and returns the new token', function () {
+    $owner = User::factory()->create([
+        'account_id' => $this->account->id,
+        'role' => UserRole::Owner,
+    ]);
+
+    $originalToken = $this->account->shopify_connect_token;
+
+    $response = $this->actingAs($owner)
+        ->postJson(route('shopify-connect-token.reset'));
+
+    $response->assertOk()
+        ->assertJsonStructure(['connect_token']);
+
+    $newToken = $response->json('connect_token');
+
+    expect($newToken)->not->toBe($originalToken);
+    expect($this->account->fresh()->shopify_connect_token)->toBe($newToken);
+});
+
+it('returns 403 when user has no account', function () {
+    $userWithoutAccount = User::factory()->create(['account_id' => null]);
+
+    $this->actingAs($userWithoutAccount)
+        ->postJson(route('shopify-connect-token.reset'))
+        ->assertForbidden();
 });

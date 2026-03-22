@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\Account;
 use App\Models\Dye;
 use App\Models\Integration;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,11 +74,38 @@ class UserController extends Controller
      *
      * @return array<string, mixed>|null
      */
+    /**
+     * Reset the creator's Shopify connect token.
+     */
+    public function resetConnectToken(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! $user->account_id) {
+            abort(403, 'User does not have an account.');
+        }
+
+        $account = Account::findOrFail($user->account_id);
+
+        $this->authorize('update', $account);
+
+        $account->generateConnectToken();
+
+        return response()->json(['connect_token' => $account->shopify_connect_token]);
+    }
+
+    /**
+     * Build the shopify integration state prop for the settings page.
+     *
+     * @return array<string, mixed>|null
+     */
     private function buildShopifyProp(?int $accountId): ?array
     {
         if (! $accountId) {
             return null;
         }
+
+        $account = Account::find($accountId);
 
         $integration = Integration::where('account_id', $accountId)
             ->where('type', IntegrationType::Shopify)
@@ -92,6 +120,7 @@ class UserController extends Controller
                 'auto_sync' => false,
                 'sync' => ['status' => 'idle'],
                 'recent_errors' => [],
+                'connect_token' => $account?->shopify_connect_token,
             ];
         }
 
@@ -116,6 +145,7 @@ class UserController extends Controller
             'auto_sync' => $settings['auto_sync'] ?? false,
             'sync' => $settings['sync'] ?? ['status' => 'idle'],
             'recent_errors' => $recentErrors,
+            'connect_token' => $account?->shopify_connect_token,
         ];
     }
 

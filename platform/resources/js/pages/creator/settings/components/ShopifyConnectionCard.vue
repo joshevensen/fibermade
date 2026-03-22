@@ -9,19 +9,20 @@ interface Props {
         connected: boolean;
         shop: string | null;
         connected_since: string | null;
+        connect_token: string | null;
     } | null;
+    connectToken?: string | null;
 }
 
 const props = defineProps<Props>();
 
 const { showError, showSuccess } = useToast();
 
-const token = ref('');
-const loading = ref(false);
-const copied = ref(false);
-const errorMessage = ref('');
-
-const hasToken = computed(() => token.value.length > 0);
+const displayToken = ref<string | null>(
+    props.connectToken ?? props.shopify?.connect_token ?? null,
+);
+const confirmingReset = ref(false);
+const resetting = ref(false);
 
 const connectedSinceFormatted = computed(() => {
     const d = props.shopify?.connected_since;
@@ -45,69 +46,17 @@ function getCsrfToken(): string {
     );
 }
 
-async function generateToken(): Promise<void> {
-    loading.value = true;
-    errorMessage.value = '';
-    copied.value = false;
-
-    try {
-        const response = await fetch('/creator/settings/api-token', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': getCsrfToken(),
-            },
-            body: JSON.stringify({ _token: getCsrfToken() }),
-        });
-
-        if (!response.ok) {
-            if (response.status === 419) {
-                throw new Error(
-                    'Your session expired. Refresh the page and try again.',
-                );
-            }
-            const payload = (await response.json().catch(() => null)) as {
-                message?: string;
-            } | null;
-            throw new Error(
-                payload?.message ??
-                    'Could not generate token. Please try again.',
-            );
-        }
-
-        const payload = (await response.json()) as { token?: string };
-        if (!payload.token) {
-            throw new Error('Token response was invalid. Please try again.');
-        }
-
-        token.value = payload.token;
-        showSuccess('Shopify API token generated.');
-    } catch (error) {
-        const message =
-            error instanceof Error
-                ? error.message
-                : 'Could not generate token. Please try again.';
-        errorMessage.value = message;
-        showError(message);
-    } finally {
-        loading.value = false;
-    }
-}
-
 async function copyToken(): Promise<void> {
-    if (!token.value) {
+    if (!displayToken.value) {
         return;
     }
 
     try {
         if (window.isSecureContext && navigator.clipboard) {
-            await navigator.clipboard.writeText(token.value);
+            await navigator.clipboard.writeText(displayToken.value);
         } else {
             const textArea = document.createElement('textarea');
-            textArea.value = token.value;
+            textArea.value = displayToken.value;
             textArea.setAttribute('readonly', '');
             textArea.style.position = 'fixed';
             textArea.style.opacity = '0';
@@ -123,12 +72,52 @@ async function copyToken(): Promise<void> {
             }
         }
 
-        copied.value = true;
         showSuccess('Token copied to clipboard.');
     } catch {
         showError(
             'Clipboard copy failed. Please copy the token manually from the field.',
         );
+    }
+}
+
+async function resetToken(): Promise<void> {
+    resetting.value = true;
+
+    try {
+        const response = await fetch(
+            '/creator/settings/shopify-connect-token/reset',
+            {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                },
+            },
+        );
+
+        if (!response.ok) {
+            throw new Error('Could not reset token. Please try again.');
+        }
+
+        const payload = (await response.json()) as { connect_token?: string };
+        if (!payload.connect_token) {
+            throw new Error('Reset response was invalid. Please try again.');
+        }
+
+        displayToken.value = payload.connect_token;
+        confirmingReset.value = false;
+        showSuccess('Connect token reset.');
+    } catch (error) {
+        const message =
+            error instanceof Error
+                ? error.message
+                : 'Could not reset token. Please try again.';
+        showError(message);
+    } finally {
+        resetting.value = false;
     }
 }
 </script>
@@ -173,46 +162,62 @@ async function copyToken(): Promise<void> {
                     </div>
                 </div>
 
-                <!-- Token generator -->
+                <!-- Connect token display -->
                 <div class="flex flex-col gap-3">
-                    <p class="text-muted-foreground text-sm">
-                        Generate a Fibermade API token and paste it into the
-                        Shopify app Connect screen to link your store.
+                    <p class="text-sm font-medium text-surface-700">
+                        Your Fibermade Connect Token
                     </p>
 
-                    <UiButton :loading="loading" @click="generateToken">
-                        Generate token
-                    </UiButton>
-
-                    <div v-if="hasToken" class="flex flex-col gap-2">
-                        <label
-                            for="shopify-api-token"
-                            class="text-sm font-medium text-surface-700"
-                        >
-                            Shopify API token
-                        </label>
-                        <div class="flex gap-2">
-                            <input
-                                id="shopify-api-token"
-                                :value="token"
-                                readonly
-                                spellcheck="false"
-                                class="min-w-0 flex-1 rounded-md border border-surface-300 bg-surface-50 px-3 py-2 font-mono text-xs text-surface-800"
-                            />
-                            <UiButton class="shrink-0" @click="copyToken">Copy token</UiButton>
-                        </div>
-                        <p class="text-muted-foreground text-xs">
-                            This token is shown only once. Store it securely
-                            and use it in the Shopify app.
-                        </p>
-                        <p v-if="copied" class="text-xs text-green-600">
-                            Copied to clipboard.
-                        </p>
+                    <div class="flex gap-2">
+                        <input
+                            :value="displayToken ?? ''"
+                            readonly
+                            spellcheck="false"
+                            class="min-w-0 flex-1 rounded-md border border-surface-300 bg-surface-50 px-3 py-2 font-mono text-xs text-surface-800"
+                        />
+                        <UiButton class="shrink-0" @click="copyToken">
+                            Copy
+                        </UiButton>
                     </div>
 
-                    <p v-if="errorMessage" class="text-sm text-red-600">
-                        {{ errorMessage }}
+                    <p class="text-muted-foreground text-xs">
+                        Paste this into the Shopify app to connect your store.
                     </p>
+
+                    <!-- Reset token -->
+                    <div v-if="!confirmingReset">
+                        <button
+                            type="button"
+                            class="text-xs text-red-600 underline hover:text-red-700"
+                            @click="confirmingReset = true"
+                        >
+                            Reset token
+                        </button>
+                    </div>
+
+                    <div v-else class="flex flex-col gap-2">
+                        <p class="text-xs text-surface-600">
+                            This will disconnect any stores currently linked
+                            with this token. Are you sure?
+                        </p>
+                        <div class="flex gap-2">
+                            <UiButton
+                                severity="danger"
+                                size="small"
+                                :loading="resetting"
+                                @click="resetToken"
+                            >
+                                Yes, reset
+                            </UiButton>
+                            <UiButton
+                                severity="secondary"
+                                size="small"
+                                @click="confirmingReset = false"
+                            >
+                                Cancel
+                            </UiButton>
+                        </div>
+                    </div>
                 </div>
             </div>
         </template>

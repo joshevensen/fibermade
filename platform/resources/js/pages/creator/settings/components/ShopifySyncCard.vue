@@ -49,9 +49,7 @@ const props = defineProps<Props>();
 
 const { showError, showSuccess } = useToast();
 
-const syncState = ref<SyncState>(
-    props.shopify?.sync ?? { status: 'idle' },
-);
+const syncState = ref<SyncState>(props.shopify?.sync ?? { status: 'idle' });
 const autoSync = ref<boolean>(props.shopify?.auto_sync ?? false);
 const savingAutoSync = ref(false);
 const triggering = ref(false);
@@ -90,9 +88,7 @@ const completedAt = computed(() => {
 
 const lastResult = computed(() => syncState.value.last_result ?? null);
 
-const syncErrors = computed<SyncError[]>(
-    () => syncState.value.errors ?? [],
-);
+const syncErrors = computed<SyncError[]>(() => syncState.value.errors ?? []);
 
 const errorCount = computed(() => {
     const result = lastResult.value;
@@ -171,10 +167,7 @@ onUnmounted(() => {
     stopPolling();
 });
 
-async function triggerSync(
-    endpoint: string,
-    label: string,
-): Promise<void> {
+async function triggerSync(endpoint: string, label: string): Promise<void> {
     if (isRunning.value || triggering.value) return;
 
     triggering.value = true;
@@ -238,9 +231,7 @@ async function saveAutoSync(value: boolean): Promise<void> {
         }
 
         autoSync.value = value;
-        showSuccess(
-            value ? 'Auto-sync enabled.' : 'Auto-sync disabled.',
-        );
+        showSuccess(value ? 'Auto-sync enabled.' : 'Auto-sync disabled.');
     } catch (error) {
         const message =
             error instanceof Error
@@ -301,9 +292,7 @@ function formatStepCount(result: SyncStepResult): string {
                             >
                                 Auto-sync
                             </p>
-                            <p
-                                class="text-muted-foreground text-xs"
-                            >
+                            <p class="text-muted-foreground text-xs">
                                 Automatically sync when products change in
                                 Shopify
                             </p>
@@ -410,10 +399,7 @@ function formatStepCount(result: SyncStepResult): string {
                             {{ completedAt }}
                         </p>
 
-                        <div
-                            v-if="lastResult"
-                            class="flex flex-col gap-1"
-                        >
+                        <div v-if="lastResult" class="flex flex-col gap-1">
                             <div
                                 v-if="lastResult.products"
                                 class="flex justify-between text-xs"
@@ -425,11 +411,7 @@ function formatStepCount(result: SyncStepResult): string {
                                 <span
                                     class="text-surface-800 dark:text-surface-200"
                                 >
-                                    {{
-                                        formatStepCount(
-                                            lastResult.products,
-                                        )
-                                    }}
+                                    {{ formatStepCount(lastResult.products) }}
                                 </span>
                             </div>
                             <div
@@ -444,9 +426,7 @@ function formatStepCount(result: SyncStepResult): string {
                                     class="text-surface-800 dark:text-surface-200"
                                 >
                                     {{
-                                        formatStepCount(
-                                            lastResult.collections,
-                                        )
+                                        formatStepCount(lastResult.collections)
                                     }}
                                 </span>
                             </div>
@@ -461,11 +441,7 @@ function formatStepCount(result: SyncStepResult): string {
                                 <span
                                     class="text-surface-800 dark:text-surface-200"
                                 >
-                                    {{
-                                        formatStepCount(
-                                            lastResult.inventory,
-                                        )
-                                    }}
+                                    {{ formatStepCount(lastResult.inventory) }}
                                 </span>
                             </div>
                         </div>
@@ -504,8 +480,7 @@ function formatStepCount(result: SyncStepResult): string {
                                     :key="i"
                                     class="rounded bg-red-50 px-2 py-1 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-300"
                                 >
-                                    <span
-                                        class="mr-1 font-medium capitalize"
+                                    <span class="mr-1 font-medium capitalize"
                                         >{{ err.step }}:</span
                                     >
                                     {{ err.message }}

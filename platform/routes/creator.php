@@ -42,6 +42,7 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
     Route::delete('settings/profile', [UserController::class, 'destroy'])->name('user.destroy');
     Route::delete('settings/account', [UserController::class, 'destroyAccount'])->name('account.destroy');
     Route::patch('settings/account', [AccountController::class, 'update'])->name('account.update');
+    Route::post('settings/shopify-connect-token/reset', [UserController::class, 'resetConnectToken'])->name('shopify-connect-token.reset');
 
     // Colorways routes
     Route::patch('colorways/{colorway}/collections', [ColorwayController::class, 'updateCollections'])->name('colorways.collections.update');

@@ -26,6 +26,7 @@ const shopify = page.props.shopify as
           connected: boolean;
           shop: string | null;
           connected_since: string | null;
+          connect_token: string | null;
           auto_sync: boolean;
           sync: {
               status: 'idle' | 'running' | 'complete' | 'failed';
@@ -33,13 +34,33 @@ const shopify = page.props.shopify as
               started_at?: string | null;
               completed_at?: string | null;
               last_result?: {
-                  products?: { created: number; updated: number; failed: number };
-                  collections?: { created: number; updated: number; failed: number };
-                  inventory?: { created: number; updated: number; failed: number };
+                  products?: {
+                      created: number;
+                      updated: number;
+                      failed: number;
+                  };
+                  collections?: {
+                      created: number;
+                      updated: number;
+                      failed: number;
+                  };
+                  inventory?: {
+                      created: number;
+                      updated: number;
+                      failed: number;
+                  };
               };
-              errors?: { step: string; message: string; [key: string]: unknown }[];
+              errors?: {
+                  step: string;
+                  message: string;
+                  [key: string]: unknown;
+              }[];
           };
-          recent_errors: { id: number; message: string; created_at: string | null }[];
+          recent_errors: {
+              id: number;
+              message: string;
+              created_at: string | null;
+          }[];
       }
     | null
     | undefined;
@@ -150,7 +171,10 @@ function refreshShopifyStatus(): void {
 
             <UiTabPanel value="shopify-api">
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                    <ShopifyConnectionCard :shopify="shopify" />
+                    <ShopifyConnectionCard
+                        :shopify="shopify"
+                        :connect-token="shopify?.connect_token"
+                    />
                     <ShopifySyncCard :shopify="shopify" />
                 </div>
             </UiTabPanel>
