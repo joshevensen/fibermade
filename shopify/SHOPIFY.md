@@ -17,16 +17,23 @@ When releasing a new version, fill out the **Create version** form as follows.
 **Scopes (required):**
 
 ```
-read_products,read_inventory,read_locations
+read_products,write_products,read_inventory,write_inventory,read_locations
 ```
 
-These are the only scopes the app needs. All sync logic runs in the Laravel platform using the stored access token — the Shopify app itself only reads data to confirm connection status.
+All sync logic runs in the Laravel platform using the stored access token — the Shopify app itself only reads data to confirm connection status. The write scopes are exercised by the platform when pushing catalog changes from Fibermade to Shopify.
 
 - `read_products` — query products, variants, and collections via GraphQL
+- `write_products` — create/update/delete products, variants, and collections; sync images
 - `read_inventory` — query inventory quantities and inventory item GIDs
-- `read_locations` — query store locations (needed for inventory sync)
+- `write_inventory` — set inventory quantities via `inventorySetQuantities`
+- `read_locations` — query store locations (needed to resolve the default location for inventory pushes)
 
-`read_products,read_inventory,read_locations`
+**Copy-paste for the Partner Dashboard:**
+```
+read_products,write_products,read_inventory,write_inventory,read_locations
+```
+
+**Note on existing merchants:** Adding `write_products` and `write_inventory` is a scope upgrade. Existing merchants will be prompted to re-authorize the app on their next visit to the Shopify admin. Until they do, all push operations from Fibermade will fail with a permissions error — the error banner (specs/shopify-push Task 06) will surface this.
 
 **Optional scopes:** leave empty.
 
