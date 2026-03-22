@@ -270,25 +270,27 @@ export default function Index() {
     return (
       <s-page heading="Fibermade">
         <s-section>
-          <img
-            src="/logo.png"
-            alt="Fibermade"
-            style={{ height: "40px", marginBottom: "12px", display: "block" }}
-          />
-          <s-paragraph>
-            Fibermade is a commerce platform built for the fiber community.
-          </s-paragraph>
-          {fibermadeUrl && (
+          <s-stack direction="block" gap="loose">
+            <img
+              src="/logo.png"
+              alt="Fibermade"
+              style={{ height: "48px", display: "block" }}
+            />
             <s-paragraph>
-              <a
-                href={`${fibermadeUrl}/creator/settings?tab=shopify-api`}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Log in to Fibermade →
-              </a>
+              Fibermade is a commerce platform built for the fiber community.
             </s-paragraph>
-          )}
+            {fibermadeUrl && (
+              <s-paragraph>
+                <a
+                  href={`${fibermadeUrl}/creator/settings?tab=shopify-api`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Log in to Fibermade →
+                </a>
+              </s-paragraph>
+            )}
+          </s-stack>
         </s-section>
 
         <s-section heading="Connected to Fibermade">
@@ -297,19 +299,21 @@ export default function Index() {
               {disconnectError}
             </s-banner>
           )}
-          <s-paragraph>
-            <strong>{shop}</strong>
-            {connectedAt && ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
-          </s-paragraph>
-          <s-paragraph>This store is linked to your Fibermade account.</s-paragraph>
-          <s-button
-            variant="secondary"
-            tone="critical"
-            commandFor="disconnect-modal"
-            command="--show"
-          >
-            Disconnect
-          </s-button>
+          <s-stack direction="block" gap="loose">
+            <s-paragraph>
+              <strong>{shop}</strong>
+              {connectedAt && ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
+            </s-paragraph>
+            <s-paragraph>This store is linked to your Fibermade account.</s-paragraph>
+            <s-button
+              variant="secondary"
+              tone="critical"
+              commandFor="disconnect-modal"
+              command="--show"
+            >
+              Disconnect
+            </s-button>
+          </s-stack>
         </s-section>
 
         <s-modal id="disconnect-modal" heading="Disconnect from Fibermade">
@@ -374,47 +378,54 @@ export default function Index() {
   return (
     <s-page heading="Fibermade">
       <s-section>
-        <img
-          src="/logo.png"
-          alt="Fibermade"
-          style={{ height: "40px", marginBottom: "12px", display: "block" }}
-        />
-        <s-text>Manage your fiber business from one place</s-text>
-        <s-list>
-          <s-list-item>Keep your colorways and inventory in sync</s-list-item>
-          <s-list-item>Manage collections across Shopify and Fibermade</s-list-item>
-          <s-list-item>Changes in Shopify automatically reflect in Fibermade</s-list-item>
-        </s-list>
+        <s-stack direction="block" gap="loose">
+          <img
+            src="/logo.png"
+            alt="Fibermade"
+            style={{ height: "48px", display: "block" }}
+          />
+          <s-text variant="headingLg">Manage your fiber business from one place</s-text>
+          <s-list>
+            <s-list-item>Keep your colorways and inventory in sync</s-list-item>
+            <s-list-item>Manage collections across Shopify and Fibermade</s-list-item>
+            <s-list-item>Changes in Shopify automatically reflect in Fibermade</s-list-item>
+          </s-list>
+        </s-stack>
+      </s-section>
+
+      <s-section heading="Connect your account">
         {connectError && (
           <s-banner tone="critical" slot="aside">
             {connectError}
           </s-banner>
         )}
-        <form onSubmit={handleConnect}>
-          <s-stack direction="block" gap="base">
-            <s-text-field
-              name="connectToken"
-              label="Fibermade Connect Token"
-              helpText="Find this in Fibermade → Settings → Shopify API"
-              value={connectToken}
-              onChange={(e) => setConnectToken(e.currentTarget?.value ?? "")}
-              autocomplete="off"
-              error={tokenError}
-              disabled={isConnecting}
-            />
-            <s-button type="submit" variant="primary" loading={isConnecting}>
-              Connect Fibermade account
-            </s-button>
-          </s-stack>
-        </form>
-        {fibermadeUrl && (
-          <s-paragraph>
-            Don&apos;t have an account?{" "}
-            <a href={`${fibermadeUrl}/register`} target="_blank" rel="noreferrer">
-              Sign up at fibermade.app →
-            </a>
-          </s-paragraph>
-        )}
+        <s-stack direction="block" gap="loose">
+          <form onSubmit={handleConnect}>
+            <s-stack direction="block" gap="base">
+              <s-text-field
+                name="connectToken"
+                label="Fibermade Connect Token"
+                helpText="Find this in Fibermade → Settings → Shopify API"
+                value={connectToken}
+                onChange={(e) => setConnectToken(e.currentTarget?.value ?? "")}
+                autocomplete="off"
+                error={tokenError}
+                disabled={isConnecting}
+              />
+              <s-button type="submit" variant="primary" loading={isConnecting}>
+                Connect Fibermade account
+              </s-button>
+            </s-stack>
+          </form>
+          {fibermadeUrl && (
+            <s-paragraph>
+              Don&apos;t have an account?{" "}
+              <a href={`${fibermadeUrl}/register`} target="_blank" rel="noreferrer">
+                Sign up at fibermade.app →
+              </a>
+            </s-paragraph>
+          )}
+        </s-stack>
       </s-section>
     </s-page>
   );
