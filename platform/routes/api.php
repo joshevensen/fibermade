@@ -12,7 +12,18 @@ use App\Http\Controllers\Api\V1\InventoryController;
 use App\Http\Controllers\Api\V1\MediaController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\OrderItemController;
+use App\Http\Controllers\Api\V1\ShopifyConnectionController;
 use Illuminate\Support\Facades\Route;
+
+Route::prefix('v1')->group(function () {
+    Route::post('shopify/connect', [ShopifyConnectionController::class, 'connect'])
+        ->middleware('throttle:10,1')
+        ->name('api.v1.shopify.connect');
+    Route::post('shopify/disconnect', [ShopifyConnectionController::class, 'disconnect'])
+        ->name('api.v1.shopify.disconnect');
+    Route::get('shopify/status', [ShopifyConnectionController::class, 'status'])
+        ->name('api.v1.shopify.status');
+});
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('health', fn () => response()->json(['status' => 'ok']));

@@ -10,7 +10,6 @@ use App\Http\Requests\UpdateUserRequest;
 use App\Models\Account;
 use App\Models\Dye;
 use App\Models\Integration;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -129,18 +128,6 @@ class UserController extends Controller
         $request->user()->save();
 
         return to_route('user.edit');
-    }
-
-    /**
-     * Create an API token for Shopify connection.
-     */
-    public function storeApiToken(Request $request): JsonResponse
-    {
-        $accessToken = $request->user()->createToken('shopify');
-
-        return response()->json([
-            'token' => $accessToken->plainTextToken,
-        ], 201);
     }
 
     /**
