@@ -1,11 +1,11 @@
 -- CreateTable
 CREATE TABLE "Session" (
-    "id" TEXT NOT NULL,
+    "id" TEXT NOT NULL PRIMARY KEY,
     "shop" TEXT NOT NULL,
     "state" TEXT NOT NULL,
     "isOnline" BOOLEAN NOT NULL DEFAULT false,
     "scope" TEXT,
-    "expires" TIMESTAMP(3),
+    "expires" DATETIME,
     "accessToken" TEXT NOT NULL,
     "userId" BIGINT,
     "firstName" TEXT,
@@ -16,20 +16,16 @@ CREATE TABLE "Session" (
     "collaborator" BOOLEAN DEFAULT false,
     "emailVerified" BOOLEAN DEFAULT false,
     "refreshToken" TEXT,
-    "refreshTokenExpires" TIMESTAMP(3),
-
-    CONSTRAINT "Session_pkey" PRIMARY KEY ("id")
+    "refreshTokenExpires" DATETIME
 );
 
 -- CreateTable
 CREATE TABLE "FibermadeConnection" (
-    "id" SERIAL NOT NULL,
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     "shop" TEXT NOT NULL,
     "connectToken" TEXT NOT NULL,
     "fibermadeIntegrationId" INTEGER NOT NULL,
-    "connectedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT "FibermadeConnection_pkey" PRIMARY KEY ("id")
+    "connectedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- CreateIndex
