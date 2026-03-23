@@ -103,6 +103,44 @@ class ShopifyGraphqlClient
         throw $lastException ?? new ShopifyApiException('Unknown error');
     }
 
+    /**
+     * Execute a REST GET request to the Shopify Admin API.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws ShopifyApiException
+     */
+    public function restGet(string $path): array
+    {
+        $url = $this->restUrl($path);
+
+        try {
+            $response = $this->client()->get($url);
+            $response->throw();
+
+            return $response->json();
+        } catch (RequestException $e) {
+            throw new ShopifyApiException($e->getMessage(), $e->response?->json() ?? []);
+        }
+    }
+
+    /**
+     * Execute a REST DELETE request to the Shopify Admin API.
+     *
+     * @throws ShopifyApiException
+     */
+    public function restDelete(string $path): void
+    {
+        $url = $this->restUrl($path);
+
+        try {
+            $response = $this->client()->delete($url);
+            $response->throw();
+        } catch (RequestException $e) {
+            throw new ShopifyApiException($e->getMessage(), $e->response?->json() ?? []);
+        }
+    }
+
     private function client(): PendingRequest
     {
         return Http::withHeaders([
@@ -116,6 +154,13 @@ class ShopifyGraphqlClient
         $shop = preg_replace('#^https?://#', '', rtrim($this->shop, '/'));
 
         return "https://{$shop}/admin/api/".self::API_VERSION.'/graphql.json';
+    }
+
+    private function restUrl(string $path): string
+    {
+        $shop = preg_replace('#^https?://#', '', rtrim($this->shop, '/'));
+
+        return "https://{$shop}/admin/api/".self::API_VERSION."/{$path}";
     }
 
     /**

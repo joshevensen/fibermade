@@ -6,6 +6,7 @@ use App\Enums\BaseStatus;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionColorwaysRequest;
 use App\Http\Requests\UpdateCollectionRequest;
+use App\Jobs\SyncCollectionToShopifyJob;
 use App\Models\Collection;
 use App\Models\Colorway;
 use Illuminate\Http\RedirectResponse;
@@ -96,7 +97,14 @@ class CollectionController extends Controller
      */
     public function updateColorways(UpdateCollectionColorwaysRequest $request, Collection $collection): RedirectResponse
     {
-        $collection->colorways()->sync($request->validated()['colorway_ids']);
+        $previousIds = $collection->colorways()->pluck('colorways.id')->all();
+        $newIds = $request->validated()['colorway_ids'];
+
+        $collection->colorways()->sync($newIds);
+
+        $removedIds = array_values(array_diff($previousIds, $newIds));
+
+        SyncCollectionToShopifyJob::dispatch($collection, 'updated', $removedIds);
 
         return redirect()->route('collections.edit', $collection)->with('success', 'Colorways updated successfully.');
     }
