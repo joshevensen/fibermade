@@ -23,6 +23,10 @@ class SyncBaseToShopifyJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 3;
+
+    public int $backoff = 60;
+
     public function __construct(
         public Base $base,
         public string $action
@@ -69,13 +73,28 @@ class SyncBaseToShopifyJob implements ShouldQueue
             ->with(['colorway', 'base'])
             ->get();
 
-        $count = 0;
+        $grouped = [];
         foreach ($inventories as $inventory) {
             $variantGid = $inventory->getExternalIdFor($integration, 'shopify_variant');
-            if ($variantGid) {
-                $shopifySync->updateVariant($variantGid, $inventory->base);
-                $count++;
+            if (! $variantGid) {
+                continue;
             }
+
+            $productGid = $inventory->colorway?->getExternalIdFor($integration, 'shopify_product');
+            if (! $productGid) {
+                continue;
+            }
+
+            $grouped[$productGid][] = [
+                'variant_gid' => $variantGid,
+                'base' => $inventory->base,
+            ];
+        }
+
+        $count = 0;
+        foreach ($grouped as $productGid => $entries) {
+            $shopifySync->updateVariantsBulk($productGid, $entries);
+            $count += count($entries);
         }
 
         if ($count > 0) {
@@ -107,7 +126,7 @@ class SyncBaseToShopifyJob implements ShouldQueue
             })
             ->get();
 
-        $count = 0;
+        $grouped = [];
         foreach ($colorways as $colorway) {
             $productGid = $colorway->getExternalIdFor($integration, 'shopify_product');
             if (! $productGid) {
@@ -123,15 +142,26 @@ class SyncBaseToShopifyJob implements ShouldQueue
                 ['quantity' => 0]
             );
 
-            $variantGid = $shopifySync->createVariant($productGid, $this->base, 0);
-            ExternalIdentifier::create([
-                'integration_id' => $integration->id,
-                'identifiable_type' => Inventory::class,
-                'identifiable_id' => $inventory->id,
-                'external_type' => 'shopify_variant',
-                'external_id' => $variantGid,
-            ]);
-            $count++;
+            $grouped[$productGid][] = [
+                'inventory' => $inventory,
+                'base' => $this->base,
+                'quantity' => 0,
+            ];
+        }
+
+        $count = 0;
+        foreach ($grouped as $productGid => $entries) {
+            $variantMap = $shopifySync->createVariantsBulk($productGid, $entries);
+            foreach ($variantMap as $inventoryId => $variantGid) {
+                ExternalIdentifier::create([
+                    'integration_id' => $integration->id,
+                    'identifiable_type' => Inventory::class,
+                    'identifiable_id' => $inventoryId,
+                    'external_type' => 'shopify_variant',
+                    'external_id' => $variantGid,
+                ]);
+                $count++;
+            }
         }
 
         if ($count > 0) {

@@ -308,6 +308,171 @@ class ShopifySyncService
     }
 
     /**
+     * Creates variants on an existing Shopify product for multiple inventories.
+     * Returns a map of inventory_id => variant_gid.
+     *
+     * @param  array<array{inventory: Inventory, base: Base, quantity: int}>  $entries
+     * @return array<int, string> [inventory_id => variant_gid]
+     *
+     * @throws ShopifyApiException
+     */
+    public function createVariantsBulk(string $productGid, array $entries): array
+    {
+        $mutation = <<<'GQL'
+        mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+          productVariantsBulkCreate(productId: $productId, variants: $variants) {
+            productVariants {
+              id
+              title
+              selectedOptions {
+                name
+                value
+              }
+              inventoryItem {
+                id
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        GQL;
+
+        $locationId = $this->getDefaultLocationId();
+
+        $variants = [];
+        foreach ($entries as $entry) {
+            $variants[] = [
+                'optionValues' => [['optionName' => 'Base', 'name' => $entry['base']->descriptor]],
+                'price' => (string) ($entry['base']->retail_price ?? '0'),
+                'inventoryItem' => [
+                    'cost' => (string) ($entry['base']->cost ?? '0'),
+                    'tracked' => true,
+                ],
+                'inventoryQuantities' => [[
+                    'locationId' => $locationId,
+                    'availableQuantity' => $entry['quantity'],
+                ]],
+            ];
+        }
+
+        $result = $this->client->request($mutation, [
+            'productId' => $productGid,
+            'variants' => $variants,
+        ]);
+
+        $payload = $result['data']['productVariantsBulkCreate'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException($message, $userErrors);
+        }
+
+        $createdVariants = $payload['productVariants'] ?? [];
+        if (count($createdVariants) !== count($entries)) {
+            throw new ShopifyApiException('productVariantsBulkCreate returned unexpected number of variants');
+        }
+
+        $map = [];
+        foreach ($entries as $index => $entry) {
+            $variantGid = $createdVariants[$index]['id'] ?? null;
+            if (! $variantGid) {
+                throw new ShopifyApiException("productVariantsBulkCreate returned no ID for variant at index {$index}");
+            }
+            $map[$entry['inventory']->id] = $variantGid;
+        }
+
+        return $map;
+    }
+
+    /**
+     * Updates multiple variants on a single Shopify product.
+     *
+     * @param  array<array{variant_gid: string, base: Base}>  $entries
+     *
+     * @throws ShopifyApiException
+     */
+    public function updateVariantsBulk(string $productGid, array $entries): void
+    {
+        $mutation = <<<'GQL'
+        mutation productVariantsBulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+          productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+            productVariants {
+              id
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        GQL;
+
+        $variants = [];
+        foreach ($entries as $entry) {
+            $variants[] = [
+                'id' => $entry['variant_gid'],
+                'optionValues' => [['optionName' => 'Base', 'name' => $entry['base']->descriptor]],
+                'price' => (string) ($entry['base']->retail_price ?? '0'),
+            ];
+        }
+
+        $result = $this->client->request($mutation, [
+            'productId' => $productGid,
+            'variants' => $variants,
+        ]);
+
+        $payload = $result['data']['productVariantsBulkUpdate'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException($message, $userErrors);
+        }
+    }
+
+    /**
+     * Deletes multiple variants from a single Shopify product.
+     * All variant GIDs must belong to the same product.
+     *
+     * @param  string[]  $variantGids
+     *
+     * @throws ShopifyApiException
+     */
+    public function deleteVariantsBulk(string $productGid, array $variantGids): void
+    {
+        $mutation = <<<'GQL'
+        mutation productVariantsBulkDelete($productId: ID!, $variantsIds: [ID!]!) {
+          productVariantsBulkDelete(productId: $productId, variantsIds: $variantsIds) {
+            product {
+              id
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        GQL;
+
+        $result = $this->client->request($mutation, [
+            'productId' => $productGid,
+            'variantsIds' => $variantGids,
+        ]);
+
+        $payload = $result['data']['productVariantsBulkDelete'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException($message, $userErrors);
+        }
+    }
+
+    /**
      * Create a variant for a product.
      *
      * @return string variant GID
@@ -414,10 +579,54 @@ class ShopifySyncService
 
         $this->deleteExistingProductMedia($productGid);
 
-        foreach ($media as $m) {
+        if ($media->isEmpty()) {
+            return;
+        }
+
+        $mediaInputs = $media->map(function ($m) use ($colorway) {
             $url = Storage::disk('public')->url($m->file_path);
             $fullUrl = str_starts_with($url, 'http') ? $url : url($url);
-            $this->createProductMedia($productGid, $fullUrl);
+
+            return [
+                'originalSource' => $fullUrl,
+                'mediaContentType' => 'IMAGE',
+                'alt' => $colorway->name,
+            ];
+        })->all();
+
+        $mutation = <<<'GQL'
+        mutation productUpdate($product: ProductUpdateInput!, $media: [CreateMediaInput!]) {
+          productUpdate(product: $product, media: $media) {
+            product {
+              id
+              media(first: 10) {
+                edges {
+                  node {
+                    id
+                    status
+                  }
+                }
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        GQL;
+
+        $result = $this->client->request($mutation, [
+            'product' => ['id' => $productGid],
+            'media' => $mediaInputs,
+        ]);
+
+        $payload = $result['data']['productUpdate'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException("Image upload failed: {$message}", $userErrors);
         }
     }
 
@@ -459,31 +668,5 @@ class ShopifySyncService
             'productId' => $productGid,
             'mediaIds' => $mediaIds,
         ]);
-    }
-
-    private function createProductMedia(string $productGid, string $imageUrl): void
-    {
-        $mutation = <<<'GQL'
-        mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
-          productCreateMedia(productId: $productId, media: $media) {
-            media { ... on MediaImage { id } }
-            mediaUserErrors { field message code }
-          }
-        }
-        GQL;
-
-        $result = $this->client->request($mutation, [
-            'productId' => $productGid,
-            'media' => [
-                ['originalSource' => $imageUrl, 'mediaContentType' => 'IMAGE'],
-            ],
-        ]);
-
-        $payload = $result['data']['productCreateMedia'] ?? [];
-        $errors = $payload['mediaUserErrors'] ?? [];
-        if (! empty($errors)) {
-            $message = collect($errors)->pluck('message')->implode('; ');
-            throw new ShopifyApiException("Image upload failed: {$message}", $errors);
-        }
     }
 }

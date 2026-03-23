@@ -199,9 +199,9 @@ test('syncImages orders media with is_primary first', function () {
         ->andReturn(['data' => ['product' => ['media' => ['edges' => []]]]]);
     $mockClient->shouldReceive('request')
         ->with(Mockery::type('string'), Mockery::on(function ($vars) {
-            return isset($vars['productId']) && isset($vars['media']);
+            return isset($vars['product']) && isset($vars['media']);
         }))
-        ->andReturn(['data' => ['productCreateMedia' => ['mediaUserErrors' => []]]]);
+        ->andReturn(['data' => ['productUpdate' => ['product' => ['id' => 'gid://shopify/Product/1', 'media' => ['edges' => []]], 'userErrors' => []]]]);
 
     $service = new ShopifySyncService($mockClient);
     $service->syncImages($colorway->fresh(), 'gid://shopify/Product/1');
