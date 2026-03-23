@@ -16,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Sentry\State\Scope;
 
 class SyncCollectionDeletedToShopifyJob implements ShouldQueue
 {
@@ -76,6 +77,9 @@ class SyncCollectionDeletedToShopifyJob implements ShouldQueue
                 'synced_at' => now(),
             ]);
         } catch (ShopifyApiException $e) {
+            \Sentry\captureException($e);
+            $integration->flagSyncError();
+
             IntegrationLog::create([
                 'integration_id' => $integration->id,
                 'loggable_type' => Collection::class,
@@ -91,5 +95,18 @@ class SyncCollectionDeletedToShopifyJob implements ShouldQueue
                 'synced_at' => now(),
             ]);
         }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Sentry\withScope(function (Scope $scope) use ($exception): void {
+            $scope->setContext('shopify_sync', [
+                'job' => static::class,
+                'collection_id' => $this->collectionId,
+                'account' => $this->accountId,
+            ]);
+
+            \Sentry\captureException($exception);
+        });
     }
 }

@@ -159,6 +159,26 @@ class Integration extends Model
             });
     }
 
+    /**
+     * Set the has_sync_errors flag in integration settings.
+     */
+    public function flagSyncError(): void
+    {
+        $settings = $this->settings ?? [];
+        $settings['has_sync_errors'] = true;
+        $this->update(['settings' => $settings]);
+    }
+
+    /**
+     * Clear the has_sync_errors flag in integration settings.
+     */
+    public function clearSyncErrors(): void
+    {
+        $settings = $this->settings ?? [];
+        $settings['has_sync_errors'] = false;
+        $this->update(['settings' => $settings]);
+    }
+
     private static function normalizeShopDomain(string $shop): string
     {
         return strtolower(preg_replace('#^https?://#', '', rtrim($shop, '/')));

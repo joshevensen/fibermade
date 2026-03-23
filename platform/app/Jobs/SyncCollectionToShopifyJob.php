@@ -16,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Sentry\State\Scope;
 
 class SyncCollectionToShopifyJob implements ShouldQueue
 {
@@ -50,6 +51,9 @@ class SyncCollectionToShopifyJob implements ShouldQueue
                 default => null,
             };
         } catch (ShopifyApiException $e) {
+            \Sentry\captureException($e);
+            $integration->flagSyncError();
+
             IntegrationLog::create([
                 'integration_id' => $integration->id,
                 'loggable_type' => Collection::class,
@@ -118,6 +122,20 @@ class SyncCollectionToShopifyJob implements ShouldQueue
             ],
             'synced_at' => now(),
         ]);
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Sentry\withScope(function (Scope $scope) use ($exception): void {
+            $scope->setContext('shopify_sync', [
+                'job' => static::class,
+                'collection' => $this->collection->id ?? null,
+                'account' => $this->collection->account_id ?? null,
+                'action' => $this->action,
+            ]);
+
+            \Sentry\captureException($exception);
+        });
     }
 
     private function getShopifyIntegration(int $accountId): ?Integration

@@ -16,6 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Sentry\State\Scope;
 
 class SyncColorwayCatalogToShopifyJob implements ShouldQueue
 {
@@ -74,6 +75,8 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
                 $this->logSuccess($integration, 'Synced colorway catalog to Shopify', $operation);
             }
         } catch (ShopifyApiException $e) {
+            \Sentry\captureException($e);
+            $integration->flagSyncError();
             $this->logError($integration, $e, $operation);
         }
     }
@@ -121,6 +124,20 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
             ],
             'synced_at' => now(),
         ]);
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Sentry\withScope(function (Scope $scope) use ($exception): void {
+            $scope->setContext('shopify_sync', [
+                'job' => static::class,
+                'colorway' => $this->colorway->id ?? null,
+                'account' => $this->colorway->account_id ?? null,
+                'action' => $this->action,
+            ]);
+
+            \Sentry\captureException($exception);
+        });
     }
 
     private function getShopifyIntegration(): ?Integration

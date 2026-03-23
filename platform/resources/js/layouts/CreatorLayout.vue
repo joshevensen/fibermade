@@ -10,6 +10,7 @@ import CollectionCreateDrawer from '@/pages/creator/collections/CollectionCreate
 import ColorwayCreateDrawer from '@/pages/creator/colorways/ColorwayCreateDrawer.vue';
 import PaymentFailedBanner from '@/pages/creator/components/PaymentFailedBanner.vue';
 import ReactivationBanner from '@/pages/creator/components/ReactivationBanner.vue';
+import ShopifySyncErrorBanner from '@/pages/creator/components/ShopifySyncErrorBanner.vue';
 // TODO: Re-enable CustomerCreateDrawer in Stage 2
 // import CustomerCreateDrawer from '@/pages/creator/customers/CustomerCreateDrawer.vue';
 // TODO: Re-enable OrderCreateDrawer when ready to work on orders
@@ -75,6 +76,7 @@ const storeDrawerVisible = computed(() => activeDrawer.value === 'store');
 
             <PaymentFailedBanner />
             <ReactivationBanner />
+            <ShopifySyncErrorBanner />
 
             <!-- Page Content -->
             <main class="flex-1 overflow-auto px-4 pt-3.5 pb-8">

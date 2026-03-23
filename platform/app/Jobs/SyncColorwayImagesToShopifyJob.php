@@ -15,6 +15,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Sentry\State\Scope;
 
 class SyncColorwayImagesToShopifyJob implements ShouldQueue
 {
@@ -63,6 +64,9 @@ class SyncColorwayImagesToShopifyJob implements ShouldQueue
                 'synced_at' => now(),
             ]);
         } catch (ShopifyApiException $e) {
+            \Sentry\captureException($e);
+            $integration->flagSyncError();
+
             IntegrationLog::create([
                 'integration_id' => $integration->id,
                 'loggable_type' => Colorway::class,
@@ -78,5 +82,18 @@ class SyncColorwayImagesToShopifyJob implements ShouldQueue
                 'synced_at' => now(),
             ]);
         }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Sentry\withScope(function (Scope $scope) use ($exception): void {
+            $scope->setContext('shopify_sync', [
+                'job' => static::class,
+                'colorway' => $this->colorway->id ?? null,
+                'account' => $this->colorway->account_id ?? null,
+            ]);
+
+            \Sentry\captureException($exception);
+        });
     }
 }

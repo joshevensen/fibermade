@@ -107,5 +107,6 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
         Route::get('sync/status', [ShopifySyncController::class, 'status'])->name('sync.status');
         Route::patch('settings', [ShopifySyncController::class, 'updateSettings'])->name('settings.update');
         Route::post('push/all', [ShopifySyncController::class, 'pushAll'])->name('push.all');
+        Route::post('{integration}/errors/dismiss', [ShopifySyncController::class, 'dismissErrors'])->name('errors.dismiss');
     });
 });

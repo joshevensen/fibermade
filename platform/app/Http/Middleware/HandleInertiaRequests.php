@@ -2,7 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\AccountType;
+use App\Enums\IntegrationType;
 use App\Enums\SubscriptionStatus;
+use App\Models\Account;
+use App\Models\Integration;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -41,6 +45,18 @@ class HandleInertiaRequests extends Middleware
 
         $user = $request->hasSession() ? $request->user() : null;
 
+        $shopifyIntegration = null;
+        $hasSyncErrors = false;
+
+        if ($user?->account) {
+            $shopifyIntegration = Integration::where('account_id', $user->account->id)
+                ->where('type', IntegrationType::Shopify)
+                ->where('active', true)
+                ->first();
+
+            $hasSyncErrors = (bool) ($shopifyIntegration?->settings['has_sync_errors'] ?? false);
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -54,15 +70,19 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->hasSession() ? $request->session()->get('success') : null,
                 'error' => $request->hasSession() ? $request->session()->get('error') : null,
             ],
+            'shopify' => [
+                'has_sync_errors' => $hasSyncErrors,
+                'integration_id' => $shopifyIntegration?->id,
+            ],
         ];
     }
 
     /**
      * Shared account props for layouts (type, subscription_status, reactivation_days_remaining when inactive).
      *
-     * @return array{type: \App\Enums\AccountType, subscription_status: \App\Enums\SubscriptionStatus|null, reactivation_days_remaining: int|null}
+     * @return array{type: AccountType, subscription_status: SubscriptionStatus|null, reactivation_days_remaining: int|null}
      */
-    private function sharedAccountProps(\App\Models\Account $account): array
+    private function sharedAccountProps(Account $account): array
     {
         $props = [
             'type' => $account->type,
@@ -70,7 +90,7 @@ class HandleInertiaRequests extends Middleware
             'reactivation_days_remaining' => null,
         ];
 
-        if ($account->type === \App\Enums\AccountType::Creator
+        if ($account->type === AccountType::Creator
             && $account->subscription_status === SubscriptionStatus::Inactive
         ) {
             $endsAt = $account->subscriptions()->latest('ends_at')->first()?->ends_at;

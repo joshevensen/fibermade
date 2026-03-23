@@ -17,6 +17,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Sentry\State\Scope;
 
 class SyncBaseDeletedToShopifyJob implements ShouldQueue
 {
@@ -87,8 +88,9 @@ class SyncBaseDeletedToShopifyJob implements ShouldQueue
                 $shopifySync->deleteVariantsBulk($productGid, $variantGids);
                 ExternalIdentifier::whereIn('id', $identifierIds)->delete();
                 $count += count($variantGids);
-            } catch (ShopifyApiException) {
-                // Variants may already be deleted in Shopify
+            } catch (ShopifyApiException $e) {
+                \Sentry\captureException($e);
+                $integration->flagSyncError();
             }
         }
 
@@ -110,5 +112,18 @@ class SyncBaseDeletedToShopifyJob implements ShouldQueue
                 'synced_at' => now(),
             ]);
         }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        \Sentry\withScope(function (Scope $scope) use ($exception): void {
+            $scope->setContext('shopify_sync', [
+                'job' => static::class,
+                'base_id' => $this->baseId,
+                'account' => $this->accountId,
+            ]);
+
+            \Sentry\captureException($exception);
+        });
     }
 }

@@ -9,6 +9,7 @@ use App\Jobs\PushCatalogToShopifyJob;
 use App\Models\Integration;
 use App\Services\Shopify\ShopifySyncOrchestrator;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -124,6 +125,17 @@ class ShopifySyncController extends Controller
         $integration->update(['settings' => $settings]);
 
         return response()->json(['auto_sync' => $settings['auto_sync']]);
+    }
+
+    /**
+     * Dismiss the Shopify sync error banner by clearing the error flag.
+     */
+    public function dismissErrors(Integration $integration): RedirectResponse
+    {
+        $this->authorize('update', $integration);
+        $integration->clearSyncErrors();
+
+        return back();
     }
 
     /**
