@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Enums\IntegrationType;
+use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * Represents an integration connection (Shopify, future integrations).
@@ -19,17 +21,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $account_id
- * @property \App\Enums\IntegrationType $type
+ * @property IntegrationType $type
  * @property string $credentials
  * @property array|null $settings
  * @property bool $active
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Integration extends Model
 {
-    /** @use HasFactory<\Database\Factories\IntegrationFactory> */
+    /** @use HasFactory<IntegrationFactory> */
     use HasFactory, SoftDeletes;
 
     /**
@@ -130,6 +132,14 @@ class Integration extends Model
             'shop' => $shop,
             'access_token' => $accessToken,
         ];
+    }
+
+    /**
+     * Get the current push sync status from integration settings.
+     */
+    public function getPushSyncStatus(): ?string
+    {
+        return $this->settings['push_sync']['status'] ?? null;
     }
 
     /**

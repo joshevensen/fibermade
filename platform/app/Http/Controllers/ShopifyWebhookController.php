@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\IntegrationLogStatus;
-use App\Jobs\ProcessShopifyCollectionWebhookJob;
-use App\Jobs\ProcessShopifyProductWebhookJob;
 use App\Models\Integration;
 use App\Models\IntegrationLog;
 use App\Models\Inventory;
@@ -203,67 +201,15 @@ class ShopifyWebhookController extends Controller
 
     private function handleProductWebhook(Request $request, string $action): Response
     {
-        $payload = $request->getContent();
-        if (! $this->verifyHmac($payload, $request->header('X-Shopify-Hmac-Sha256'))) {
-            Log::warning("Shopify products/{$action} webhook rejected: invalid HMAC");
-
-            return response('', 401);
-        }
-
-        $data = json_decode($payload, true);
-        if (! is_array($data)) {
-            return response('', 400);
-        }
-
-        $shopDomain = $request->header('X-Shopify-Shop-Domain');
-        $integration = $this->resolveIntegration($shopDomain);
-        if (! $integration) {
-            return response('', 200);
-        }
-
-        if (! $this->isAutoSyncEnabled($integration)) {
-            return response('', 200);
-        }
-
-        $normalized = $action === 'delete'
-            ? ['gid' => $this->normalizer->extractProductGid($data)]
-            : $this->normalizer->normalizeProduct($data);
-
-        ProcessShopifyProductWebhookJob::dispatch($integration, $action, $normalized);
-
+        // Fibermade is the source of truth — product webhooks from Shopify are
+        // ignored to prevent echo loops. Return 200 so Shopify stops retrying.
         return response('', 200);
     }
 
     private function handleCollectionWebhook(Request $request, string $action): Response
     {
-        $payload = $request->getContent();
-        if (! $this->verifyHmac($payload, $request->header('X-Shopify-Hmac-Sha256'))) {
-            Log::warning("Shopify collections/{$action} webhook rejected: invalid HMAC");
-
-            return response('', 401);
-        }
-
-        $data = json_decode($payload, true);
-        if (! is_array($data)) {
-            return response('', 400);
-        }
-
-        $shopDomain = $request->header('X-Shopify-Shop-Domain');
-        $integration = $this->resolveIntegration($shopDomain);
-        if (! $integration) {
-            return response('', 200);
-        }
-
-        if (! $this->isAutoSyncEnabled($integration)) {
-            return response('', 200);
-        }
-
-        $normalized = $action === 'delete'
-            ? ['gid' => $this->normalizer->extractCollectionGid($data)]
-            : $this->normalizer->normalizeCollection($data);
-
-        ProcessShopifyCollectionWebhookJob::dispatch($integration, $action, $normalized);
-
+        // Fibermade is the source of truth — collection webhooks from Shopify are
+        // ignored to prevent echo loops. Return 200 so Shopify stops retrying.
         return response('', 200);
     }
 

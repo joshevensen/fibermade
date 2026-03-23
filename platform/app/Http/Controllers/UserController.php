@@ -144,6 +144,7 @@ class UserController extends Controller
             'connected_since' => $integration->created_at?->toDateString(),
             'auto_sync' => $settings['auto_sync'] ?? false,
             'sync' => $settings['sync'] ?? ['status' => 'idle'],
+            'push_sync' => $settings['push_sync'] ?? ['status' => 'idle'],
             'recent_errors' => $recentErrors,
             'connect_token' => $account?->shopify_connect_token,
         ];

@@ -22,10 +22,18 @@ class ShopifySyncOrchestrator
     /**
      * Dispatch all three sync jobs in order as a chain.
      *
+     * Pull sync is gated behind the `allow_pull_sync` setting (default false).
+     * Fibermade is the source of truth — pull sync is disabled by default to
+     * prevent Shopify from overwriting Fibermade data.
+     *
      * @throws SyncAlreadyRunningException
      */
     public function syncAll(Integration $integration): void
     {
+        if (! $this->isPullSyncAllowed($integration)) {
+            return;
+        }
+
         $this->guardAgainstRunning($integration);
 
         $this->writeSyncState($integration, [
@@ -45,10 +53,16 @@ class ShopifySyncOrchestrator
     /**
      * Dispatch only the products sync job.
      *
+     * Gated behind `allow_pull_sync` — disabled by default.
+     *
      * @throws SyncAlreadyRunningException
      */
     public function syncProducts(Integration $integration): void
     {
+        if (! $this->isPullSyncAllowed($integration)) {
+            return;
+        }
+
         $this->guardAgainstRunning($integration);
 
         $this->writeSyncState($integration, [
@@ -64,10 +78,16 @@ class ShopifySyncOrchestrator
     /**
      * Dispatch only the collections sync job.
      *
+     * Gated behind `allow_pull_sync` — disabled by default.
+     *
      * @throws SyncAlreadyRunningException
      */
     public function syncCollections(Integration $integration): void
     {
+        if (! $this->isPullSyncAllowed($integration)) {
+            return;
+        }
+
         $this->guardAgainstRunning($integration);
 
         $this->writeSyncState($integration, [
@@ -111,6 +131,18 @@ class ShopifySyncOrchestrator
                 "A sync is already running for integration #{$integration->id}."
             );
         }
+    }
+
+    /**
+     * Whether pull sync (Shopify → Fibermade) is allowed for this integration.
+     *
+     * Fibermade is the source of truth. Pull sync is disabled by default.
+     * Set `allow_pull_sync: true` in integration settings to re-enable
+     * (e.g. for admin import of an existing Shopify catalog).
+     */
+    private function isPullSyncAllowed(Integration $integration): bool
+    {
+        return (bool) ($integration->settings['allow_pull_sync'] ?? false);
     }
 
     private function writeSyncState(Integration $integration, array $state): void

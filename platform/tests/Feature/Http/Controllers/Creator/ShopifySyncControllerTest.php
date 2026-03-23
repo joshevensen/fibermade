@@ -2,11 +2,13 @@
 
 use App\Enums\IntegrationType;
 use App\Exceptions\SyncAlreadyRunningException;
+use App\Jobs\PushCatalogToShopifyJob;
 use App\Models\Account;
 use App\Models\Creator;
 use App\Models\Integration;
 use App\Models\User;
 use App\Services\Shopify\ShopifySyncOrchestrator;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     $this->account = Account::factory()->creator()->create();
@@ -176,7 +178,44 @@ it('returns correct shape from status endpoint', function () {
             'shop' => 'test.myshopify.com',
             'auto_sync' => false,
             'sync' => ['status' => 'idle'],
+            'push_sync' => ['status' => 'idle'],
         ]);
+});
+
+// ─── pushAll ──────────────────────────────────────────────────────────────────
+
+it('returns 404 for pushAll when no active integration exists', function () {
+    $this->integration->update(['active' => false]);
+
+    $this->actingAs($this->user)
+        ->postJson(route('shopify.push.all'))
+        ->assertNotFound();
+});
+
+it('returns 409 for pushAll when a push is already running', function () {
+    $settings = $this->integration->settings ?? [];
+    $settings['push_sync'] = ['status' => 'running'];
+    $this->integration->update(['settings' => $settings]);
+
+    $this->actingAs($this->user)
+        ->postJson(route('shopify.push.all'))
+        ->assertStatus(409)
+        ->assertJson(['message' => 'A push is already running.']);
+});
+
+it('dispatches PushCatalogToShopifyJob and returns 202', function () {
+    Queue::fake();
+
+    $this->actingAs($this->user)
+        ->postJson(route('shopify.push.all'))
+        ->assertStatus(202)
+        ->assertJsonStructure(['message', 'push_sync']);
+
+    Queue::assertPushed(PushCatalogToShopifyJob::class, fn ($job) => $job->integrationId === $this->integration->id);
+});
+
+it('redirects guests away from pushAll endpoint', function () {
+    $this->postJson(route('shopify.push.all'))->assertRedirect(route('login'));
 });
 
 // ─── updateSettings ──────────────────────────────────────────────────────────

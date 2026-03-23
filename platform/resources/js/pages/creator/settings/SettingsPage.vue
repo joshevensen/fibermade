@@ -56,6 +56,24 @@ const shopify = page.props.shopify as
                   [key: string]: unknown;
               }[];
           };
+          push_sync?: {
+              status: 'idle' | 'running' | 'complete' | 'failed';
+              current_step?: string | null;
+              started_at?: string | null;
+              completed_at?: string | null;
+              last_result?: {
+                  colorways?: {
+                      created: number;
+                      updated: number;
+                      failed: number;
+                  };
+                  collections?: {
+                      created: number;
+                      updated: number;
+                      failed: number;
+                  };
+              };
+          };
           recent_errors: {
               id: number;
               message: string;

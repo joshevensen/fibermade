@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Creator;
 use App\Enums\IntegrationType;
 use App\Exceptions\SyncAlreadyRunningException;
 use App\Http\Controllers\Controller;
+use App\Jobs\PushCatalogToShopifyJob;
 use App\Models\Integration;
 use App\Services\Shopify\ShopifySyncOrchestrator;
 use Illuminate\Http\JsonResponse;
@@ -50,6 +51,32 @@ class ShopifySyncController extends Controller
     }
 
     /**
+     * Trigger a full catalog push (colorways → collections) to Shopify.
+     */
+    public function pushAll(Request $request): JsonResponse
+    {
+        $integration = $this->resolveIntegration($request);
+
+        if (! $integration) {
+            return response()->json(['message' => 'No active Shopify integration found.'], 404);
+        }
+
+        if ($integration->getPushSyncStatus() === 'running') {
+            return response()->json(['message' => 'A push is already running.'], 409);
+        }
+
+        PushCatalogToShopifyJob::dispatch($integration->id);
+
+        $integration->refresh();
+        $settings = $integration->settings ?? [];
+
+        return response()->json([
+            'message' => 'Push started',
+            'push_sync' => $settings['push_sync'] ?? ['status' => 'running'],
+        ], 202);
+    }
+
+    /**
      * Return the current sync state and connection info.
      */
     public function status(Request $request): JsonResponse
@@ -67,6 +94,7 @@ class ShopifySyncController extends Controller
             'shop' => $settings['shop'] ?? null,
             'auto_sync' => $settings['auto_sync'] ?? false,
             'sync' => $settings['sync'] ?? ['status' => 'idle'],
+            'push_sync' => $settings['push_sync'] ?? ['status' => 'idle'],
         ]);
     }
 
