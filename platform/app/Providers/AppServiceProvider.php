@@ -5,10 +5,12 @@ namespace App\Providers;
 use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
+use App\Models\Inventory;
 use App\Models\Media;
 use App\Observers\BaseObserver;
 use App\Observers\CollectionObserver;
 use App\Observers\ColorwayObserver;
+use App\Observers\InventoryObserver;
 use App\Observers\MediaObserver;
 use Illuminate\Auth\Events\Authenticated;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         Colorway::observe(ColorwayObserver::class);
         Base::observe(BaseObserver::class);
         Collection::observe(CollectionObserver::class);
+        Inventory::observe(InventoryObserver::class);
         Media::observe(MediaObserver::class);
 
         RateLimiter::for('api', function (Request $request) {
