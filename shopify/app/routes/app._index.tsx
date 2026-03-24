@@ -270,7 +270,7 @@ export default function Index() {
     return (
       <s-page heading="Fibermade">
         <s-section>
-          <s-stack direction="block" gap="loose">
+          <s-stack direction="block" gap="large">
             <img
               src="/logo.png"
               alt="Fibermade"
@@ -299,7 +299,7 @@ export default function Index() {
               {disconnectError}
             </s-banner>
           )}
-          <s-stack direction="block" gap="loose">
+          <s-stack direction="block" gap="large">
             <s-paragraph>
               <strong>{shop}</strong>
               {connectedAt && ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
@@ -350,14 +350,14 @@ export default function Index() {
           <img
             src="/logo.png"
             alt="Fibermade"
-            style={{ height: "40px", marginBottom: "12px", display: "block" }}
+            style={{ height: "48px", marginBottom: "12px", display: "block" }}
           />
           <s-banner
             heading="Integration deactivated"
             tone="critical"
             slot="aside"
           >
-            Reconnect using your connect token from Fibermade → Settings → Shopify API, or disconnect to remove the link.
+            Reconnect using your connect token from Fibermade → Settings → Shopify, or disconnect to remove the link.
           </s-banner>
           <s-paragraph>
             {shop} — disconnected
@@ -378,18 +378,18 @@ export default function Index() {
   return (
     <s-page heading="Fibermade">
       <s-section>
-        <s-stack direction="block" gap="loose">
+        <s-stack direction="block" gap="large">
           <img
             src="/logo.png"
             alt="Fibermade"
             style={{ height: "48px", display: "block" }}
           />
-          <s-text variant="headingLg">Manage your fiber business from one place</s-text>
-          <s-list>
+          <s-heading>Manage your fiber business from one place</s-heading>
+          <s-unordered-list>
             <s-list-item>Keep your colorways and inventory in sync</s-list-item>
             <s-list-item>Manage collections across Shopify and Fibermade</s-list-item>
             <s-list-item>Changes in Shopify automatically reflect in Fibermade</s-list-item>
-          </s-list>
+          </s-unordered-list>
         </s-stack>
       </s-section>
 
@@ -399,13 +399,27 @@ export default function Index() {
             {connectError}
           </s-banner>
         )}
-        <s-stack direction="block" gap="loose">
+        <s-stack direction="block" gap="large">
+          <s-paragraph>
+            You&apos;ll need your Fibermade Connect Token to link this store.{" "}
+            {fibermadeUrl ? (
+              <a
+                href={`${fibermadeUrl}/creator/settings?tab=shopify-api`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Find it in Fibermade → Settings → Shopify →
+              </a>
+            ) : (
+              <>Find it in Fibermade under Settings → Shopify.</>
+            )}
+          </s-paragraph>
           <form onSubmit={handleConnect}>
             <s-stack direction="block" gap="base">
               <s-text-field
                 name="connectToken"
                 label="Fibermade Connect Token"
-                helpText="Find this in Fibermade → Settings → Shopify API"
+                details="Find this in Fibermade → Settings → Shopify"
                 value={connectToken}
                 onChange={(e) => setConnectToken(e.currentTarget?.value ?? "")}
                 autocomplete="off"
