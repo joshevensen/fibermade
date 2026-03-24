@@ -188,12 +188,14 @@ function refreshShopifyStatus(): void {
             </UiTabPanel>
 
             <UiTabPanel value="shopify-api">
-                <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                    <div class="lg:col-span-2">
+                        <ShopifySyncCard :shopify="shopify" />
+                    </div>
                     <ShopifyConnectionCard
                         :shopify="shopify"
                         :connect-token="shopify?.connect_token"
                     />
-                    <ShopifySyncCard :shopify="shopify" />
                 </div>
             </UiTabPanel>
         </UiTabs>
