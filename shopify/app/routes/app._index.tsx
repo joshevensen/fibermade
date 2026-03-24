@@ -269,6 +269,13 @@ export default function Index() {
   if (connected) {
     return (
       <s-page heading="Fibermade">
+        <div style={{ display: "flex", alignItems: "flex-center", alignContent: 'center', marginBottom: "10px" }}>
+            <img
+              src="/logo.png"
+              alt="Fibermade"
+              style={{ width: "200px", display: "block" }}
+            />
+        </div>
         <s-section>
           <s-stack direction="block" gap="large">
             <s-heading>Shopify wasn&apos;t built for yarn. Fibermade fixes that.</s-heading>
@@ -278,12 +285,6 @@ export default function Index() {
               <s-list-item>Use the terms that make sense to you: colorways, bases, etc</s-list-item>
               <s-list-item>Changes in Fibermade are automatically pushed to Shopify</s-list-item>
             </s-unordered-list>
-
-            <img
-              src="/logo.png"
-              alt="Fibermade"
-              style={{ width: "200px", display: "block" }}
-            />
 
             {fibermadeUrl && (
               <s-paragraph>
@@ -325,17 +326,14 @@ export default function Index() {
         <s-section>
           <s-stack>
             <s-paragraph>
-              Shopify uses this account to sync with Fibermade. View Fibermade&apos;s 
-              &nbsp;<a 
-                  href={`${fibermadeUrl}/terms`}
-                  target="_blank"
-                  rel="noreferrer">terms of service</a>
-              &nbsp;and 
-              &nbsp;<a
-                  href={`${fibermadeUrl}/privacy`}
-                  target="_blank"
-                  rel="noreferrer">privacy policy</a>
-              .</s-paragraph>
+              Shopify uses this account to sync with Fibermade. View Fibermade&apos;s <a 
+                href={`${fibermadeUrl}/terms`}
+                target="_blank"
+                rel="noreferrer">terms of service</a> and <a
+                href={`${fibermadeUrl}/privacy`}
+                target="_blank"
+                rel="noreferrer">privacy policy</a>.
+            </s-paragraph>
           </s-stack>
         </s-section>
 
@@ -400,6 +398,14 @@ export default function Index() {
 
   return (
     <s-page heading="Fibermade">
+      <div style={{ display: "flex", alignItems: "flex-center", alignContent: 'center', marginBottom: "10px" }}>
+          <img
+            src="/logo.png"
+            alt="Fibermade"
+            style={{ width: "200px", display: "block" }}
+          />
+      </div>
+
       <s-section>
         <s-stack direction="block" gap="large">
           <s-heading>Shopify wasn&apos;t built for yarn. Fibermade fixes that.</s-heading>
@@ -409,12 +415,6 @@ export default function Index() {
             <s-list-item>Use the terms that make sense to you: colorways, bases, etc</s-list-item>
             <s-list-item>Changes in Fibermade are automatically pushed to Shopify</s-list-item>
           </s-unordered-list>
-
-          <img
-            src="/logo.png"
-            alt="Fibermade"
-            style={{ width: "200px", display: "block" }}
-          />
 
           {fibermadeUrl && (
             <s-paragraph>
@@ -494,17 +494,14 @@ export default function Index() {
       <s-section>
         <s-stack>
           <s-paragraph>
-            Shopify uses this account to sync with Fibermade. View Fibermade&apos;s 
-            &nbsp;<a 
-                href={`${fibermadeUrl}/terms`}
-                target="_blank"
-                rel="noreferrer">terms of service</a>
-            &nbsp;and 
-            &nbsp;<a
-                href={`${fibermadeUrl}/privacy`}
-                target="_blank"
-                rel="noreferrer">privacy policy</a>
-            .</s-paragraph>
+            Shopify uses this account to sync with Fibermade. View Fibermade&apos;s <a 
+              href={`${fibermadeUrl}/terms`}
+              target="_blank"
+              rel="noreferrer">terms of service</a> and <a
+              href={`${fibermadeUrl}/privacy`}
+              target="_blank"
+              rel="noreferrer">privacy policy</a>.
+          </s-paragraph>
         </s-stack>
       </s-section>
     </s-page>
