@@ -73,6 +73,20 @@ class SyncCollectionToShopifyJob implements ShouldQueue
 
     private function handleCreated(ShopifyCollectionPushService $pushService, Integration $integration): void
     {
+        // If a mapping already exists (e.g. collection was pulled from Shopify), treat as update.
+        $existingGid = ExternalIdentifier::where('integration_id', $integration->id)
+            ->where('identifiable_type', Collection::class)
+            ->where('identifiable_id', $this->collection->id)
+            ->where('external_type', 'shopify_collection')
+            ->value('external_id');
+
+        if ($existingGid) {
+            $pushService->updateCollection($this->collection, $existingGid);
+            $pushService->syncCollectionProducts($this->collection, $existingGid, $integration, $this->removedColorwayIds);
+
+            return;
+        }
+
         $collectionGid = $pushService->createCollection($this->collection, $integration);
         $pushService->syncCollectionProducts($this->collection, $collectionGid, $integration, $this->removedColorwayIds);
 

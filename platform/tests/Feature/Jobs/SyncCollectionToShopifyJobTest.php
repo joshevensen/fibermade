@@ -204,6 +204,40 @@ test('SyncCollectionToShopifyJob passes removed colorway IDs to syncCollectionPr
     Http::assertSent(fn ($r) => str_contains($r->url(), 'collects/501.json') && $r->method() === 'DELETE');
 });
 
+test('SyncCollectionToShopifyJob (created) updates instead of creating when mapping already exists (pulled from Shopify)', function () {
+    $collection = Collection::factory()->create(['account_id' => $this->account->id, 'name' => 'Pulled Collection']);
+
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Collection::class,
+        'identifiable_id' => $collection->id,
+        'external_type' => 'shopify_collection',
+        'external_id' => 'gid://shopify/Collection/999',
+    ]);
+
+    Http::fake([
+        'test.myshopify.com/*' => Http::response([
+            'data' => [
+                'collectionUpdate' => [
+                    'collection' => ['id' => 'gid://shopify/Collection/999'],
+                    'userErrors' => [],
+                ],
+            ],
+        ]),
+    ]);
+
+    $job = new SyncCollectionToShopifyJob($collection, 'created');
+    $job->handle();
+
+    Http::assertNotSent(fn ($r) => str_contains($r->body(), 'collectionCreate'));
+    Http::assertSent(fn ($r) => str_contains($r->body(), 'collectionUpdate'));
+
+    expect(ExternalIdentifier::where('identifiable_type', Collection::class)
+        ->where('identifiable_id', $collection->id)
+        ->where('external_type', 'shopify_collection')
+        ->count())->toBe(1);
+});
+
 // ─── guard checks ─────────────────────────────────────────────────────────────
 
 test('SyncCollectionToShopifyJob returns early when no active integration', function () {
