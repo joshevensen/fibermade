@@ -5,13 +5,17 @@ namespace App\Http\Controllers;
 use App\Enums\BaseStatus;
 use App\Enums\Color;
 use App\Enums\ColorwayStatus;
+use App\Enums\IntegrationType;
 use App\Enums\Technique;
 use App\Http\Requests\StoreColorwayRequest;
 use App\Http\Requests\UpdateColorwayCollectionsRequest;
 use App\Http\Requests\UpdateColorwayRequest;
+use App\Jobs\SyncColorwayCatalogToShopifyJob;
 use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
+use App\Models\Integration;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -202,6 +206,11 @@ class ColorwayController extends Controller
             'data' => $identifier->data,
         ])->toArray();
 
+        $hasShopify = Integration::where('account_id', $colorway->account_id)
+            ->where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->exists();
+
         return Inertia::render('creator/colorways/ColorwayEditPage', [
             'colorway' => $colorwayArray,
             'collections' => $colorway->collections,
@@ -210,6 +219,7 @@ class ColorwayController extends Controller
             'colorwayStatusOptions' => $colorwayStatusOptions,
             'techniqueOptions' => $techniqueOptions,
             'colorOptions' => $colorOptions,
+            'has_shopify' => $hasShopify,
         ]);
     }
 
@@ -233,6 +243,18 @@ class ColorwayController extends Controller
         $colorway->collections()->sync($request->validated()['collection_ids']);
 
         return redirect()->route('colorways.edit', $colorway)->with('success', 'Collections updated successfully.');
+    }
+
+    /**
+     * Dispatch a push-to-Shopify job for the given colorway.
+     */
+    public function pushToShopify(Colorway $colorway): JsonResponse
+    {
+        $this->authorize('update', $colorway);
+
+        SyncColorwayCatalogToShopifyJob::dispatch($colorway, 'updated');
+
+        return response()->json(['message' => 'Push queued.']);
     }
 
     /**

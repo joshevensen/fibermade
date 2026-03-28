@@ -88,10 +88,24 @@ function handleDelete(event: Event): void {
 
 <template>
     <CreatorLayout page-title="Edit Base">
+        <template #header-actions>
+            <UiButton
+                type="submit"
+                form="base-form"
+                :loading="form.processing"
+            >
+                Update Base
+            </UiButton>
+        </template>
+
         <template #default>
             <UiCard>
                 <template #content>
-                    <UiForm :initial-values="initialValues" @submit="onSubmit">
+                    <UiForm
+                        id="base-form"
+                        :initial-values="initialValues"
+                        @submit="onSubmit"
+                    >
                         <UiFormField
                             name="status"
                             label="Status"
@@ -199,9 +213,6 @@ function handleDelete(event: Event): void {
                             </UiFormField>
                         </div>
 
-                        <UiButton type="submit" :loading="form.processing">
-                            Update Base
-                        </UiButton>
                     </UiForm>
                 </template>
             </UiCard>

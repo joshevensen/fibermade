@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
     destroy as destroyCollection,
+    index as collectionsIndex,
     update,
 } from '@/actions/App/Http/Controllers/CollectionController';
 import UiButton from '@/components/ui/UiButton.vue';
@@ -100,7 +101,7 @@ const { form, onSubmit } = useFormSubmission({
     initialValues,
     successMessage: 'Collection updated successfully.',
     onSuccess: () => {
-        router.visit('/collections');
+        router.visit(collectionsIndex.url());
     },
 });
 
@@ -117,10 +118,24 @@ function handleDelete(event: Event): void {
 
 <template>
     <CreatorLayout page-title="Edit Collection">
+        <template #header-actions>
+            <UiButton
+                type="submit"
+                form="collection-form"
+                :loading="form.processing"
+            >
+                Update Collection
+            </UiButton>
+        </template>
+
         <template #default>
             <UiCard>
                 <template #content>
-                    <UiForm :initial-values="initialValues" @submit="onSubmit">
+                    <UiForm
+                        id="collection-form"
+                        :initial-values="initialValues"
+                        @submit="onSubmit"
+                    >
                         <UiFormFieldInput
                             name="name"
                             label="Name"
@@ -141,10 +156,6 @@ function handleDelete(event: Event): void {
                                 />
                             </template>
                         </UiFormField>
-
-                        <UiButton type="submit" :loading="form.processing">
-                            Update Collection
-                        </UiButton>
                     </UiForm>
                 </template>
             </UiCard>
@@ -190,6 +201,7 @@ function handleDelete(event: Event): void {
                         </ul>
                         <UiButton
                             type="button"
+                            outlined
                             class="mt-4 w-full"
                             @click="openColorwayDialog"
                         >

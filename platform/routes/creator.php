@@ -43,6 +43,7 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
 
     // Colorways routes
     Route::patch('colorways/{colorway}/collections', [ColorwayController::class, 'updateCollections'])->name('colorways.collections.update');
+    Route::post('colorways/{colorway}/push-to-shopify', [ColorwayController::class, 'pushToShopify'])->name('colorways.push-to-shopify');
     Route::resource('colorways', ColorwayController::class)->except(['create']);
 
     // Bases routes

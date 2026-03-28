@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import {
     destroy as destroyColorway,
+    index as colorwaysIndex,
+    pushToShopify,
     update,
 } from '@/actions/App/Http/Controllers/ColorwayController';
 import UiButton from '@/components/ui/UiButton.vue';
@@ -54,11 +56,41 @@ interface Props {
     colorwayStatusOptions: Array<{ label: string; value: string }>;
     techniqueOptions: Array<{ label: string; value: string }>;
     colorOptions: Array<{ label: string; value: string }>;
+    has_shopify: boolean;
 }
 
 const props = defineProps<Props>();
 const { requireDelete } = useConfirm();
-const { showSuccess } = useToast();
+const { showSuccess, showError } = useToast();
+
+const pushingToShopify = ref(false);
+
+async function handlePushToShopify(): Promise<void> {
+    pushingToShopify.value = true;
+    try {
+        const response = await fetch(pushToShopify.url(props.colorway.id), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content') ?? '',
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Push failed.');
+        }
+        showSuccess('Colorway queued for push to Shopify.');
+    } catch {
+        showError('Could not push to Shopify. Please try again.');
+    } finally {
+        pushingToShopify.value = false;
+    }
+}
 
 const showCollectionDialog = ref(false);
 const selectedCollectionIds = ref<number[]>([]);
@@ -112,7 +144,7 @@ const { form, onSubmit } = useFormSubmission({
     initialValues,
     successMessage: 'Colorway updated successfully.',
     onSuccess: () => {
-        router.visit('/colorways');
+        router.visit(colorwaysIndex.url());
     },
 });
 
@@ -165,201 +197,241 @@ function handleDelete(event: Event): void {
 
 <template>
     <CreatorLayout page-title="Edit Colorway">
-        <template #default>
-            <UiCard>
-                <template #content>
-                    <UiForm :initial-values="initialValues" @submit="onSubmit">
-                        <UiFormField
-                            name="status"
-                            label="Status"
-                            :server-error="form.errors.status"
-                        >
-                            <template #default="{ props: fieldProps }">
-                                <UiSelectButton
-                                    v-bind="fieldProps"
-                                    :options="colorwayStatusOptions"
-                                    fluid
-                                />
-                            </template>
-                        </UiFormField>
-
-                        <UiFormFieldInput
-                            name="name"
-                            label="Name"
-                            placeholder="Colorway name"
-                            :server-error="form.errors.name"
-                            required
-                        />
-
-                        <div
-                            class="grid w-full gap-4"
-                            style="grid-template-columns: auto 1fr auto"
-                        >
-                            <UiFormFieldSelect
-                                name="technique"
-                                label="Technique"
-                                :options="techniqueOptions"
-                                placeholder="Select technique"
-                                :server-error="form.errors.technique"
-                                show-clear
-                            />
-
-                            <UiFormFieldMultiSelect
-                                name="colors"
-                                label="Colors"
-                                :options="colorOptions"
-                                placeholder="Select colors"
-                                :server-error="form.errors.colors"
-                            />
-
-                            <UiFormFieldInputNumber
-                                name="per_pan"
-                                label="Per Pan"
-                                placeholder="1-6"
-                                :min="1"
-                                :max="6"
-                                :server-error="form.errors.per_pan"
-                                required
-                            />
-                        </div>
-
-                        <UiFormField
-                            name="description"
-                            label="Description"
-                            :server-error="form.errors.description"
-                        >
-                            <template #default="{ props: fieldProps }">
-                                <UiEditor
-                                    v-bind="fieldProps"
-                                    placeholder="Colorway description"
-                                />
-                            </template>
-                        </UiFormField>
-
-                        <UiFormField
-                            name="recipe"
-                            label="Recipe"
-                            :server-error="form.errors.recipe"
-                        >
-                            <template #default="{ props: fieldProps }">
-                                <UiEditor
-                                    v-bind="fieldProps"
-                                    placeholder="Colorway recipe"
-                                />
-                            </template>
-                        </UiFormField>
-
-                        <UiFormField
-                            name="notes"
-                            label="Notes"
-                            :server-error="form.errors.notes"
-                        >
-                            <template #default="{ props: fieldProps }">
-                                <UiEditor
-                                    v-bind="fieldProps"
-                                    placeholder="Additional notes"
-                                />
-                            </template>
-                        </UiFormField>
-
-                        <UiButton type="submit" :loading="form.processing">
-                            Update Colorway
-                        </UiButton>
-                    </UiForm>
-                </template>
-            </UiCard>
+        <template #header-actions>
+            <UiButton
+                v-if="has_shopify"
+                type="button"
+                outlined
+                :loading="pushingToShopify"
+                @click="handlePushToShopify"
+            >
+                Push to Shopify
+            </UiButton>
+            <UiButton
+                type="submit"
+                form="colorway-form"
+                :loading="form.processing"
+            >
+                Update Colorway
+            </UiButton>
         </template>
 
-        <template #side>
-            <div class="flex flex-col gap-4">
-                <UiCard>
-                    <template #title>
-                        <h3 class="text-lg font-semibold">Inventory</h3>
-                    </template>
-                    <template #content>
-                        <div v-if="props.bases.length === 0" class="py-8">
-                            <p class="text-center text-surface-500">
-                                No bases available
-                            </p>
-                        </div>
-                        <div v-else class="space-y-4">
-                            <div class="text-sm text-surface-600">
-                                Total:
-                                <span class="font-semibold">{{
-                                    getTotalQuantity()
-                                }}</span>
-                            </div>
-                            <div class="space-y-3">
-                                <InventoryQuantityInput
-                                    v-for="base in props.bases"
-                                    :key="base.id"
-                                    :colorway-id="props.colorway.id"
-                                    :base-id="base.id"
-                                    :base-name="base.descriptor"
-                                    :initial-quantity="base.quantity"
-                                    size="large"
-                                    @quantity-changed="
-                                        handleQuantityChange(base.id, $event)
-                                    "
-                                />
-                            </div>
-                        </div>
-                    </template>
-                </UiCard>
-
-                <UiCard>
-                    <template #title>
-                        <h3 class="text-lg font-semibold">Collections</h3>
-                    </template>
-                    <template #content>
-                        <div v-if="props.collections.length === 0" class="py-8">
-                            <p class="text-center text-surface-500">
-                                No collections found
-                            </p>
-                        </div>
-                        <ul v-else class="space-y-2">
-                            <li
-                                v-for="collection in props.collections"
-                                :key="collection.id"
-                                class="flex items-center justify-between gap-4 rounded-lg border border-surface-200 p-3 transition-colors hover:bg-surface-50"
+        <template #default>
+            <!-- Two-column layout -->
+            <div class="flex flex-col gap-4 lg:flex-row lg:pr-4">
+                <!-- Left: form -->
+                <div class="flex-[0_0_60%]">
+                    <UiCard>
+                        <template #content>
+                            <UiForm
+                                id="colorway-form"
+                                :initial-values="initialValues"
+                                @submit="onSubmit"
                             >
-                                <span class="font-medium text-surface-700">
-                                    {{ collection.name }}
-                                </span>
-                            </li>
-                        </ul>
-                        <UiButton
-                            type="button"
-                            class="mt-4 w-full"
-                            @click="openCollectionDialog"
-                        >
-                            Update Collections
-                        </UiButton>
-                    </template>
-                </UiCard>
+                                <UiFormField
+                                    name="status"
+                                    label="Status"
+                                    :server-error="form.errors.status"
+                                >
+                                    <template #default="{ props: fieldProps }">
+                                        <UiSelectButton
+                                            v-bind="fieldProps"
+                                            :options="colorwayStatusOptions"
+                                            fluid
+                                        />
+                                    </template>
+                                </UiFormField>
 
-                <UiCard>
-                    <template #content>
-                        <div class="space-y-4">
-                            <div>
+                                <UiFormFieldInput
+                                    name="name"
+                                    label="Name"
+                                    placeholder="Colorway name"
+                                    :server-error="form.errors.name"
+                                    required
+                                />
+
+                                <div
+                                    class="grid w-full gap-4"
+                                    style="
+                                        grid-template-columns: auto 1fr auto;
+                                    "
+                                >
+                                    <UiFormFieldSelect
+                                        name="technique"
+                                        label="Technique"
+                                        :options="techniqueOptions"
+                                        placeholder="Select technique"
+                                        :server-error="form.errors.technique"
+                                        show-clear
+                                    />
+
+                                    <UiFormFieldMultiSelect
+                                        name="colors"
+                                        label="Colors"
+                                        :options="colorOptions"
+                                        placeholder="Select colors"
+                                        :server-error="form.errors.colors"
+                                    />
+
+                                    <UiFormFieldInputNumber
+                                        name="per_pan"
+                                        label="Per Pan"
+                                        placeholder="1-6"
+                                        :min="1"
+                                        :max="6"
+                                        :server-error="form.errors.per_pan"
+                                        required
+                                    />
+                                </div>
+
+                                <UiFormField
+                                    name="description"
+                                    label="Description"
+                                    :server-error="form.errors.description"
+                                >
+                                    <template
+                                        #default="{ props: fieldProps }"
+                                    >
+                                        <UiEditor
+                                            v-bind="fieldProps"
+                                            placeholder="Colorway description"
+                                        />
+                                    </template>
+                                </UiFormField>
+
+                                <UiFormField
+                                    name="recipe"
+                                    label="Recipe"
+                                    :server-error="form.errors.recipe"
+                                >
+                                    <template
+                                        #default="{ props: fieldProps }"
+                                    >
+                                        <UiEditor
+                                            v-bind="fieldProps"
+                                            placeholder="Colorway recipe"
+                                        />
+                                    </template>
+                                </UiFormField>
+
+                                <UiFormField
+                                    name="notes"
+                                    label="Notes"
+                                    :server-error="form.errors.notes"
+                                >
+                                    <template
+                                        #default="{ props: fieldProps }"
+                                    >
+                                        <UiEditor
+                                            v-bind="fieldProps"
+                                            placeholder="Additional notes"
+                                        />
+                                    </template>
+                                </UiFormField>
+                            </UiForm>
+                        </template>
+                    </UiCard>
+                </div>
+
+                <!-- Right: sidebar cards -->
+                <div class="flex flex-[0_0_40%] flex-col gap-4">
+                    <UiCard>
+                        <template #title>
+                            <h3 class="text-lg font-semibold">Inventory</h3>
+                        </template>
+                        <template #content>
+                            <div
+                                v-if="props.bases.length === 0"
+                                class="py-8"
+                            >
+                                <p class="text-center text-surface-500">
+                                    No bases available
+                                </p>
+                            </div>
+                            <div v-else class="space-y-4">
+                                <div class="text-sm text-surface-600">
+                                    Total:
+                                    <span class="font-semibold">{{
+                                        getTotalQuantity()
+                                    }}</span>
+                                </div>
+                                <div class="space-y-3">
+                                    <InventoryQuantityInput
+                                        v-for="base in props.bases"
+                                        :key="base.id"
+                                        :colorway-id="props.colorway.id"
+                                        :base-id="base.id"
+                                        :base-name="base.descriptor"
+                                        :initial-quantity="base.quantity"
+                                        size="large"
+                                        @quantity-changed="
+                                            handleQuantityChange(
+                                                base.id,
+                                                $event,
+                                            )
+                                        "
+                                    />
+                                </div>
+                            </div>
+                        </template>
+                    </UiCard>
+
+                    <UiCard>
+                        <template #title>
+                            <h3 class="text-lg font-semibold">Collections</h3>
+                        </template>
+                        <template #content>
+                            <div
+                                v-if="props.collections.length === 0"
+                                class="py-8"
+                            >
+                                <p class="text-center text-surface-500">
+                                    No collections found
+                                </p>
+                            </div>
+                            <ul v-else class="space-y-2">
+                                <li
+                                    v-for="collection in props.collections"
+                                    :key="collection.id"
+                                    class="flex items-center justify-between gap-4 rounded-lg border border-surface-200 p-3 transition-colors hover:bg-surface-50"
+                                >
+                                    <span class="font-medium text-surface-700">
+                                        {{ collection.name }}
+                                    </span>
+                                </li>
+                            </ul>
+                            <UiButton
+                                type="button"
+                                outlined
+                                class="mt-4 w-full"
+                                @click="openCollectionDialog"
+                            >
+                                Update Collections
+                            </UiButton>
+                        </template>
+                    </UiCard>
+
+                    <UiCard>
+                        <template #content>
+                            <div class="space-y-4">
                                 <p class="text-sm text-surface-600">
                                     Deleting this colorway will permanently
                                     remove all associated data. This action
                                     cannot be undone.
                                 </p>
+                                <UiButton
+                                    type="button"
+                                    severity="danger"
+                                    outlined
+                                    class="w-full"
+                                    @click="handleDelete($event)"
+                                >
+                                    Delete Colorway
+                                </UiButton>
                             </div>
-                            <UiButton
-                                type="button"
-                                severity="danger"
-                                outlined
-                                class="w-full"
-                                @click="handleDelete($event)"
-                            >
-                                Delete Colorway
-                            </UiButton>
-                        </div>
-                    </template>
-                </UiCard>
+                        </template>
+                    </UiCard>
+                </div>
             </div>
         </template>
     </CreatorLayout>

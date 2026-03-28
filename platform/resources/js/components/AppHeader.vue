@@ -93,7 +93,7 @@ function handleCreateClick(): void {
 
 <template>
     <header
-        class="flex h-12 w-full items-center justify-between bg-surface-100 px-4"
+        class="flex min-h-12 w-full items-center justify-between bg-surface-100 px-4 py-2"
     >
         <!-- Mobile: Menu toggle + Logo -->
         <div class="flex items-center gap-4 lg:hidden">
@@ -124,7 +124,6 @@ function handleCreateClick(): void {
                 <UiButton
                     v-if="hasCreateDrawer"
                     :icon="IconList.Plus"
-                    size="small"
                     :label="createButtonLabel"
                     aria-label="Create"
                     @click="handleCreateClick"

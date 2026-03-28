@@ -49,9 +49,15 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
 
     private function handleCreated(Integration $integration): void
     {
-        /** @var InventorySyncService $inventorySyncService */
-        $inventorySyncService = app(InventorySyncService::class);
-        $inventorySyncService->pushAllInventoryForColorway($this->colorway->fresh(), $integration, 'observer');
+        try {
+            /** @var InventorySyncService $inventorySyncService */
+            $inventorySyncService = app(InventorySyncService::class);
+            $inventorySyncService->pushAllInventoryForColorway($this->colorway->fresh(), $integration, 'observer');
+        } catch (ShopifyApiException $e) {
+            \Sentry\captureException($e);
+            $integration->flagSyncError();
+            $this->logError($integration, $e, 'product_create');
+        }
     }
 
     private function handleUpdated(Integration $integration): void

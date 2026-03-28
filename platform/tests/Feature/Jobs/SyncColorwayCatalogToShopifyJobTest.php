@@ -10,8 +10,10 @@ use App\Models\ExternalIdentifier;
 use App\Models\Integration;
 use App\Models\IntegrationLog;
 use App\Services\InventorySyncService;
+use App\Services\Shopify\ShopifyApiException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
@@ -174,6 +176,8 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status i
 });
 
 test('SyncColorwayCatalogToShopifyJob calls updateProduct with ACTIVE when re-activating from retired', function () {
+    Queue::fake();
+
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Active,
@@ -188,7 +192,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct with ACTIVE when re-ac
     ]);
 
     Http::fake([
-        'test.myshopify.com/*' => Http::response([
+        'https://test.myshopify.com/*' => Http::response([
             'data' => [
                 'productUpdate' => [
                     'product' => ['id' => $productGid],
@@ -230,6 +234,8 @@ test('SyncColorwayCatalogToShopifyJob updated path skips when no product mapping
 });
 
 test('SyncColorwayCatalogToShopifyJob logs success on archive', function () {
+    Queue::fake();
+
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Retired,
@@ -244,7 +250,7 @@ test('SyncColorwayCatalogToShopifyJob logs success on archive', function () {
     ]);
 
     Http::fake([
-        'test.myshopify.com/*' => Http::response([
+        'https://test.myshopify.com/*' => Http::response([
             'data' => [
                 'productUpdate' => [
                     'product' => ['id' => $productGid, 'status' => 'ARCHIVED'],
@@ -266,6 +272,8 @@ test('SyncColorwayCatalogToShopifyJob logs success on archive', function () {
 });
 
 test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', function () {
+    Queue::fake();
+
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Active,
@@ -280,7 +288,7 @@ test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', functi
     ]);
 
     Http::fake([
-        'test.myshopify.com/*' => Http::response([
+        'https://test.myshopify.com/*' => Http::response([
             'data' => [
                 'productUpdate' => [
                     'product' => null,
@@ -299,4 +307,25 @@ test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', functi
     expect($log)->not->toBeNull();
     expect($log->status)->toBe(IntegrationLogStatus::Error);
     expect($log->metadata['operation'])->toBe('product_update');
+});
+
+test('SyncColorwayCatalogToShopifyJob created path logs error when Shopify API fails', function () {
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+
+    $mock = $this->mock(InventorySyncService::class);
+    $mock->shouldReceive('pushAllInventoryForColorway')
+        ->once()
+        ->andThrow(new ShopifyApiException('HTTP request returned status code 401: {"errors":"[API] Invalid API key or access token"}'));
+
+    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'created');
+    $job->handle();
+
+    expect($this->integration->fresh()->settings['has_sync_errors'])->toBeTrue();
+
+    $log = IntegrationLog::where('integration_id', $this->integration->id)
+        ->where('loggable_id', $colorway->id)
+        ->first();
+    expect($log)->not->toBeNull();
+    expect($log->status)->toBe(IntegrationLogStatus::Error);
+    expect($log->metadata['operation'])->toBe('product_create');
 });
