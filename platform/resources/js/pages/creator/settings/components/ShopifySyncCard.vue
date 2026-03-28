@@ -1,20 +1,13 @@
 <script setup lang="ts">
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
-import UiToggleSwitch from '@/components/ui/UiToggleSwitch.vue';
 import { useToast } from '@/composables/useToast';
-import { computed, onUnmounted, ref, watch } from 'vue';
+import { computed, onUnmounted, ref, watch, type Ref } from 'vue';
 
 interface SyncStepResult {
     created: number;
     updated: number;
     failed: number;
-}
-
-interface SyncError {
-    step: string;
-    message: string;
-    [key: string]: unknown;
 }
 
 interface SyncState {
@@ -27,7 +20,6 @@ interface SyncState {
         collections?: SyncStepResult;
         inventory?: SyncStepResult;
     };
-    errors?: SyncError[];
 }
 
 interface PushSyncState {
@@ -50,32 +42,39 @@ interface RecentError {
 interface Props {
     shopify?: {
         connected: boolean;
-        auto_sync: boolean;
         sync: SyncState;
         push_sync?: PushSyncState;
         recent_errors: RecentError[];
     } | null;
+    shopifyAppUrl?: string | null;
 }
 
 const props = defineProps<Props>();
 
-const { showError, showSuccess } = useToast();
+const { showError } = useToast();
 
 const syncState = ref<SyncState>(props.shopify?.sync ?? { status: 'idle' });
 const pushSyncState = ref<PushSyncState>(
     props.shopify?.push_sync ?? { status: 'idle' },
 );
-const autoSync = ref<boolean>(props.shopify?.auto_sync ?? false);
-const savingAutoSync = ref(false);
-const triggeringPull = ref(false);
+const triggeringPullAll = ref(false);
+const triggeringColorways = ref(false);
+const triggeringCollections = ref(false);
+const triggeringInventory = ref(false);
 const triggeringPush = ref(false);
-const pushErrorsExpanded = ref(false);
 
 let pullPollInterval: ReturnType<typeof setInterval> | null = null;
 let pushPollInterval: ReturnType<typeof setInterval> | null = null;
 
 const isPullRunning = computed(() => syncState.value.status === 'running');
 const isPushRunning = computed(() => pushSyncState.value.status === 'running');
+const isAnyPullTriggering = computed(
+    () =>
+        triggeringPullAll.value ||
+        triggeringColorways.value ||
+        triggeringCollections.value ||
+        triggeringInventory.value,
+);
 
 const pushCurrentStepLabel = computed(() => {
     const step = pushSyncState.value.current_step;
@@ -210,10 +209,13 @@ onUnmounted(() => {
     stopPushPolling();
 });
 
-async function triggerSync(endpoint: string, label: string): Promise<void> {
-    if (isPullRunning.value || triggeringPull.value) return;
+async function triggerPull(
+    endpoint: string,
+    triggeringRef: Ref<boolean>,
+): Promise<void> {
+    if (isPullRunning.value || isAnyPullTriggering.value) return;
 
-    triggeringPull.value = true;
+    triggeringRef.value = true;
 
     try {
         const response = await fetch(endpoint, {
@@ -236,21 +238,17 @@ async function triggerSync(endpoint: string, label: string): Promise<void> {
             const payload = (await response.json().catch(() => null)) as {
                 message?: string;
             } | null;
-            throw new Error(
-                payload?.message ?? `Could not start ${label} sync.`,
-            );
+            throw new Error(payload?.message ?? 'Could not start sync.');
         }
 
         const data = (await response.json()) as { sync: SyncState };
         syncState.value = data.sync ?? { status: 'running' };
     } catch (error) {
         const message =
-            error instanceof Error
-                ? error.message
-                : `Could not start ${label} sync.`;
+            error instanceof Error ? error.message : 'Could not start sync.';
         showError(message);
     } finally {
-        triggeringPull.value = false;
+        triggeringRef.value = false;
     }
 }
 
@@ -298,42 +296,23 @@ async function triggerPushAll(): Promise<void> {
     }
 }
 
-async function saveAutoSync(value: boolean): Promise<void> {
-    savingAutoSync.value = true;
-    try {
-        const response = await fetch('/creator/shopify/settings', {
-            method: 'PATCH',
-            credentials: 'same-origin',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': getCsrfToken(),
-            },
-            body: JSON.stringify({ auto_sync: value }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Could not save auto-sync setting.');
-        }
-
-        autoSync.value = value;
-        showSuccess(value ? 'Auto-sync enabled.' : 'Auto-sync disabled.');
-    } catch (error) {
-        const message =
-            error instanceof Error
-                ? error.message
-                : 'Could not save auto-sync setting.';
-        showError(message);
-        // Revert toggle on failure
-        autoSync.value = !value;
-    } finally {
-        savingAutoSync.value = false;
-    }
+function pullAll(): void {
+    void triggerPull('/creator/shopify/sync/all', triggeringPullAll);
 }
 
-function syncInventory(): void {
-    void triggerSync('/creator/shopify/sync/inventory', 'inventory');
+function pullColorways(): void {
+    void triggerPull('/creator/shopify/sync/products', triggeringColorways);
+}
+
+function pullCollections(): void {
+    void triggerPull(
+        '/creator/shopify/sync/collections',
+        triggeringCollections,
+    );
+}
+
+function pullInventory(): void {
+    void triggerPull('/creator/shopify/sync/inventory', triggeringInventory);
 }
 
 function formatStepCount(result: SyncStepResult): string {
@@ -343,220 +322,106 @@ function formatStepCount(result: SyncStepResult): string {
 </script>
 
 <template>
-    <UiCard>
-        <template #title>Shopify Sync</template>
-        <template #subtitle>
-            Push your catalog to Shopify and reconcile inventory
-        </template>
-        <template #content>
-            <div class="flex flex-col gap-5">
-                <!-- Not connected notice -->
-                <div
-                    v-if="!shopify?.connected"
-                    class="rounded-lg border border-surface-200 bg-surface-50 p-4 text-sm text-surface-500"
-                >
-                    Connect your Shopify store to enable sync controls.
-                </div>
+    <div class="flex flex-col gap-4">
+        <!-- Not connected: onboarding card -->
+        <UiCard v-if="!shopify?.connected">
+            <template #title>Shopify Sync</template>
+            <template #content>
+                <div class="flex flex-col gap-5">
+                    <p class="text-sm text-surface-600">
+                        Connect Fibermade to your Shopify store to keep your
+                        yarn catalog, collections, and inventory in sync.
+                        Changes you make in Fibermade are automatically pushed
+                        to Shopify — no manual updates needed.
+                    </p>
 
-                <template v-else>
-                    <!-- Auto-sync toggle -->
-                    <div class="flex items-center justify-between gap-4">
-                        <div>
-                            <p
-                                class="text-sm font-medium text-surface-900 dark:text-surface-100"
+                    <ol class="flex flex-col gap-3 text-sm text-surface-700">
+                        <li class="flex gap-3">
+                            <span
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700"
+                                >1</span
                             >
-                                Auto-sync
-                            </p>
-                            <p class="text-muted-foreground text-xs">
-                                Automatically push changes to Shopify when
-                                catalog items are updated
-                            </p>
-                        </div>
-                        <UiToggleSwitch
-                            :model-value="autoSync"
-                            :disabled="savingAutoSync"
-                            @update:model-value="saveAutoSync"
-                        />
-                    </div>
-
-                    <div
-                        class="border-t border-surface-200 dark:border-surface-700"
-                    />
-
-                    <!-- Push to Shopify section -->
-                    <div class="flex flex-col gap-3">
-                        <div>
-                            <p
-                                class="text-sm font-medium text-surface-900 dark:text-surface-100"
+                            <span
+                                >Copy your
+                                <strong>Fibermade Connect Token</strong> from
+                                the Shopify Connection card on the right.</span
                             >
-                                Push all to Shopify
-                            </p>
-                            <p class="mt-0.5 text-xs text-surface-500">
-                                This will overwrite all product data in your
-                                Shopify store with current Fibermade values.
-                            </p>
-                        </div>
+                        </li>
+                        <li class="flex gap-3">
+                            <span
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700"
+                                >2</span
+                            >
+                            <span
+                                >Install the <strong>Fibermade app</strong> from
+                                the Shopify App Store using the link
+                                below.</span
+                            >
+                        </li>
+                        <li class="flex gap-3">
+                            <span
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700"
+                                >3</span
+                            >
+                            <span
+                                >Open the app in Shopify and paste your Connect
+                                Token to link your accounts.</span
+                            >
+                        </li>
+                        <li class="flex gap-3">
+                            <span
+                                class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-semibold text-primary-700"
+                                >4</span
+                            >
+                            <span
+                                >Return here and use the sync controls to pull
+                                your existing Shopify products into
+                                Fibermade.</span
+                            >
+                        </li>
+                    </ol>
 
-                        <!-- Push running state -->
-                        <div v-if="isPushRunning" class="flex items-center gap-3">
+                    <div v-if="shopifyAppUrl">
+                        <a
+                            :href="shopifyAppUrl"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline"
+                        >
+                            Get the Fibermade Shopify App
                             <svg
-                                class="h-4 w-4 shrink-0 animate-spin text-primary-500"
+                                class="h-3.5 w-3.5"
                                 fill="none"
                                 viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2"
                             >
-                                <circle
-                                    class="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    stroke-width="4"
-                                />
                                 <path
-                                    class="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
                                 />
                             </svg>
-                            <span
-                                class="text-sm text-surface-700 dark:text-surface-300"
-                            >
-                                {{ pushCurrentStepLabel }}
-                            </span>
-                        </div>
-
-                        <UiButton
-                            :disabled="isPushRunning || triggeringPush"
-                            :loading="triggeringPush && !isPushRunning"
-                            @click="triggerPushAll"
-                        >
-                            Push All to Shopify
-                        </UiButton>
-
-                        <!-- Push last result -->
-                        <div
-                            v-if="
-                                pushSyncState.status === 'complete' ||
-                                pushSyncState.status === 'failed'
-                            "
-                            class="flex flex-col gap-2 rounded-lg border border-surface-200 bg-surface-50 p-3 dark:border-surface-700 dark:bg-surface-800"
-                        >
-                            <div class="flex items-center justify-between gap-2">
-                                <p
-                                    class="text-xs font-medium text-surface-700 dark:text-surface-300"
-                                >
-                                    Last push
-                                </p>
-                                <span
-                                    v-if="pushSyncState.status === 'failed'"
-                                    class="text-xs font-medium text-red-600 dark:text-red-400"
-                                >
-                                    Failed
-                                </span>
-                            </div>
-
-                            <p
-                                v-if="pushCompletedAt"
-                                class="text-muted-foreground text-xs"
-                            >
-                                {{ pushCompletedAt }}
-                            </p>
-
-                            <div
-                                v-if="pushLastResult"
-                                class="flex flex-col gap-1"
-                            >
-                                <div
-                                    v-if="pushLastResult.colorways"
-                                    class="flex justify-between text-xs"
-                                >
-                                    <span
-                                        class="text-surface-600 dark:text-surface-400"
-                                        >Colorways</span
-                                    >
-                                    <span
-                                        class="text-surface-800 dark:text-surface-200"
-                                    >
-                                        {{
-                                            formatStepCount(
-                                                pushLastResult.colorways,
-                                            )
-                                        }}
-                                    </span>
-                                </div>
-                                <div
-                                    v-if="pushLastResult.collections"
-                                    class="flex justify-between text-xs"
-                                >
-                                    <span
-                                        class="text-surface-600 dark:text-surface-400"
-                                        >Collections</span
-                                    >
-                                    <span
-                                        class="text-surface-800 dark:text-surface-200"
-                                    >
-                                        {{
-                                            formatStepCount(
-                                                pushLastResult.collections,
-                                            )
-                                        }}
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Error count + expand -->
-                            <div v-if="pushErrorCount > 0">
-                                <button
-                                    type="button"
-                                    class="flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                                    @click="pushErrorsExpanded = !pushErrorsExpanded"
-                                >
-                                    {{ pushErrorCount }}
-                                    {{
-                                        pushErrorCount === 1
-                                            ? 'error'
-                                            : 'errors'
-                                    }}
-                                    <svg
-                                        class="h-3 w-3 transition-transform"
-                                        :class="{
-                                            'rotate-180': pushErrorsExpanded,
-                                        }"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                        </a>
                     </div>
+                </div>
+            </template>
+        </UiCard>
 
-                    <div
-                        class="border-t border-surface-200 dark:border-surface-700"
-                    />
+        <template v-else>
+            <!-- Main Shopify Sync card -->
+            <UiCard>
+                <template #title>Shopify Sync</template>
+                <template #content>
+                    <div class="flex flex-col gap-4">
+                        <p class="text-sm text-surface-600">
+                            Fibermade is your source of truth. When you update a
+                            colorway or collection in Fibermade it's
+                            automatically pushed to Shopify, and inventory is
+                            kept in sync across both platforms — avoid making
+                            product changes directly in Shopify.
+                        </p>
 
-                    <!-- Reconcile inventory from Shopify -->
-                    <div class="flex flex-col gap-3">
-                        <div>
-                            <p
-                                class="text-sm font-medium text-surface-900 dark:text-surface-100"
-                            >
-                                Reconcile inventory
-                            </p>
-                            <p class="mt-0.5 text-xs text-surface-500">
-                                Import inventory quantities from Shopify to
-                                account for customer purchases.
-                            </p>
-                        </div>
-
-                        <!-- Inventory sync running state -->
                         <div
                             v-if="isPullRunning"
                             class="flex items-center gap-3"
@@ -580,48 +445,256 @@ function formatStepCount(result: SyncStepResult): string {
                                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                                 />
                             </svg>
-                            <span
-                                class="text-sm text-surface-700 dark:text-surface-300"
-                            >
-                                Syncing inventory...
+                            <span class="text-sm text-surface-700">
+                                Pulling from Shopify...
                             </span>
                         </div>
 
                         <UiButton
-                            severity="secondary"
-                            :disabled="isPullRunning || triggeringPull"
-                            :loading="triggeringPull && !isPullRunning"
-                            @click="syncInventory"
+                            :disabled="isPullRunning || isAnyPullTriggering"
+                            :loading="triggeringPullAll && !isPullRunning"
+                            @click="pullAll"
                         >
-                            Reconcile Inventory from Shopify
+                            Pull All from Shopify
                         </UiButton>
                     </div>
+                </template>
+            </UiCard>
 
-                    <!-- Recent integration log errors -->
-                    <div
-                        v-if="
-                            shopify.recent_errors &&
-                            shopify.recent_errors.length > 0
-                        "
-                        class="flex flex-col gap-2"
-                    >
-                        <p
-                            class="text-xs font-medium text-surface-700 dark:text-surface-300"
-                        >
-                            Recent errors
-                        </p>
-                        <ul class="flex flex-col gap-1">
-                            <li
-                                v-for="err in shopify.recent_errors"
-                                :key="err.id"
-                                class="rounded bg-red-50 px-2 py-1 text-xs text-red-700 dark:bg-red-900/20 dark:text-red-300"
+            <!-- Pull colorways card -->
+            <UiCard>
+                <template #content>
+                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
+                        <div>
+                            <p class="text-sm text-surface-700">
+                                Import colorway and product data from your
+                                Shopify store into Fibermade.
+                            </p>
+                            <p class="mt-1 text-xs text-amber-600">
+                                This will overwrite existing colorway data in
+                                Fibermade with values from Shopify.
+                            </p>
+                        </div>
+                        <div class="flex justify-end">
+                            <UiButton
+                                outlined
+                                :disabled="isPullRunning || isAnyPullTriggering"
+                                :loading="triggeringColorways && !isPullRunning"
+                                @click="pullColorways"
                             >
-                                {{ err.message }}
-                            </li>
-                        </ul>
+                                Pull Colorways
+                            </UiButton>
+                        </div>
                     </div>
                 </template>
+            </UiCard>
+
+            <!-- Pull collections card -->
+            <UiCard>
+                <template #content>
+                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
+                        <div>
+                            <p class="text-sm text-surface-700">
+                                Import collections from Shopify to match your
+                                Fibermade catalog structure.
+                            </p>
+                            <p class="mt-1 text-xs text-amber-600">
+                                This will overwrite existing collection data in
+                                Fibermade with values from Shopify.
+                            </p>
+                        </div>
+                        <div class="flex justify-end">
+                            <UiButton
+                                outlined
+                                :disabled="isPullRunning || isAnyPullTriggering"
+                                :loading="
+                                    triggeringCollections && !isPullRunning
+                                "
+                                @click="pullCollections"
+                            >
+                                Pull Collections
+                            </UiButton>
+                        </div>
+                    </div>
+                </template>
+            </UiCard>
+
+            <!-- Pull inventory card -->
+            <UiCard>
+                <template #content>
+                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
+                        <div>
+                            <p class="text-sm text-surface-700">
+                                Import current inventory quantities from Shopify
+                                to account for customer purchases made in your
+                                store.
+                            </p>
+                        </div>
+                        <div class="flex justify-end">
+                            <UiButton
+                                outlined
+                                :disabled="isPullRunning || isAnyPullTriggering"
+                                :loading="triggeringInventory && !isPullRunning"
+                                @click="pullInventory"
+                            >
+                                Pull Inventory
+                            </UiButton>
+                        </div>
+                    </div>
+                </template>
+            </UiCard>
+
+            <!-- Push all to Shopify card -->
+            <UiCard>
+                <template #content>
+                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
+                        <div class="flex flex-col gap-2">
+                            <p class="text-sm text-surface-700">
+                                Push all Fibermade product data — colorways,
+                                bases, and collections — to your Shopify store.
+                            </p>
+                            <p class="text-xs text-amber-600">
+                                This will overwrite all product data in your
+                                Shopify store with current Fibermade values.
+                            </p>
+
+                            <!-- Push last result -->
+                            <div
+                                v-if="
+                                    pushSyncState.status === 'complete' ||
+                                    pushSyncState.status === 'failed'
+                                "
+                                class="rounded-lg border border-surface-200 bg-surface-50 p-3"
+                            >
+                                <div
+                                    class="flex items-center justify-between gap-2"
+                                >
+                                    <p
+                                        class="text-xs font-medium text-surface-700"
+                                    >
+                                        Last push
+                                    </p>
+                                    <span
+                                        v-if="pushSyncState.status === 'failed'"
+                                        class="text-xs font-medium text-red-600"
+                                    >
+                                        Failed
+                                    </span>
+                                </div>
+                                <p
+                                    v-if="pushCompletedAt"
+                                    class="text-muted-foreground mt-0.5 text-xs"
+                                >
+                                    {{ pushCompletedAt }}
+                                </p>
+                                <div
+                                    v-if="pushLastResult"
+                                    class="mt-2 flex flex-col gap-1"
+                                >
+                                    <div
+                                        v-if="pushLastResult.colorways"
+                                        class="flex justify-between text-xs"
+                                    >
+                                        <span class="text-surface-600"
+                                            >Colorways</span
+                                        >
+                                        <span class="text-surface-800">
+                                            {{
+                                                formatStepCount(
+                                                    pushLastResult.colorways,
+                                                )
+                                            }}
+                                        </span>
+                                    </div>
+                                    <div
+                                        v-if="pushLastResult.collections"
+                                        class="flex justify-between text-xs"
+                                    >
+                                        <span class="text-surface-600"
+                                            >Collections</span
+                                        >
+                                        <span class="text-surface-800">
+                                            {{
+                                                formatStepCount(
+                                                    pushLastResult.collections,
+                                                )
+                                            }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <p
+                                    v-if="pushErrorCount > 0"
+                                    class="mt-1 text-xs font-medium text-red-600"
+                                >
+                                    {{ pushErrorCount }}
+                                    {{
+                                        pushErrorCount === 1
+                                            ? 'error'
+                                            : 'errors'
+                                    }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col items-end gap-3">
+                            <div
+                                v-if="isPushRunning"
+                                class="flex items-center gap-2"
+                            >
+                                <svg
+                                    class="h-4 w-4 shrink-0 animate-spin text-primary-500"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    />
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                    />
+                                </svg>
+                                <span class="text-sm text-surface-700">
+                                    {{ pushCurrentStepLabel }}
+                                </span>
+                            </div>
+                            <UiButton
+                                outlined
+                                :disabled="isPushRunning || triggeringPush"
+                                :loading="triggeringPush && !isPushRunning"
+                                @click="triggerPushAll"
+                            >
+                                Push All to Shopify
+                            </UiButton>
+                        </div>
+                    </div>
+                </template>
+            </UiCard>
+
+            <!-- Recent integration log errors -->
+            <div
+                v-if="shopify.recent_errors && shopify.recent_errors.length > 0"
+                class="flex flex-col gap-2"
+            >
+                <p class="text-xs font-medium text-surface-700">
+                    Recent errors
+                </p>
+                <ul class="flex flex-col gap-1">
+                    <li
+                        v-for="err in shopify.recent_errors"
+                        :key="err.id"
+                        class="rounded bg-red-50 px-2 py-1 text-xs text-red-700"
+                    >
+                        {{ err.message }}
+                    </li>
+                </ul>
             </div>
         </template>
-    </UiCard>
+    </div>
 </template>

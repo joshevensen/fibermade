@@ -48,7 +48,7 @@ function openDialog(): void {
         >
         <template #content>
             <div
-                class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10"
+                class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4"
             >
                 <div class="relative space-y-0.5 text-red-600">
                     <p class="font-medium">Warning</p>
@@ -77,7 +77,7 @@ function openDialog(): void {
         @update:visible="(value: boolean) => (dialogVisible = value)"
     >
         <UiForm :initialValues="{ password: '' }" @submit="onSubmit">
-            <p class="mb-6 text-neutral-600 dark:text-neutral-400">
+            <p class="mb-6 text-neutral-600">
                 Once your account is deleted, all of its resources and data will
                 also be permanently deleted. Please enter your password to
                 confirm you would like to permanently delete your account.

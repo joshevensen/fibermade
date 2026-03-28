@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import UiButton from '@/components/ui/UiButton.vue';
 import UiTabPanel from '@/components/ui/UiTabPanel.vue';
 import UiTabs from '@/components/ui/UiTabs.vue';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
@@ -11,6 +10,7 @@ import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
 import PasswordForm from './components/PasswordForm.vue';
 import ProfileForm from './components/ProfileForm.vue';
 import ShopifyConnectionCard from './components/ShopifyConnectionCard.vue';
+import ShopifySettingsCard from './components/ShopifySettingsCard.vue';
 import ShopifySyncCard from './components/ShopifySyncCard.vue';
 
 const page = usePage();
@@ -141,32 +141,11 @@ watch(
     },
 );
 
-const refreshing = ref(false);
-
-function refreshShopifyStatus(): void {
-    refreshing.value = true;
-    router.reload({
-        only: ['shopify'],
-        onFinish: () => {
-            refreshing.value = false;
-        },
-    });
-}
+const shopifyAppUrl = page.props.shopify_app_url as string | null | undefined;
 </script>
 
 <template>
     <CreatorLayout page-title="Settings">
-        <template v-if="activeTab === 'shopify-api'" #header-actions>
-            <UiButton
-                severity="secondary"
-                size="small"
-                :loading="refreshing"
-                @click="refreshShopifyStatus"
-            >
-                Refresh status
-            </UiButton>
-        </template>
-
         <UiTabs :value="activeTab" :tabs="tabs" @update:value="handleTabChange">
             <UiTabPanel value="profile">
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -190,12 +169,21 @@ function refreshShopifyStatus(): void {
             <UiTabPanel value="shopify-api">
                 <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
                     <div class="lg:col-span-2">
-                        <ShopifySyncCard :shopify="shopify" />
+                        <ShopifySyncCard
+                            :shopify="shopify"
+                            :shopify-app-url="shopifyAppUrl"
+                        />
                     </div>
-                    <ShopifyConnectionCard
-                        :shopify="shopify"
-                        :connect-token="shopify?.connect_token"
-                    />
+                    <div class="flex flex-col gap-4">
+                        <ShopifyConnectionCard
+                            :shopify="shopify"
+                            :connect-token="shopify?.connect_token"
+                        />
+                        <ShopifySettingsCard
+                            v-if="shopify?.connected"
+                            :shopify="shopify"
+                        />
+                    </div>
                 </div>
             </UiTabPanel>
         </UiTabs>

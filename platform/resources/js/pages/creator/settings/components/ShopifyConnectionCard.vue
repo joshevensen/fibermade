@@ -2,6 +2,7 @@
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import { useToast } from '@/composables/useToast';
+import { router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Props {
@@ -23,6 +24,17 @@ const displayToken = ref<string | null>(
 );
 const confirmingReset = ref(false);
 const resetting = ref(false);
+const refreshing = ref(false);
+
+function refreshStatus(): void {
+    refreshing.value = true;
+    router.reload({
+        only: ['shopify'],
+        onFinish: () => {
+            refreshing.value = false;
+        },
+    });
+}
 
 const connectedSinceFormatted = computed(() => {
     const d = props.shopify?.connected_since;
@@ -184,39 +196,54 @@ async function resetToken(): Promise<void> {
                         Paste this into the Shopify app to connect your store.
                     </p>
 
-                    <!-- Reset token -->
-                    <div v-if="!confirmingReset">
+                    <!-- Reset token + Refresh status -->
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <div v-if="!confirmingReset">
+                                <button
+                                    type="button"
+                                    class="text-xs text-red-600 underline hover:text-red-700"
+                                    @click="confirmingReset = true"
+                                >
+                                    Reset token
+                                </button>
+                            </div>
+
+                            <div v-else class="flex flex-col gap-2">
+                                <p class="text-xs text-surface-600">
+                                    This will disconnect any stores currently
+                                    linked with this token. Are you sure?
+                                </p>
+                                <div class="flex gap-2">
+                                    <UiButton
+                                        severity="danger"
+                                        size="small"
+                                        :loading="resetting"
+                                        @click="resetToken"
+                                    >
+                                        Yes, reset
+                                    </UiButton>
+                                    <UiButton
+                                        severity="secondary"
+                                        size="small"
+                                        @click="confirmingReset = false"
+                                    >
+                                        Cancel
+                                    </UiButton>
+                                </div>
+                            </div>
+                        </div>
+
                         <button
                             type="button"
-                            class="text-xs text-red-600 underline hover:text-red-700"
-                            @click="confirmingReset = true"
+                            class="shrink-0 text-xs text-primary-600 hover:text-primary-700 disabled:opacity-50"
+                            :disabled="refreshing"
+                            @click="refreshStatus"
                         >
-                            Reset token
+                            {{
+                                refreshing ? 'Refreshing...' : 'Refresh status'
+                            }}
                         </button>
-                    </div>
-
-                    <div v-else class="flex flex-col gap-2">
-                        <p class="text-xs text-surface-600">
-                            This will disconnect any stores currently linked
-                            with this token. Are you sure?
-                        </p>
-                        <div class="flex gap-2">
-                            <UiButton
-                                severity="danger"
-                                size="small"
-                                :loading="resetting"
-                                @click="resetToken"
-                            >
-                                Yes, reset
-                            </UiButton>
-                            <UiButton
-                                severity="secondary"
-                                size="small"
-                                @click="confirmingReset = false"
-                            >
-                                Cancel
-                            </UiButton>
-                        </div>
                     </div>
                 </div>
             </div>

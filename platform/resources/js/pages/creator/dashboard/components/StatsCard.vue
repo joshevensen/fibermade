@@ -16,7 +16,7 @@ defineProps<Props>();
 <template>
     <Link :href="href" class="block">
         <UiCard
-            class="transition-colors focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-200 hover:border-primary-300 hover:bg-surface-50 dark:focus-within:ring-primary-900 dark:hover:bg-surface-100"
+            class="transition-colors focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-200 hover:border-primary-300 hover:bg-surface-50"
             tabindex="-1"
         >
             <template #content>

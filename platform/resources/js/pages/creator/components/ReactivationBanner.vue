@@ -31,10 +31,10 @@ function goToReactivate(): void {
 <template>
     <div
         v-if="showBanner"
-        class="flex flex-wrap items-center justify-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-950/40"
+        class="flex flex-wrap items-center justify-center gap-3 border-b border-amber-200 bg-amber-50 px-4 py-3"
         role="alert"
     >
-        <p class="text-amber-900 dark:text-amber-100">
+        <p class="text-amber-900">
             Your subscription has ended.
             <template v-if="daysRemaining !== null">
                 {{ daysRemaining }}

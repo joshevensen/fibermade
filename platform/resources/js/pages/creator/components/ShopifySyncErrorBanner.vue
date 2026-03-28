@@ -26,10 +26,10 @@ function dismiss(): void {
 <template>
     <div
         v-if="showBanner"
-        class="flex flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3 dark:border-red-800 dark:bg-red-950/40"
+        class="flex flex-wrap items-center justify-between gap-3 border-b border-red-200 bg-red-50 px-4 py-3"
         role="alert"
     >
-        <p class="text-sm text-red-800 dark:text-red-100">
+        <p class="text-sm text-red-800">
             <strong>Shopify sync error</strong> — One or more updates failed to
             sync to your Shopify store. Please contact
             <a
@@ -41,7 +41,7 @@ function dismiss(): void {
         </p>
         <button
             type="button"
-            class="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-200"
+            class="text-red-500 hover:text-red-700"
             aria-label="Dismiss"
             @click="dismiss"
         >

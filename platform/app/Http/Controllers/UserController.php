@@ -66,6 +66,7 @@ class UserController extends Controller
             'dyes' => $dyes,
             'next_billing_date' => $nextBillingDate,
             'shopify' => $shopify,
+            'shopify_app_url' => config('services.shopify.app_url'),
         ]);
     }
 

@@ -38,6 +38,10 @@ npm run format                                         # frontend formatting
 
 Always run `vendor/bin/pint --dirty` before finalizing PHP changes. Always write or update tests — every change needs test coverage.
 
+### Styling
+
+**Dark mode is not supported.** Never add `dark:` Tailwind classes anywhere in the platform. If you find yourself writing `dark:text-*`, `dark:bg-*`, `dark:border-*`, or any other `dark:` variant — stop and remove it.
+
 ### Key Directories
 
 | Path | Purpose |

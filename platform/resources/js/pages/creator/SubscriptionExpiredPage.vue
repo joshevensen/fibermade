@@ -8,7 +8,7 @@ import { Head, router } from '@inertiajs/vue3';
     <Head title="Subscription expired" />
     <CreatorLayout page-title="Subscription expired">
         <div
-            class="flex flex-col gap-6 rounded-lg border border-amber-200 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-950/30"
+            class="flex flex-col gap-6 rounded-lg border border-amber-200 bg-amber-50 p-6"
         >
             <h2 class="text-lg font-semibold">Your subscription has ended</h2>
             <p class="text-muted-foreground">

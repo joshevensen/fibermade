@@ -55,6 +55,7 @@ return [
         'catalog_sync_enabled' => env('SHOPIFY_CATALOG_SYNC_ENABLED', false),
         'max_retries' => (int) env('SHOPIFY_API_MAX_RETRIES', 3),
         'initial_backoff_ms' => (int) env('SHOPIFY_API_INITIAL_BACKOFF_MS', 1000),
+        'app_url' => env('SHOPIFY_APP_URL'),
     ],
 
 ];

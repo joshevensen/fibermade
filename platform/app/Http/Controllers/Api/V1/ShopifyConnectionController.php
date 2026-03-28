@@ -38,7 +38,7 @@ class ShopifyConnectionController extends ApiController
             'account_id' => $account->id,
             'type' => IntegrationType::Shopify,
             'credentials' => $validated['shopify_access_token'],
-            'settings' => ['shop' => $validated['shop']],
+            'settings' => ['shop' => $validated['shop'], 'auto_sync' => true],
             'active' => true,
         ]);
 
