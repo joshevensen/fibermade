@@ -47,8 +47,8 @@ defineEmits<{
             <UiImage
                 :src="props.image.src"
                 :alt="props.image.alt"
-                class="h-14 w-14 overflow-hidden rounded"
-                image-class="h-full w-full object-cover"
+                class="overflow-hidden rounded"
+                image-class="h-14 w-14 object-cover"
             >
                 <template #placeholder>
                     <span class="text-xs text-surface-400">—</span>
