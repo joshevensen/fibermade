@@ -214,6 +214,48 @@ export const action = async ({ request }: ActionFunctionArgs): Promise<ConnectAc
   return { intent: "disconnect", success: false, error: "Invalid intent." };
 };
 
+function HeroSection({ fibermadeUrl, cta }: { fibermadeUrl: string; cta: "login" | "register" | null }) {
+  return (
+    <s-section>
+      <s-stack direction="block" gap="large">
+        <s-heading>Shopify wasn&apos;t built for yarn. Fibermade fixes that.</s-heading>
+
+        <s-unordered-list>
+          <s-list-item>Add wholesale capabilities to your Shopify store</s-list-item>
+          <s-list-item>Use the terms that make sense to you: colorways, bases, etc</s-list-item>
+          <s-list-item>Changes in Fibermade are automatically pushed to Shopify</s-list-item>
+        </s-unordered-list>
+
+        {fibermadeUrl && cta === "login" && (
+          <s-button variant="primary" href={`${fibermadeUrl}/creator`} target="_blank">
+            Login to Fibermade
+          </s-button>
+        )}
+        {fibermadeUrl && cta === "register" && (
+          <s-button variant="primary" href={`${fibermadeUrl}/register`} target="_blank">
+            Sign up for Fibermade
+          </s-button>
+        )}
+      </s-stack>
+    </s-section>
+  );
+}
+
+function LegalSection({ fibermadeUrl }: { fibermadeUrl: string }) {
+  return (
+    <s-section>
+      <s-stack>
+        <s-paragraph>
+          Shopify uses this account to sync with Fibermade. View Fibermade&apos;s{" "}
+          <a href={`${fibermadeUrl}/terms`} target="_blank" rel="noreferrer">terms of service</a>
+          {" "}and{" "}
+          <a href={`${fibermadeUrl}/privacy`} target="_blank" rel="noreferrer">privacy policy</a>.
+        </s-paragraph>
+      </s-stack>
+    </s-section>
+  );
+}
+
 export default function Index() {
   const loaderData = useLoaderData<typeof loader>();
   const fetcher = useFetcher<ConnectActionData>();
@@ -269,36 +311,7 @@ export default function Index() {
   if (connected) {
     return (
       <s-page heading="Fibermade">
-        <div style={{ display: "flex", alignItems: "flex-center", alignContent: 'center', marginBottom: "10px" }}>
-            <img
-              src="/logo.png"
-              alt="Fibermade"
-              style={{ width: "200px", display: "block" }}
-            />
-        </div>
-        <s-section>
-          <s-stack direction="block" gap="large">
-            <s-heading>Shopify wasn&apos;t built for yarn. Fibermade fixes that.</s-heading>
-            
-            <s-unordered-list>
-              <s-list-item>Add wholesale capabilities to your Shopify store</s-list-item>
-              <s-list-item>Use the terms that make sense to you: colorways, bases, etc</s-list-item>
-              <s-list-item>Changes in Fibermade are automatically pushed to Shopify</s-list-item>
-            </s-unordered-list>
-
-            {fibermadeUrl && (
-              <s-paragraph>
-                <a
-                  href={`${fibermadeUrl}/creator`}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Login to Fibermade
-                </a>
-              </s-paragraph>
-            )}
-          </s-stack>
-        </s-section>
+        <HeroSection fibermadeUrl={fibermadeUrl} cta="login" />
 
         <s-section heading="Connected to Fibermade">
           {disconnectError && (
@@ -323,19 +336,7 @@ export default function Index() {
           </s-stack>
         </s-section>
 
-        <s-section>
-          <s-stack>
-            <s-paragraph>
-              Shopify uses this account to sync with Fibermade. View Fibermade&apos;s <a 
-                href={`${fibermadeUrl}/terms`}
-                target="_blank"
-                rel="noreferrer">terms of service</a> and <a
-                href={`${fibermadeUrl}/privacy`}
-                target="_blank"
-                rel="noreferrer">privacy policy</a>.
-            </s-paragraph>
-          </s-stack>
-        </s-section>
+        <LegalSection fibermadeUrl={fibermadeUrl} />
 
         <s-modal id="disconnect-modal" heading="Disconnect from Fibermade">
           <s-paragraph>
@@ -368,11 +369,6 @@ export default function Index() {
     return (
       <s-page heading="Fibermade">
         <s-section>
-          <img
-            src="/logo.png"
-            alt="Fibermade"
-            style={{ width: "200px", marginBottom: "12px", display: "block" }}
-          />
           <s-banner
             heading="Integration deactivated"
             tone="critical"
@@ -392,39 +388,15 @@ export default function Index() {
             Disconnect
           </s-button>
         </s-section>
+
+        <LegalSection fibermadeUrl={fibermadeUrl} />
       </s-page>
     );
   }
 
   return (
     <s-page heading="Fibermade">
-      <div style={{ display: "flex", alignItems: "flex-center", alignContent: 'center', marginBottom: "10px" }}>
-          <img
-            src="/logo.png"
-            alt="Fibermade"
-            style={{ width: "200px", display: "block" }}
-          />
-      </div>
-
-      <s-section>
-        <s-stack direction="block" gap="large">
-          <s-heading>Shopify wasn&apos;t built for yarn. Fibermade fixes that.</s-heading>
-
-          <s-unordered-list>
-            <s-list-item>Add wholesale capabilities to your Shopify store</s-list-item>
-            <s-list-item>Use the terms that make sense to you: colorways, bases, etc</s-list-item>
-            <s-list-item>Changes in Fibermade are automatically pushed to Shopify</s-list-item>
-          </s-unordered-list>
-
-          {fibermadeUrl && (
-            <s-paragraph>
-              <a href={`${fibermadeUrl}/register`} target="_blank" rel="noreferrer">
-                Sign up for Fibermade
-              </a>
-            </s-paragraph>
-          )}
-        </s-stack>
-      </s-section>
+      <HeroSection fibermadeUrl={fibermadeUrl} cta="register" />
 
       <s-section heading="Connect Fibermade to Shopify">
         {connectError && (
@@ -491,19 +463,7 @@ export default function Index() {
         </s-stack>
       </s-section>
 
-      <s-section>
-        <s-stack>
-          <s-paragraph>
-            Shopify uses this account to sync with Fibermade. View Fibermade&apos;s <a 
-              href={`${fibermadeUrl}/terms`}
-              target="_blank"
-              rel="noreferrer">terms of service</a> and <a
-              href={`${fibermadeUrl}/privacy`}
-              target="_blank"
-              rel="noreferrer">privacy policy</a>.
-          </s-paragraph>
-        </s-stack>
-      </s-section>
+      <LegalSection fibermadeUrl={fibermadeUrl} />
     </s-page>
   );
 }
