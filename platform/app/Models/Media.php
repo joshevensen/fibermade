@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\MediaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * Represents media files attached to various models.
@@ -22,13 +24,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property array|null $metadata
  * @property int|null $created_by
  * @property int|null $updated_by
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Media extends Model
 {
-    /** @use HasFactory<\Database\Factories\MediaFactory> */
+    /** @use HasFactory<MediaFactory> */
     use HasFactory, SoftDeletes;
 
     /**
@@ -40,6 +42,7 @@ class Media extends Model
         'mediable_type',
         'mediable_id',
         'file_path',
+        'disk',
         'file_name',
         'mime_type',
         'size',

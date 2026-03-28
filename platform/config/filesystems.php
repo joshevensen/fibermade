@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Media Disk
+    |--------------------------------------------------------------------------
+    |
+    | The disk used for user-uploaded and synced media files. Use 'public'
+    | for local/staging (served via storage symlink) and 's3' for production
+    | (DigitalOcean Spaces).
+    |
+    */
+
+    'media_disk' => env('MEDIA_DISK', 'public'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |

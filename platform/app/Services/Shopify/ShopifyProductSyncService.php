@@ -13,6 +13,9 @@ use App\Models\Integration;
 use App\Models\IntegrationLog;
 use App\Models\Inventory;
 use App\Models\Media;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Pulls Shopify products into Fibermade as Colorways, Bases, and Inventory records.
@@ -283,12 +286,37 @@ class ShopifyProductSyncService
         }
 
         $fileName = basename(parse_url($imageUrl, PHP_URL_PATH));
+        $disk = config('filesystems.media_disk', 'public');
+        $relativePath = "colorways/{$colorway->id}/{$fileName}";
+
+        try {
+            $response = Http::timeout(30)->get($imageUrl);
+
+            if (! $response->successful()) {
+                Log::warning("Shopify image download failed for colorway {$colorway->id}: HTTP {$response->status()}", [
+                    'url' => $imageUrl,
+                ]);
+
+                return;
+            }
+
+            Storage::disk($disk)->put($relativePath, $response->body());
+        } catch (\Throwable $e) {
+            Log::warning("Shopify image download failed for colorway {$colorway->id}: {$e->getMessage()}", [
+                'url' => $imageUrl,
+            ]);
+
+            return;
+        }
 
         Media::create([
             'mediable_type' => Colorway::class,
             'mediable_id' => $colorway->id,
-            'file_path' => $imageUrl,
+            'file_path' => $relativePath,
+            'disk' => $disk,
             'file_name' => $fileName,
+            'mime_type' => $response->header('Content-Type') ?: null,
+            'size' => strlen($response->body()),
             'is_primary' => true,
             'metadata' => [
                 'source' => 'shopify',

@@ -12,6 +12,8 @@ use App\Models\Inventory;
 use App\Models\Media;
 use App\Services\Shopify\ShopifyGraphqlClient;
 use App\Services\Shopify\ShopifyProductSyncService;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -23,7 +25,7 @@ function makeProduct(array $overrides = []): array
         'descriptionHtml' => '<p>Beautiful</p>',
         'status' => 'ACTIVE',
         'handle' => 'ocean-mist',
-        'featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg'],
+        'featuredImage' => null,
         'variants' => [
             [
                 'gid' => 'gid://shopify/ProductVariant/10',
@@ -97,8 +99,12 @@ it('creates ExternalIdentifier mapping for variant to inventory', function () {
     ])->exists())->toBeTrue();
 });
 
-it('stores primary image as Media record', function () {
-    $this->service->syncProduct(makeProduct(), $this->integration);
+it('stores primary image as Media record by downloading and storing on disk', function () {
+    Storage::fake('public');
+    Http::fake(['https://cdn.shopify.com/image.jpg' => Http::response('fake-image-data', 200, ['Content-Type' => 'image/jpeg'])]);
+
+    $product = makeProduct(['featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg']]);
+    $this->service->syncProduct($product, $this->integration);
 
     $colorway = Colorway::first();
     $media = Media::where('mediable_type', Colorway::class)
@@ -107,8 +113,13 @@ it('stores primary image as Media record', function () {
 
     expect($media)->not->toBeNull();
     expect($media->is_primary)->toBeTrue();
-    expect($media->file_path)->toBe('https://cdn.shopify.com/image.jpg');
+    expect($media->disk)->toBe('public');
+    expect($media->file_path)->toBe("colorways/{$colorway->id}/image.jpg");
+    expect($media->file_name)->toBe('image.jpg');
+    expect($media->mime_type)->toBe('image/jpeg');
     expect($media->metadata['source'])->toBe('shopify');
+    expect($media->metadata['original_url'])->toBe('https://cdn.shopify.com/image.jpg');
+    Storage::disk('public')->assertExists("colorways/{$colorway->id}/image.jpg");
 });
 
 it('skips image sync when no featured image URL', function () {
@@ -117,8 +128,21 @@ it('skips image sync when no featured image URL', function () {
     expect(Media::count())->toBe(0);
 });
 
+it('skips image sync when image download fails', function () {
+    Http::fake(['https://cdn.shopify.com/image.jpg' => Http::response('', 404)]);
+
+    $product = makeProduct(['featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg']]);
+    $this->service->syncProduct($product, $this->integration);
+
+    expect(Media::count())->toBe(0);
+});
+
 it('skips creating a second shopify image when one already exists', function () {
-    $this->service->syncProduct(makeProduct(), $this->integration);
+    Storage::fake('public');
+    Http::fake(['https://cdn.shopify.com/image.jpg' => Http::response('fake-image-data', 200)]);
+
+    $product = makeProduct(['featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg']]);
+    $this->service->syncProduct($product, $this->integration);
 
     // Sync a second product for the same colorway — image already present
     $colorway = Colorway::first();

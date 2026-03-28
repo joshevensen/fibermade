@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\Technique;
+use Database\Factories\ColorwayFactory;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -28,21 +30,21 @@ use Illuminate\Support\Facades\Storage;
  * @property int $account_id
  * @property string $name
  * @property string|null $description
- * @property \App\Enums\Technique|null $technique
- * @property \Illuminate\Support\Collection<int, \App\Enums\Color>|null $colors
+ * @property Technique|null $technique
+ * @property \Illuminate\Support\Collection<int, Color>|null $colors
  * @property int $per_pan
  * @property string|null $recipe
  * @property string|null $notes
- * @property \App\Enums\ColorwayStatus $status
+ * @property ColorwayStatus $status
  * @property int|null $created_by
  * @property int|null $updated_by
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Colorway extends Model
 {
-    /** @use HasFactory<\Database\Factories\ColorwayFactory> */
+    /** @use HasFactory<ColorwayFactory> */
     use HasFactory, SoftDeletes;
 
     /**
@@ -150,19 +152,34 @@ class Colorway extends Model
      */
     public function getPrimaryImageUrlAttribute(): ?string
     {
-        $primaryMedia = $this->media()->where('is_primary', true)->first();
+        $media = $this->media()->where('is_primary', true)->first()
+            ?? $this->media()->first();
 
-        if ($primaryMedia) {
-            return Storage::disk('public')->url($primaryMedia->file_path);
+        if (! $media) {
+            return null;
         }
 
-        $firstMedia = $this->media()->first();
+        return $this->resolveMediaUrl($media);
+    }
 
-        if ($firstMedia) {
-            return Storage::disk('public')->url($firstMedia->file_path);
+    /**
+     * Resolve the public URL for a media record.
+     *
+     * New records store a disk name + relative path. Legacy records (synced
+     * before the disk column was added) may have an absolute URL in file_path.
+     */
+    private function resolveMediaUrl(Media $media): string
+    {
+        if ($media->disk) {
+            return Storage::disk($media->disk)->url($media->file_path);
         }
 
-        return null;
+        // Legacy: absolute URL stored directly in file_path
+        if (str_starts_with($media->file_path, 'http')) {
+            return $media->file_path;
+        }
+
+        return Storage::disk('public')->url($media->file_path);
     }
 
     /**
