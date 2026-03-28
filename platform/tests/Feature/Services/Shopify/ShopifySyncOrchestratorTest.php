@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
     $this->integration = Integration::factory()->create([
-        'settings' => ['shop' => 'test.myshopify.com', 'allow_pull_sync' => true],
+        'settings' => ['shop' => 'test.myshopify.com'],
     ]);
     $this->orchestrator = new ShopifySyncOrchestrator;
 });
@@ -158,68 +158,6 @@ it('syncInventory throws SyncAlreadyRunningException when a sync is in progress'
 
     expect(fn () => $this->orchestrator->syncInventory($this->integration))
         ->toThrow(SyncAlreadyRunningException::class);
-});
-
-// ─── Pull sync gating ─────────────────────────────────────────────────────────
-
-it('syncAll does nothing when allow_pull_sync is false (default)', function () {
-    Bus::fake();
-
-    $settings = $this->integration->settings ?? [];
-    $settings['allow_pull_sync'] = false;
-    $this->integration->update(['settings' => $settings]);
-
-    $this->orchestrator->syncAll($this->integration);
-
-    Bus::assertNothingDispatched();
-});
-
-it('syncProducts does nothing when allow_pull_sync is false', function () {
-    Bus::fake();
-
-    $settings = $this->integration->settings ?? [];
-    $settings['allow_pull_sync'] = false;
-    $this->integration->update(['settings' => $settings]);
-
-    $this->orchestrator->syncProducts($this->integration);
-
-    Bus::assertNotDispatched(SyncShopifyProductsJob::class);
-});
-
-it('syncCollections does nothing when allow_pull_sync is false', function () {
-    Bus::fake();
-
-    $settings = $this->integration->settings ?? [];
-    $settings['allow_pull_sync'] = false;
-    $this->integration->update(['settings' => $settings]);
-
-    $this->orchestrator->syncCollections($this->integration);
-
-    Bus::assertNotDispatched(SyncShopifyCollectionsJob::class);
-});
-
-it('syncAll dispatches jobs when allow_pull_sync is explicitly true', function () {
-    Bus::fake();
-
-    $settings = $this->integration->settings ?? [];
-    $settings['allow_pull_sync'] = true;
-    $this->integration->update(['settings' => $settings]);
-
-    $this->orchestrator->syncAll($this->integration);
-
-    Bus::assertChained([
-        SyncShopifyProductsJob::class,
-        SyncShopifyCollectionsJob::class,
-        SyncShopifyInventoryJob::class,
-    ]);
-});
-
-it('syncInventory dispatches regardless of allow_pull_sync (inventory reconciliation is always allowed)', function () {
-    Bus::fake();
-
-    $this->orchestrator->syncInventory($this->integration);
-
-    Bus::assertDispatched(SyncShopifyInventoryJob::class);
 });
 
 it('allows a new sync after a previous sync completed', function () {

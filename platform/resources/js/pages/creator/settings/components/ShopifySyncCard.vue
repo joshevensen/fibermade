@@ -414,14 +414,6 @@ function formatStepCount(result: SyncStepResult): string {
                 <template #title>Shopify Sync</template>
                 <template #content>
                     <div class="flex flex-col gap-4">
-                        <p class="text-sm text-surface-600">
-                            Fibermade is your source of truth. When you update a
-                            colorway or collection in Fibermade it's
-                            automatically pushed to Shopify, and inventory is
-                            kept in sync across both platforms — avoid making
-                            product changes directly in Shopify.
-                        </p>
-
                         <div
                             v-if="isPullRunning"
                             class="flex items-center gap-3"
@@ -450,6 +442,14 @@ function formatStepCount(result: SyncStepResult): string {
                             </span>
                         </div>
 
+                        <p class="text-sm text-surface-600">
+                            Fibermade is your source of truth. When you update a
+                            colorway or collection in Fibermade it's
+                            automatically pushed to Shopify, and inventory is
+                            kept in sync across both platforms — avoid making
+                            product changes directly in Shopify.
+                        </p>
+
                         <UiButton
                             :disabled="isPullRunning || isAnyPullTriggering"
                             :loading="triggeringPullAll && !isPullRunning"
@@ -467,12 +467,12 @@ function formatStepCount(result: SyncStepResult): string {
                     <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
                         <div>
                             <p class="text-sm text-surface-700">
-                                Import colorway and product data from your
+                                Import product (aka colorway) data from your
                                 Shopify store into Fibermade.
-                            </p>
-                            <p class="mt-1 text-xs text-amber-600">
-                                This will overwrite existing colorway data in
-                                Fibermade with values from Shopify.
+                                <strong>
+                                    This will overwrite existing colorway data in
+                                    Fibermade with values from Shopify.
+                                </strong>
                             </p>
                         </div>
                         <div class="flex justify-end">
@@ -497,10 +497,10 @@ function formatStepCount(result: SyncStepResult): string {
                             <p class="text-sm text-surface-700">
                                 Import collections from Shopify to match your
                                 Fibermade catalog structure.
-                            </p>
-                            <p class="mt-1 text-xs text-amber-600">
-                                This will overwrite existing collection data in
-                                Fibermade with values from Shopify.
+                                <strong>
+                                    This will overwrite existing collection data in
+                                    Fibermade with values from Shopify.
+                                </strong>
                             </p>
                         </div>
                         <div class="flex justify-end">
@@ -550,12 +550,12 @@ function formatStepCount(result: SyncStepResult): string {
                     <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
                         <div class="flex flex-col gap-2">
                             <p class="text-sm text-surface-700">
-                                Push all Fibermade product data — colorways,
+                                Push all Fibermade data — colorways,
                                 bases, and collections — to your Shopify store.
-                            </p>
-                            <p class="text-xs text-amber-600">
-                                This will overwrite all product data in your
-                                Shopify store with current Fibermade values.
+                                <strong>
+                                    This will overwrite all product data in your
+                                    Shopify store with current Fibermade values.
+                                </strong>
                             </p>
 
                             <!-- Push last result -->
