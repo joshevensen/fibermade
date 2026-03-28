@@ -26,8 +26,7 @@ use Inertia\Inertia;
 Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscriptionMiddleware::class, EnsureCreatorCanWriteMiddleware::class])->group(function () {
 
     // Dashboard route
-    Route::get('', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('', [DashboardController::class, 'index']);
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
