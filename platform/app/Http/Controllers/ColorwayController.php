@@ -11,12 +11,14 @@ use App\Http\Requests\StoreColorwayMediaRequest;
 use App\Http\Requests\StoreColorwayRequest;
 use App\Http\Requests\UpdateColorwayCollectionsRequest;
 use App\Http\Requests\UpdateColorwayRequest;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
 use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Integration;
 use App\Models\Media;
+use App\Services\InventorySyncService;
+use App\Services\Shopify\ShopifyApiException;
+use App\Services\Shopify\ShopifySyncService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
@@ -256,7 +258,7 @@ class ColorwayController extends Controller
     }
 
     /**
-     * Dispatch a push-to-Shopify job for the given colorway.
+     * Push the colorway to Shopify synchronously and return success or error.
      */
     public function pushToShopify(Colorway $colorway): JsonResponse
     {
@@ -267,12 +269,39 @@ class ColorwayController extends Controller
             ->where('active', true)
             ->first();
 
-        $hasExistingProduct = $integration && $colorway->getExternalIdFor($integration, 'shopify_product');
-        $action = $hasExistingProduct ? 'updated' : 'created';
+        if (! $integration) {
+            return response()->json(['message' => 'No active Shopify integration found.'], 422);
+        }
 
-        SyncColorwayCatalogToShopifyJob::dispatch($colorway, $action);
+        $colorway = $colorway->fresh();
+        $productGid = $colorway->getExternalIdFor($integration, 'shopify_product');
 
-        return response()->json(['message' => 'Push queued.']);
+        try {
+            if (! $productGid) {
+                /** @var InventorySyncService $inventorySyncService */
+                $inventorySyncService = app(InventorySyncService::class);
+                $inventorySyncService->pushAllInventoryForColorway($colorway, $integration, 'manual_push');
+            } else {
+                $client = InventorySyncService::createShopifyClient($integration);
+                if (! $client) {
+                    return response()->json(['message' => 'Shopify is not configured.'], 422);
+                }
+
+                $shopifySync = new ShopifySyncService($client);
+
+                if ($colorway->status === ColorwayStatus::Retired) {
+                    $shopifySync->archiveProduct($productGid);
+                } else {
+                    $shopifySync->updateProduct($colorway, $productGid);
+                }
+            }
+
+            return response()->json(['message' => 'Pushed to Shopify successfully.']);
+        } catch (ShopifyApiException $e) {
+            return response()->json(['message' => $e->getMessage()], 422);
+        } catch (\Throwable $e) {
+            return response()->json(['message' => 'Push failed: '.$e->getMessage()], 500);
+        }
     }
 
     /**

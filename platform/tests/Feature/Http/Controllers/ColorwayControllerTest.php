@@ -4,13 +4,15 @@ use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationType;
 use App\Enums\Technique;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
 use App\Models\Account;
 use App\Models\Colorway;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
 use App\Models\User;
-use Illuminate\Support\Facades\Queue;
+use App\Services\InventorySyncService;
+use Illuminate\Support\Facades\Http;
+
+use function Pest\Laravel\mock;
 
 test('user can create a colorway without slug', function () {
     $account = Account::factory()->create();
@@ -90,12 +92,10 @@ test('store accepts valid Color enum values in colors', function () {
     expect($colorway->colors->map(fn ($c) => $c->value)->all())->toBe(['red', 'blue']);
 });
 
-test('pushToShopify dispatches created action when no existing product mapping', function () {
-    Queue::fake();
-
+test('pushToShopify creates product via InventorySyncService when no existing product mapping', function () {
     $account = Account::factory()->creator()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
-    $integration = Integration::factory()->create([
+    Integration::factory()->create([
         'account_id' => $account->id,
         'type' => IntegrationType::Shopify,
         'active' => true,
@@ -104,16 +104,28 @@ test('pushToShopify dispatches created action when no existing product mapping',
     ]);
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
 
+    $mockService = mock(InventorySyncService::class);
+    $mockService->shouldReceive('pushAllInventoryForColorway')->once()->andReturn([
+        'products_created' => 1, 'variants_created' => 1, 'variants_updated' => 0, 'skipped' => 0,
+    ]);
+
     $response = $this->actingAs($user)->postJson(route('colorways.push-to-shopify', $colorway));
 
     $response->assertOk();
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
-        return $job->colorway->id === $colorway->id && $job->action === 'created';
-    });
+    $response->assertJson(['message' => 'Pushed to Shopify successfully.']);
 });
 
-test('pushToShopify dispatches updated action when product mapping exists', function () {
-    Queue::fake();
+test('pushToShopify updates product via Shopify API when product mapping exists', function () {
+    Http::fake([
+        'test.myshopify.com/*' => Http::response([
+            'data' => [
+                'productUpdate' => [
+                    'product' => ['id' => 'gid://shopify/Product/1'],
+                    'userErrors' => [],
+                ],
+            ],
+        ], 200),
+    ]);
 
     $account = Account::factory()->creator()->create();
     $user = User::factory()->create(['account_id' => $account->id]);
@@ -136,7 +148,5 @@ test('pushToShopify dispatches updated action when product mapping exists', func
     $response = $this->actingAs($user)->postJson(route('colorways.push-to-shopify', $colorway));
 
     $response->assertOk();
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
-        return $job->colorway->id === $colorway->id && $job->action === 'updated';
-    });
+    $response->assertJson(['message' => 'Pushed to Shopify successfully.']);
 });

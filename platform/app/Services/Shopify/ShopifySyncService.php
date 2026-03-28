@@ -178,7 +178,7 @@ class ShopifySyncService
         }
         GQL;
 
-        $optionValues = $variants
+        $optionValues = ! empty($variants)
             ? array_map(fn ($v) => ['name' => $v['optionValues'][0]['name'] ?? 'Default'], $variants)
             : [['name' => 'Default']];
 
@@ -190,7 +190,6 @@ class ShopifySyncService
             'status' => $status,
             'tags' => $tags->unique()->values()->all(),
             'productOptions' => [['name' => 'Base', 'values' => $optionValues]],
-            'variants' => $variants,
         ];
 
         if ($colorway->per_pan > 0) {
@@ -221,6 +220,17 @@ class ShopifySyncService
         $variantIds = collect($product['variants']['edges'] ?? [])
             ->pluck('node.id')
             ->all();
+
+        // Shopify auto-creates variants from productOptions.values with price=0.
+        // Update prices now that we have the variant IDs.
+        if (! empty($variants) && count($variantIds) === count($variants)) {
+            $updateEntries = array_map(fn ($variantId, $variant) => [
+                'variant_gid' => $variantId,
+                'price' => $variant['price'],
+            ], $variantIds, $variants);
+
+            $this->updateVariantPricesBulk($product['id'], $updateEntries);
+        }
 
         return [
             'product_id' => $product['id'],
@@ -386,6 +396,43 @@ class ShopifySyncService
         }
 
         return $map;
+    }
+
+    /**
+     * Update only the price of multiple variants after auto-creation via productOptions.
+     *
+     * @param  array<array{variant_gid: string, price: string}>  $entries
+     *
+     * @throws ShopifyApiException
+     */
+    private function updateVariantPricesBulk(string $productGid, array $entries): void
+    {
+        $mutation = <<<'GQL'
+        mutation productVariantsBulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+          productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+            productVariants { id }
+            userErrors { field message }
+          }
+        }
+        GQL;
+
+        $variants = array_map(fn ($entry) => [
+            'id' => $entry['variant_gid'],
+            'price' => $entry['price'],
+        ], $entries);
+
+        $result = $this->client->request($mutation, [
+            'productId' => $productGid,
+            'variants' => $variants,
+        ]);
+
+        $payload = $result['data']['productVariantsBulkUpdate'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException($message, $userErrors);
+        }
     }
 
     /**

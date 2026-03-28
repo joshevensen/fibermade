@@ -133,12 +133,13 @@ async function handlePushToShopify(): Promise<void> {
                         ?.getAttribute('content') ?? '',
             },
         });
+        const data = await response.json();
         if (!response.ok) {
-            throw new Error('Push failed.');
+            throw new Error(data?.message ?? 'Push failed.');
         }
-        showSuccess('Colorway queued for push to Shopify.');
-    } catch {
-        showError('Could not push to Shopify. Please try again.');
+        showSuccess(data?.message ?? 'Pushed to Shopify successfully.');
+    } catch (error) {
+        showError(error instanceof Error ? error.message : 'Could not push to Shopify. Please try again.');
     } finally {
         pushingToShopify.value = false;
     }
