@@ -2,6 +2,7 @@
 import {
     destroy as destroyCollection,
     index as collectionsIndex,
+    pushToShopify,
     update,
 } from '@/actions/App/Http/Controllers/CollectionController';
 import UiButton from '@/components/ui/UiButton.vue';
@@ -36,11 +37,41 @@ interface Props {
         name: string;
         status: string;
     }>;
+    has_shopify: boolean;
 }
 
 const props = defineProps<Props>();
 const { requireDelete } = useConfirm();
-const { showSuccess } = useToast();
+const { showSuccess, showError } = useToast();
+
+const pushingToShopify = ref(false);
+
+async function handlePushToShopify(): Promise<void> {
+    pushingToShopify.value = true;
+    try {
+        const response = await fetch(pushToShopify.url(props.collection.id), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content') ?? '',
+            },
+        });
+        if (!response.ok) {
+            throw new Error('Push failed.');
+        }
+        showSuccess('Collection queued for push to Shopify.');
+    } catch {
+        showError('Could not push to Shopify. Please try again.');
+    } finally {
+        pushingToShopify.value = false;
+    }
+}
 
 const showColorwayDialog = ref(false);
 const selectedColorwayIds = ref<number[]>([]);
@@ -119,6 +150,15 @@ function handleDelete(event: Event): void {
 <template>
     <CreatorLayout page-title="Edit Collection">
         <template #header-actions>
+            <UiButton
+                v-if="has_shopify"
+                type="button"
+                outlined
+                :loading="pushingToShopify"
+                @click="handlePushToShopify"
+            >
+                Push to Shopify
+            </UiButton>
             <UiButton
                 type="submit"
                 form="collection-form"

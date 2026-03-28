@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers\Creator;
 
+use App\Enums\BaseStatus;
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
 use App\Exceptions\SyncAlreadyRunningException;
 use App\Http\Controllers\Controller;
 use App\Jobs\PushCatalogToShopifyJob;
+use App\Jobs\SyncBaseToShopifyJob;
+use App\Models\Base;
 use App\Models\Integration;
 use App\Services\Shopify\ShopifySyncOrchestrator;
 use Illuminate\Http\JsonResponse;
@@ -51,6 +54,28 @@ class ShopifySyncController extends Controller
     public function syncInventory(Request $request): JsonResponse
     {
         return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->syncInventory($integration));
+    }
+
+    /**
+     * Dispatch update jobs for all active bases to sync variants across all Shopify products.
+     */
+    public function syncBases(Request $request): JsonResponse
+    {
+        $integration = $this->resolveIntegration($request);
+
+        if (! $integration) {
+            return response()->json(['message' => 'No active Shopify integration found.'], 404);
+        }
+
+        $bases = Base::where('account_id', $request->user()->account_id)
+            ->where('status', BaseStatus::Active)
+            ->get();
+
+        foreach ($bases as $base) {
+            SyncBaseToShopifyJob::dispatch($base, 'updated');
+        }
+
+        return response()->json(['message' => 'Base sync queued.', 'count' => $bases->count()], 202);
     }
 
     /**

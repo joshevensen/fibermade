@@ -168,7 +168,7 @@ class Colorway extends Model
      * New records store a disk name + relative path. Legacy records (synced
      * before the disk column was added) may have an absolute URL in file_path.
      */
-    private function resolveMediaUrl(Media $media): string
+    public function resolveMediaUrl(Media $media): string
     {
         if ($media->disk) {
             return Storage::disk($media->disk)->url($media->file_path);

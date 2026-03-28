@@ -44,6 +44,8 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
     // Colorways routes
     Route::patch('colorways/{colorway}/collections', [ColorwayController::class, 'updateCollections'])->name('colorways.collections.update');
     Route::post('colorways/{colorway}/push-to-shopify', [ColorwayController::class, 'pushToShopify'])->name('colorways.push-to-shopify');
+    Route::post('colorways/{colorway}/media', [ColorwayController::class, 'storeMedia'])->name('colorways.media.store');
+    Route::delete('colorways/{colorway}/media/{media}', [ColorwayController::class, 'destroyMedia'])->name('colorways.media.destroy');
     Route::resource('colorways', ColorwayController::class)->except(['create']);
 
     // Bases routes
@@ -64,6 +66,7 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
 
     // Collections routes
     Route::patch('collections/{collection}/colorways', [CollectionController::class, 'updateColorways'])->name('collections.colorways.update');
+    Route::post('collections/{collection}/push-to-shopify', [CollectionController::class, 'pushToShopify'])->name('collections.push-to-shopify');
     Route::resource('collections', CollectionController::class)->except(['create']);
 
     // Media routes
@@ -102,6 +105,7 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
         Route::post('sync/products', [ShopifySyncController::class, 'syncProducts'])->name('sync.products');
         Route::post('sync/collections', [ShopifySyncController::class, 'syncCollections'])->name('sync.collections');
         Route::post('sync/inventory', [ShopifySyncController::class, 'syncInventory'])->name('sync.inventory');
+        Route::post('sync/bases', [ShopifySyncController::class, 'syncBases'])->name('sync.bases');
         Route::get('sync/status', [ShopifySyncController::class, 'status'])->name('sync.status');
         Route::patch('settings', [ShopifySyncController::class, 'updateSettings'])->name('settings.update');
         Route::post('push/all', [ShopifySyncController::class, 'pushAll'])->name('push.all');

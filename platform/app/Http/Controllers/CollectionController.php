@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BaseStatus;
+use App\Enums\IntegrationType;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionColorwaysRequest;
 use App\Http\Requests\UpdateCollectionRequest;
 use App\Jobs\SyncCollectionToShopifyJob;
 use App\Models\Collection;
 use App\Models\Colorway;
+use App\Models\Integration;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -75,10 +78,16 @@ class CollectionController extends Controller
             ? Colorway::orderBy('name')->get()
             : ($user->account_id ? Colorway::where('account_id', $user->account_id)->orderBy('name')->get() : collect());
 
+        $hasShopify = Integration::where('account_id', $collection->account_id)
+            ->where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->exists();
+
         return Inertia::render('creator/collections/CollectionEditPage', [
             'collection' => $collection,
             'colorways' => $collection->colorways,
             'allColorways' => $allColorways,
+            'has_shopify' => $hasShopify,
         ]);
     }
 
@@ -107,6 +116,18 @@ class CollectionController extends Controller
         SyncCollectionToShopifyJob::dispatch($collection, 'updated', $removedIds);
 
         return redirect()->route('collections.edit', $collection)->with('success', 'Colorways updated successfully.');
+    }
+
+    /**
+     * Dispatch a push-to-Shopify job for the given collection.
+     */
+    public function pushToShopify(Collection $collection): JsonResponse
+    {
+        $this->authorize('update', $collection);
+
+        SyncCollectionToShopifyJob::dispatch($collection, 'created');
+
+        return response()->json(['message' => 'Push queued.']);
     }
 
     /**

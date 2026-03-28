@@ -92,6 +92,9 @@ defineOptions({
         :showUploadButton="showUploadButton"
         :showCancelButton="showCancelButton"
     >
+        <template v-if="$slots.content" #content="slotProps">
+            <slot name="content" v-bind="slotProps" />
+        </template>
         <slot />
     </PrimeFileUpload>
 </template>

@@ -7,6 +7,7 @@ use App\Enums\Color;
 use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationType;
 use App\Enums\Technique;
+use App\Http\Requests\StoreColorwayMediaRequest;
 use App\Http\Requests\StoreColorwayRequest;
 use App\Http\Requests\UpdateColorwayCollectionsRequest;
 use App\Http\Requests\UpdateColorwayRequest;
@@ -15,8 +16,10 @@ use App\Models\Base;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Integration;
+use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -147,7 +150,7 @@ class ColorwayController extends Controller
     {
         $this->authorize('view', $colorway);
 
-        $colorway->load(['collections', 'inventories', 'externalIdentifiers.integration']);
+        $colorway->load(['collections', 'inventories', 'externalIdentifiers.integration', 'media']);
 
         $user = auth()->user();
         $allCollections = $user->is_admin
@@ -211,6 +214,12 @@ class ColorwayController extends Controller
             ->where('active', true)
             ->exists();
 
+        $mediaData = $colorway->media->map(fn ($media) => [
+            'id' => $media->id,
+            'url' => $colorway->resolveMediaUrl($media),
+            'file_name' => $media->file_name,
+        ])->values()->toArray();
+
         return Inertia::render('creator/colorways/ColorwayEditPage', [
             'colorway' => $colorwayArray,
             'collections' => $colorway->collections,
@@ -220,6 +229,7 @@ class ColorwayController extends Controller
             'techniqueOptions' => $techniqueOptions,
             'colorOptions' => $colorOptions,
             'has_shopify' => $hasShopify,
+            'media' => $mediaData,
         ]);
     }
 
@@ -252,9 +262,65 @@ class ColorwayController extends Controller
     {
         $this->authorize('update', $colorway);
 
-        SyncColorwayCatalogToShopifyJob::dispatch($colorway, 'updated');
+        $integration = Integration::where('account_id', $colorway->account_id)
+            ->where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->first();
+
+        $hasExistingProduct = $integration && $colorway->getExternalIdFor($integration, 'shopify_product');
+        $action = $hasExistingProduct ? 'updated' : 'created';
+
+        SyncColorwayCatalogToShopifyJob::dispatch($colorway, $action);
 
         return response()->json(['message' => 'Push queued.']);
+    }
+
+    /**
+     * Upload one or more images for the given colorway.
+     */
+    public function storeMedia(StoreColorwayMediaRequest $request, Colorway $colorway): RedirectResponse
+    {
+        $disk = config('filesystems.media_disk', 'public');
+        $hasExistingMedia = $colorway->media()->exists();
+
+        foreach ($request->file('images') as $file) {
+            $relativePath = $file->store("colorways/{$colorway->id}", $disk);
+
+            $media = $colorway->media()->create([
+                'mediable_type' => Colorway::class,
+                'mediable_id' => $colorway->id,
+                'file_path' => $relativePath,
+                'disk' => $disk,
+                'file_name' => $file->getClientOriginalName(),
+                'mime_type' => $file->getMimeType(),
+                'size' => $file->getSize(),
+                'is_primary' => ! $hasExistingMedia,
+                'created_by' => $request->user()->id,
+            ]);
+
+            // Only the first uploaded image can become primary
+            if (! $hasExistingMedia) {
+                $hasExistingMedia = true;
+            }
+        }
+
+        return redirect()->route('colorways.edit', $colorway);
+    }
+
+    /**
+     * Delete a media record and its file for the given colorway.
+     */
+    public function destroyMedia(Colorway $colorway, Media $media): RedirectResponse
+    {
+        $this->authorize('delete', $media);
+
+        if ($media->disk) {
+            Storage::disk($media->disk)->delete($media->file_path);
+        }
+
+        $media->delete();
+
+        return redirect()->route('colorways.edit', $colorway);
     }
 
     /**

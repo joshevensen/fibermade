@@ -51,7 +51,7 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const { showError } = useToast();
+const { showError, showSuccess } = useToast();
 
 const syncState = ref<SyncState>(props.shopify?.sync ?? { status: 'idle' });
 const pushSyncState = ref<PushSyncState>(
@@ -63,6 +63,7 @@ const triggeringColorways = ref(false);
 const triggeringCollections = ref(false);
 const triggeringInventory = ref(false);
 const triggeringPush = ref(false);
+const triggeringBases = ref(false);
 
 let pullPollInterval: ReturnType<typeof setInterval> | null = null;
 let pushPollInterval: ReturnType<typeof setInterval> | null = null;
@@ -320,6 +321,40 @@ function pullInventory(): void {
     void triggerPull('/creator/shopify/sync/inventory', triggeringInventory);
 }
 
+async function syncBases(): Promise<void> {
+    if (triggeringBases.value) return;
+
+    triggeringBases.value = true;
+
+    try {
+        const response = await fetch('/creator/shopify/sync/bases', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
+        });
+
+        if (!response.ok) {
+            const payload = (await response.json().catch(() => null)) as {
+                message?: string;
+            } | null;
+            throw new Error(payload?.message ?? 'Could not sync bases.');
+        }
+
+        showSuccess('Bases queued for sync to Shopify.');
+    } catch (error) {
+        const message =
+            error instanceof Error ? error.message : 'Could not sync bases.';
+        showError(message);
+    } finally {
+        triggeringBases.value = false;
+    }
+}
+
 function formatStepCount(result: SyncStepResult): string {
     const total = result.created + result.updated;
     return `${total} synced, ${result.failed} failed`;
@@ -562,6 +597,32 @@ function formatStepCount(result: SyncStepResult): string {
                                 @click="pullInventory"
                             >
                                 Pull Inventory
+                            </UiButton>
+                        </div>
+                    </div>
+                </template>
+            </UiCard>
+
+            <!-- Sync bases card -->
+            <UiCard>
+                <template #content>
+                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
+                        <div>
+                            <p class="text-sm text-surface-700">
+                                Push base (variant) metadata — name, weight,
+                                fiber content — to all Shopify products.
+                                <strong>
+                                    Inventory quantities are not affected.
+                                </strong>
+                            </p>
+                        </div>
+                        <div class="flex justify-end">
+                            <UiButton
+                                outlined
+                                :loading="triggeringBases"
+                                @click="syncBases"
+                            >
+                                Sync Bases
                             </UiButton>
                         </div>
                     </div>

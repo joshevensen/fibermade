@@ -2,10 +2,15 @@
 
 use App\Enums\Color;
 use App\Enums\ColorwayStatus;
+use App\Enums\IntegrationType;
 use App\Enums\Technique;
+use App\Jobs\SyncColorwayCatalogToShopifyJob;
 use App\Models\Account;
 use App\Models\Colorway;
+use App\Models\ExternalIdentifier;
+use App\Models\Integration;
 use App\Models\User;
+use Illuminate\Support\Facades\Queue;
 
 test('user can create a colorway without slug', function () {
     $account = Account::factory()->create();
@@ -83,4 +88,55 @@ test('store accepts valid Color enum values in colors', function () {
     $colorway = Colorway::where('account_id', $account->id)->where('name', 'Test Colorway')->first();
     expect($colorway)->not->toBeNull();
     expect($colorway->colors->map(fn ($c) => $c->value)->all())->toBe(['red', 'blue']);
+});
+
+test('pushToShopify dispatches created action when no existing product mapping', function () {
+    Queue::fake();
+
+    $account = Account::factory()->creator()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+    $integration = Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'test-token']),
+        'settings' => ['shop' => 'test.myshopify.com'],
+    ]);
+    $colorway = Colorway::factory()->create(['account_id' => $account->id]);
+
+    $response = $this->actingAs($user)->postJson(route('colorways.push-to-shopify', $colorway));
+
+    $response->assertOk();
+    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+        return $job->colorway->id === $colorway->id && $job->action === 'created';
+    });
+});
+
+test('pushToShopify dispatches updated action when product mapping exists', function () {
+    Queue::fake();
+
+    $account = Account::factory()->creator()->create();
+    $user = User::factory()->create(['account_id' => $account->id]);
+    $integration = Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'test-token']),
+        'settings' => ['shop' => 'test.myshopify.com'],
+    ]);
+    $colorway = Colorway::factory()->create(['account_id' => $account->id]);
+    ExternalIdentifier::create([
+        'integration_id' => $integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/1',
+    ]);
+
+    $response = $this->actingAs($user)->postJson(route('colorways.push-to-shopify', $colorway));
+
+    $response->assertOk();
+    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+        return $job->colorway->id === $colorway->id && $job->action === 'updated';
+    });
 });

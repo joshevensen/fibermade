@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import {
     destroy as destroyColorway,
+    destroyMedia,
     index as colorwaysIndex,
     pushToShopify,
+    storeMedia,
     update,
 } from '@/actions/App/Http/Controllers/ColorwayController';
 import UiButton from '@/components/ui/UiButton.vue';
@@ -10,12 +12,14 @@ import UiCard from '@/components/ui/UiCard.vue';
 import UiCheckbox from '@/components/ui/UiCheckbox.vue';
 import UiDialog from '@/components/ui/UiDialog.vue';
 import UiEditor from '@/components/ui/UiEditor.vue';
+import UiFileUpload from '@/components/ui/UiFileUpload.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
 import UiFormFieldInputNumber from '@/components/ui/UiFormFieldInputNumber.vue';
 import UiFormFieldMultiSelect from '@/components/ui/UiFormFieldMultiSelect.vue';
 import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
+import UiImage from '@/components/ui/UiImage.vue';
 import UiSelectButton from '@/components/ui/UiSelectButton.vue';
 import { useConfirm } from '@/composables/useConfirm';
 import { useFormSubmission } from '@/composables/useFormSubmission';
@@ -57,6 +61,7 @@ interface Props {
     techniqueOptions: Array<{ label: string; value: string }>;
     colorOptions: Array<{ label: string; value: string }>;
     has_shopify: boolean;
+    media: Array<{ id: number; url: string; file_name: string }>;
 }
 
 const props = defineProps<Props>();
@@ -64,6 +69,53 @@ const { requireDelete } = useConfirm();
 const { showSuccess, showError } = useToast();
 
 const pushingToShopify = ref(false);
+const uploadingMedia = ref(false);
+
+async function handleMediaUpload(event: { files: File[] }): Promise<void> {
+    uploadingMedia.value = true;
+    try {
+        const formData = new FormData();
+        event.files.forEach((file) => formData.append('images[]', file));
+
+        const response = await fetch(storeMedia.url(props.colorway.id), {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN':
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute('content') ?? '',
+            },
+            body: formData,
+        });
+        if (!response.ok) {
+            throw new Error('Upload failed.');
+        }
+        router.reload({ only: ['media'] });
+    } catch {
+        showError('Could not upload image(s). Please try again.');
+    } finally {
+        uploadingMedia.value = false;
+    }
+}
+
+function handleDeleteMedia(event: Event, mediaId: number): void {
+    requireDelete({
+        target: event.currentTarget as HTMLElement,
+        message: 'Are you sure you want to delete this image?',
+        onAccept: () => {
+            router.delete(
+                destroyMedia.url({
+                    colorway: props.colorway.id,
+                    media: mediaId,
+                }),
+                { only: ['media'] },
+            );
+        },
+    });
+}
 
 async function handlePushToShopify(): Promise<void> {
     pushingToShopify.value = true;
@@ -335,6 +387,68 @@ function handleDelete(event: Event): void {
 
                 <!-- Right: sidebar cards -->
                 <div class="flex flex-[0_0_40%] flex-col gap-4">
+                    <!-- Media card -->
+                    <UiCard>
+                        <template #title>
+                            <h3 class="text-lg font-semibold">Media</h3>
+                        </template>
+                        <template #content>
+                            <div class="space-y-4">
+                                <div
+                                    v-if="props.media.length > 0"
+                                    class="grid grid-cols-2 gap-3"
+                                >
+                                    <div
+                                        v-for="item in props.media"
+                                        :key="item.id"
+                                        class="flex flex-col items-center gap-1"
+                                    >
+                                        <UiImage
+                                            :src="item.url"
+                                            :alt="item.file_name"
+                                            preview
+                                            class="aspect-square w-full overflow-hidden rounded-lg"
+                                            image-class="h-full w-full object-cover"
+                                        />
+                                        <button
+                                            type="button"
+                                            class="text-xs text-red-500 hover:text-red-700"
+                                            @click="
+                                                handleDeleteMedia($event, item.id)
+                                            "
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                                <p
+                                    v-else
+                                    class="py-4 text-center text-sm text-surface-500"
+                                >
+                                    No images yet
+                                </p>
+                                <div class="media-upload">
+                                    <UiFileUpload
+                                        name="images[]"
+                                        accept="image/*"
+                                        :multiple="true"
+                                        :custom-upload="true"
+                                        :auto="true"
+                                        :show-upload-button="false"
+                                        :show-cancel-button="false"
+                                        :disabled="uploadingMedia"
+                                        choose-label="Upload Images"
+                                        :choose-button-props="{ outlined: true }"
+                                        class="w-full"
+                                        @uploader="handleMediaUpload"
+                                    >
+                                        <template #content />
+                                    </UiFileUpload>
+                                </div>
+                            </div>
+                        </template>
+                    </UiCard>
+
                     <UiCard>
                         <template #title>
                             <h3 class="text-lg font-semibold">Inventory</h3>
@@ -487,3 +601,9 @@ function handleDelete(event: Event): void {
         </template>
     </UiDialog>
 </template>
+
+<style scoped>
+.media-upload :deep(.p-fileupload-content) {
+    display: none;
+}
+</style>
