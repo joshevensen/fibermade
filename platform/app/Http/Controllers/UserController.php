@@ -13,6 +13,7 @@ use App\Models\Integration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -127,17 +128,27 @@ class UserController extends Controller
 
         $settings = $integration->settings ?? [];
 
-        $recentErrors = $integration->logs()
-            ->where('status', IntegrationLogStatus::Error)
-            ->latest()
-            ->limit(20)
-            ->get()
-            ->map(fn (object $log) => [
-                'id' => $log->id,
-                'message' => $log->message,
-                'created_at' => $log->created_at?->toIso8601String(),
-            ])
-            ->toArray();
+        $syncStartedAt = $settings['sync']['started_at'] ?? null;
+        $pushStartedAt = $settings['push_sync']['started_at'] ?? null;
+        $since = ($syncStartedAt || $pushStartedAt)
+            ? Carbon::parse(max(array_filter([$syncStartedAt, $pushStartedAt])))
+            : null;
+
+        $recentErrors = $since
+            ? $integration->logs()
+                ->where('status', IntegrationLogStatus::Error)
+                ->where('created_at', '>=', $since)
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn (object $log) => [
+                    'id' => $log->id,
+                    'message' => $log->message,
+                    'created_at' => $log->created_at?->toIso8601String(),
+                ])
+                ->values()
+                ->toArray()
+            : [];
 
         return [
             'connected' => true,

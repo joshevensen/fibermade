@@ -57,6 +57,7 @@ const syncState = ref<SyncState>(props.shopify?.sync ?? { status: 'idle' });
 const pushSyncState = ref<PushSyncState>(
     props.shopify?.push_sync ?? { status: 'idle' },
 );
+const recentErrors = ref<RecentError[]>(props.shopify?.recent_errors ?? []);
 const triggeringPullAll = ref(false);
 const triggeringColorways = ref(false);
 const triggeringCollections = ref(false);
@@ -164,10 +165,14 @@ async function pollStatus(): Promise<void> {
             connected: boolean;
             sync: SyncState;
             push_sync: PushSyncState;
+            recent_errors?: RecentError[];
         };
 
         syncState.value = data.sync ?? { status: 'idle' };
         pushSyncState.value = data.push_sync ?? { status: 'idle' };
+        if (data.recent_errors !== undefined) {
+            recentErrors.value = data.recent_errors;
+        }
 
         if (syncState.value.status !== 'running') {
             stopPullPolling();
@@ -461,6 +466,25 @@ function formatStepCount(result: SyncStepResult): string {
                 </template>
             </UiCard>
 
+            <!-- Recent integration log errors -->
+            <div
+                v-if="recentErrors.length > 0"
+                class="flex flex-col gap-2"
+            >
+                <p class="text-xs font-medium text-surface-700">
+                    Recent errors
+                </p>
+                <ul class="flex flex-col gap-1">
+                    <li
+                        v-for="err in recentErrors"
+                        :key="err.id"
+                        class="rounded bg-red-50 px-2 py-1 text-xs text-red-700"
+                    >
+                        {{ err.message }}
+                    </li>
+                </ul>
+            </div>
+
             <!-- Pull colorways card -->
             <UiCard>
                 <template #content>
@@ -677,24 +701,6 @@ function formatStepCount(result: SyncStepResult): string {
                 </template>
             </UiCard>
 
-            <!-- Recent integration log errors -->
-            <div
-                v-if="shopify.recent_errors && shopify.recent_errors.length > 0"
-                class="flex flex-col gap-2"
-            >
-                <p class="text-xs font-medium text-surface-700">
-                    Recent errors
-                </p>
-                <ul class="flex flex-col gap-1">
-                    <li
-                        v-for="err in shopify.recent_errors"
-                        :key="err.id"
-                        class="rounded bg-red-50 px-2 py-1 text-xs text-red-700"
-                    >
-                        {{ err.message }}
-                    </li>
-                </ul>
-            </div>
         </template>
     </div>
 </template>

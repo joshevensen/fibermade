@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Creator;
 
+use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
 use App\Exceptions\SyncAlreadyRunningException;
 use App\Http\Controllers\Controller;
@@ -11,6 +12,7 @@ use App\Services\Shopify\ShopifySyncOrchestrator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class ShopifySyncController extends Controller
@@ -96,6 +98,7 @@ class ShopifySyncController extends Controller
             'auto_sync' => $settings['auto_sync'] ?? false,
             'sync' => $settings['sync'] ?? ['status' => 'idle'],
             'push_sync' => $settings['push_sync'] ?? ['status' => 'idle'],
+            'recent_errors' => $this->recentErrors($integration, $settings),
         ]);
     }
 
@@ -136,6 +139,38 @@ class ShopifySyncController extends Controller
         $integration->clearSyncErrors();
 
         return back();
+    }
+
+    /**
+     * Return recent error logs since the last sync started (or empty if no sync has run).
+     *
+     * @param  array<string, mixed>  $settings
+     * @return list<array{id: int, message: string, created_at: string|null}>
+     */
+    private function recentErrors(Integration $integration, array $settings): array
+    {
+        $syncStartedAt = $settings['sync']['started_at'] ?? null;
+        $pushStartedAt = $settings['push_sync']['started_at'] ?? null;
+
+        if (! $syncStartedAt && ! $pushStartedAt) {
+            return [];
+        }
+
+        $since = Carbon::parse(max(array_filter([$syncStartedAt, $pushStartedAt])));
+
+        return $integration->logs()
+            ->where('status', IntegrationLogStatus::Error)
+            ->where('created_at', '>=', $since)
+            ->latest()
+            ->limit(20)
+            ->get()
+            ->map(fn ($log) => [
+                'id' => $log->id,
+                'message' => $log->message,
+                'created_at' => $log->created_at?->toIso8601String(),
+            ])
+            ->values()
+            ->toArray();
     }
 
     /**
