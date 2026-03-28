@@ -24,12 +24,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscriptionMiddleware::class, EnsureCreatorCanWriteMiddleware::class])->group(function () {
-    Route::get('subscription/expired', fn () => Inertia::render('creator/SubscriptionExpiredPage'))->name('subscription.expired');
-    Route::get('subscription/reactivate', SubscriptionReactivationController::class)->name('subscription.reactivate');
-
-    Route::get('billing/portal', BillingPortalController::class)->name('billing.portal');
 
     // Dashboard route
+    Route::get('', [DashboardController::class, 'index'])
+        ->name('dashboard');
     Route::get('dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
@@ -109,4 +107,9 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
         Route::post('push/all', [ShopifySyncController::class, 'pushAll'])->name('push.all');
         Route::post('{integration}/errors/dismiss', [ShopifySyncController::class, 'dismissErrors'])->name('errors.dismiss');
     });
+
+    // Billing
+    Route::get('subscription/expired', fn () => Inertia::render('creator/SubscriptionExpiredPage'))->name('subscription.expired');
+    Route::get('subscription/reactivate', SubscriptionReactivationController::class)->name('subscription.reactivate');
+    Route::get('billing/portal', BillingPortalController::class)->name('billing.portal');
 });
