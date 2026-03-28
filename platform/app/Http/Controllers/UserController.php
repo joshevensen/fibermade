@@ -91,6 +91,10 @@ class UserController extends Controller
 
         $this->authorize('update', $account);
 
+        Integration::where('account_id', $account->id)
+            ->where('type', IntegrationType::Shopify)
+            ->update(['active' => false]);
+
         $account->generateConnectToken();
 
         return response()->json(['connect_token' => $account->shopify_connect_token]);

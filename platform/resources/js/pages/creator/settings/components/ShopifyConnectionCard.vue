@@ -121,7 +121,8 @@ async function resetToken(): Promise<void> {
 
         displayToken.value = payload.connect_token;
         confirmingReset.value = false;
-        showSuccess('Connect token reset.');
+        showSuccess('Connect token reset. Your Shopify connection has been deactivated.');
+        router.reload({ only: ['shopify'] });
     } catch (error) {
         const message =
             error instanceof Error
