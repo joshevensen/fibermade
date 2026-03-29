@@ -7,6 +7,7 @@ use App\Models\Base;
 use App\Models\Colorway;
 use App\Models\Integration;
 use App\Models\Inventory;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -95,7 +96,7 @@ class ShopifySyncService
     {
         $query = <<<'GQL'
         query getLocations {
-          locations(first: 1, query: "manageable") {
+          locations(first: 1, query: "active:true") {
             edges {
               node {
                 id
@@ -217,24 +218,41 @@ class ShopifySyncService
             throw new ShopifyApiException('productCreate returned no product');
         }
 
-        $variantIds = collect($product['variants']['edges'] ?? [])
+        // Shopify API 2025-01 always auto-creates exactly 1 default variant regardless of
+        // how many productOptions.values were sent. Update it to match base[0], then
+        // explicitly create one variant per remaining base.
+        $defaultVariantIds = collect($product['variants']['edges'] ?? [])
             ->pluck('node.id')
             ->all();
 
-        // Shopify auto-creates variants from productOptions.values with price=0.
-        // Update prices now that we have the variant IDs.
-        if (! empty($variants) && count($variantIds) === count($variants)) {
-            $updateEntries = array_map(fn ($variantId, $variant) => [
-                'variant_gid' => $variantId,
-                'price' => $variant['price'],
-            ], $variantIds, $variants);
+        if ($bases->isEmpty()) {
+            return [
+                'product_id' => $product['id'],
+                'variant_ids' => $defaultVariantIds,
+            ];
+        }
 
-            $this->updateVariantPricesBulk($product['id'], $updateEntries);
+        $allVariantIds = [];
+
+        if (! empty($defaultVariantIds)) {
+            $this->updateVariantsBulk($product['id'], [[
+                'variant_gid' => $defaultVariantIds[0],
+                'base' => $bases->first(),
+            ]]);
+            $allVariantIds[] = $defaultVariantIds[0];
+            $basesToCreate = $bases->slice(1)->values();
+        } else {
+            $basesToCreate = $bases;
+        }
+
+        if ($basesToCreate->isNotEmpty()) {
+            $newIds = $this->bulkCreateVariantsForProduct($product['id'], $basesToCreate);
+            $allVariantIds = array_merge($allVariantIds, $newIds);
         }
 
         return [
             'product_id' => $product['id'],
-            'variant_ids' => $variantIds,
+            'variant_ids' => $allVariantIds,
         ];
     }
 
@@ -399,40 +417,49 @@ class ShopifySyncService
     }
 
     /**
-     * Update only the price of multiple variants after auto-creation via productOptions.
+     * Create variants on an existing product (option + price only, no inventory).
+     * Used during product creation to add base[1..N] after the default variant is updated.
      *
-     * @param  array<array{variant_gid: string, price: string}>  $entries
+     * @param  Collection<int, Base>  $bases
+     * @return string[] variant GIDs in the same order as $bases
      *
      * @throws ShopifyApiException
      */
-    private function updateVariantPricesBulk(string $productGid, array $entries): void
+    private function bulkCreateVariantsForProduct(string $productGid, Collection $bases): array
     {
         $mutation = <<<'GQL'
-        mutation productVariantsBulkUpdate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-          productVariantsBulkUpdate(productId: $productId, variants: $variants) {
-            productVariants { id }
-            userErrors { field message }
+        mutation productVariantsBulkCreate($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+          productVariantsBulkCreate(productId: $productId, variants: $variants) {
+            productVariants {
+              id
+            }
+            userErrors {
+              field
+              message
+            }
           }
         }
         GQL;
 
-        $variants = array_map(fn ($entry) => [
-            'id' => $entry['variant_gid'],
-            'price' => $entry['price'],
-        ], $entries);
+        $variants = $bases->map(fn (Base $base) => [
+            'optionValues' => [['optionName' => 'Base', 'name' => $base->descriptor]],
+            'price' => (string) ($base->retail_price ?? '0'),
+        ])->all();
 
         $result = $this->client->request($mutation, [
             'productId' => $productGid,
             'variants' => $variants,
         ]);
 
-        $payload = $result['data']['productVariantsBulkUpdate'] ?? [];
+        $payload = $result['data']['productVariantsBulkCreate'] ?? [];
         $userErrors = $payload['userErrors'] ?? [];
 
         if (! empty($userErrors)) {
             $message = collect($userErrors)->pluck('message')->implode('; ');
             throw new ShopifyApiException($message, $userErrors);
         }
+
+        return collect($payload['productVariants'] ?? [])->pluck('id')->all();
     }
 
     /**

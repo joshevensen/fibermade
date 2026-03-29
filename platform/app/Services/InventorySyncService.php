@@ -204,7 +204,14 @@ class InventorySyncService
                     'external_id' => $variantIds[$i],
                 ]);
 
-                $shopifySync->setVariantInventory($variantIds[$i], $inventory->quantity);
+                try {
+                    $shopifySync->setVariantInventory($variantIds[$i], $inventory->quantity);
+                } catch (ShopifyApiException $e) {
+                    $this->logPush($integration, $inventory, IntegrationLogStatus::Warning, 'variant_inventory_set', 0, $syncSource, [
+                        'error' => $e->getMessage(),
+                        'shopify_variant_id' => $variantIds[$i],
+                    ]);
+                }
             }
         }
 

@@ -121,6 +121,15 @@ const { form, onSubmit } = useFormSubmission({
                     required
                 />
 
+                <UiFormFieldInputNumber
+                    name="per_pan"
+                    label="Per Pan"
+                    :min="1"
+                    :max="6"
+                    :server-error="form.errors.per_pan"
+                    required
+                />
+
                 <UiFormFieldSelect
                     name="technique"
                     label="Technique"
@@ -134,15 +143,6 @@ const { form, onSubmit } = useFormSubmission({
                     label="Colors"
                     :options="colorOptions"
                     :server-error="form.errors.colors"
-                />
-
-                <UiFormFieldInputNumber
-                    name="per_pan"
-                    label="Per Pan"
-                    :min="1"
-                    :max="6"
-                    :server-error="form.errors.per_pan"
-                    required
                 />
 
                 <UiButton type="submit" :loading="form.processing">

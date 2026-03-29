@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\BaseStatus;
 use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationType;
 use App\Enums\Technique;
@@ -37,28 +38,37 @@ test('createProduct sends correct Colorway to Product field mapping', function (
         'account_id' => $this->account->id,
         'descriptor' => 'Fingering',
         'retail_price' => 28.00,
+        'status' => BaseStatus::Active,
     ]);
 
     $captured = [];
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
-    $mockClient->shouldReceive('request')
-        ->once()
-        ->with(Mockery::type('string'), Mockery::on(function ($vars) use (&$captured) {
+    $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
+        if (isset($vars['product'])) {
             $captured = $vars;
 
-            return isset($vars['product']);
-        }))
-        ->andReturn([
-            'data' => [
-                'productCreate' => [
-                    'product' => [
-                        'id' => 'gid://shopify/Product/1',
-                        'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
+            return [
+                'data' => [
+                    'productCreate' => [
+                        'product' => [
+                            'id' => 'gid://shopify/Product/1',
+                            'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
+                        ],
+                        'userErrors' => [],
                     ],
+                ],
+            ];
+        }
+
+        return [
+            'data' => [
+                'productVariantsBulkUpdate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/1']],
                     'userErrors' => [],
                 ],
             ],
-        ]);
+        ];
+    });
 
     $service = new ShopifySyncService($mockClient);
     $service->createProduct($colorway, $this->integration);
@@ -78,15 +88,26 @@ test('createProduct maps ColorwayStatus to Shopify status', function () {
     $captured = [];
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
-        $captured = $vars;
+        if (isset($vars['product'])) {
+            $captured = $vars;
+
+            return [
+                'data' => [
+                    'productCreate' => [
+                        'product' => [
+                            'id' => 'gid://shopify/Product/1',
+                            'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
+                        ],
+                        'userErrors' => [],
+                    ],
+                ],
+            ];
+        }
 
         return [
             'data' => [
-                'productCreate' => [
-                    'product' => [
-                        'id' => 'gid://shopify/Product/1',
-                        'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
-                    ],
+                'productVariantsBulkUpdate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/1']],
                     'userErrors' => [],
                 ],
             ],
@@ -96,7 +117,7 @@ test('createProduct maps ColorwayStatus to Shopify status', function () {
     $service = new ShopifySyncService($mockClient);
 
     $colorwayActive = Colorway::factory()->create(['account_id' => $this->account->id, 'status' => ColorwayStatus::Active]);
-    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering']);
+    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'status' => BaseStatus::Active]);
     $service->createProduct($colorwayActive, $this->integration);
     expect($captured['product']['status'])->toBe('ACTIVE');
 
@@ -114,20 +135,31 @@ test('createProduct adds per_pan metafield when per_pan greater than zero', func
         'account_id' => $this->account->id,
         'per_pan' => 4,
     ]);
-    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering']);
+    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'status' => BaseStatus::Active]);
 
     $captured = [];
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
-        $captured = $vars;
+        if (isset($vars['product'])) {
+            $captured = $vars;
+
+            return [
+                'data' => [
+                    'productCreate' => [
+                        'product' => [
+                            'id' => 'gid://shopify/Product/1',
+                            'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
+                        ],
+                        'userErrors' => [],
+                    ],
+                ],
+            ];
+        }
 
         return [
             'data' => [
-                'productCreate' => [
-                    'product' => [
-                        'id' => 'gid://shopify/Product/1',
-                        'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
-                    ],
+                'productVariantsBulkUpdate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/1']],
                     'userErrors' => [],
                 ],
             ],
@@ -152,20 +184,31 @@ test('createProduct omits per_pan metafield when per_pan is zero', function () {
         'account_id' => $this->account->id,
         'per_pan' => 0,
     ]);
-    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering']);
+    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'status' => BaseStatus::Active]);
 
     $captured = [];
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$captured) {
-        $captured = $vars;
+        if (isset($vars['product'])) {
+            $captured = $vars;
+
+            return [
+                'data' => [
+                    'productCreate' => [
+                        'product' => [
+                            'id' => 'gid://shopify/Product/1',
+                            'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
+                        ],
+                        'userErrors' => [],
+                    ],
+                ],
+            ];
+        }
 
         return [
             'data' => [
-                'productCreate' => [
-                    'product' => [
-                        'id' => 'gid://shopify/Product/1',
-                        'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/1']]]],
-                    ],
+                'productVariantsBulkUpdate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/1']],
                     'userErrors' => [],
                 ],
             ],
@@ -209,6 +252,72 @@ test('syncImages orders media with is_primary first', function () {
     $mediaOrder = $colorway->fresh()->media()->orderByDesc('is_primary')->orderBy('id')->pluck('file_path')->all();
     expect($mediaOrder[0])->toBe('colorways/first.jpg');
     expect($mediaOrder[1])->toBe('colorways/second.jpg');
+});
+
+test('createProduct creates all variants when account has multiple bases', function () {
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'retail_price' => 28.00, 'status' => BaseStatus::Active]);
+    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'DK', 'retail_price' => 30.00, 'status' => BaseStatus::Active]);
+    Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Worsted', 'retail_price' => 32.00, 'status' => BaseStatus::Active]);
+
+    $bulkCreateVars = null;
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+
+    $mockClient->shouldReceive('request')->andReturnUsing(function ($query, $vars) use (&$bulkCreateVars) {
+        if (str_contains($query, 'productCreate(')) {
+            return [
+                'data' => [
+                    'productCreate' => [
+                        'product' => [
+                            'id' => 'gid://shopify/Product/1',
+                            'variants' => ['edges' => [['node' => ['id' => 'gid://shopify/ProductVariant/10']]]],
+                        ],
+                        'userErrors' => [],
+                    ],
+                ],
+            ];
+        }
+
+        if (str_contains($query, 'productVariantsBulkUpdate')) {
+            return [
+                'data' => [
+                    'productVariantsBulkUpdate' => [
+                        'productVariants' => [['id' => 'gid://shopify/ProductVariant/10']],
+                        'userErrors' => [],
+                    ],
+                ],
+            ];
+        }
+
+        // productVariantsBulkCreate (bulkCreateVariantsForProduct)
+        $bulkCreateVars = $vars;
+
+        return [
+            'data' => [
+                'productVariantsBulkCreate' => [
+                    'productVariants' => [
+                        ['id' => 'gid://shopify/ProductVariant/20'],
+                        ['id' => 'gid://shopify/ProductVariant/30'],
+                    ],
+                    'userErrors' => [],
+                ],
+            ],
+        ];
+    });
+
+    $service = new ShopifySyncService($mockClient);
+    $result = $service->createProduct($colorway, $this->integration);
+
+    expect($result['variant_ids'])->toHaveCount(3);
+    expect($result['variant_ids'][0])->toBe('gid://shopify/ProductVariant/10');
+    expect($result['variant_ids'][1])->toBe('gid://shopify/ProductVariant/20');
+    expect($result['variant_ids'][2])->toBe('gid://shopify/ProductVariant/30');
+
+    expect($bulkCreateVars['variants'])->toHaveCount(2);
+    expect($bulkCreateVars['variants'][0]['optionValues'])->toEqual([['optionName' => 'Base', 'name' => 'DK']]);
+    expect($bulkCreateVars['variants'][0]['price'])->toBe('30.00');
+    expect($bulkCreateVars['variants'][1]['optionValues'])->toEqual([['optionName' => 'Base', 'name' => 'Worsted']]);
+    expect($bulkCreateVars['variants'][1]['price'])->toBe('32.00');
 });
 
 test('archiveProduct sends productUpdate mutation with status ARCHIVED', function () {
