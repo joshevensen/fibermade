@@ -370,7 +370,7 @@ function formatStepCount(result: SyncStepResult): string {
                 <div class="flex flex-col gap-5">
                     <p class="text-sm text-surface-600">
                         Connect Fibermade to your Shopify store to keep your
-                        yarn catalog, collections, and inventory in sync.
+                        yarn catalog and collections in sync.
                         Changes you make in Fibermade are automatically pushed
                         to Shopify — no manual updates needed.
                     </p>

@@ -247,7 +247,6 @@ function HeroSection({ fibermadeUrl, cta }: { fibermadeUrl: string; cta: "login"
           <s-list-item>Add wholesale capabilities to your Shopify store</s-list-item>
           <s-list-item>Use the terms that make sense to you: colorways, bases, etc</s-list-item>
           <s-list-item>Changes in Fibermade are automatically pushed to Shopify</s-list-item>
-          <s-list-item>Fibermade tracks on-hand stock — Shopify calculates available for customers automatically</s-list-item>
         </s-unordered-list>
 
         {fibermadeUrl && cta === "login" && (
@@ -347,12 +346,6 @@ export default function Index() {
             <s-paragraph>
               <strong>{shop}</strong>
               {connectedAt && ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
-            </s-paragraph>
-
-            <s-paragraph>
-              Fibermade syncs <strong>on-hand</strong> inventory to Shopify.
-              Shopify automatically calculates the <strong>available</strong> quantity shown to customers by subtracting open orders from on hand.
-              Manage your stock levels in Fibermade — no need to adjust inventory directly in Shopify.
             </s-paragraph>
 
             <s-button
