@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
  */
 class ShopifyGraphqlClient
 {
-    private const API_VERSION = '2025-01';
+    private const API_VERSION = '2025-10';
 
     public function __construct(
         private readonly string $shop,
