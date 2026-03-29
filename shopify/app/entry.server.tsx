@@ -14,7 +14,11 @@ Sentry.init({
   enabled: !!process.env.SENTRY_DSN,
 });
 
-export const handleError = Sentry.createSentryHandleError();
+export function handleError(error: unknown, { request }: { request: Request }) {
+  if (!request.signal.aborted) {
+    Sentry.captureException(error);
+  }
+}
 
 export const streamTimeout = 5000;
 
