@@ -369,11 +369,15 @@ class ShopifySyncService
 
     /**
      * Ensure the Shopify product has a "Base" option, creating it if missing.
-     * Products pulled from Shopify may not have this option defined.
+     * Shopify requires at least one value when creating an option, and automatically
+     * creates a variant for that value. Returns the auto-created variant GID for
+     * $firstValue so callers can map it instead of trying to create it again.
+     *
+     * Returns null if the "Base" option already existed (no variant was auto-created).
      *
      * @throws ShopifyApiException
      */
-    private function ensureBaseOptionExists(string $productGid): void
+    private function ensureBaseOptionExists(string $productGid, string $firstValue): ?string
     {
         $query = <<<'GQL'
         query getProductOptions($id: ID!) {
@@ -390,14 +394,25 @@ class ShopifySyncService
         $hasBase = collect($options)->contains(fn ($o) => ($o['name'] ?? '') === 'Base');
 
         if ($hasBase) {
-            return;
+            return null;
         }
 
+        // Shopify requires at least one value; passing $firstValue means Shopify will
+        // auto-create a variant for it — we capture that GID so the caller skips it.
         $mutation = <<<'GQL'
         mutation productOptionsCreate($productId: ID!, $options: [OptionCreateInput!]!) {
           productOptionsCreate(productId: $productId, options: $options) {
             userErrors { field message }
-            product { id }
+            product {
+              variants(first: 50) {
+                edges {
+                  node {
+                    id
+                    selectedOptions { name value }
+                  }
+                }
+              }
+            }
           }
         }
         GQL;
@@ -405,7 +420,7 @@ class ShopifySyncService
         $result = $this->client->request($mutation, [
             'productId' => $productGid,
             'options' => [
-                ['name' => 'Base'],
+                ['name' => 'Base', 'values' => [['name' => $firstValue]]],
             ],
         ]);
 
@@ -416,6 +431,17 @@ class ShopifySyncService
             $message = collect($userErrors)->pluck('message')->implode('; ');
             throw new ShopifyApiException("Failed to create Base option: {$message}", $userErrors);
         }
+
+        // Find the variant Shopify auto-created for $firstValue
+        foreach ($payload['product']['variants']['edges'] ?? [] as $edge) {
+            foreach ($edge['node']['selectedOptions'] ?? [] as $opt) {
+                if ($opt['name'] === 'Base' && $opt['value'] === $firstValue) {
+                    return $edge['node']['id'];
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -451,53 +477,68 @@ class ShopifySyncService
         }
         GQL;
 
+        $autoCreatedVariantGid = null;
+        $autoCreatedEntry = null;
         if (! empty($entries)) {
-            $this->ensureBaseOptionExists($productGid);
+            $autoCreatedVariantGid = $this->ensureBaseOptionExists($productGid, $entries[0]['base']->descriptor);
         }
 
-        $locationId = $this->getDefaultLocationId();
-
-        $variants = [];
-        foreach ($entries as $entry) {
-            $variants[] = [
-                'optionValues' => [['optionName' => 'Base', 'name' => $entry['base']->descriptor]],
-                'price' => (string) ($entry['base']->retail_price ?? '0'),
-                'inventoryItem' => [
-                    'cost' => (string) ($entry['base']->cost ?? '0'),
-                    'tracked' => true,
-                ],
-                'inventoryQuantities' => [[
-                    'locationId' => $locationId,
-                    'availableQuantity' => $entry['quantity'],
-                ]],
-            ];
-        }
-
-        $result = $this->client->request($mutation, [
-            'productId' => $productGid,
-            'variants' => $variants,
-        ]);
-
-        $payload = $result['data']['productVariantsBulkCreate'] ?? [];
-        $userErrors = $payload['userErrors'] ?? [];
-
-        if (! empty($userErrors)) {
-            $message = collect($userErrors)->pluck('message')->implode('; ');
-            throw new ShopifyApiException($message, $userErrors);
-        }
-
-        $createdVariants = $payload['productVariants'] ?? [];
-        if (count($createdVariants) !== count($entries)) {
-            throw new ShopifyApiException('productVariantsBulkCreate returned unexpected number of variants');
+        // If ensureBaseOptionExists just created the "Base" option, Shopify auto-created a
+        // variant for $entries[0]. Pull that entry out so we don't try to create it again.
+        if ($autoCreatedVariantGid !== null) {
+            $autoCreatedEntry = array_shift($entries);
         }
 
         $map = [];
-        foreach ($entries as $index => $entry) {
-            $variantGid = $createdVariants[$index]['id'] ?? null;
-            if (! $variantGid) {
-                throw new ShopifyApiException("productVariantsBulkCreate returned no ID for variant at index {$index}");
+
+        if (! empty($entries)) {
+            $locationId = $this->getDefaultLocationId();
+            $variants = [];
+            foreach ($entries as $entry) {
+                $variants[] = [
+                    'optionValues' => [['optionName' => 'Base', 'name' => $entry['base']->descriptor]],
+                    'price' => (string) ($entry['base']->retail_price ?? '0'),
+                    'inventoryItem' => [
+                        'cost' => (string) ($entry['base']->cost ?? '0'),
+                        'tracked' => true,
+                    ],
+                    'inventoryQuantities' => [[
+                        'locationId' => $locationId,
+                        'availableQuantity' => $entry['quantity'],
+                    ]],
+                ];
             }
-            $map[$entry['inventory']->id] = $variantGid;
+
+            $result = $this->client->request($mutation, [
+                'productId' => $productGid,
+                'variants' => $variants,
+            ]);
+
+            $payload = $result['data']['productVariantsBulkCreate'] ?? [];
+            $userErrors = $payload['userErrors'] ?? [];
+
+            if (! empty($userErrors)) {
+                $message = collect($userErrors)->pluck('message')->implode('; ');
+                throw new ShopifyApiException($message, $userErrors);
+            }
+
+            $createdVariants = $payload['productVariants'] ?? [];
+            if (count($createdVariants) !== count($entries)) {
+                throw new ShopifyApiException('productVariantsBulkCreate returned unexpected number of variants');
+            }
+
+            foreach ($entries as $index => $entry) {
+                $variantGid = $createdVariants[$index]['id'] ?? null;
+                if (! $variantGid) {
+                    throw new ShopifyApiException("productVariantsBulkCreate returned no ID for variant at index {$index}");
+                }
+                $map[$entry['inventory']->id] = $variantGid;
+            }
+        }
+
+        // Merge the auto-created variant mapping (if any) into the result
+        if ($autoCreatedEntry !== null && $autoCreatedVariantGid !== null) {
+            $map[$autoCreatedEntry['inventory']->id] = $autoCreatedVariantGid;
         }
 
         return $map;
@@ -649,7 +690,13 @@ class ShopifySyncService
         }
         GQL;
 
-        $this->ensureBaseOptionExists($productGid);
+        $autoCreatedVariantGid = $this->ensureBaseOptionExists($productGid, $base->descriptor);
+
+        // Shopify auto-created a variant for $base->descriptor when the "Base" option was
+        // just added — return that GID directly instead of creating a duplicate.
+        if ($autoCreatedVariantGid !== null) {
+            return $autoCreatedVariantGid;
+        }
 
         $input = [
             'productId' => $productGid,

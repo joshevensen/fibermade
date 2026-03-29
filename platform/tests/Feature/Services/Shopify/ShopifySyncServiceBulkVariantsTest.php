@@ -173,14 +173,14 @@ test('createVariantsBulk throws ShopifyApiException on userErrors', function () 
     ]))->toThrow(ShopifyApiException::class, 'Invalid option value');
 });
 
-test('createVariantsBulk calls productOptionsCreate when Base option is missing', function () {
+test('createVariantsBulk uses auto-created variant GID when productOptionsCreate creates the Base option', function () {
     $base = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'retail_price' => 28.00, 'cost' => 10.00]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id, 'quantity' => 5]);
 
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
 
-    // getProductOptions — no "Base" option (product was pulled from Shopify)
+    // getProductOptions — no "Base" option (product was pulled from Shopify without one)
     $mockClient->shouldReceive('request')
         ->once()
         ->with(Mockery::on(fn ($q) => str_contains($q, 'getProductOptions')), Mockery::any())
@@ -188,15 +188,81 @@ test('createVariantsBulk calls productOptionsCreate when Base option is missing'
             'data' => ['product' => ['options' => [['name' => 'Title']]]],
         ]);
 
-    // productOptionsCreate
+    // productOptionsCreate — Shopify auto-creates a variant for the first value
     $mockClient->shouldReceive('request')
         ->once()
         ->with(Mockery::on(fn ($q) => str_contains($q, 'productOptionsCreate')), Mockery::any())
         ->andReturn([
-            'data' => ['productOptionsCreate' => ['userErrors' => [], 'product' => ['id' => 'gid://shopify/Product/1']]],
+            'data' => [
+                'productOptionsCreate' => [
+                    'userErrors' => [],
+                    'product' => [
+                        'variants' => [
+                            'edges' => [
+                                [
+                                    'node' => [
+                                        'id' => 'gid://shopify/ProductVariant/AUTO',
+                                        'selectedOptions' => [['name' => 'Base', 'value' => 'Fingering']],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
         ]);
 
-    // getDefaultLocationId
+    // No getLocations or productVariantsBulkCreate calls expected — the only entry was auto-created
+    $service = new ShopifySyncService($mockClient);
+    $map = $service->createVariantsBulk('gid://shopify/Product/1', [
+        ['inventory' => $inv, 'base' => $base, 'quantity' => 5],
+    ]);
+
+    expect($map[$inv->id])->toBe('gid://shopify/ProductVariant/AUTO');
+});
+
+test('createVariantsBulk creates remaining entries via bulk create when Base option was just added', function () {
+    $base1 = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'retail_price' => 28.00, 'cost' => 10.00]);
+    $base2 = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'DK', 'retail_price' => 32.00, 'cost' => 12.00]);
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $inv1 = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base1->id, 'quantity' => 5]);
+    $inv2 = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base2->id, 'quantity' => 10]);
+
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+
+    // getProductOptions — no "Base" option
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'getProductOptions')), Mockery::any())
+        ->andReturn([
+            'data' => ['product' => ['options' => [['name' => 'Title']]]],
+        ]);
+
+    // productOptionsCreate — auto-creates variant for entries[0] ("Fingering")
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'productOptionsCreate')), Mockery::any())
+        ->andReturn([
+            'data' => [
+                'productOptionsCreate' => [
+                    'userErrors' => [],
+                    'product' => [
+                        'variants' => [
+                            'edges' => [
+                                [
+                                    'node' => [
+                                        'id' => 'gid://shopify/ProductVariant/AUTO',
+                                        'selectedOptions' => [['name' => 'Base', 'value' => 'Fingering']],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+    // getLocations — needed for remaining entries[1] ("DK")
     $mockClient->shouldReceive('request')
         ->once()
         ->with(Mockery::on(fn ($q) => str_contains($q, 'getLocations')))
@@ -204,13 +270,19 @@ test('createVariantsBulk calls productOptionsCreate when Base option is missing'
             'data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]],
         ]);
 
-    // productVariantsBulkCreate
+    // productVariantsBulkCreate — only "DK" variant
+    $capturedVars = [];
     $mockClient->shouldReceive('request')
         ->once()
+        ->with(Mockery::type('string'), Mockery::on(function ($vars) use (&$capturedVars) {
+            $capturedVars = $vars;
+
+            return isset($vars['productId']);
+        }))
         ->andReturn([
             'data' => [
                 'productVariantsBulkCreate' => [
-                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/100']],
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/200']],
                     'userErrors' => [],
                 ],
             ],
@@ -218,10 +290,16 @@ test('createVariantsBulk calls productOptionsCreate when Base option is missing'
 
     $service = new ShopifySyncService($mockClient);
     $map = $service->createVariantsBulk('gid://shopify/Product/1', [
-        ['inventory' => $inv, 'base' => $base, 'quantity' => 5],
+        ['inventory' => $inv1, 'base' => $base1, 'quantity' => 5],
+        ['inventory' => $inv2, 'base' => $base2, 'quantity' => 10],
     ]);
 
-    expect($map[$inv->id])->toBe('gid://shopify/ProductVariant/100');
+    expect($map)->toHaveCount(2);
+    expect($map[$inv1->id])->toBe('gid://shopify/ProductVariant/AUTO');
+    expect($map[$inv2->id])->toBe('gid://shopify/ProductVariant/200');
+    // Only 1 variant sent to bulk create (DK, not Fingering which was auto-created)
+    expect($capturedVars['variants'])->toHaveCount(1);
+    expect($capturedVars['variants'][0]['optionValues'][0]['name'])->toBe('DK');
 });
 
 // ─── updateVariantsBulk ───────────────────────────────────────────────────────

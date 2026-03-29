@@ -28,6 +28,7 @@ class ShopifyProductSyncService
         'ACTIVE' => ColorwayStatus::Active,
         'DRAFT' => ColorwayStatus::Idea,
         'ARCHIVED' => ColorwayStatus::Retired,
+        'UNLISTED' => ColorwayStatus::Retired,
     ];
 
     private const DEFAULT_VARIANT_TITLE = 'Default Title';

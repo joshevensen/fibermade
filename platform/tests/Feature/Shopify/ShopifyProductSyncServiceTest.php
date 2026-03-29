@@ -218,6 +218,11 @@ it('maps ARCHIVED to retired status', function () {
     expect(Colorway::first()->status)->toBe(ColorwayStatus::Retired);
 });
 
+it('maps UNLISTED to retired status', function () {
+    $this->service->syncProduct(makeProduct(['status' => 'UNLISTED']), $this->integration);
+    expect(Colorway::first()->status)->toBe(ColorwayStatus::Retired);
+});
+
 // ── Update path ────────────────────────────────────────────────────────────────
 
 it('returns updated when mapping already exists', function () {
