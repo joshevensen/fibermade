@@ -362,6 +362,15 @@ class ShopifyGraphqlClient
                             title
                             descriptionHtml
                             handle
+                            products(first: 250) {
+                                edges {
+                                    node { id }
+                                }
+                                pageInfo {
+                                    hasNextPage
+                                    endCursor
+                                }
+                            }
                         }
                     }
                     pageInfo {
@@ -551,11 +560,18 @@ class ShopifyGraphqlClient
      */
     private function normalizeCollection(array $node): array
     {
+        $productEdges = $node['products']['edges'] ?? [];
+        $productsHasNextPage = $node['products']['pageInfo']['hasNextPage'] ?? false;
+        $productsEndCursor = $node['products']['pageInfo']['endCursor'] ?? null;
+
         return [
             'gid' => $node['id'],
             'title' => $node['title'],
             'descriptionHtml' => $node['descriptionHtml'] ?? null,
             'handle' => $node['handle'] ?? null,
+            'productGids' => array_map(fn (array $e) => $e['node']['id'], $productEdges),
+            'productsHasNextPage' => $productsHasNextPage,
+            'productsEndCursor' => $productsEndCursor,
         ];
     }
 }

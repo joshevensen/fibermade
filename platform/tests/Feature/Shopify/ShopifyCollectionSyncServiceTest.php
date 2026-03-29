@@ -18,6 +18,9 @@ function makeCollection(array $overrides = []): array
         'title' => 'Autumn Colors',
         'descriptionHtml' => '<p>Fall palette</p>',
         'handle' => 'autumn-colors',
+        'productGids' => [],
+        'productsHasNextPage' => false,
+        'productsEndCursor' => null,
     ], $overrides);
 }
 
@@ -48,10 +51,6 @@ beforeEach(function () {
 // ── Create path ────────────────────────────────────────────────────────────────
 
 it('creates a collection with correct name and description', function () {
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage([]));
-
     $outcome = $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
 
     expect($outcome)->toBe('created');
@@ -63,10 +62,6 @@ it('creates a collection with correct name and description', function () {
 });
 
 it('creates ExternalIdentifier mapping for collection', function () {
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage([]));
-
     $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
 
     $collection = Collection::first();
@@ -79,7 +74,7 @@ it('creates ExternalIdentifier mapping for collection', function () {
     ])->exists())->toBeTrue();
 });
 
-it('assigns mapped colorways when creating collection', function () {
+it('assigns mapped colorways using inline product GIDs', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     ExternalIdentifier::create([
         'integration_id' => $this->integration->id,
@@ -89,45 +84,76 @@ it('assigns mapped colorways when creating collection', function () {
         'external_id' => 'gid://shopify/Product/1',
     ]);
 
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/1']));
-
-    $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
+    $this->service->syncCollection(
+        makeCollection(['productGids' => ['gid://shopify/Product/1']]),
+        $this->integration,
+        $this->client,
+    );
 
     $collection = Collection::first();
     expect($collection->colorways()->where('colorways.id', $colorway->id)->exists())->toBeTrue();
 });
 
 it('skips products with no colorway mapping gracefully', function () {
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/999']));
-
-    $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
+    $this->service->syncCollection(
+        makeCollection(['productGids' => ['gid://shopify/Product/999']]),
+        $this->integration,
+        $this->client,
+    );
 
     $collection = Collection::first();
     expect($collection->colorways()->count())->toBe(0);
 });
 
 it('handles empty collection without error', function () {
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage([]));
-
     $outcome = $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
 
     expect($outcome)->toBe('created');
     expect(Collection::first()->colorways()->count())->toBe(0);
 });
 
+it('fetches additional pages via API when productsHasNextPage is true', function () {
+    $colorwayA = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $colorwayB = Colorway::factory()->create(['account_id' => $this->account->id]);
+
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorwayA->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/1',
+    ]);
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorwayB->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/2',
+    ]);
+
+    // Inline has first page, API call fetches the overflow page
+    $this->client->shouldReceive('getCollectionProducts')
+        ->once()
+        ->with('gid://shopify/Collection/5', 'cursor_page2')
+        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/2'], false));
+
+    $this->service->syncCollection(
+        makeCollection([
+            'productGids' => ['gid://shopify/Product/1'],
+            'productsHasNextPage' => true,
+            'productsEndCursor' => 'cursor_page2',
+        ]),
+        $this->integration,
+        $this->client,
+    );
+
+    $collection = Collection::first();
+    expect($collection->colorways()->count())->toBe(2);
+});
+
 // ── Update path ────────────────────────────────────────────────────────────────
 
 it('returns updated when collection mapping already exists', function () {
-    $this->client->shouldReceive('getCollectionProducts')
-        ->twice()
-        ->andReturn(makeCollectionProductsPage([]));
-
     $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
 
     $outcome = $this->service->syncCollection(makeCollection(['title' => 'Autumn Colors v2']), $this->integration, $this->client);
@@ -156,18 +182,18 @@ it('adds new colorways to existing collection on update', function () {
     ]);
 
     // First sync with only colorwayA
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/1']));
-
-    $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
+    $this->service->syncCollection(
+        makeCollection(['productGids' => ['gid://shopify/Product/1']]),
+        $this->integration,
+        $this->client,
+    );
 
     // Second sync with both colorways
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/1', 'gid://shopify/Product/2']));
-
-    $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
+    $this->service->syncCollection(
+        makeCollection(['productGids' => ['gid://shopify/Product/1', 'gid://shopify/Product/2']]),
+        $this->integration,
+        $this->client,
+    );
 
     $collection = Collection::first();
     expect($collection->colorways()->count())->toBe(2);
@@ -193,18 +219,18 @@ it('removes dropped colorways from collection on update', function () {
     ]);
 
     // First sync: both colorways
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/1', 'gid://shopify/Product/2']));
-
-    $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
+    $this->service->syncCollection(
+        makeCollection(['productGids' => ['gid://shopify/Product/1', 'gid://shopify/Product/2']]),
+        $this->integration,
+        $this->client,
+    );
 
     // Second sync: only colorwayA — colorwayB should be removed
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage(['gid://shopify/Product/1']));
-
-    $this->service->syncCollection(makeCollection(), $this->integration, $this->client);
+    $this->service->syncCollection(
+        makeCollection(['productGids' => ['gid://shopify/Product/1']]),
+        $this->integration,
+        $this->client,
+    );
 
     $collection = Collection::first();
     expect($collection->colorways()->count())->toBe(1);
@@ -233,10 +259,6 @@ it('syncAll processes paginated collections', function () {
             'nextCursor' => null,
         ]);
 
-    $this->client->shouldReceive('getCollectionProducts')
-        ->twice()
-        ->andReturn(makeCollectionProductsPage([]));
-
     $result = $this->service->syncAll($this->integration);
 
     expect($result->created)->toBe(2);
@@ -244,25 +266,26 @@ it('syncAll processes paginated collections', function () {
 });
 
 it('syncAll records failed count and continues when a collection throws', function () {
+    // Collections with productsHasNextPage=true will trigger a getCollectionProducts API call.
+    // We use this to force an exception on the first collection while the second succeeds.
+    $collectionWithOverflow = makeCollection([
+        'gid' => 'gid://shopify/Collection/1',
+        'productsHasNextPage' => true,
+        'productsEndCursor' => 'cursor',
+    ]);
+    $collectionOk = makeCollection(['gid' => 'gid://shopify/Collection/2', 'title' => 'Good']);
+
     $this->client->shouldReceive('getCollections')
         ->once()
         ->andReturn([
-            'collections' => [
-                makeCollection(['gid' => 'gid://shopify/Collection/1']),
-                makeCollection(['gid' => 'gid://shopify/Collection/2', 'title' => 'Good']),
-            ],
+            'collections' => [$collectionWithOverflow, $collectionOk],
             'hasNextPage' => false,
             'nextCursor' => null,
         ]);
 
-    // First throws, second succeeds
     $this->client->shouldReceive('getCollectionProducts')
         ->once()
         ->andThrow(new RuntimeException('API error'));
-
-    $this->client->shouldReceive('getCollectionProducts')
-        ->once()
-        ->andReturn(makeCollectionProductsPage([]));
 
     $result = $this->service->syncAll($this->integration);
 
@@ -272,8 +295,6 @@ it('syncAll records failed count and continues when a collection throws', functi
 });
 
 it('syncAll excludes archived collections via published_status filter at API level', function () {
-    // Archived collections are filtered by getCollections() via the published_status:published
-    // Shopify query filter — simulated here by the mock returning an empty list.
     $this->client->shouldReceive('getCollections')
         ->once()
         ->andReturn([

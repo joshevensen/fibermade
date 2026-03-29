@@ -220,6 +220,13 @@ it('getCollections returns normalized collection list with pagination info', fun
                                 'title' => 'Autumn Colors',
                                 'descriptionHtml' => '<p>Fall</p>',
                                 'handle' => 'autumn-colors',
+                                'products' => [
+                                    'edges' => [
+                                        ['node' => ['id' => 'gid://shopify/Product/1']],
+                                        ['node' => ['id' => 'gid://shopify/Product/2']],
+                                    ],
+                                    'pageInfo' => ['hasNextPage' => false, 'endCursor' => null],
+                                ],
                             ],
                         ],
                     ],
@@ -240,6 +247,8 @@ it('getCollections returns normalized collection list with pagination info', fun
     expect($collection['title'])->toBe('Autumn Colors');
     expect($collection['descriptionHtml'])->toBe('<p>Fall</p>');
     expect($collection['handle'])->toBe('autumn-colors');
+    expect($collection['productGids'])->toBe(['gid://shopify/Product/1', 'gid://shopify/Product/2']);
+    expect($collection['productsHasNextPage'])->toBeFalse();
 });
 
 it('getCollections passes cursor in variables when provided', function () {

@@ -110,7 +110,14 @@ class ShopifyCollectionSyncService
             ],
         ]);
 
-        $colorwayIds = $this->resolveColorwayIds($shopifyCollection['gid'], $integration, $client);
+        $colorwayIds = $this->resolveColorwayIds(
+            $shopifyCollection['gid'],
+            $integration,
+            $client,
+            $shopifyCollection['productGids'] ?? [],
+            $shopifyCollection['productsHasNextPage'] ?? false,
+            $shopifyCollection['productsEndCursor'] ?? null,
+        );
 
         if (! empty($colorwayIds)) {
             $collection->colorways()->sync($colorwayIds);
@@ -139,7 +146,14 @@ class ShopifyCollectionSyncService
             'description' => $shopifyCollection['descriptionHtml'] ? trim($shopifyCollection['descriptionHtml']) : null,
         ]);
 
-        $colorwayIds = $this->resolveColorwayIds($shopifyCollection['gid'], $integration, $client);
+        $colorwayIds = $this->resolveColorwayIds(
+            $shopifyCollection['gid'],
+            $integration,
+            $client,
+            $shopifyCollection['productGids'] ?? [],
+            $shopifyCollection['productsHasNextPage'] ?? false,
+            $shopifyCollection['productsEndCursor'] ?? null,
+        );
         $collection->colorways()->sync($colorwayIds);
 
         $this->log(
@@ -152,38 +166,46 @@ class ShopifyCollectionSyncService
     }
 
     /**
-     * Fetch all product GIDs for a collection and resolve them to Colorway IDs.
+     * Resolve product GIDs for a collection to Colorway IDs.
      *
-     * Products with no mapping are silently skipped.
+     * Uses GIDs already fetched inline on the collection node. Falls back to
+     * paginated API calls only when the collection has more than 250 products.
      *
+     * @param  array<string>  $inlineProductGids
      * @return array<int>
      */
-    private function resolveColorwayIds(string $collectionGid, Integration $integration, ShopifyGraphqlClient $client): array
-    {
-        $colorwayIds = [];
-        $cursor = null;
+    private function resolveColorwayIds(
+        string $collectionGid,
+        Integration $integration,
+        ShopifyGraphqlClient $client,
+        array $inlineProductGids = [],
+        bool $hasMoreProducts = false,
+        ?string $productsCursor = null,
+    ): array {
+        $allGids = $inlineProductGids;
 
-        do {
-            $page = $client->getCollectionProducts($collectionGid, $cursor);
-
-            foreach ($page['products'] as $product) {
-                $productGid = $product['gid'];
-
-                $identifier = ExternalIdentifier::where('integration_id', $integration->id)
-                    ->where('external_type', 'shopify_product')
-                    ->where('external_id', $productGid)
-                    ->where('identifiable_type', Colorway::class)
-                    ->first();
-
-                if ($identifier) {
-                    $colorwayIds[] = $identifier->identifiable_id;
+        if ($hasMoreProducts) {
+            $cursor = $productsCursor;
+            do {
+                $page = $client->getCollectionProducts($collectionGid, $cursor);
+                foreach ($page['products'] as $product) {
+                    $allGids[] = $product['gid'];
                 }
-            }
+                $cursor = $page['nextCursor'];
+            } while ($page['hasNextPage']);
+        }
 
-            $cursor = $page['nextCursor'];
-        } while ($page['hasNextPage']);
+        if (empty($allGids)) {
+            return [];
+        }
 
-        return $colorwayIds;
+        return ExternalIdentifier::where('integration_id', $integration->id)
+            ->where('external_type', 'shopify_product')
+            ->whereIn('external_id', $allGids)
+            ->where('identifiable_type', Colorway::class)
+            ->pluck('identifiable_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
     }
 
     private function collectionName(array $collection): string
