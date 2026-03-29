@@ -73,9 +73,8 @@ const filteredMetadata = computed(() => {
             <p
                 v-if="props.description"
                 class="line-clamp-2 text-sm text-surface-600"
-            >
-                {{ props.description }}
-            </p>
+                v-html="props.description"
+            ></p>
             <UiImage
                 v-if="props.image"
                 :src="props.image.src"

@@ -70,6 +70,7 @@ const { showSuccess, showError } = useToast();
 
 const pushingToShopify = ref(false);
 const uploadingMedia = ref(false);
+const fileUploadKey = ref(0);
 
 async function handleMediaUpload(event: { files: File[] }): Promise<void> {
     uploadingMedia.value = true;
@@ -93,6 +94,7 @@ async function handleMediaUpload(event: { files: File[] }): Promise<void> {
         if (!response.ok) {
             throw new Error('Upload failed.');
         }
+        fileUploadKey.value++;
         router.reload({ only: ['media'] });
     } catch {
         showError('Could not upload image(s). Please try again.');
@@ -429,6 +431,7 @@ function handleDelete(event: Event): void {
                                 </p>
                                 <div class="media-upload">
                                     <UiFileUpload
+                                        :key="fileUploadKey"
                                         name="images[]"
                                         accept="image/*"
                                         :multiple="true"
