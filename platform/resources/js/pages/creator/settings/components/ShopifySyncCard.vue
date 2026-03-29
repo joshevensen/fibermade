@@ -485,8 +485,7 @@ function formatStepCount(result: SyncStepResult): string {
                         <p class="text-sm text-surface-600">
                             Fibermade is your source of truth. When you update a
                             colorway or collection in Fibermade it's
-                            automatically pushed to Shopify, and inventory is
-                            kept in sync across both platforms — avoid making
+                            automatically pushed to Shopify — avoid making
                             product changes directly in Shopify.
                         </p>
 
@@ -575,8 +574,9 @@ function formatStepCount(result: SyncStepResult): string {
                 </template>
             </UiCard>
 
+            <!-- TODO: re-enable when inventory ships post-launch -->
             <!-- Pull inventory card -->
-            <UiCard>
+            <!-- <UiCard>
                 <template #content>
                     <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
                         <div>
@@ -601,7 +601,7 @@ function formatStepCount(result: SyncStepResult): string {
                         </div>
                     </div>
                 </template>
-            </UiCard>
+            </UiCard> -->
 
             <!-- Sync bases card -->
             <UiCard>

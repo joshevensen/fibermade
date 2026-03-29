@@ -24,11 +24,12 @@ export function useCreatorNavigation(): NavigationItem[] {
             href: dashboard.url(),
             icon: BusinessIconList.Dashboard,
         },
-        {
-            title: 'Inventory',
-            href: inventoryIndex.url(),
-            icon: BusinessIconList.Inventory,
-        },
+        // TODO: re-enable when inventory ships post-launch
+        // {
+        //     title: 'Inventory',
+        //     href: inventoryIndex.url(),
+        //     icon: BusinessIconList.Inventory,
+        // },
         {
             title: 'Colorways',
             href: colorwaysIndex.url(),

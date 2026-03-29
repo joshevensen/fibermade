@@ -28,8 +28,18 @@ class ShopifyWebhookController extends Controller
 
     /**
      * Handle inventory_levels/update webhooks.
+     *
+     * TODO: re-enable when inventory ships post-launch — processing is disabled for now.
      */
     public function inventory(Request $request): Response
+    {
+        return response('', 200);
+    }
+
+    /**
+     * @codeCoverageIgnore
+     */
+    private function processInventoryWebhook(Request $request): Response
     {
         $topic = $request->header('X-Shopify-Topic');
         if ($topic !== 'inventory_levels/update') {
