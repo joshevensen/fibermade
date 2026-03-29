@@ -101,6 +101,7 @@ class PushColorwayJob implements ShouldQueue
                 $this->logSuccess($integration, 'Archived colorway in Shopify', $operation);
             } else {
                 $shopifySync->updateProduct($colorway, $productGid);
+                $shopifySync->syncImages($colorway, $productGid);
                 $this->logSuccess($integration, 'Synced colorway catalog to Shopify', $operation);
             }
         } catch (ShopifyApiException $e) {

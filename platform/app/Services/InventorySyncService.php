@@ -153,6 +153,14 @@ class InventorySyncService
             );
         }
 
+        try {
+            $shopifySync->syncImages($colorway->fresh(), $productGid);
+        } catch (ShopifyApiException $e) {
+            $this->logPush($integration, $colorway, IntegrationLogStatus::Warning, 'image_sync', 0, $syncSource, [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
         return $result;
     }
 
