@@ -53,6 +53,46 @@ class ShopifyConnectionController extends ApiController
     }
 
     /**
+     * Update the Shopify access token for an existing integration.
+     *
+     * Called by the Shopify app whenever its session token is rotated.
+     */
+    public function refreshToken(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'connect_token' => ['required', 'string'],
+            'shop' => ['required', 'string'],
+            'shopify_access_token' => ['required', 'string'],
+        ]);
+
+        $account = Account::where('shopify_connect_token', $validated['connect_token'])->first();
+
+        if (! $account) {
+            return $this->errorResponse('Invalid connect token');
+        }
+
+        $integration = Integration::where('account_id', $account->id)
+            ->where('type', IntegrationType::Shopify)
+            ->where('active', true)
+            ->get()
+            ->first(function (Integration $i) use ($validated) {
+                $config = $i->getShopifyConfig();
+
+                return $config && strtolower($config['shop']) === strtolower(
+                    preg_replace('#^https?://#', '', rtrim($validated['shop'], '/'))
+                );
+            });
+
+        if (! $integration) {
+            return response()->json(null, 204);
+        }
+
+        $integration->update(['credentials' => $validated['shopify_access_token']]);
+
+        return response()->json(null, 204);
+    }
+
+    /**
      * Disconnect a Shopify store from a Fibermade account.
      */
     public function disconnect(Request $request): JsonResponse

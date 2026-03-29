@@ -21,6 +21,9 @@ Route::prefix('v1')->group(function () {
         ->name('api.v1.shopify.connect');
     Route::post('shopify/disconnect', [ShopifyConnectionController::class, 'disconnect'])
         ->name('api.v1.shopify.disconnect');
+    Route::post('shopify/refresh-token', [ShopifyConnectionController::class, 'refreshToken'])
+        ->middleware('throttle:60,1')
+        ->name('api.v1.shopify.refresh-token');
     Route::get('shopify/status', [ShopifyConnectionController::class, 'status'])
         ->name('api.v1.shopify.status');
 });

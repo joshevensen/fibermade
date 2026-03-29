@@ -6,7 +6,7 @@ import type {
 } from "react-router";
 import { useFetcher, useLoaderData, useNavigate } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { authenticate } from "../shopify.server";
+import { authenticate, sessionStorage } from "../shopify.server";
 import db from "../db.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 
@@ -102,6 +102,25 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<Connectio
       };
     }
 
+    // Keep the platform's stored access token up to date. The offline token may
+    // be rotated by Shopify (expiringOfflineAccessTokens) and the Shopify
+    // framework updates the session storage automatically, but the platform
+    // stores its own copy. Silently refresh it on each page load.
+    const offlineSession = await sessionStorage.loadSession(`offline_${session.shop}`);
+    const currentToken = offlineSession?.accessToken;
+    if (currentToken) {
+      fibermadeRequest(baseUrl, "/api/v1/shopify/refresh-token", {
+        method: "POST",
+        body: {
+          connect_token: connection.connectToken,
+          shop: session.shop,
+          shopify_access_token: currentToken,
+        },
+      }).catch(() => {
+        // Non-fatal: the sync will still work until the token rotates
+      });
+    }
+
     return connectedPayload;
   } catch {
     return connectedPayload;
@@ -118,7 +137,11 @@ export const action = async ({ request }: ActionFunctionArgs): Promise<ConnectAc
   const intent = formData.get("intent");
 
   if (intent === "connect") {
-    const shopifyAccessToken = session.accessToken;
+    // Load the offline (store-scoped) session to get a long-lived access token.
+    // The embedded admin request uses an online session; storing an online token
+    // in the platform would cause 401s after it expires (within ~24h).
+    const offlineSession = await sessionStorage.loadSession(`offline_${session.shop}`);
+    const shopifyAccessToken = offlineSession?.accessToken ?? session.accessToken;
     if (typeof shopifyAccessToken !== "string" || !shopifyAccessToken) {
       return { intent: "connect", success: false, error: "Shopify session is missing access token." };
     }
