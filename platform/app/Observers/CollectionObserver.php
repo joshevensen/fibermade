@@ -3,8 +3,8 @@
 namespace App\Observers;
 
 use App\Enums\IntegrationType;
-use App\Jobs\SyncCollectionDeletedToShopifyJob;
-use App\Jobs\SyncCollectionToShopifyJob;
+use App\Jobs\PushCollectionDeletedJob;
+use App\Jobs\PushCollectionJob;
 use App\Models\Collection;
 use App\Models\Integration;
 use Illuminate\Support\Facades\Log;
@@ -19,7 +19,7 @@ class CollectionObserver
         }
 
         try {
-            SyncCollectionToShopifyJob::dispatch($collection, 'created');
+            PushCollectionJob::dispatch($collection, 'created');
         } catch (\Throwable $e) {
             Log::warning('CollectionObserver: failed to dispatch sync job', [
                 'collection_id' => $collection->id,
@@ -37,7 +37,7 @@ class CollectionObserver
         }
 
         try {
-            SyncCollectionToShopifyJob::dispatch($collection, 'updated');
+            PushCollectionJob::dispatch($collection, 'updated');
         } catch (\Throwable $e) {
             Log::warning('CollectionObserver: failed to dispatch sync job', [
                 'collection_id' => $collection->id,
@@ -55,7 +55,7 @@ class CollectionObserver
         }
 
         try {
-            SyncCollectionDeletedToShopifyJob::dispatch($collection->id, $collection->account_id);
+            PushCollectionDeletedJob::dispatch($collection->id, $collection->account_id);
         } catch (\Throwable $e) {
             Log::warning('CollectionObserver: failed to dispatch delete sync job', [
                 'collection_id' => $collection->id,

@@ -3,13 +3,13 @@
 use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
-use App\Jobs\SyncBaseDeletedToShopifyJob;
-use App\Jobs\SyncBaseToShopifyJob;
-use App\Jobs\SyncCollectionDeletedToShopifyJob;
-use App\Jobs\SyncCollectionToShopifyJob;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
-use App\Jobs\SyncColorwayImagesToShopifyJob;
-use App\Jobs\SyncInventoryToShopifyJob;
+use App\Jobs\PushBaseDeletedJob;
+use App\Jobs\PushBaseJob;
+use App\Jobs\PushCollectionDeletedJob;
+use App\Jobs\PushCollectionJob;
+use App\Jobs\PushColorwayImagesJob;
+use App\Jobs\PushColorwayJob;
+use App\Jobs\PushInventoryJob;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Collection;
@@ -79,9 +79,9 @@ test('clearSyncErrors works when has_sync_errors was not previously set', functi
     expect($integration->settings['has_sync_errors'])->toBeFalse();
 });
 
-// ─── SyncColorwayCatalogToShopifyJob ─────────────────────────────────────────
+// ─── PushColorwayJob ─────────────────────────────────────────
 
-test('SyncColorwayCatalogToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushColorwayJob flags sync error on ShopifyApiException', function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $account = Account::factory()->creator()->create();
@@ -116,7 +116,7 @@ test('SyncColorwayCatalogToShopifyJob flags sync error on ShopifyApiException', 
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     $integration->refresh();
@@ -128,18 +128,18 @@ test('SyncColorwayCatalogToShopifyJob flags sync error on ShopifyApiException', 
     expect($log)->not->toBeNull();
 });
 
-test('SyncColorwayCatalogToShopifyJob failed() method is callable without exception', function () {
+test('PushColorwayJob failed() method is callable without exception', function () {
     $account = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });
 
-// ─── SyncColorwayImagesToShopifyJob ──────────────────────────────────────────
+// ─── PushColorwayImagesJob ──────────────────────────────────────────
 
-test('SyncColorwayImagesToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushColorwayImagesJob flags sync error on ShopifyApiException', function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $account = Account::factory()->creator()->create();
@@ -182,7 +182,7 @@ test('SyncColorwayImagesToShopifyJob flags sync error on ShopifyApiException', f
             ]]]),
     ]);
 
-    $job = new SyncColorwayImagesToShopifyJob($colorway);
+    $job = new PushColorwayImagesJob($colorway);
     $job->handle();
 
     $integration->refresh();
@@ -194,18 +194,18 @@ test('SyncColorwayImagesToShopifyJob flags sync error on ShopifyApiException', f
     expect($log)->not->toBeNull();
 });
 
-test('SyncColorwayImagesToShopifyJob failed() method is callable without exception', function () {
+test('PushColorwayImagesJob failed() method is callable without exception', function () {
     $account = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
 
-    $job = new SyncColorwayImagesToShopifyJob($colorway);
+    $job = new PushColorwayImagesJob($colorway);
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });
 
-// ─── SyncBaseToShopifyJob ─────────────────────────────────────────────────────
+// ─── PushBaseJob ─────────────────────────────────────────────────────
 
-test('SyncBaseToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushBaseJob flags sync error on ShopifyApiException', function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $account = Account::factory()->creator()->create();
@@ -250,7 +250,7 @@ test('SyncBaseToShopifyJob flags sync error on ShopifyApiException', function ()
         ]),
     ]);
 
-    $job = new SyncBaseToShopifyJob($base, 'updated');
+    $job = new PushBaseJob($base, 'updated');
     $job->handle();
 
     $integration->refresh();
@@ -262,18 +262,18 @@ test('SyncBaseToShopifyJob flags sync error on ShopifyApiException', function ()
     expect($log)->not->toBeNull();
 });
 
-test('SyncBaseToShopifyJob failed() method is callable without exception', function () {
+test('PushBaseJob failed() method is callable without exception', function () {
     $account = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $account->id]);
 
-    $job = new SyncBaseToShopifyJob($base, 'updated');
+    $job = new PushBaseJob($base, 'updated');
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });
 
-// ─── SyncBaseDeletedToShopifyJob ─────────────────────────────────────────────
+// ─── PushBaseDeletedJob ─────────────────────────────────────────────
 
-test('SyncBaseDeletedToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushBaseDeletedJob flags sync error on ShopifyApiException', function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $account = Account::factory()->creator()->create();
@@ -318,22 +318,22 @@ test('SyncBaseDeletedToShopifyJob flags sync error on ShopifyApiException', func
         ]),
     ]);
 
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $account->id);
+    $job = new PushBaseDeletedJob($base->id, $account->id);
     $job->handle();
 
     $integration->refresh();
     expect($integration->settings['has_sync_errors'])->toBeTrue();
 });
 
-test('SyncBaseDeletedToShopifyJob failed() method is callable without exception', function () {
-    $job = new SyncBaseDeletedToShopifyJob(1, 1);
+test('PushBaseDeletedJob failed() method is callable without exception', function () {
+    $job = new PushBaseDeletedJob(1, 1);
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });
 
-// ─── SyncCollectionToShopifyJob ───────────────────────────────────────────────
+// ─── PushCollectionJob ───────────────────────────────────────────────
 
-test('SyncCollectionToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushCollectionJob flags sync error on ShopifyApiException', function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $account = Account::factory()->creator()->create();
@@ -358,7 +358,7 @@ test('SyncCollectionToShopifyJob flags sync error on ShopifyApiException', funct
         ]),
     ]);
 
-    $job = new SyncCollectionToShopifyJob($collection, 'created');
+    $job = new PushCollectionJob($collection, 'created');
     $job->handle();
 
     $integration->refresh();
@@ -370,18 +370,18 @@ test('SyncCollectionToShopifyJob flags sync error on ShopifyApiException', funct
     expect($log)->not->toBeNull();
 });
 
-test('SyncCollectionToShopifyJob failed() method is callable without exception', function () {
+test('PushCollectionJob failed() method is callable without exception', function () {
     $account = Account::factory()->creator()->create();
     $collection = Collection::factory()->create(['account_id' => $account->id]);
 
-    $job = new SyncCollectionToShopifyJob($collection, 'created');
+    $job = new PushCollectionJob($collection, 'created');
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });
 
-// ─── SyncCollectionDeletedToShopifyJob ───────────────────────────────────────
+// ─── PushCollectionDeletedJob ───────────────────────────────────────
 
-test('SyncCollectionDeletedToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushCollectionDeletedJob flags sync error on ShopifyApiException', function () {
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $account = Account::factory()->creator()->create();
@@ -406,7 +406,7 @@ test('SyncCollectionDeletedToShopifyJob flags sync error on ShopifyApiException'
         'test.myshopify.com/*' => Http::response(['errors' => 'Not Found'], 404),
     ]);
 
-    $job = new SyncCollectionDeletedToShopifyJob($collection->id, $account->id);
+    $job = new PushCollectionDeletedJob($collection->id, $account->id);
     $job->handle();
 
     $integration->refresh();
@@ -418,15 +418,15 @@ test('SyncCollectionDeletedToShopifyJob flags sync error on ShopifyApiException'
     expect($log)->not->toBeNull();
 });
 
-test('SyncCollectionDeletedToShopifyJob failed() method is callable without exception', function () {
-    $job = new SyncCollectionDeletedToShopifyJob(1, 1);
+test('PushCollectionDeletedJob failed() method is callable without exception', function () {
+    $job = new PushCollectionDeletedJob(1, 1);
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });
 
-// ─── SyncInventoryToShopifyJob ────────────────────────────────────────────────
+// ─── PushInventoryJob ────────────────────────────────────────────────
 
-test('SyncInventoryToShopifyJob flags sync error on ShopifyApiException', function () {
+test('PushInventoryJob flags sync error on ShopifyApiException', function () {
     $account = Account::factory()->creator()->create();
     $integration = Integration::factory()->create([
         'account_id' => $account->id,
@@ -449,7 +449,7 @@ test('SyncInventoryToShopifyJob flags sync error on ShopifyApiException', functi
         ->once()
         ->andThrow(new ShopifyApiException('API error', []));
 
-    $job = new SyncInventoryToShopifyJob($inventory->id, $integration->id);
+    $job = new PushInventoryJob($inventory->id, $integration->id);
     $job->handle(app(InventorySyncService::class));
 
     $integration->refresh();
@@ -462,8 +462,8 @@ test('SyncInventoryToShopifyJob flags sync error on ShopifyApiException', functi
     expect($log->metadata['operation'])->toBe('inventory_sync');
 });
 
-test('SyncInventoryToShopifyJob failed() method is callable without exception', function () {
-    $job = new SyncInventoryToShopifyJob(1, 1);
+test('PushInventoryJob failed() method is callable without exception', function () {
+    $job = new PushInventoryJob(1, 1);
 
     expect(fn () => $job->failed(new RuntimeException('Test failure')))->not->toThrow(Throwable::class);
 });

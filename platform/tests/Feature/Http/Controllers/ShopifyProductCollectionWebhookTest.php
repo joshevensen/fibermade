@@ -1,7 +1,7 @@
 <?php
 
-use App\Jobs\ProcessShopifyCollectionWebhookJob;
-use App\Jobs\ProcessShopifyProductWebhookJob;
+use App\Jobs\ProcessCollectionWebhookJob;
+use App\Jobs\ProcessProductWebhookJob;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Config;
 
@@ -27,7 +27,7 @@ test('products/create returns 200 with no side effects', function () {
     );
 
     $response->assertStatus(200);
-    Bus::assertNotDispatched(ProcessShopifyProductWebhookJob::class);
+    Bus::assertNotDispatched(ProcessProductWebhookJob::class);
 });
 
 // ── products/update is a no-op ────────────────────────────────────────────────
@@ -42,7 +42,7 @@ test('products/update returns 200 with no side effects', function () {
     );
 
     $response->assertStatus(200);
-    Bus::assertNotDispatched(ProcessShopifyProductWebhookJob::class);
+    Bus::assertNotDispatched(ProcessProductWebhookJob::class);
 });
 
 // ── products/delete is a no-op ────────────────────────────────────────────────
@@ -57,7 +57,7 @@ test('products/delete returns 200 with no side effects', function () {
     );
 
     $response->assertStatus(200);
-    Bus::assertNotDispatched(ProcessShopifyProductWebhookJob::class);
+    Bus::assertNotDispatched(ProcessProductWebhookJob::class);
 });
 
 // ── collections/create is a no-op ─────────────────────────────────────────────
@@ -72,7 +72,7 @@ test('collections/create returns 200 with no side effects', function () {
     );
 
     $response->assertStatus(200);
-    Bus::assertNotDispatched(ProcessShopifyCollectionWebhookJob::class);
+    Bus::assertNotDispatched(ProcessCollectionWebhookJob::class);
 });
 
 // ── collections/update is a no-op ─────────────────────────────────────────────
@@ -87,7 +87,7 @@ test('collections/update returns 200 with no side effects', function () {
     );
 
     $response->assertStatus(200);
-    Bus::assertNotDispatched(ProcessShopifyCollectionWebhookJob::class);
+    Bus::assertNotDispatched(ProcessCollectionWebhookJob::class);
 });
 
 // ── collections/delete is a no-op ─────────────────────────────────────────────
@@ -102,5 +102,5 @@ test('collections/delete returns 200 with no side effects', function () {
     );
 
     $response->assertStatus(200);
-    Bus::assertNotDispatched(ProcessShopifyCollectionWebhookJob::class);
+    Bus::assertNotDispatched(ProcessCollectionWebhookJob::class);
 });

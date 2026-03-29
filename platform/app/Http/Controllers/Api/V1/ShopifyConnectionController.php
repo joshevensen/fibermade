@@ -155,6 +155,7 @@ class ShopifyConnectionController extends ApiController
         return $this->successResponse([
             'active' => $integration->active,
             'integration_id' => $integration->id,
+            'creator_name' => $account->creator?->name,
         ]);
     }
 }

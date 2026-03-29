@@ -2,7 +2,7 @@
 
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
-use App\Jobs\SyncBaseToShopifyJob;
+use App\Jobs\PushBaseJob;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
@@ -71,7 +71,7 @@ test('handleCreated groups colorways by product and calls productVariantsBulkCre
         ]);
     });
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkCreate'));
@@ -109,7 +109,7 @@ test('handleCreated creates ExternalIdentifier mappings for each new variant', f
         ]);
     });
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     $inventory = Inventory::where('base_id', $base->id)->where('colorway_id', $colorway->id)->first();
@@ -152,7 +152,7 @@ test('handleCreated logs success after creating variants', function () {
         ]);
     });
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -195,7 +195,7 @@ test('handleCreated calls updateVariantsBulk when variant already exists in Shop
         ]),
     ]);
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkUpdate'));
@@ -264,7 +264,7 @@ test('handleCreated mixes create and update when some variants already exist', f
         ]);
     });
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkUpdate'));
@@ -280,7 +280,7 @@ test('handleCreated skips colorways without Shopify product mapping', function (
 
     Http::fake();
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     Http::assertNothingSent();
@@ -338,7 +338,7 @@ test('handleUpdated groups inventories by product and calls productVariantsBulkU
         ]),
     ]);
 
-    $job = new SyncBaseToShopifyJob($base, 'updated');
+    $job = new PushBaseJob($base, 'updated');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkUpdate'));
@@ -377,7 +377,7 @@ test('handleUpdated logs success after updating variants', function () {
         ]),
     ]);
 
-    $job = new SyncBaseToShopifyJob($base, 'updated');
+    $job = new PushBaseJob($base, 'updated');
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -397,26 +397,26 @@ test('handleUpdated skips inventories without variant mapping', function () {
 
     Http::fake();
 
-    $job = new SyncBaseToShopifyJob($base, 'updated');
+    $job = new PushBaseJob($base, 'updated');
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncBaseToShopifyJob returns early when no active integration', function () {
+test('PushBaseJob returns early when no active integration', function () {
     $otherAccount = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $otherAccount->id]);
 
     Http::fake();
 
-    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job = new PushBaseJob($base, 'created');
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncBaseToShopifyJob has retry configuration', function () {
-    $job = new SyncBaseToShopifyJob(new Base, 'created');
+test('PushBaseJob has retry configuration', function () {
+    $job = new PushBaseJob(new Base, 'created');
 
     expect($job->tries)->toBe(3);
     expect($job->backoff)->toBe(60);

@@ -17,7 +17,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-class ProcessShopifyProductWebhookJob implements ShouldQueue
+class ProcessProductWebhookJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -41,7 +41,7 @@ class ProcessShopifyProductWebhookJob implements ShouldQueue
 
     public function failed(Throwable $e): void
     {
-        Log::error('ProcessShopifyProductWebhookJob failed', [
+        Log::error('ProcessProductWebhookJob failed', [
             'integration_id' => $this->integration->id,
             'action' => $this->action,
             'gid' => $this->normalizedProduct['gid'] ?? null,

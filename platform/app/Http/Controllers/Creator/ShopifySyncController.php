@@ -7,9 +7,13 @@ use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
 use App\Exceptions\SyncAlreadyRunningException;
 use App\Http\Controllers\Controller;
-use App\Jobs\PushCatalogToShopifyJob;
-use App\Jobs\SyncBaseToShopifyJob;
+use App\Jobs\PushBaseJob;
+use App\Jobs\PushCatalogJob;
+use App\Jobs\PushCollectionJob;
+use App\Jobs\PushColorwayJob;
 use App\Models\Base;
+use App\Models\Collection;
+use App\Models\Colorway;
 use App\Models\Integration;
 use App\Services\Shopify\ShopifySyncOrchestrator;
 use Illuminate\Http\JsonResponse;
@@ -25,41 +29,41 @@ class ShopifySyncController extends Controller
     ) {}
 
     /**
-     * Trigger a full sync (products → collections → inventory).
+     * Trigger a full pull (products → collections → inventory).
      */
-    public function syncAll(Request $request): JsonResponse
+    public function pullAll(Request $request): JsonResponse
     {
-        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->syncAll($integration));
+        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->pullAll($integration));
     }
 
     /**
-     * Trigger a products-only sync.
+     * Trigger a colorways-only pull.
      */
-    public function syncProducts(Request $request): JsonResponse
+    public function pullColorways(Request $request): JsonResponse
     {
-        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->syncProducts($integration));
+        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->pullColorways($integration));
     }
 
     /**
-     * Trigger a collections-only sync.
+     * Trigger a collections-only pull.
      */
-    public function syncCollections(Request $request): JsonResponse
+    public function pullCollections(Request $request): JsonResponse
     {
-        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->syncCollections($integration));
+        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->pullCollections($integration));
     }
 
     /**
-     * Trigger an inventory-only sync.
+     * Trigger an inventory-only pull.
      */
-    public function syncInventory(Request $request): JsonResponse
+    public function pullInventory(Request $request): JsonResponse
     {
-        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->syncInventory($integration));
+        return $this->triggerSync($request, fn (Integration $integration) => $this->orchestrator->pullInventory($integration));
     }
 
     /**
-     * Dispatch update jobs for all active bases to sync variants across all Shopify products.
+     * Dispatch push jobs for all active bases to sync variants across all Shopify products.
      */
-    public function syncBases(Request $request): JsonResponse
+    public function pushBases(Request $request): JsonResponse
     {
         $integration = $this->resolveIntegration($request);
 
@@ -72,10 +76,50 @@ class ShopifySyncController extends Controller
             ->get();
 
         foreach ($bases as $base) {
-            SyncBaseToShopifyJob::dispatch($base, 'updated');
+            PushBaseJob::dispatch($base, 'updated');
         }
 
         return response()->json(['message' => 'Base sync queued.', 'count' => $bases->count()], 202);
+    }
+
+    /**
+     * Push all colorways to Shopify.
+     */
+    public function pushColorways(Request $request): JsonResponse
+    {
+        $integration = $this->resolveIntegration($request);
+
+        if (! $integration) {
+            return response()->json(['message' => 'No active Shopify integration found.'], 404);
+        }
+
+        $colorways = Colorway::where('account_id', $request->user()->account_id)->get();
+
+        foreach ($colorways as $colorway) {
+            PushColorwayJob::dispatch($colorway, 'updated');
+        }
+
+        return response()->json(['message' => 'Colorway push queued.', 'count' => $colorways->count()], 202);
+    }
+
+    /**
+     * Push all collections to Shopify.
+     */
+    public function pushCollections(Request $request): JsonResponse
+    {
+        $integration = $this->resolveIntegration($request);
+
+        if (! $integration) {
+            return response()->json(['message' => 'No active Shopify integration found.'], 404);
+        }
+
+        $collections = Collection::where('account_id', $request->user()->account_id)->get();
+
+        foreach ($collections as $collection) {
+            PushCollectionJob::dispatch($collection, 'updated');
+        }
+
+        return response()->json(['message' => 'Collection push queued.', 'count' => $collections->count()], 202);
     }
 
     /**
@@ -93,7 +137,7 @@ class ShopifySyncController extends Controller
             return response()->json(['message' => 'A push is already running.'], 409);
         }
 
-        PushCatalogToShopifyJob::dispatch($integration->id);
+        PushCatalogJob::dispatch($integration->id);
 
         $integration->refresh();
         $settings = $integration->settings ?? [];

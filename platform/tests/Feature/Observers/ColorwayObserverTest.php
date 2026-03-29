@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\IntegrationType;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
+use App\Jobs\PushColorwayJob;
 use App\Models\Account;
 use App\Models\Colorway;
 use App\Models\Integration;
@@ -22,13 +22,13 @@ beforeEach(function () {
     ]);
 });
 
-test('deleting a colorway dispatches SyncColorwayCatalogToShopifyJob with deleted action', function () {
+test('deleting a colorway dispatches PushColorwayJob with deleted action', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     Queue::fake(); // reset after create dispatch
 
     $colorway->delete();
 
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+    Queue::assertPushed(PushColorwayJob::class, function ($job) use ($colorway) {
         return $job->colorway->id === $colorway->id && $job->action === 'deleted';
     });
 });
@@ -40,7 +40,7 @@ test('deleting a colorway does not dispatch job when no active Shopify integrati
 
     $colorway->delete();
 
-    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertNotPushed(PushColorwayJob::class);
 });
 
 test('deleting a colorway does not dispatch job when catalog sync is globally disabled', function () {
@@ -50,13 +50,13 @@ test('deleting a colorway does not dispatch job when catalog sync is globally di
 
     $colorway->delete();
 
-    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertNotPushed(PushColorwayJob::class);
 });
 
-test('creating a colorway dispatches SyncColorwayCatalogToShopifyJob with created action', function () {
+test('creating a colorway dispatches PushColorwayJob with created action', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+    Queue::assertPushed(PushColorwayJob::class, function ($job) use ($colorway) {
         return $job->colorway->id === $colorway->id && $job->action === 'created';
     });
 });

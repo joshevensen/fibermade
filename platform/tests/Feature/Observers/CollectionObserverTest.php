@@ -1,8 +1,8 @@
 <?php
 
 use App\Enums\IntegrationType;
-use App\Jobs\SyncCollectionDeletedToShopifyJob;
-use App\Jobs\SyncCollectionToShopifyJob;
+use App\Jobs\PushCollectionDeletedJob;
+use App\Jobs\PushCollectionJob;
 use App\Models\Account;
 use App\Models\Collection;
 use App\Models\Integration;
@@ -23,33 +23,33 @@ beforeEach(function () {
     ]);
 });
 
-test('CollectionObserver created dispatches SyncCollectionToShopifyJob with action created', function () {
+test('CollectionObserver created dispatches PushCollectionJob with action created', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id]);
 
-    Queue::assertPushed(SyncCollectionToShopifyJob::class, function ($job) use ($collection) {
+    Queue::assertPushed(PushCollectionJob::class, function ($job) use ($collection) {
         return $job->collection->id === $collection->id && $job->action === 'created';
     });
 });
 
-test('CollectionObserver updated dispatches SyncCollectionToShopifyJob with action updated', function () {
+test('CollectionObserver updated dispatches PushCollectionJob with action updated', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id]);
     Queue::fake();
 
     $collection->update(['name' => 'Updated Name']);
 
-    Queue::assertPushed(SyncCollectionToShopifyJob::class, function ($job) use ($collection) {
+    Queue::assertPushed(PushCollectionJob::class, function ($job) use ($collection) {
         return $job->collection->id === $collection->id && $job->action === 'updated';
     });
 });
 
-test('CollectionObserver deleted dispatches SyncCollectionDeletedToShopifyJob', function () {
+test('CollectionObserver deleted dispatches PushCollectionDeletedJob', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id]);
     Queue::fake();
 
     $collectionId = $collection->id;
     $collection->delete();
 
-    Queue::assertPushed(SyncCollectionDeletedToShopifyJob::class, function ($job) use ($collectionId) {
+    Queue::assertPushed(PushCollectionDeletedJob::class, function ($job) use ($collectionId) {
         return $job->collectionId === $collectionId;
     });
 });
@@ -58,7 +58,7 @@ test('CollectionObserver does not dispatch when no active Shopify integration', 
     $otherAccount = Account::factory()->creator()->create();
     $collection = Collection::factory()->create(['account_id' => $otherAccount->id]);
 
-    Queue::assertNotPushed(SyncCollectionToShopifyJob::class);
+    Queue::assertNotPushed(PushCollectionJob::class);
 });
 
 test('CollectionObserver does not dispatch when catalog sync is disabled', function () {
@@ -67,7 +67,7 @@ test('CollectionObserver does not dispatch when catalog sync is disabled', funct
 
     Collection::factory()->create(['account_id' => $this->account->id]);
 
-    Queue::assertNotPushed(SyncCollectionToShopifyJob::class);
+    Queue::assertNotPushed(PushCollectionJob::class);
 });
 
 test('CollectionObserver deleted does not dispatch when no active Shopify integration', function () {
@@ -77,7 +77,7 @@ test('CollectionObserver deleted does not dispatch when no active Shopify integr
 
     $collection->delete();
 
-    Queue::assertNotPushed(SyncCollectionDeletedToShopifyJob::class);
+    Queue::assertNotPushed(PushCollectionDeletedJob::class);
 });
 
 test('CollectionObserver deleted does not dispatch when catalog sync is disabled', function () {
@@ -87,5 +87,5 @@ test('CollectionObserver deleted does not dispatch when catalog sync is disabled
     $collection = Collection::factory()->create(['account_id' => $this->account->id]);
     $collection->delete();
 
-    Queue::assertNotPushed(SyncCollectionDeletedToShopifyJob::class);
+    Queue::assertNotPushed(PushCollectionDeletedJob::class);
 });

@@ -7,7 +7,7 @@ use App\Enums\IntegrationType;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionColorwaysRequest;
 use App\Http\Requests\UpdateCollectionRequest;
-use App\Jobs\SyncCollectionToShopifyJob;
+use App\Jobs\PushCollectionJob;
 use App\Models\Collection;
 use App\Models\Colorway;
 use App\Models\Integration;
@@ -113,7 +113,7 @@ class CollectionController extends Controller
 
         $removedIds = array_values(array_diff($previousIds, $newIds));
 
-        SyncCollectionToShopifyJob::dispatch($collection, 'updated', $removedIds);
+        PushCollectionJob::dispatch($collection, 'updated', $removedIds);
 
         return redirect()->route('collections.edit', $collection)->with('success', 'Colorways updated successfully.');
     }
@@ -125,7 +125,7 @@ class CollectionController extends Controller
     {
         $this->authorize('update', $collection);
 
-        SyncCollectionToShopifyJob::dispatch($collection, 'created');
+        PushCollectionJob::dispatch($collection, 'created');
 
         return response()->json(['message' => 'Push queued.']);
     }

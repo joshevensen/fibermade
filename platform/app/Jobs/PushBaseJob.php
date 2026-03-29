@@ -20,7 +20,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Sentry\State\Scope;
 
-class SyncBaseToShopifyJob implements ShouldQueue
+class PushBaseJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

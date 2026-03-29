@@ -2,7 +2,7 @@
 
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
-use App\Jobs\SyncCollectionToShopifyJob;
+use App\Jobs\PushCollectionJob;
 use App\Models\Account;
 use App\Models\Collection;
 use App\Models\Colorway;
@@ -31,7 +31,7 @@ beforeEach(function () {
 
 // ─── created path ─────────────────────────────────────────────────────────────
 
-test('SyncCollectionToShopifyJob (created) creates collection and syncs products', function () {
+test('PushCollectionJob (created) creates collection and syncs products', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id, 'name' => 'My Collection']);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $collection->colorways()->attach($colorway->id);
@@ -72,7 +72,7 @@ test('SyncCollectionToShopifyJob (created) creates collection and syncs products
         ]);
     });
 
-    $job = new SyncCollectionToShopifyJob($collection, 'created');
+    $job = new PushCollectionJob($collection, 'created');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'collectionCreate'));
@@ -87,7 +87,7 @@ test('SyncCollectionToShopifyJob (created) creates collection and syncs products
 
 // ─── updated path ─────────────────────────────────────────────────────────────
 
-test('SyncCollectionToShopifyJob (updated) updates collection and syncs products when mapping exists', function () {
+test('PushCollectionJob (updated) updates collection and syncs products when mapping exists', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id, 'name' => 'Updated Name']);
 
     ExternalIdentifier::create([
@@ -109,7 +109,7 @@ test('SyncCollectionToShopifyJob (updated) updates collection and syncs products
         ]),
     ]);
 
-    $job = new SyncCollectionToShopifyJob($collection, 'updated');
+    $job = new PushCollectionJob($collection, 'updated');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'collectionUpdate'));
@@ -121,7 +121,7 @@ test('SyncCollectionToShopifyJob (updated) updates collection and syncs products
     expect($log->metadata['operation'])->toBe('collection_update');
 });
 
-test('SyncCollectionToShopifyJob (updated) creates collection when no mapping exists', function () {
+test('PushCollectionJob (updated) creates collection when no mapping exists', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id, 'name' => 'New Collection']);
     // No ExternalIdentifier mapping
 
@@ -151,7 +151,7 @@ test('SyncCollectionToShopifyJob (updated) creates collection when no mapping ex
         ]);
     });
 
-    $job = new SyncCollectionToShopifyJob($collection, 'updated');
+    $job = new PushCollectionJob($collection, 'updated');
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'collectionCreate'));
@@ -162,7 +162,7 @@ test('SyncCollectionToShopifyJob (updated) creates collection when no mapping ex
     expect($log->metadata['operation'])->toBe('collection_create');
 });
 
-test('SyncCollectionToShopifyJob passes removed colorway IDs to syncCollectionProducts', function () {
+test('PushCollectionJob passes removed colorway IDs to syncCollectionProducts', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id]);
     $removedColorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
@@ -198,13 +198,13 @@ test('SyncCollectionToShopifyJob passes removed colorway IDs to syncCollectionPr
         ]),
     ]);
 
-    $job = new SyncCollectionToShopifyJob($collection, 'updated', [$removedColorway->id]);
+    $job = new PushCollectionJob($collection, 'updated', [$removedColorway->id]);
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->url(), 'collects/501.json') && $r->method() === 'DELETE');
 });
 
-test('SyncCollectionToShopifyJob (created) updates instead of creating when mapping already exists (pulled from Shopify)', function () {
+test('PushCollectionJob (created) updates instead of creating when mapping already exists (pulled from Shopify)', function () {
     $collection = Collection::factory()->create(['account_id' => $this->account->id, 'name' => 'Pulled Collection']);
 
     ExternalIdentifier::create([
@@ -226,7 +226,7 @@ test('SyncCollectionToShopifyJob (created) updates instead of creating when mapp
         ]),
     ]);
 
-    $job = new SyncCollectionToShopifyJob($collection, 'created');
+    $job = new PushCollectionJob($collection, 'created');
     $job->handle();
 
     Http::assertNotSent(fn ($r) => str_contains($r->body(), 'collectionCreate'));
@@ -240,20 +240,20 @@ test('SyncCollectionToShopifyJob (created) updates instead of creating when mapp
 
 // ─── guard checks ─────────────────────────────────────────────────────────────
 
-test('SyncCollectionToShopifyJob returns early when no active integration', function () {
+test('PushCollectionJob returns early when no active integration', function () {
     $otherAccount = Account::factory()->creator()->create();
     $collection = Collection::factory()->create(['account_id' => $otherAccount->id]);
 
     Http::fake();
 
-    $job = new SyncCollectionToShopifyJob($collection, 'created');
+    $job = new PushCollectionJob($collection, 'created');
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncCollectionToShopifyJob has retry configuration', function () {
-    $job = new SyncCollectionToShopifyJob(new Collection, 'created');
+test('PushCollectionJob has retry configuration', function () {
+    $job = new PushCollectionJob(new Collection, 'created');
 
     expect($job->tries)->toBe(3);
     expect($job->backoff)->toBe(60);

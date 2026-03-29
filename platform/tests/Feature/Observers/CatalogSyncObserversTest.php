@@ -3,10 +3,10 @@
 use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationType;
 use App\Enums\Technique;
-use App\Jobs\SyncBaseDeletedToShopifyJob;
-use App\Jobs\SyncBaseToShopifyJob;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
-use App\Jobs\SyncColorwayImagesToShopifyJob;
+use App\Jobs\PushBaseDeletedJob;
+use App\Jobs\PushBaseJob;
+use App\Jobs\PushColorwayImagesJob;
+use App\Jobs\PushColorwayJob;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
@@ -21,18 +21,18 @@ beforeEach(function () {
     Queue::fake();
 });
 
-test('Colorway name change dispatches SyncColorwayCatalogToShopifyJob', function () {
+test('Colorway name change dispatches PushColorwayJob', function () {
     $account = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create(['account_id' => $account->id, 'name' => 'Original Name']);
 
     $colorway->update(['name' => 'Updated Name']);
 
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+    Queue::assertPushed(PushColorwayJob::class, function ($job) use ($colorway) {
         return $job->colorway->id === $colorway->id;
     });
 });
 
-test('Colorway catalog field changes dispatch SyncColorwayCatalogToShopifyJob', function () {
+test('Colorway catalog field changes dispatch PushColorwayJob', function () {
     $account = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create([
         'account_id' => $account->id,
@@ -41,49 +41,49 @@ test('Colorway catalog field changes dispatch SyncColorwayCatalogToShopifyJob', 
     ]);
 
     $colorway->update(['description' => 'New description']);
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertPushed(PushColorwayJob::class);
 
     Queue::fake();
     $colorway->update(['status' => ColorwayStatus::Retired]);
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertPushed(PushColorwayJob::class);
 
     Queue::fake();
     $colorway->update(['technique' => Technique::Variegated]);
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertPushed(PushColorwayJob::class);
 });
 
-test('Base descriptor change dispatches SyncBaseToShopifyJob', function () {
+test('Base descriptor change dispatches PushBaseJob', function () {
     $account = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $account->id, 'descriptor' => 'Fingering']);
 
     $base->update(['descriptor' => 'DK']);
 
-    Queue::assertPushed(SyncBaseToShopifyJob::class, function ($job) use ($base) {
+    Queue::assertPushed(PushBaseJob::class, function ($job) use ($base) {
         return $job->base->id === $base->id && $job->action === 'updated';
     });
 });
 
-test('Base retail_price change dispatches SyncBaseToShopifyJob', function () {
+test('Base retail_price change dispatches PushBaseJob', function () {
     $account = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $account->id, 'retail_price' => 2800]);
 
     $base->update(['retail_price' => 3200]);
 
-    Queue::assertPushed(SyncBaseToShopifyJob::class, function ($job) use ($base) {
+    Queue::assertPushed(PushBaseJob::class, function ($job) use ($base) {
         return $job->base->id === $base->id && $job->action === 'updated';
     });
 });
 
-test('Base creation dispatches SyncBaseToShopifyJob with action created', function () {
+test('Base creation dispatches PushBaseJob with action created', function () {
     $account = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $account->id]);
 
-    Queue::assertPushed(SyncBaseToShopifyJob::class, function ($job) use ($base) {
+    Queue::assertPushed(PushBaseJob::class, function ($job) use ($base) {
         return $job->base->id === $base->id && $job->action === 'created';
     });
 });
 
-test('Base deletion dispatches SyncBaseDeletedToShopifyJob', function () {
+test('Base deletion dispatches PushBaseDeletedJob', function () {
     $account = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $account->id]);
     $baseId = $base->id;
@@ -91,12 +91,12 @@ test('Base deletion dispatches SyncBaseDeletedToShopifyJob', function () {
 
     $base->delete();
 
-    Queue::assertPushed(SyncBaseDeletedToShopifyJob::class, function ($job) use ($baseId, $accountId) {
+    Queue::assertPushed(PushBaseDeletedJob::class, function ($job) use ($baseId, $accountId) {
         return $job->baseId === $baseId && $job->accountId === $accountId;
     });
 });
 
-test('Colorway image changes dispatch SyncColorwayImagesToShopifyJob', function () {
+test('Colorway image changes dispatch PushColorwayImagesJob', function () {
     $account = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
     $media = Media::create([
@@ -110,7 +110,7 @@ test('Colorway image changes dispatch SyncColorwayImagesToShopifyJob', function 
     Queue::fake();
     $media->update(['is_primary' => true]);
 
-    Queue::assertPushed(SyncColorwayImagesToShopifyJob::class, function ($job) use ($colorway) {
+    Queue::assertPushed(PushColorwayImagesJob::class, function ($job) use ($colorway) {
         return $job->colorway->id === $colorway->id;
     });
 });
@@ -138,7 +138,7 @@ test('observer dispatches job for base affecting multiple products', function ()
 
     $base->update(['descriptor' => 'Sport']);
 
-    Queue::assertPushed(SyncBaseToShopifyJob::class);
+    Queue::assertPushed(PushBaseJob::class);
 });
 
 test('observer error does not block model save', function () {
@@ -147,7 +147,7 @@ test('observer error does not block model save', function () {
     $colorway = Colorway::factory()->create(['account_id' => $account->id, 'name' => 'Before']);
     $originalId = $colorway->id;
 
-    SyncColorwayCatalogToShopifyJob::dispatchSync($colorway);
+    PushColorwayJob::dispatchSync($colorway);
     Queue::fake();
 
     $colorway->update(['name' => 'After']);
@@ -164,10 +164,10 @@ test('observer does not dispatch when catalog_sync_enabled is false', function (
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
     $colorway->update(['name' => 'New Name']);
 
-    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertNotPushed(PushColorwayJob::class);
 });
 
-test('ColorwayObserver created dispatches SyncColorwayCatalogToShopifyJob with action created', function () {
+test('ColorwayObserver created dispatches PushColorwayJob with action created', function () {
     $account = Account::factory()->creator()->create();
     Integration::factory()->create([
         'account_id' => $account->id,
@@ -179,7 +179,7 @@ test('ColorwayObserver created dispatches SyncColorwayCatalogToShopifyJob with a
 
     $colorway = Colorway::factory()->create(['account_id' => $account->id]);
 
-    Queue::assertPushed(SyncColorwayCatalogToShopifyJob::class, function ($job) use ($colorway) {
+    Queue::assertPushed(PushColorwayJob::class, function ($job) use ($colorway) {
         return $job->colorway->id === $colorway->id && $job->action === 'created';
     });
 });
@@ -189,7 +189,7 @@ test('ColorwayObserver created does not dispatch when no Shopify integration exi
 
     Colorway::factory()->create(['account_id' => $account->id]);
 
-    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertNotPushed(PushColorwayJob::class);
 });
 
 test('ColorwayObserver created does not dispatch when catalog sync is disabled', function () {
@@ -206,5 +206,5 @@ test('ColorwayObserver created does not dispatch when catalog sync is disabled',
 
     Colorway::factory()->create(['account_id' => $account->id]);
 
-    Queue::assertNotPushed(SyncColorwayCatalogToShopifyJob::class);
+    Queue::assertNotPushed(PushColorwayJob::class);
 });

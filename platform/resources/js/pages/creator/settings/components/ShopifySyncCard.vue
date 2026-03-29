@@ -64,6 +64,8 @@ const triggeringCollections = ref(false);
 const triggeringInventory = ref(false);
 const triggeringPush = ref(false);
 const triggeringBases = ref(false);
+const triggeringPushColorways = ref(false);
+const triggeringPushCollections = ref(false);
 
 let pullPollInterval: ReturnType<typeof setInterval> | null = null;
 let pushPollInterval: ReturnType<typeof setInterval> | null = null;
@@ -150,7 +152,7 @@ function stopPushPolling(): void {
 
 async function pollStatus(): Promise<void> {
     try {
-        const response = await fetch('/creator/shopify/sync/status', {
+        const response = await fetch('/creator/shopify/pull/status', {
             credentials: 'same-origin',
             headers: {
                 Accept: 'application/json',
@@ -303,31 +305,31 @@ async function triggerPushAll(): Promise<void> {
 }
 
 function pullAll(): void {
-    void triggerPull('/creator/shopify/sync/all', triggeringPullAll);
+    void triggerPull('/creator/shopify/pull/all', triggeringPullAll);
 }
 
 function pullColorways(): void {
-    void triggerPull('/creator/shopify/sync/products', triggeringColorways);
+    void triggerPull('/creator/shopify/pull/colorways', triggeringColorways);
 }
 
 function pullCollections(): void {
     void triggerPull(
-        '/creator/shopify/sync/collections',
+        '/creator/shopify/pull/collections',
         triggeringCollections,
     );
 }
 
 function pullInventory(): void {
-    void triggerPull('/creator/shopify/sync/inventory', triggeringInventory);
+    void triggerPull('/creator/shopify/pull/inventory', triggeringInventory);
 }
 
-async function syncBases(): Promise<void> {
+async function pushBases(): Promise<void> {
     if (triggeringBases.value) return;
 
     triggeringBases.value = true;
 
     try {
-        const response = await fetch('/creator/shopify/sync/bases', {
+        const response = await fetch('/creator/shopify/push/bases', {
             method: 'POST',
             credentials: 'same-origin',
             headers: {
@@ -352,6 +354,58 @@ async function syncBases(): Promise<void> {
         showError(message);
     } finally {
         triggeringBases.value = false;
+    }
+}
+
+async function pushColorways(): Promise<void> {
+    if (triggeringPushColorways.value) return;
+    triggeringPushColorways.value = true;
+    try {
+        const response = await fetch('/creator/shopify/push/colorways', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
+        });
+        if (!response.ok) {
+            const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+            throw new Error(payload?.message ?? 'Could not push colorways.');
+        }
+        showSuccess('Colorways queued for push to Shopify.');
+    } catch (error) {
+        showError(error instanceof Error ? error.message : 'Could not push colorways.');
+    } finally {
+        triggeringPushColorways.value = false;
+    }
+}
+
+async function pushCollections(): Promise<void> {
+    if (triggeringPushCollections.value) return;
+    triggeringPushCollections.value = true;
+    try {
+        const response = await fetch('/creator/shopify/push/collections', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                Accept: 'application/json',
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': getCsrfToken(),
+            },
+        });
+        if (!response.ok) {
+            const payload = (await response.json().catch(() => null)) as { message?: string } | null;
+            throw new Error(payload?.message ?? 'Could not push collections.');
+        }
+        showSuccess('Collections queued for push to Shopify.');
+    } catch (error) {
+        showError(error instanceof Error ? error.message : 'Could not push collections.');
+    } finally {
+        triggeringPushCollections.value = false;
     }
 }
 
@@ -516,21 +570,20 @@ function formatStepCount(result: SyncStepResult): string {
                 </ul>
             </div>
 
-            <!-- Pull colorways card -->
+            <!-- Colorways card -->
             <UiCard>
+                <template #title>Colorways</template>
                 <template #content>
-                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
-                        <div>
-                            <p class="text-sm text-surface-700">
-                                Import product (aka colorway) data from your
-                                Shopify store into Fibermade.
-                                <strong>
-                                    This will overwrite existing colorway data
-                                    in Fibermade with values from Shopify.
-                                </strong>
-                            </p>
-                        </div>
-                        <div class="flex justify-end">
+                    <div class="grid grid-cols-[1fr_auto] items-start gap-6">
+                        <p class="text-sm text-surface-700">
+                            Use these buttons to fix colorway data mismatches.
+                            <strong>Pull</strong> imports Shopify product data
+                            into Fibermade, overwriting existing colorway
+                            values. <strong>Push</strong> sends all Fibermade
+                            colorway data to Shopify, overwriting Shopify
+                            product values.
+                        </p>
+                        <div class="flex flex-col items-end gap-2">
                             <UiButton
                                 outlined
                                 :disabled="isPullRunning || isAnyPullTriggering"
@@ -539,35 +592,46 @@ function formatStepCount(result: SyncStepResult): string {
                             >
                                 Pull Colorways
                             </UiButton>
+                            <UiButton
+                                outlined
+                                :loading="triggeringPushColorways"
+                                @click="pushColorways"
+                            >
+                                Push Colorways
+                            </UiButton>
                         </div>
                     </div>
                 </template>
             </UiCard>
 
-            <!-- Pull collections card -->
+            <!-- Collections card -->
             <UiCard>
+                <template #title>Collections</template>
                 <template #content>
-                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
-                        <div>
-                            <p class="text-sm text-surface-700">
-                                Import collections from Shopify to match your
-                                Fibermade catalog structure.
-                                <strong>
-                                    This will overwrite existing collection data
-                                    in Fibermade with values from Shopify.
-                                </strong>
-                            </p>
-                        </div>
-                        <div class="flex justify-end">
+                    <div class="grid grid-cols-[1fr_auto] items-start gap-6">
+                        <p class="text-sm text-surface-700">
+                            Use these buttons to fix collection data mismatches.
+                            <strong>Pull</strong> imports Shopify collection
+                            data into Fibermade, overwriting existing collection
+                            values. <strong>Push</strong> sends all Fibermade
+                            collections to Shopify, overwriting Shopify
+                            collection values.
+                        </p>
+                        <div class="flex flex-col items-end gap-2">
                             <UiButton
                                 outlined
                                 :disabled="isPullRunning || isAnyPullTriggering"
-                                :loading="
-                                    triggeringCollections && !isPullRunning
-                                "
+                                :loading="triggeringCollections && !isPullRunning"
                                 @click="pullCollections"
                             >
                                 Pull Collections
+                            </UiButton>
+                            <UiButton
+                                outlined
+                                :loading="triggeringPushCollections"
+                                @click="pushCollections"
+                            >
+                                Push Collections
                             </UiButton>
                         </div>
                     </div>
@@ -576,53 +640,28 @@ function formatStepCount(result: SyncStepResult): string {
 
             <!-- TODO: re-enable when inventory ships post-launch -->
             <!-- Pull inventory card -->
-            <!-- <UiCard>
-                <template #content>
-                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
-                        <div>
-                            <p class="text-sm text-surface-700">
-                                Import on-hand inventory quantities from Shopify
-                                into Fibermade. Fibermade tracks
-                                <strong>on hand</strong> — the physical stock
-                                you have. Shopify automatically calculates
-                                <strong>available</strong> (on hand minus open
-                                orders) and shows that to customers.
-                            </p>
-                        </div>
-                        <div class="flex justify-end">
-                            <UiButton
-                                outlined
-                                :disabled="isPullRunning || isAnyPullTriggering"
-                                :loading="triggeringInventory && !isPullRunning"
-                                @click="pullInventory"
-                            >
-                                Pull Inventory
-                            </UiButton>
-                        </div>
-                    </div>
-                </template>
-            </UiCard> -->
+            <!-- <UiCard> ... </UiCard> -->
 
-            <!-- Sync bases card -->
+            <!-- Bases card -->
             <UiCard>
+                <template #title>Bases</template>
                 <template #content>
-                    <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
-                        <div>
-                            <p class="text-sm text-surface-700">
-                                Push base (variant) metadata — name, weight,
-                                fiber content — to all Shopify products.
-                                <strong>
-                                    Inventory quantities are not affected.
-                                </strong>
-                            </p>
-                        </div>
-                        <div class="flex justify-end">
+                    <div class="grid grid-cols-[1fr_auto] items-start gap-6">
+                        <p class="text-sm text-surface-700">
+                            Bases are pulled automatically when you pull
+                            colorways, since they come from Shopify variant
+                            titles. Use <strong>Push</strong> to sync base
+                            metadata — name, weight, fiber content — to all
+                            Shopify products.
+                            <strong>Inventory quantities are not affected.</strong>
+                        </p>
+                        <div class="flex flex-col items-end gap-2">
                             <UiButton
                                 outlined
                                 :loading="triggeringBases"
-                                @click="syncBases"
+                                @click="pushBases"
                             >
-                                Sync Bases
+                                Push Bases
                             </UiButton>
                         </div>
                     </div>

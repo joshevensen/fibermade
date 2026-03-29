@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Enums\IntegrationType;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
+use App\Jobs\PushColorwayJob;
 use App\Models\Colorway;
 use App\Models\Integration;
 use Illuminate\Support\Facades\Log;
@@ -20,7 +20,7 @@ class ColorwayObserver
         }
 
         try {
-            SyncColorwayCatalogToShopifyJob::dispatch($colorway, 'created');
+            PushColorwayJob::dispatch($colorway, 'created');
         } catch (\Throwable $e) {
             Log::warning('ColorwayObserver: failed to dispatch catalog sync job', [
                 'colorway_id' => $colorway->id,
@@ -38,7 +38,7 @@ class ColorwayObserver
         }
 
         try {
-            SyncColorwayCatalogToShopifyJob::dispatch($colorway, 'deleted');
+            PushColorwayJob::dispatch($colorway, 'deleted');
         } catch (\Throwable $e) {
             Log::warning('ColorwayObserver: failed to dispatch catalog sync job', [
                 'colorway_id' => $colorway->id,
@@ -59,7 +59,7 @@ class ColorwayObserver
         }
 
         try {
-            SyncColorwayCatalogToShopifyJob::dispatch($colorway);
+            PushColorwayJob::dispatch($colorway);
         } catch (\Throwable $e) {
             Log::warning('ColorwayObserver: failed to dispatch catalog sync job', [
                 'colorway_id' => $colorway->id,

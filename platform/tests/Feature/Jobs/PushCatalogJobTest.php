@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\IntegrationType;
-use App\Jobs\PushCatalogToShopifyJob;
+use App\Jobs\PushCatalogJob;
 use App\Models\Account;
 use App\Models\Collection;
 use App\Models\Colorway;
@@ -36,7 +36,7 @@ it('calls pushAllInventoryForColorway for each colorway in the account', functio
 
     $this->app->bind(ShopifyGraphqlClient::class, fn () => Mockery::mock(ShopifyGraphqlClient::class));
 
-    $job = new PushCatalogToShopifyJob($this->integration->id);
+    $job = new PushCatalogJob($this->integration->id);
     $job->handle($mockInventorySync);
 });
 
@@ -52,7 +52,7 @@ it('skips colorways from other accounts', function () {
 
     $this->app->bind(ShopifyGraphqlClient::class, fn () => Mockery::mock(ShopifyGraphqlClient::class));
 
-    $job = new PushCatalogToShopifyJob($this->integration->id);
+    $job = new PushCatalogJob($this->integration->id);
     $job->handle($mockInventorySync);
 });
 
@@ -74,7 +74,7 @@ it('continues after per-colorway failures without aborting', function () {
 
     $this->app->bind(ShopifyGraphqlClient::class, fn () => Mockery::mock(ShopifyGraphqlClient::class));
 
-    $job = new PushCatalogToShopifyJob($this->integration->id);
+    $job = new PushCatalogJob($this->integration->id);
     $job->handle($mockInventorySync);
 
     // Should still complete (not throw)
@@ -100,7 +100,7 @@ it('includes collections in last_result after push completes', function () {
         'variants_updated' => 0, 'variants_created' => 0, 'products_created' => 0, 'skipped' => 0,
     ]);
 
-    $job = new PushCatalogToShopifyJob($this->integration->id);
+    $job = new PushCatalogJob($this->integration->id);
     $job->handle($mockInventorySync);
 
     $this->integration->refresh();
@@ -120,7 +120,7 @@ it('sets push_sync status to running then complete', function () {
 
     $this->app->bind(ShopifyGraphqlClient::class, fn () => Mockery::mock(ShopifyGraphqlClient::class));
 
-    $job = new PushCatalogToShopifyJob($this->integration->id);
+    $job = new PushCatalogJob($this->integration->id);
     $job->handle($mockInventorySync);
 
     $this->integration->refresh();
@@ -133,7 +133,7 @@ it('sets push_sync status to running then complete', function () {
 });
 
 it('sets push_sync status to failed when job fails', function () {
-    $job = new PushCatalogToShopifyJob($this->integration->id);
+    $job = new PushCatalogJob($this->integration->id);
     $job->failed(new RuntimeException('Something went wrong'));
 
     $this->integration->refresh();
@@ -147,7 +147,7 @@ it('returns early when integration is not found', function () {
     $mockInventorySync = $this->mock(InventorySyncService::class);
     $mockInventorySync->shouldNotReceive('pushAllInventoryForColorway');
 
-    $job = new PushCatalogToShopifyJob(999999);
+    $job = new PushCatalogJob(999999);
     $job->handle($mockInventorySync);
 });
 
@@ -156,7 +156,7 @@ it('returns early when integration is not found', function () {
 it('is queued when dispatched', function () {
     Queue::fake();
 
-    PushCatalogToShopifyJob::dispatch($this->integration->id);
+    PushCatalogJob::dispatch($this->integration->id);
 
-    Queue::assertPushed(PushCatalogToShopifyJob::class);
+    Queue::assertPushed(PushCatalogJob::class);
 });

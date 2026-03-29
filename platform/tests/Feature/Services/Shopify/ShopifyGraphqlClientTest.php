@@ -29,6 +29,12 @@ it('getProducts returns normalized product list with pagination info', function 
                                 'status' => 'ACTIVE',
                                 'handle' => 'ocean-mist',
                                 'featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg'],
+                                'images' => [
+                                    'edges' => [
+                                        ['node' => ['url' => 'https://cdn.shopify.com/image.jpg', 'altText' => null]],
+                                        ['node' => ['url' => 'https://cdn.shopify.com/image2.jpg', 'altText' => 'Second']],
+                                    ],
+                                ],
                                 'variants' => [
                                     'edges' => [
                                         [
@@ -68,6 +74,10 @@ it('getProducts returns normalized product list with pagination info', function 
     expect($product['status'])->toBe('ACTIVE');
     expect($product['handle'])->toBe('ocean-mist');
     expect($product['featuredImage'])->toBe(['url' => 'https://cdn.shopify.com/image.jpg']);
+    expect($product['images'])->toBe([
+        ['url' => 'https://cdn.shopify.com/image.jpg', 'altText' => null],
+        ['url' => 'https://cdn.shopify.com/image2.jpg', 'altText' => 'Second'],
+    ]);
 
     $variant = $product['variants'][0];
     expect($variant['gid'])->toBe('gid://shopify/ProductVariant/10');

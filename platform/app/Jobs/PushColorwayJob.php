@@ -18,7 +18,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Sentry\State\Scope;
 
-class SyncColorwayCatalogToShopifyJob implements ShouldQueue
+class PushColorwayJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

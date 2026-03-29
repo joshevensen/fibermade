@@ -49,7 +49,7 @@ function formatConnectedAt(date: Date): string {
 
 export type ConnectionStatus =
   | { connected: false; connectionError?: "integration_inactive"; shop?: string; connectedAt?: string; fibermadeUrl: string }
-  | { connected: true; shop: string; connectedAt: string; fibermadeUrl: string };
+  | { connected: true; shop: string; connectedAt: string; creatorName: string | null; fibermadeUrl: string };
 
 export type ConnectActionData =
   | { intent: "connect"; success: true }
@@ -73,6 +73,7 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<Connectio
     connected: true as const,
     shop: connection.shop,
     connectedAt: connection.connectedAt.toISOString(),
+    creatorName: null as string | null,
     fibermadeUrl,
   };
 
@@ -91,7 +92,7 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<Connectio
       return connectedPayload;
     }
 
-    const status = (result.data as { data?: { active?: boolean } } | null)?.data;
+    const status = (result.data as { data?: { active?: boolean; creator_name?: string | null } } | null)?.data;
     if (status?.active === false) {
       return {
         connected: false,
@@ -102,7 +103,7 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<Connectio
       };
     }
 
-    return connectedPayload;
+    return { ...connectedPayload, creatorName: status?.creator_name ?? null };
   } catch {
     return connectedPayload;
   }
@@ -288,6 +289,7 @@ export default function Index() {
   const connectionError = !connected ? loaderData.connectionError : undefined;
   const shop = loaderData.shop;
   const connectedAt = loaderData.connectedAt;
+  const creatorName = connected ? loaderData.creatorName : null;
 
   const tokenError =
     data?.intent === "connect" && !data.success && data.field === "connectToken"
@@ -325,8 +327,8 @@ export default function Index() {
           )}
           <s-stack direction="block" gap="large">
             <s-paragraph>
-              <strong>{shop}</strong>
-              {connectedAt && ` — connected ${formatConnectedAt(new Date(connectedAt))}`}
+              {creatorName && <strong>{creatorName} — </strong>}
+              {connectedAt ? `connected ${formatConnectedAt(new Date(connectedAt))}` : (shop ?? "")}
             </s-paragraph>
 
             <s-button

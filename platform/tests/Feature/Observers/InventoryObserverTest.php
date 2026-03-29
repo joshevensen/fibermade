@@ -1,7 +1,7 @@
 <?php
 
 use App\Enums\IntegrationType;
-use App\Jobs\SyncInventoryToShopifyJob;
+use App\Jobs\PushInventoryJob;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
@@ -35,10 +35,10 @@ beforeEach(function () {
     ]);
 });
 
-test('InventoryObserver dispatches SyncInventoryToShopifyJob when quantity changes', function () {
+test('InventoryObserver dispatches PushInventoryJob when quantity changes', function () {
     $this->inventory->update(['quantity' => 20]);
 
-    Queue::assertPushed(SyncInventoryToShopifyJob::class, function ($job) {
+    Queue::assertPushed(PushInventoryJob::class, function ($job) {
         return $job->inventoryId === $this->inventory->id
             && $job->integrationId === $this->integration->id;
     });
@@ -47,7 +47,7 @@ test('InventoryObserver dispatches SyncInventoryToShopifyJob when quantity chang
 test('InventoryObserver does not dispatch when quantity did not change', function () {
     $this->inventory->update(['sync_status' => 'synced', 'last_synced_at' => now()]);
 
-    Queue::assertNotPushed(SyncInventoryToShopifyJob::class);
+    Queue::assertNotPushed(PushInventoryJob::class);
 });
 
 test('InventoryObserver does not dispatch when no active Shopify integration exists', function () {
@@ -63,7 +63,7 @@ test('InventoryObserver does not dispatch when no active Shopify integration exi
 
     $inventory->update(['quantity' => 15]);
 
-    Queue::assertNotPushed(SyncInventoryToShopifyJob::class);
+    Queue::assertNotPushed(PushInventoryJob::class);
 });
 
 test('InventoryObserver does not dispatch when catalog sync is disabled', function () {
@@ -73,10 +73,10 @@ test('InventoryObserver does not dispatch when catalog sync is disabled', functi
 
     $this->inventory->update(['quantity' => 30]);
 
-    Queue::assertNotPushed(SyncInventoryToShopifyJob::class);
+    Queue::assertNotPushed(PushInventoryJob::class);
 });
 
-test('SyncInventoryToShopifyJob calls pushInventoryToShopify with correct arguments', function () {
+test('PushInventoryJob calls pushInventoryToShopify with correct arguments', function () {
     $mockService = Mockery::mock(InventorySyncService::class);
     $mockService->shouldReceive('pushInventoryToShopify')
         ->once()
@@ -86,22 +86,22 @@ test('SyncInventoryToShopifyJob calls pushInventoryToShopify with correct argume
                 && $syncSource === 'observer';
         });
 
-    $job = new SyncInventoryToShopifyJob($this->inventory->id, $this->integration->id);
+    $job = new PushInventoryJob($this->inventory->id, $this->integration->id);
     $job->handle($mockService);
 });
 
-test('SyncInventoryToShopifyJob returns early when integration no longer exists', function () {
+test('PushInventoryJob returns early when integration no longer exists', function () {
     $mockService = Mockery::mock(InventorySyncService::class);
     $mockService->shouldNotReceive('pushInventoryToShopify');
 
-    $job = new SyncInventoryToShopifyJob($this->inventory->id, 99999);
+    $job = new PushInventoryJob($this->inventory->id, 99999);
     $job->handle($mockService);
 });
 
-test('SyncInventoryToShopifyJob returns early when inventory record no longer exists', function () {
+test('PushInventoryJob returns early when inventory record no longer exists', function () {
     $mockService = Mockery::mock(InventorySyncService::class);
     $mockService->shouldNotReceive('pushInventoryToShopify');
 
-    $job = new SyncInventoryToShopifyJob(99999, $this->integration->id);
+    $job = new PushInventoryJob(99999, $this->integration->id);
     $job->handle($mockService);
 });

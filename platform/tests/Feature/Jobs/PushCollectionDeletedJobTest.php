@@ -2,7 +2,7 @@
 
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
-use App\Jobs\SyncCollectionDeletedToShopifyJob;
+use App\Jobs\PushCollectionDeletedJob;
 use App\Models\Account;
 use App\Models\Collection;
 use App\Models\ExternalIdentifier;
@@ -24,7 +24,7 @@ beforeEach(function () {
     ]);
 });
 
-test('SyncCollectionDeletedToShopifyJob deletes collection and removes ExternalIdentifier', function () {
+test('PushCollectionDeletedJob deletes collection and removes ExternalIdentifier', function () {
     $collectionId = 9999;
 
     ExternalIdentifier::create([
@@ -39,7 +39,7 @@ test('SyncCollectionDeletedToShopifyJob deletes collection and removes ExternalI
         'test.myshopify.com/admin/api/2025-01/custom_collections/888.json' => Http::response(null, 200),
     ]);
 
-    $job = new SyncCollectionDeletedToShopifyJob($collectionId, $this->account->id);
+    $job = new PushCollectionDeletedJob($collectionId, $this->account->id);
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->url(), 'custom_collections/888.json') && $r->method() === 'DELETE');
@@ -50,7 +50,7 @@ test('SyncCollectionDeletedToShopifyJob deletes collection and removes ExternalI
     )->toBeFalse();
 });
 
-test('SyncCollectionDeletedToShopifyJob logs success after deletion', function () {
+test('PushCollectionDeletedJob logs success after deletion', function () {
     $collectionId = 8888;
 
     ExternalIdentifier::create([
@@ -65,7 +65,7 @@ test('SyncCollectionDeletedToShopifyJob logs success after deletion', function (
         'test.myshopify.com/admin/api/2025-01/custom_collections/777.json' => Http::response(null, 200),
     ]);
 
-    $job = new SyncCollectionDeletedToShopifyJob($collectionId, $this->account->id);
+    $job = new PushCollectionDeletedJob($collectionId, $this->account->id);
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -76,28 +76,28 @@ test('SyncCollectionDeletedToShopifyJob logs success after deletion', function (
     expect($log->metadata['operation'])->toBe('collection_delete');
 });
 
-test('SyncCollectionDeletedToShopifyJob returns early when no ExternalIdentifier exists', function () {
+test('PushCollectionDeletedJob returns early when no ExternalIdentifier exists', function () {
     Http::fake();
 
-    $job = new SyncCollectionDeletedToShopifyJob(12345, $this->account->id);
+    $job = new PushCollectionDeletedJob(12345, $this->account->id);
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncCollectionDeletedToShopifyJob returns early when no active integration', function () {
+test('PushCollectionDeletedJob returns early when no active integration', function () {
     $otherAccount = Account::factory()->creator()->create();
 
     Http::fake();
 
-    $job = new SyncCollectionDeletedToShopifyJob(1, $otherAccount->id);
+    $job = new PushCollectionDeletedJob(1, $otherAccount->id);
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncCollectionDeletedToShopifyJob has retry configuration', function () {
-    $job = new SyncCollectionDeletedToShopifyJob(1, 1);
+test('PushCollectionDeletedJob has retry configuration', function () {
+    $job = new PushCollectionDeletedJob(1, 1);
 
     expect($job->tries)->toBe(3);
     expect($job->backoff)->toBe(60);

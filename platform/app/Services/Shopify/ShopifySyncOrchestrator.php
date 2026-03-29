@@ -3,9 +3,9 @@
 namespace App\Services\Shopify;
 
 use App\Exceptions\SyncAlreadyRunningException;
-use App\Jobs\SyncShopifyCollectionsJob;
-use App\Jobs\SyncShopifyInventoryJob;
-use App\Jobs\SyncShopifyProductsJob;
+use App\Jobs\PullCollectionsJob;
+use App\Jobs\PullColorwaysJob;
+use App\Jobs\PullInventoryJob;
 use App\Models\Integration;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Bus;
@@ -20,11 +20,11 @@ use Illuminate\Support\Facades\Bus;
 class ShopifySyncOrchestrator
 {
     /**
-     * Dispatch all three sync jobs in order as a chain.
+     * Dispatch all three pull jobs in order as a chain.
      *
      * @throws SyncAlreadyRunningException
      */
-    public function syncAll(Integration $integration): void
+    public function pullAll(Integration $integration): void
     {
         $this->guardAgainstRunning($integration);
 
@@ -36,18 +36,18 @@ class ShopifySyncOrchestrator
         ]);
 
         Bus::chain([
-            new SyncShopifyProductsJob($integration),
-            new SyncShopifyCollectionsJob($integration),
-            new SyncShopifyInventoryJob($integration),
+            new PullColorwaysJob($integration),
+            new PullCollectionsJob($integration),
+            new PullInventoryJob($integration),
         ])->dispatch();
     }
 
     /**
-     * Dispatch only the products sync job.
+     * Dispatch only the colorways pull job.
      *
      * @throws SyncAlreadyRunningException
      */
-    public function syncProducts(Integration $integration): void
+    public function pullColorways(Integration $integration): void
     {
         $this->guardAgainstRunning($integration);
 
@@ -58,15 +58,15 @@ class ShopifySyncOrchestrator
             'completed_at' => null,
         ]);
 
-        SyncShopifyProductsJob::dispatch($integration);
+        PullColorwaysJob::dispatch($integration);
     }
 
     /**
-     * Dispatch only the collections sync job.
+     * Dispatch only the collections pull job.
      *
      * @throws SyncAlreadyRunningException
      */
-    public function syncCollections(Integration $integration): void
+    public function pullCollections(Integration $integration): void
     {
         $this->guardAgainstRunning($integration);
 
@@ -77,15 +77,15 @@ class ShopifySyncOrchestrator
             'completed_at' => null,
         ]);
 
-        SyncShopifyCollectionsJob::dispatch($integration);
+        PullCollectionsJob::dispatch($integration);
     }
 
     /**
-     * Dispatch only the inventory sync job.
+     * Dispatch only the inventory pull job.
      *
      * @throws SyncAlreadyRunningException
      */
-    public function syncInventory(Integration $integration): void
+    public function pullInventory(Integration $integration): void
     {
         $this->guardAgainstRunning($integration);
 
@@ -96,7 +96,7 @@ class ShopifySyncOrchestrator
             'completed_at' => null,
         ]);
 
-        SyncShopifyInventoryJob::dispatch($integration);
+        PullInventoryJob::dispatch($integration);
     }
 
     /**

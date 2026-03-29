@@ -3,7 +3,7 @@
 use App\Enums\ColorwayStatus;
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
-use App\Jobs\SyncColorwayCatalogToShopifyJob;
+use App\Jobs\PushColorwayJob;
 use App\Models\Account;
 use App\Models\Colorway;
 use App\Models\ExternalIdentifier;
@@ -29,7 +29,7 @@ beforeEach(function () {
     ]);
 });
 
-test('SyncColorwayCatalogToShopifyJob created path calls pushAllInventoryForColorway', function () {
+test('PushColorwayJob created path calls pushAllInventoryForColorway', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
     $mock = $this->mock(InventorySyncService::class);
@@ -41,33 +41,33 @@ test('SyncColorwayCatalogToShopifyJob created path calls pushAllInventoryForColo
             'observer'
         );
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'created');
+    $job = new PushColorwayJob($colorway, 'created');
     $job->handle();
 });
 
-test('SyncColorwayCatalogToShopifyJob created path returns early when no integration', function () {
+test('PushColorwayJob created path returns early when no integration', function () {
     $otherAccount = Account::factory()->creator()->create();
     $colorway = Colorway::factory()->create(['account_id' => $otherAccount->id]);
 
     $mock = $this->mock(InventorySyncService::class);
     $mock->shouldNotReceive('pushAllInventoryForColorway');
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'created');
+    $job = new PushColorwayJob($colorway, 'created');
     $job->handle();
 });
 
-test('SyncColorwayCatalogToShopifyJob created path returns early when catalog sync disabled', function () {
+test('PushColorwayJob created path returns early when catalog sync disabled', function () {
     Config::set('services.shopify.catalog_sync_enabled', false);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
     $mock = $this->mock(InventorySyncService::class);
     $mock->shouldNotReceive('pushAllInventoryForColorway');
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'created');
+    $job = new PushColorwayJob($colorway, 'created');
     $job->handle();
 });
 
-test('SyncColorwayCatalogToShopifyJob calls archiveProduct when colorway status is retired', function () {
+test('PushColorwayJob calls archiveProduct when colorway status is retired', function () {
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Retired,
@@ -92,7 +92,7 @@ test('SyncColorwayCatalogToShopifyJob calls archiveProduct when colorway status 
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     Http::assertSent(function ($request) {
@@ -106,7 +106,7 @@ test('SyncColorwayCatalogToShopifyJob calls archiveProduct when colorway status 
     });
 });
 
-test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status is active', function () {
+test('PushColorwayJob calls updateProduct when colorway status is active', function () {
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Active,
@@ -131,7 +131,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status i
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     Http::assertSent(function ($request) {
@@ -141,7 +141,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status i
     });
 });
 
-test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status is idea', function () {
+test('PushColorwayJob calls updateProduct when colorway status is idea', function () {
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Idea,
@@ -166,7 +166,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status i
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     Http::assertSent(function ($request) {
@@ -176,7 +176,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct when colorway status i
     });
 });
 
-test('SyncColorwayCatalogToShopifyJob calls updateProduct with ACTIVE when re-activating from retired', function () {
+test('PushColorwayJob calls updateProduct with ACTIVE when re-activating from retired', function () {
     Queue::fake();
 
     $colorway = Colorway::factory()->create([
@@ -203,7 +203,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct with ACTIVE when re-ac
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     Http::assertSent(function ($request) {
@@ -220,7 +220,7 @@ test('SyncColorwayCatalogToShopifyJob calls updateProduct with ACTIVE when re-ac
     expect($log->metadata['operation'])->toBe('product_update');
 });
 
-test('SyncColorwayCatalogToShopifyJob updated path skips when no product mapping exists', function () {
+test('PushColorwayJob updated path skips when no product mapping exists', function () {
     $colorway = Colorway::factory()->create([
         'account_id' => $this->account->id,
         'status' => ColorwayStatus::Active,
@@ -228,13 +228,13 @@ test('SyncColorwayCatalogToShopifyJob updated path skips when no product mapping
 
     Http::fake();
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncColorwayCatalogToShopifyJob logs success on archive', function () {
+test('PushColorwayJob logs success on archive', function () {
     Queue::fake();
 
     $colorway = Colorway::factory()->create([
@@ -261,7 +261,7 @@ test('SyncColorwayCatalogToShopifyJob logs success on archive', function () {
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -272,7 +272,7 @@ test('SyncColorwayCatalogToShopifyJob logs success on archive', function () {
     expect($log->metadata['operation'])->toBe('product_archive');
 });
 
-test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', function () {
+test('PushColorwayJob logs error when Shopify API fails', function () {
     Queue::fake();
 
     $colorway = Colorway::factory()->create([
@@ -299,7 +299,7 @@ test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', functi
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'updated');
+    $job = new PushColorwayJob($colorway, 'updated');
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -310,7 +310,7 @@ test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', functi
     expect($log->metadata['operation'])->toBe('product_update');
 });
 
-test('SyncColorwayCatalogToShopifyJob deleted path calls deleteProduct', function () {
+test('PushColorwayJob deleted path calls deleteProduct', function () {
     Queue::fake();
 
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
@@ -334,7 +334,7 @@ test('SyncColorwayCatalogToShopifyJob deleted path calls deleteProduct', functio
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'deleted');
+    $job = new PushColorwayJob($colorway, 'deleted');
     $job->handle();
 
     Http::assertSent(fn ($request) => str_contains($request->body(), 'productDelete'));
@@ -347,18 +347,18 @@ test('SyncColorwayCatalogToShopifyJob deleted path calls deleteProduct', functio
     expect($log->metadata['operation'])->toBe('product_delete');
 });
 
-test('SyncColorwayCatalogToShopifyJob deleted path skips when no product mapping exists', function () {
+test('PushColorwayJob deleted path skips when no product mapping exists', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
     Http::fake();
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'deleted');
+    $job = new PushColorwayJob($colorway, 'deleted');
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncColorwayCatalogToShopifyJob deleted path logs error when Shopify API fails', function () {
+test('PushColorwayJob deleted path logs error when Shopify API fails', function () {
     Queue::fake();
 
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
@@ -382,7 +382,7 @@ test('SyncColorwayCatalogToShopifyJob deleted path logs error when Shopify API f
         ]),
     ]);
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'deleted');
+    $job = new PushColorwayJob($colorway, 'deleted');
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -393,7 +393,7 @@ test('SyncColorwayCatalogToShopifyJob deleted path logs error when Shopify API f
     expect($log->metadata['operation'])->toBe('product_delete');
 });
 
-test('SyncColorwayCatalogToShopifyJob created path logs error when Shopify API fails', function () {
+test('PushColorwayJob created path logs error when Shopify API fails', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
     $mock = $this->mock(InventorySyncService::class);
@@ -401,7 +401,7 @@ test('SyncColorwayCatalogToShopifyJob created path logs error when Shopify API f
         ->once()
         ->andThrow(new ShopifyApiException('HTTP request returned status code 401: {"errors":"[API] Invalid API key or access token"}'));
 
-    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'created');
+    $job = new PushColorwayJob($colorway, 'created');
     $job->handle();
 
     expect($this->integration->fresh()->settings['has_sync_errors'])->toBeTrue();

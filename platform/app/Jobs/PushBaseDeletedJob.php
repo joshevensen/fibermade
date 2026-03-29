@@ -19,7 +19,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Sentry\State\Scope;
 
-class SyncBaseDeletedToShopifyJob implements ShouldQueue
+class PushBaseDeletedJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 

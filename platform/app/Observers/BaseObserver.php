@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Jobs\SyncBaseDeletedToShopifyJob;
-use App\Jobs\SyncBaseToShopifyJob;
+use App\Jobs\PushBaseDeletedJob;
+use App\Jobs\PushBaseJob;
 use App\Models\Base;
 use Illuminate\Support\Facades\Log;
 
@@ -32,7 +32,7 @@ class BaseObserver
         }
 
         try {
-            SyncBaseDeletedToShopifyJob::dispatch($base->id, $base->account_id);
+            PushBaseDeletedJob::dispatch($base->id, $base->account_id);
         } catch (\Throwable $e) {
             Log::warning('BaseObserver: failed to dispatch delete sync job', [
                 'base_id' => $base->id,
@@ -59,7 +59,7 @@ class BaseObserver
         }
 
         try {
-            SyncBaseToShopifyJob::dispatch($base, $action);
+            PushBaseJob::dispatch($base, $action);
         } catch (\Throwable $e) {
             Log::warning('BaseObserver: failed to dispatch sync job', [
                 'base_id' => $base->id,

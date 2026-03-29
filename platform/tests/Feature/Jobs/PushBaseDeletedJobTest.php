@@ -2,7 +2,7 @@
 
 use App\Enums\IntegrationLogStatus;
 use App\Enums\IntegrationType;
-use App\Jobs\SyncBaseDeletedToShopifyJob;
+use App\Jobs\PushBaseDeletedJob;
 use App\Models\Account;
 use App\Models\Base;
 use App\Models\Colorway;
@@ -28,7 +28,7 @@ beforeEach(function () {
     ]);
 });
 
-test('SyncBaseDeletedToShopifyJob groups variants by product and calls productVariantsBulkDelete', function () {
+test('PushBaseDeletedJob groups variants by product and calls productVariantsBulkDelete', function () {
     $base = Base::factory()->create(['account_id' => $this->account->id]);
 
     $colorway1 = Colorway::factory()->create(['account_id' => $this->account->id]);
@@ -77,13 +77,13 @@ test('SyncBaseDeletedToShopifyJob groups variants by product and calls productVa
         ]),
     ]);
 
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $this->account->id);
+    $job = new PushBaseDeletedJob($base->id, $this->account->id);
     $job->handle();
 
     Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkDelete'));
 });
 
-test('SyncBaseDeletedToShopifyJob removes ExternalIdentifier records after delete', function () {
+test('PushBaseDeletedJob removes ExternalIdentifier records after delete', function () {
     $base = Base::factory()->create(['account_id' => $this->account->id]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id]);
@@ -114,13 +114,13 @@ test('SyncBaseDeletedToShopifyJob removes ExternalIdentifier records after delet
         ]),
     ]);
 
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $this->account->id);
+    $job = new PushBaseDeletedJob($base->id, $this->account->id);
     $job->handle();
 
     expect(ExternalIdentifier::find($variantIdentifier->id))->toBeNull();
 });
 
-test('SyncBaseDeletedToShopifyJob deletes inventory records', function () {
+test('PushBaseDeletedJob deletes inventory records', function () {
     $base = Base::factory()->create(['account_id' => $this->account->id]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id]);
@@ -151,13 +151,13 @@ test('SyncBaseDeletedToShopifyJob deletes inventory records', function () {
         ]),
     ]);
 
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $this->account->id);
+    $job = new PushBaseDeletedJob($base->id, $this->account->id);
     $job->handle();
 
     expect(Inventory::find($inv->id))->toBeNull();
 });
 
-test('SyncBaseDeletedToShopifyJob logs success after deleting variants', function () {
+test('PushBaseDeletedJob logs success after deleting variants', function () {
     $base = Base::factory()->create(['account_id' => $this->account->id]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id]);
@@ -188,7 +188,7 @@ test('SyncBaseDeletedToShopifyJob logs success after deleting variants', functio
         ]),
     ]);
 
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $this->account->id);
+    $job = new PushBaseDeletedJob($base->id, $this->account->id);
     $job->handle();
 
     $log = IntegrationLog::where('integration_id', $this->integration->id)
@@ -200,7 +200,7 @@ test('SyncBaseDeletedToShopifyJob logs success after deleting variants', functio
     expect($log->metadata['count'])->toBe(1);
 });
 
-test('SyncBaseDeletedToShopifyJob silently continues when Shopify API fails', function () {
+test('PushBaseDeletedJob silently continues when Shopify API fails', function () {
     $base = Base::factory()->create(['account_id' => $this->account->id]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id]);
@@ -232,27 +232,27 @@ test('SyncBaseDeletedToShopifyJob silently continues when Shopify API fails', fu
     ]);
 
     // Should not throw
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $this->account->id);
+    $job = new PushBaseDeletedJob($base->id, $this->account->id);
     $job->handle();
 
     // Inventory still deleted (cleanup always runs)
     expect(Inventory::find($inv->id))->toBeNull();
 });
 
-test('SyncBaseDeletedToShopifyJob returns early when no active integration', function () {
+test('PushBaseDeletedJob returns early when no active integration', function () {
     $otherAccount = Account::factory()->creator()->create();
     $base = Base::factory()->create(['account_id' => $otherAccount->id]);
 
     Http::fake();
 
-    $job = new SyncBaseDeletedToShopifyJob($base->id, $otherAccount->id);
+    $job = new PushBaseDeletedJob($base->id, $otherAccount->id);
     $job->handle();
 
     Http::assertNothingSent();
 });
 
-test('SyncBaseDeletedToShopifyJob has retry configuration', function () {
-    $job = new SyncBaseDeletedToShopifyJob(1, 1);
+test('PushBaseDeletedJob has retry configuration', function () {
+    $job = new PushBaseDeletedJob(1, 1);
 
     expect($job->tries)->toBe(3);
     expect($job->backoff)->toBe(60);

@@ -266,6 +266,7 @@ class ShopifyGraphqlClient
                             status
                             handle
                             featuredImage { url }
+                            images(first: 250) { edges { node { url altText } } }
                             variants(first: 100) {
                                 edges {
                                     node {
@@ -323,6 +324,7 @@ class ShopifyGraphqlClient
                     status
                     handle
                     featuredImage { url }
+                    images(first: 250) { edges { node { url altText } } }
                     variants(first: 100) {
                         edges {
                             node {
@@ -507,6 +509,13 @@ class ShopifyGraphqlClient
             'featuredImage' => isset($node['featuredImage']['url'])
                 ? ['url' => $node['featuredImage']['url']]
                 : null,
+            'images' => array_map(
+                fn (array $edge) => [
+                    'url' => $edge['node']['url'],
+                    'altText' => $edge['node']['altText'] ?? null,
+                ],
+                $node['images']['edges'] ?? []
+            ),
             'variants' => array_map(
                 fn (array $edge) => $this->normalizeVariant($edge['node']),
                 $variantEdges

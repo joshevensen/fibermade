@@ -2,9 +2,9 @@
 
 use App\Data\Shopify\SyncResult;
 use App\Exceptions\SyncAlreadyRunningException;
-use App\Jobs\SyncShopifyCollectionsJob;
-use App\Jobs\SyncShopifyInventoryJob;
-use App\Jobs\SyncShopifyProductsJob;
+use App\Jobs\PullCollectionsJob;
+use App\Jobs\PullColorwaysJob;
+use App\Jobs\PullInventoryJob;
 use App\Models\Integration;
 use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyCollectionSyncService;
@@ -25,19 +25,19 @@ beforeEach(function () {
 it('syncAll dispatches chained jobs in correct order', function () {
     Bus::fake();
 
-    $this->orchestrator->syncAll($this->integration);
+    $this->orchestrator->pullAll($this->integration);
 
     Bus::assertChained([
-        SyncShopifyProductsJob::class,
-        SyncShopifyCollectionsJob::class,
-        SyncShopifyInventoryJob::class,
+        PullColorwaysJob::class,
+        PullCollectionsJob::class,
+        PullInventoryJob::class,
     ]);
 });
 
 it('syncAll sets sync status to running with correct initial state', function () {
     Bus::fake();
 
-    $this->orchestrator->syncAll($this->integration);
+    $this->orchestrator->pullAll($this->integration);
 
     $this->integration->refresh();
     $sync = $this->integration->settings['sync'];
@@ -55,26 +55,26 @@ it('syncAll throws SyncAlreadyRunningException when a sync is in progress', func
     $settings['sync'] = ['status' => 'running'];
     $this->integration->update(['settings' => $settings]);
 
-    expect(fn () => $this->orchestrator->syncAll($this->integration))
+    expect(fn () => $this->orchestrator->pullAll($this->integration))
         ->toThrow(SyncAlreadyRunningException::class);
 
     Bus::assertNothingDispatched();
 });
 
-it('syncProducts dispatches SyncShopifyProductsJob only', function () {
+it('syncProducts dispatches PullColorwaysJob only', function () {
     Bus::fake();
 
-    $this->orchestrator->syncProducts($this->integration);
+    $this->orchestrator->pullColorways($this->integration);
 
-    Bus::assertDispatched(SyncShopifyProductsJob::class);
-    Bus::assertNotDispatched(SyncShopifyCollectionsJob::class);
-    Bus::assertNotDispatched(SyncShopifyInventoryJob::class);
+    Bus::assertDispatched(PullColorwaysJob::class);
+    Bus::assertNotDispatched(PullCollectionsJob::class);
+    Bus::assertNotDispatched(PullInventoryJob::class);
 });
 
 it('syncProducts sets sync status to running with current_step products', function () {
     Bus::fake();
 
-    $this->orchestrator->syncProducts($this->integration);
+    $this->orchestrator->pullColorways($this->integration);
 
     $this->integration->refresh();
     $sync = $this->integration->settings['sync'];
@@ -90,24 +90,24 @@ it('syncProducts throws SyncAlreadyRunningException when a sync is in progress',
     $settings['sync'] = ['status' => 'running'];
     $this->integration->update(['settings' => $settings]);
 
-    expect(fn () => $this->orchestrator->syncProducts($this->integration))
+    expect(fn () => $this->orchestrator->pullColorways($this->integration))
         ->toThrow(SyncAlreadyRunningException::class);
 });
 
-it('syncCollections dispatches SyncShopifyCollectionsJob only', function () {
+it('syncCollections dispatches PullCollectionsJob only', function () {
     Bus::fake();
 
-    $this->orchestrator->syncCollections($this->integration);
+    $this->orchestrator->pullCollections($this->integration);
 
-    Bus::assertDispatched(SyncShopifyCollectionsJob::class);
-    Bus::assertNotDispatched(SyncShopifyProductsJob::class);
-    Bus::assertNotDispatched(SyncShopifyInventoryJob::class);
+    Bus::assertDispatched(PullCollectionsJob::class);
+    Bus::assertNotDispatched(PullColorwaysJob::class);
+    Bus::assertNotDispatched(PullInventoryJob::class);
 });
 
 it('syncCollections sets sync status to running with current_step collections', function () {
     Bus::fake();
 
-    $this->orchestrator->syncCollections($this->integration);
+    $this->orchestrator->pullCollections($this->integration);
 
     $this->integration->refresh();
     $sync = $this->integration->settings['sync'];
@@ -123,24 +123,24 @@ it('syncCollections throws SyncAlreadyRunningException when a sync is in progres
     $settings['sync'] = ['status' => 'running'];
     $this->integration->update(['settings' => $settings]);
 
-    expect(fn () => $this->orchestrator->syncCollections($this->integration))
+    expect(fn () => $this->orchestrator->pullCollections($this->integration))
         ->toThrow(SyncAlreadyRunningException::class);
 });
 
-it('syncInventory dispatches SyncShopifyInventoryJob only', function () {
+it('syncInventory dispatches PullInventoryJob only', function () {
     Bus::fake();
 
-    $this->orchestrator->syncInventory($this->integration);
+    $this->orchestrator->pullInventory($this->integration);
 
-    Bus::assertDispatched(SyncShopifyInventoryJob::class);
-    Bus::assertNotDispatched(SyncShopifyProductsJob::class);
-    Bus::assertNotDispatched(SyncShopifyCollectionsJob::class);
+    Bus::assertDispatched(PullInventoryJob::class);
+    Bus::assertNotDispatched(PullColorwaysJob::class);
+    Bus::assertNotDispatched(PullCollectionsJob::class);
 });
 
 it('syncInventory sets sync status to running with current_step inventory', function () {
     Bus::fake();
 
-    $this->orchestrator->syncInventory($this->integration);
+    $this->orchestrator->pullInventory($this->integration);
 
     $this->integration->refresh();
     $sync = $this->integration->settings['sync'];
@@ -156,7 +156,7 @@ it('syncInventory throws SyncAlreadyRunningException when a sync is in progress'
     $settings['sync'] = ['status' => 'running'];
     $this->integration->update(['settings' => $settings]);
 
-    expect(fn () => $this->orchestrator->syncInventory($this->integration))
+    expect(fn () => $this->orchestrator->pullInventory($this->integration))
         ->toThrow(SyncAlreadyRunningException::class);
 });
 
@@ -167,18 +167,18 @@ it('allows a new sync after a previous sync completed', function () {
     $settings['sync'] = ['status' => 'complete'];
     $this->integration->update(['settings' => $settings]);
 
-    $this->orchestrator->syncAll($this->integration);
+    $this->orchestrator->pullAll($this->integration);
 
     Bus::assertChained([
-        SyncShopifyProductsJob::class,
-        SyncShopifyCollectionsJob::class,
-        SyncShopifyInventoryJob::class,
+        PullColorwaysJob::class,
+        PullCollectionsJob::class,
+        PullInventoryJob::class,
     ]);
 });
 
-// ─── SyncShopifyProductsJob ───────────────────────────────────────────────────
+// ─── PullColorwaysJob ───────────────────────────────────────────────────
 
-it('SyncShopifyProductsJob writes result to integration settings on success', function () {
+it('PullColorwaysJob writes result to integration settings on success', function () {
     $result = new SyncResult(created: 5, updated: 2, failed: 1, errors: [
         ['entity_gid' => 'gid://shopify/Product/1', 'message' => 'Not found'],
     ]);
@@ -191,7 +191,7 @@ it('SyncShopifyProductsJob writes result to integration settings on success', fu
     $settings['sync'] = ['status' => 'running', 'current_step' => 'products'];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyProductsJob($this->integration);
+    $job = new PullColorwaysJob($this->integration);
     $job->handle($mockService);
 
     $this->integration->refresh();
@@ -208,12 +208,12 @@ it('SyncShopifyProductsJob writes result to integration settings on success', fu
     expect($sync['errors'][0]['entity_gid'])->toBe('gid://shopify/Product/1');
 });
 
-it('SyncShopifyProductsJob failed() sets sync status to failed', function () {
+it('PullColorwaysJob failed() sets sync status to failed', function () {
     $settings = $this->integration->settings ?? [];
     $settings['sync'] = ['status' => 'running', 'current_step' => 'products'];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyProductsJob($this->integration);
+    $job = new PullColorwaysJob($this->integration);
     $job->failed(new RuntimeException('Connection timed out'));
 
     $this->integration->refresh();
@@ -223,9 +223,9 @@ it('SyncShopifyProductsJob failed() sets sync status to failed', function () {
     expect($sync['completed_at'])->not->toBeNull();
 });
 
-// ─── SyncShopifyCollectionsJob ────────────────────────────────────────────────
+// ─── PullCollectionsJob ────────────────────────────────────────────────
 
-it('SyncShopifyCollectionsJob writes result to integration settings on success', function () {
+it('PullCollectionsJob writes result to integration settings on success', function () {
     $result = new SyncResult(created: 3, updated: 1, failed: 0);
 
     $mockService = $this->mock(ShopifyCollectionSyncService::class);
@@ -235,7 +235,7 @@ it('SyncShopifyCollectionsJob writes result to integration settings on success',
     $settings['sync'] = ['status' => 'running', 'current_step' => 'collections'];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyCollectionsJob($this->integration);
+    $job = new PullCollectionsJob($this->integration);
     $job->handle($mockService);
 
     $this->integration->refresh();
@@ -248,12 +248,12 @@ it('SyncShopifyCollectionsJob writes result to integration settings on success',
     expect($sync['errors'])->toBeEmpty();
 });
 
-it('SyncShopifyCollectionsJob failed() sets sync status to failed', function () {
+it('PullCollectionsJob failed() sets sync status to failed', function () {
     $settings = $this->integration->settings ?? [];
     $settings['sync'] = ['status' => 'running', 'current_step' => 'collections'];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyCollectionsJob($this->integration);
+    $job = new PullCollectionsJob($this->integration);
     $job->failed(new RuntimeException('API error'));
 
     $this->integration->refresh();
@@ -263,9 +263,9 @@ it('SyncShopifyCollectionsJob failed() sets sync status to failed', function () 
     expect($sync['completed_at'])->not->toBeNull();
 });
 
-// ─── SyncShopifyInventoryJob ──────────────────────────────────────────────────
+// ─── PullInventoryJob ──────────────────────────────────────────────────
 
-it('SyncShopifyInventoryJob writes result to integration settings on success', function () {
+it('PullInventoryJob writes result to integration settings on success', function () {
     $result = new SyncResult(updated: 10, failed: 2, errors: [
         ['entity_gid' => 'gid://shopify/ProductVariant/1', 'message' => 'Variant missing'],
         ['entity_gid' => 'gid://shopify/ProductVariant/2', 'message' => 'Quantity error'],
@@ -278,7 +278,7 @@ it('SyncShopifyInventoryJob writes result to integration settings on success', f
     $settings['sync'] = ['status' => 'running', 'current_step' => 'inventory'];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyInventoryJob($this->integration);
+    $job = new PullInventoryJob($this->integration);
     $job->handle($mockService);
 
     $this->integration->refresh();
@@ -291,12 +291,12 @@ it('SyncShopifyInventoryJob writes result to integration settings on success', f
     expect($sync['errors'][0]['step'])->toBe('inventory');
 });
 
-it('SyncShopifyInventoryJob failed() sets sync status to failed', function () {
+it('PullInventoryJob failed() sets sync status to failed', function () {
     $settings = $this->integration->settings ?? [];
     $settings['sync'] = ['status' => 'running', 'current_step' => 'inventory'];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyInventoryJob($this->integration);
+    $job = new PullInventoryJob($this->integration);
     $job->failed(new RuntimeException('Shopify rate limit'));
 
     $this->integration->refresh();
@@ -323,7 +323,7 @@ it('sync result for later steps preserves earlier step results', function () {
     ];
     $this->integration->update(['settings' => $settings]);
 
-    $job = new SyncShopifyCollectionsJob($this->integration);
+    $job = new PullCollectionsJob($this->integration);
     $job->handle($mockService);
 
     $this->integration->refresh();
@@ -340,7 +340,7 @@ it('sync result for later steps preserves earlier step results', function () {
 it('jobs are queued when dispatched via the orchestrator', function () {
     Queue::fake();
 
-    $this->orchestrator->syncProducts($this->integration);
+    $this->orchestrator->pullColorways($this->integration);
 
-    Queue::assertPushed(SyncShopifyProductsJob::class);
+    Queue::assertPushed(PullColorwaysJob::class);
 });

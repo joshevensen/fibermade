@@ -272,57 +272,72 @@ class ShopifyProductSyncService
 
     private function syncImage(Colorway $colorway, array $shopifyProduct): void
     {
-        $imageUrl = $shopifyProduct['featuredImage']['url'] ?? null;
-        if (! $imageUrl) {
+        $images = $shopifyProduct['images'] ?? [];
+        if (empty($images)) {
             return;
         }
 
-        $alreadySynced = $colorway->media()
+        $existingUrls = $colorway->media()
             ->get()
-            ->contains(fn (Media $m) => ($m->metadata['source'] ?? null) === 'shopify');
+            ->filter(fn (Media $m) => ($m->metadata['source'] ?? null) === 'shopify')
+            ->map(fn (Media $m) => $m->metadata['original_url'] ?? null)
+            ->filter()
+            ->values()
+            ->all();
 
-        if ($alreadySynced) {
-            return;
-        }
-
-        $fileName = basename(parse_url($imageUrl, PHP_URL_PATH));
+        $hasPrimary = $colorway->media()->where('is_primary', true)->exists();
         $disk = config('filesystems.media_disk', 'public');
-        $relativePath = "colorways/{$colorway->id}/{$fileName}";
 
-        try {
-            $response = Http::timeout(30)->get($imageUrl);
+        foreach ($images as $index => $image) {
+            $imageUrl = $image['url'] ?? null;
+            if (! $imageUrl || in_array($imageUrl, $existingUrls, true)) {
+                continue;
+            }
 
-            if (! $response->successful()) {
-                Log::warning("Shopify image download failed for colorway {$colorway->id}: HTTP {$response->status()}", [
+            $fileName = basename(parse_url($imageUrl, PHP_URL_PATH));
+            $relativePath = "colorways/{$colorway->id}/{$fileName}";
+
+            try {
+                $response = Http::timeout(30)->get($imageUrl);
+
+                if (! $response->successful()) {
+                    Log::warning("Shopify image download failed for colorway {$colorway->id}: HTTP {$response->status()}", [
+                        'url' => $imageUrl,
+                    ]);
+
+                    continue;
+                }
+
+                Storage::disk($disk)->put($relativePath, $response->body());
+            } catch (\Throwable $e) {
+                Log::warning("Shopify image download failed for colorway {$colorway->id}: {$e->getMessage()}", [
                     'url' => $imageUrl,
                 ]);
 
-                return;
+                continue;
             }
 
-            Storage::disk($disk)->put($relativePath, $response->body());
-        } catch (\Throwable $e) {
-            Log::warning("Shopify image download failed for colorway {$colorway->id}: {$e->getMessage()}", [
-                'url' => $imageUrl,
+            $isPrimary = ! $hasPrimary;
+
+            Media::create([
+                'mediable_type' => Colorway::class,
+                'mediable_id' => $colorway->id,
+                'file_path' => $relativePath,
+                'disk' => $disk,
+                'file_name' => $fileName,
+                'mime_type' => $response->header('Content-Type') ?: null,
+                'size' => strlen($response->body()),
+                'is_primary' => $isPrimary,
+                'metadata' => [
+                    'source' => 'shopify',
+                    'original_url' => $imageUrl,
+                ],
             ]);
 
-            return;
+            if ($isPrimary) {
+                $hasPrimary = true;
+            }
         }
-
-        Media::create([
-            'mediable_type' => Colorway::class,
-            'mediable_id' => $colorway->id,
-            'file_path' => $relativePath,
-            'disk' => $disk,
-            'file_name' => $fileName,
-            'mime_type' => $response->header('Content-Type') ?: null,
-            'size' => strlen($response->body()),
-            'is_primary' => true,
-            'metadata' => [
-                'source' => 'shopify',
-                'original_url' => $imageUrl,
-            ],
-        ]);
     }
 
     private function productName(array $product): string

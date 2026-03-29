@@ -26,6 +26,7 @@ function makeProduct(array $overrides = []): array
         'status' => 'ACTIVE',
         'handle' => 'ocean-mist',
         'featuredImage' => null,
+        'images' => [],
         'variants' => [
             [
                 'gid' => 'gid://shopify/ProductVariant/10',
@@ -103,7 +104,7 @@ it('stores primary image as Media record by downloading and storing on disk', fu
     Storage::fake('public');
     Http::fake(['https://cdn.shopify.com/image.jpg' => Http::response('fake-image-data', 200, ['Content-Type' => 'image/jpeg'])]);
 
-    $product = makeProduct(['featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg']]);
+    $product = makeProduct(['images' => [['url' => 'https://cdn.shopify.com/image.jpg', 'altText' => null]]]);
     $this->service->syncProduct($product, $this->integration);
 
     $colorway = Colorway::first();
@@ -122,8 +123,34 @@ it('stores primary image as Media record by downloading and storing on disk', fu
     Storage::disk('public')->assertExists("colorways/{$colorway->id}/image.jpg");
 });
 
-it('skips image sync when no featured image URL', function () {
-    $this->service->syncProduct(makeProduct(['featuredImage' => null]), $this->integration);
+it('syncs all images when a product has multiple images', function () {
+    Storage::fake('public');
+    Http::fake([
+        'https://cdn.shopify.com/image1.jpg' => Http::response('data1', 200, ['Content-Type' => 'image/jpeg']),
+        'https://cdn.shopify.com/image2.jpg' => Http::response('data2', 200, ['Content-Type' => 'image/jpeg']),
+        'https://cdn.shopify.com/image3.jpg' => Http::response('data3', 200, ['Content-Type' => 'image/jpeg']),
+    ]);
+
+    $product = makeProduct([
+        'images' => [
+            ['url' => 'https://cdn.shopify.com/image1.jpg', 'altText' => null],
+            ['url' => 'https://cdn.shopify.com/image2.jpg', 'altText' => null],
+            ['url' => 'https://cdn.shopify.com/image3.jpg', 'altText' => null],
+        ],
+    ]);
+    $this->service->syncProduct($product, $this->integration);
+
+    $colorway = Colorway::first();
+    $media = Media::where('mediable_type', Colorway::class)->where('mediable_id', $colorway->id)->get();
+
+    expect($media)->toHaveCount(3);
+    expect($media->where('is_primary', true)->count())->toBe(1);
+    expect($media->where('is_primary', false)->count())->toBe(2);
+    expect($media->first()->metadata['original_url'])->toBe('https://cdn.shopify.com/image1.jpg');
+});
+
+it('skips image sync when images array is empty', function () {
+    $this->service->syncProduct(makeProduct(['images' => []]), $this->integration);
 
     expect(Media::count())->toBe(0);
 });
@@ -131,24 +158,21 @@ it('skips image sync when no featured image URL', function () {
 it('skips image sync when image download fails', function () {
     Http::fake(['https://cdn.shopify.com/image.jpg' => Http::response('', 404)]);
 
-    $product = makeProduct(['featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg']]);
+    $product = makeProduct(['images' => [['url' => 'https://cdn.shopify.com/image.jpg', 'altText' => null]]]);
     $this->service->syncProduct($product, $this->integration);
 
     expect(Media::count())->toBe(0);
 });
 
-it('skips creating a second shopify image when one already exists', function () {
+it('skips images already synced by URL on re-sync', function () {
     Storage::fake('public');
     Http::fake(['https://cdn.shopify.com/image.jpg' => Http::response('fake-image-data', 200)]);
 
-    $product = makeProduct(['featuredImage' => ['url' => 'https://cdn.shopify.com/image.jpg']]);
+    $product = makeProduct(['images' => [['url' => 'https://cdn.shopify.com/image.jpg', 'altText' => null]]]);
+    $this->service->syncProduct($product, $this->integration);
     $this->service->syncProduct($product, $this->integration);
 
-    // Sync a second product for the same colorway — image already present
     $colorway = Colorway::first();
-    $colorway->refresh();
-    $this->service->syncProduct(makeProduct(['gid' => 'gid://shopify/Product/99', 'title' => 'Another']), $this->integration);
-
     expect(Media::where('mediable_type', Colorway::class)->where('mediable_id', $colorway->id)->count())->toBe(1);
 });
 

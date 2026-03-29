@@ -101,13 +101,15 @@ Route::prefix('creator')->middleware(['auth', 'verified', EnsureActiveSubscripti
 
     // Shopify sync routes
     Route::prefix('shopify')->name('shopify.')->group(function () {
-        Route::post('sync/all', [ShopifySyncController::class, 'syncAll'])->name('sync.all');
-        Route::post('sync/products', [ShopifySyncController::class, 'syncProducts'])->name('sync.products');
-        Route::post('sync/collections', [ShopifySyncController::class, 'syncCollections'])->name('sync.collections');
-        Route::post('sync/inventory', [ShopifySyncController::class, 'syncInventory'])->name('sync.inventory');
-        Route::post('sync/bases', [ShopifySyncController::class, 'syncBases'])->name('sync.bases');
-        Route::get('sync/status', [ShopifySyncController::class, 'status'])->name('sync.status');
+        Route::post('pull/all', [ShopifySyncController::class, 'pullAll'])->name('pull.all');
+        Route::post('pull/colorways', [ShopifySyncController::class, 'pullColorways'])->name('pull.colorways');
+        Route::post('pull/collections', [ShopifySyncController::class, 'pullCollections'])->name('pull.collections');
+        Route::post('pull/inventory', [ShopifySyncController::class, 'pullInventory'])->name('pull.inventory');
+        Route::post('push/bases', [ShopifySyncController::class, 'pushBases'])->name('push.bases');
+        Route::get('pull/status', [ShopifySyncController::class, 'status'])->name('pull.status');
         Route::patch('settings', [ShopifySyncController::class, 'updateSettings'])->name('settings.update');
+        Route::post('push/colorways', [ShopifySyncController::class, 'pushColorways'])->name('push.colorways');
+        Route::post('push/collections', [ShopifySyncController::class, 'pushCollections'])->name('push.collections');
         Route::post('push/all', [ShopifySyncController::class, 'pushAll'])->name('push.all');
         Route::post('{integration}/errors/dismiss', [ShopifySyncController::class, 'dismissErrors'])->name('errors.dismiss');
     });

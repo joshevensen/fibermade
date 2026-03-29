@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use App\Jobs\SyncColorwayImagesToShopifyJob;
+use App\Jobs\PushColorwayImagesJob;
 use App\Models\Colorway;
 use App\Models\Media;
 use Illuminate\Support\Facades\Log;
@@ -40,7 +40,7 @@ class MediaObserver
         }
 
         try {
-            SyncColorwayImagesToShopifyJob::dispatch($colorway);
+            PushColorwayImagesJob::dispatch($colorway);
         } catch (\Throwable $e) {
             Log::warning('MediaObserver: failed to dispatch image sync job', [
                 'media_id' => $media->id,

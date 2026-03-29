@@ -2,7 +2,7 @@
 
 use App\Enums\IntegrationType;
 use App\Exceptions\SyncAlreadyRunningException;
-use App\Jobs\PushCatalogToShopifyJob;
+use App\Jobs\PushCatalogJob;
 use App\Models\Account;
 use App\Models\Creator;
 use App\Models\Integration;
@@ -31,8 +31,8 @@ beforeEach(function () {
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 
 it('redirects guests away from sync endpoints', function () {
-    $this->postJson(route('shopify.sync.all'))->assertRedirect(route('login'));
-    $this->getJson(route('shopify.sync.status'))->assertRedirect(route('login'));
+    $this->postJson(route('shopify.pull.all'))->assertRedirect(route('login'));
+    $this->getJson(route('shopify.pull.status'))->assertRedirect(route('login'));
 });
 
 // ─── 404 when no integration ─────────────────────────────────────────────────
@@ -41,7 +41,7 @@ it('returns 404 when no active Shopify integration exists for syncAll', function
     $this->integration->update(['active' => false]);
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.all'))
+        ->postJson(route('shopify.pull.all'))
         ->assertNotFound();
 });
 
@@ -49,7 +49,7 @@ it('returns 404 when no active Shopify integration exists for syncProducts', fun
     $this->integration->update(['active' => false]);
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.products'))
+        ->postJson(route('shopify.pull.colorways'))
         ->assertNotFound();
 });
 
@@ -57,7 +57,7 @@ it('returns 404 when no active Shopify integration exists for syncCollections', 
     $this->integration->update(['active' => false]);
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.collections'))
+        ->postJson(route('shopify.pull.collections'))
         ->assertNotFound();
 });
 
@@ -65,7 +65,7 @@ it('returns 404 when no active Shopify integration exists for syncInventory', fu
     $this->integration->update(['active' => false]);
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.inventory'))
+        ->postJson(route('shopify.pull.inventory'))
         ->assertNotFound();
 });
 
@@ -73,7 +73,7 @@ it('returns 404 for status when no active Shopify integration exists', function 
     $this->integration->update(['active' => false]);
 
     $this->actingAs($this->user)
-        ->getJson(route('shopify.sync.status'))
+        ->getJson(route('shopify.pull.status'))
         ->assertNotFound()
         ->assertJson(['connected' => false]);
 });
@@ -82,42 +82,42 @@ it('returns 404 for status when no active Shopify integration exists', function 
 
 it('returns 409 when sync is already running for syncAll', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncAll')->andThrow(new SyncAlreadyRunningException('Already running'));
+        $mock->shouldReceive('pullAll')->andThrow(new SyncAlreadyRunningException('Already running'));
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.all'))
+        ->postJson(route('shopify.pull.all'))
         ->assertStatus(409)
         ->assertJson(['message' => 'A sync is already running.']);
 });
 
 it('returns 409 when sync is already running for syncProducts', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncProducts')->andThrow(new SyncAlreadyRunningException('Already running'));
+        $mock->shouldReceive('pullColorways')->andThrow(new SyncAlreadyRunningException('Already running'));
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.products'))
+        ->postJson(route('shopify.pull.colorways'))
         ->assertStatus(409);
 });
 
 it('returns 409 when sync is already running for syncCollections', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncCollections')->andThrow(new SyncAlreadyRunningException('Already running'));
+        $mock->shouldReceive('pullCollections')->andThrow(new SyncAlreadyRunningException('Already running'));
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.collections'))
+        ->postJson(route('shopify.pull.collections'))
         ->assertStatus(409);
 });
 
 it('returns 409 when sync is already running for syncInventory', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncInventory')->andThrow(new SyncAlreadyRunningException('Already running'));
+        $mock->shouldReceive('pullInventory')->andThrow(new SyncAlreadyRunningException('Already running'));
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.inventory'))
+        ->postJson(route('shopify.pull.inventory'))
         ->assertStatus(409);
 });
 
@@ -125,44 +125,44 @@ it('returns 409 when sync is already running for syncInventory', function () {
 
 it('returns 202 with sync state after triggering syncAll', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncAll')->once()->andReturnNull();
+        $mock->shouldReceive('pullAll')->once()->andReturnNull();
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.all'))
+        ->postJson(route('shopify.pull.all'))
         ->assertStatus(202)
         ->assertJsonStructure(['message', 'sync']);
 });
 
 it('returns 202 with sync state after triggering syncProducts', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncProducts')->once()->andReturnNull();
+        $mock->shouldReceive('pullColorways')->once()->andReturnNull();
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.products'))
+        ->postJson(route('shopify.pull.colorways'))
         ->assertStatus(202)
         ->assertJsonStructure(['message', 'sync']);
 });
 
 it('returns 202 with sync state after triggering syncCollections', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncCollections')->once()->andReturnNull();
+        $mock->shouldReceive('pullCollections')->once()->andReturnNull();
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.collections'))
+        ->postJson(route('shopify.pull.collections'))
         ->assertStatus(202)
         ->assertJsonStructure(['message', 'sync']);
 });
 
 it('returns 202 with sync state after triggering syncInventory', function () {
     $this->mock(ShopifySyncOrchestrator::class, function ($mock) {
-        $mock->shouldReceive('syncInventory')->once()->andReturnNull();
+        $mock->shouldReceive('pullInventory')->once()->andReturnNull();
     });
 
     $this->actingAs($this->user)
-        ->postJson(route('shopify.sync.inventory'))
+        ->postJson(route('shopify.pull.inventory'))
         ->assertStatus(202)
         ->assertJsonStructure(['message', 'sync']);
 });
@@ -171,7 +171,7 @@ it('returns 202 with sync state after triggering syncInventory', function () {
 
 it('returns correct shape from status endpoint', function () {
     $this->actingAs($this->user)
-        ->getJson(route('shopify.sync.status'))
+        ->getJson(route('shopify.pull.status'))
         ->assertOk()
         ->assertJson([
             'connected' => true,
@@ -203,7 +203,7 @@ it('returns 409 for pushAll when a push is already running', function () {
         ->assertJson(['message' => 'A push is already running.']);
 });
 
-it('dispatches PushCatalogToShopifyJob and returns 202', function () {
+it('dispatches PushCatalogJob and returns 202', function () {
     Queue::fake();
 
     $this->actingAs($this->user)
@@ -211,7 +211,7 @@ it('dispatches PushCatalogToShopifyJob and returns 202', function () {
         ->assertStatus(202)
         ->assertJsonStructure(['message', 'push_sync']);
 
-    Queue::assertPushed(PushCatalogToShopifyJob::class, fn ($job) => $job->integrationId === $this->integration->id);
+    Queue::assertPushed(PushCatalogJob::class, fn ($job) => $job->integrationId === $this->integration->id);
 });
 
 it('redirects guests away from pushAll endpoint', function () {
