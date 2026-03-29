@@ -25,6 +25,11 @@ use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyApiException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
+
+beforeEach(function () {
+    Queue::fake();
+});
 
 // ─── Integration::flagSyncError / clearSyncErrors ────────────────────────────
 
@@ -398,14 +403,7 @@ test('SyncCollectionDeletedToShopifyJob flags sync error on ShopifyApiException'
     ]);
 
     Http::fake([
-        'test.myshopify.com/*' => Http::response([
-            'data' => [
-                'collectionDelete' => [
-                    'deletedCollectionId' => null,
-                    'userErrors' => [['message' => 'Collection not found']],
-                ],
-            ],
-        ]),
+        'test.myshopify.com/*' => Http::response(['errors' => 'Not Found'], 404),
     ]);
 
     $job = new SyncCollectionDeletedToShopifyJob($collection->id, $account->id);

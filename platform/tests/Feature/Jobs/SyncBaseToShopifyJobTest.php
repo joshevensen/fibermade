@@ -12,8 +12,10 @@ use App\Models\IntegrationLog;
 use App\Models\Inventory;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
+    Queue::fake();
     Config::set('services.shopify.catalog_sync_enabled', true);
 
     $this->account = Account::factory()->creator()->create();

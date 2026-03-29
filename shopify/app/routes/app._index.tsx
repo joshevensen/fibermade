@@ -6,7 +6,7 @@ import type {
 } from "react-router";
 import { useFetcher, useLoaderData, useNavigate } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { authenticate, sessionStorage } from "../shopify.server";
+import { authenticate } from "../shopify.server";
 import db from "../db.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 
@@ -100,25 +100,6 @@ export const loader = async ({ request }: LoaderFunctionArgs): Promise<Connectio
         connectedAt: connection.connectedAt.toISOString(),
         fibermadeUrl,
       };
-    }
-
-    // Keep the platform's stored access token up to date. The offline token may
-    // be rotated by Shopify (expiringOfflineAccessTokens) and the Shopify
-    // framework updates the session storage automatically, but the platform
-    // stores its own copy. Silently refresh it on each page load.
-    const offlineSession = await sessionStorage.loadSession(`offline_${session.shop}`);
-    const currentToken = offlineSession?.accessToken;
-    if (currentToken) {
-      fibermadeRequest(baseUrl, "/api/v1/shopify/refresh-token", {
-        method: "POST",
-        body: {
-          connect_token: connection.connectToken,
-          shop: session.shop,
-          shopify_access_token: currentToken,
-        },
-      }).catch(() => {
-        // Non-fatal: the sync will still work until the token rotates
-      });
     }
 
     return connectedPayload;

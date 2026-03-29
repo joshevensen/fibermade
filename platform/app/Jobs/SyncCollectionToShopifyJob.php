@@ -51,8 +51,7 @@ class SyncCollectionToShopifyJob implements ShouldQueue
                 default => null,
             };
         } catch (ShopifyApiException $e) {
-            \Sentry\captureException($e);
-            $integration->flagSyncError();
+            $integration->handleSyncException($e);
 
             IntegrationLog::create([
                 'integration_id' => $integration->id,

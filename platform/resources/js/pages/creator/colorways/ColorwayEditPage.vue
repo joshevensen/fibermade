@@ -27,8 +27,11 @@ import { useToast } from '@/composables/useToast';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import InventoryQuantityInput from '@/pages/creator/inventory/components/InventoryQuantityInput.vue';
 import { update as updateCollections } from '@/routes/colorways/collections';
+import { usePage } from '@inertiajs/vue3';
 import { router } from '@inertiajs/vue3';
 import { reactive, ref, watch } from 'vue';
+
+const uploadMaxFilesize = (usePage().props.upload_max_filesize as number) ?? 10 * 1024 * 1024;
 
 interface Props {
     colorway: {
@@ -440,6 +443,7 @@ function handleDelete(event: Event): void {
                                         :show-upload-button="false"
                                         :show-cancel-button="false"
                                         :disabled="uploadingMedia"
+                                        :max-file-size="uploadMaxFilesize"
                                         choose-label="Upload Images"
                                         :choose-button-props="{
                                             outlined: true,

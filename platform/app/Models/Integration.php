@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\IntegrationType;
+use App\Services\Shopify\ShopifyApiException;
+use App\Services\Shopify\ShopifyTokenExpiredException;
 use Database\Factories\IntegrationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -92,13 +94,17 @@ class Integration extends Model
             return false;
         }
 
+        if ($this->settings['token_invalid'] ?? false) {
+            return false;
+        }
+
         return (bool) ($this->settings['catalog_sync_enabled'] ?? true);
     }
 
     /**
      * Get Shopify API config (shop domain and access token) for Shopify integrations.
      *
-     * @return array{shop: string, access_token: string}|null
+     * @return array{shop: string, access_token: string, refresh_token: string|null}|null
      */
     public function getShopifyConfig(): ?array
     {
@@ -119,9 +125,11 @@ class Integration extends Model
         }
 
         $accessToken = $credentials;
+        $refreshToken = null;
         $decoded = json_decode($credentials, true);
         if (is_array($decoded) && isset($decoded['access_token'])) {
             $accessToken = $decoded['access_token'];
+            $refreshToken = $decoded['refresh_token'] ?? null;
         }
 
         if (empty($accessToken)) {
@@ -131,7 +139,24 @@ class Integration extends Model
         return [
             'shop' => $shop,
             'access_token' => $accessToken,
+            'refresh_token' => $refreshToken,
         ];
+    }
+
+    /**
+     * Update the stored access token (and optionally refresh token) after a
+     * successful server-side token refresh.
+     */
+    public function updateTokenCredentials(string $accessToken, ?string $refreshToken = null): void
+    {
+        $decoded = json_decode($this->credentials ?? '', true) ?? [];
+
+        $decoded['access_token'] = $accessToken;
+        if ($refreshToken !== null) {
+            $decoded['refresh_token'] = $refreshToken;
+        }
+
+        $this->update(['credentials' => json_encode($decoded)]);
     }
 
     /**
@@ -177,6 +202,45 @@ class Integration extends Model
         $settings = $this->settings ?? [];
         $settings['has_sync_errors'] = false;
         $this->update(['settings' => $settings]);
+    }
+
+    /**
+     * Mark the integration's access token as invalid (e.g. after a 401 from Shopify).
+     *
+     * Catalog sync jobs check this flag and skip until the token is refreshed.
+     */
+    public function flagTokenInvalid(): void
+    {
+        $settings = $this->settings ?? [];
+        $settings['token_invalid'] = true;
+        $this->update(['settings' => $settings]);
+    }
+
+    /**
+     * Clear the token_invalid flag after a successful token refresh.
+     */
+    public function clearTokenInvalid(): void
+    {
+        $settings = $this->settings ?? [];
+        $settings['token_invalid'] = false;
+        $this->update(['settings' => $settings]);
+    }
+
+    /**
+     * Handle a Shopify API exception from a sync job.
+     *
+     * 401 errors flag the token as invalid (recoverable via the Shopify app's
+     * refresh-token flow) without reporting to Sentry. All other errors flag
+     * a general sync error and are captured for investigation.
+     */
+    public function handleSyncException(ShopifyApiException $e): void
+    {
+        if ($e instanceof ShopifyTokenExpiredException) {
+            $this->flagTokenInvalid();
+        } else {
+            \Sentry\captureException($e);
+            $this->flagSyncError();
+        }
     }
 
     private static function normalizeShopDomain(string $shop): string

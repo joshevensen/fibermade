@@ -18,7 +18,9 @@ class ShopifyGraphqlClient
 
     public function __construct(
         private readonly string $shop,
-        private readonly string $accessToken
+        private string $accessToken,
+        private ?string $refreshToken = null,
+        private readonly ?\Closure $onTokenRefreshed = null,
     ) {}
 
     /**
@@ -34,6 +36,7 @@ class ShopifyGraphqlClient
         $maxRetries = config('services.shopify.max_retries', 3);
         $initialBackoffMs = config('services.shopify.initial_backoff_ms', 1000);
         $attempt = 0;
+        $tokenRefreshed = false;
         $lastException = null;
 
         while ($attempt <= $maxRetries) {
@@ -90,6 +93,17 @@ class ShopifyGraphqlClient
                 }
 
                 $status = $e->response?->status();
+                if ($status === 401) {
+                    if (! $tokenRefreshed && $this->refreshToken) {
+                        $this->attemptTokenRefresh();
+                        $tokenRefreshed = true;
+
+                        continue; // retry with the new token (does not increment $attempt)
+                    }
+
+                    throw new ShopifyTokenExpiredException($e->getMessage(), $e->response?->json() ?? []);
+                }
+
                 if ($status >= 500 || $status === 429) {
                     $backoffMs = $initialBackoffMs * (2 ** $attempt);
                     usleep($backoffMs * 1000);
@@ -106,6 +120,31 @@ class ShopifyGraphqlClient
     }
 
     /**
+     * Refresh the stored access token using the refresh token.
+     *
+     * Updates $this->accessToken and calls onTokenRefreshed if registered.
+     *
+     * @throws ShopifyTokenExpiredException if the refresh token is invalid/expired
+     * @throws ShopifyApiException for other refresh errors
+     */
+    private function attemptTokenRefresh(): void
+    {
+        Log::info('Shopify access token expired — attempting refresh via refresh token', ['shop' => $this->shop]);
+
+        $newCredentials = ShopifyTokenRefreshService::refresh($this->shop, $this->refreshToken);
+
+        $this->accessToken = $newCredentials['access_token'];
+
+        if ($newCredentials['refresh_token']) {
+            $this->refreshToken = $newCredentials['refresh_token'];
+        }
+
+        if ($this->onTokenRefreshed) {
+            ($this->onTokenRefreshed)($this->accessToken, $this->refreshToken);
+        }
+    }
+
+    /**
      * Execute a REST GET request to the Shopify Admin API.
      *
      * @return array<string, mixed>
@@ -115,13 +154,25 @@ class ShopifyGraphqlClient
     public function restGet(string $path): array
     {
         $url = $this->restUrl($path);
+        $tokenRefreshed = false;
 
         try {
             $response = $this->client()->get($url);
+
+            if ($response->status() === 401 && ! $tokenRefreshed && $this->refreshToken) {
+                $this->attemptTokenRefresh();
+                $tokenRefreshed = true;
+                $response = $this->client()->get($url);
+            }
+
             $response->throw();
 
             return $response->json();
         } catch (RequestException $e) {
+            if ($e->response?->status() === 401) {
+                throw new ShopifyTokenExpiredException($e->getMessage(), $e->response?->json() ?? []);
+            }
+
             throw new ShopifyApiException($e->getMessage(), $e->response?->json() ?? []);
         }
     }
@@ -134,11 +185,23 @@ class ShopifyGraphqlClient
     public function restDelete(string $path): void
     {
         $url = $this->restUrl($path);
+        $tokenRefreshed = false;
 
         try {
             $response = $this->client()->delete($url);
+
+            if ($response->status() === 401 && ! $tokenRefreshed && $this->refreshToken) {
+                $this->attemptTokenRefresh();
+                $tokenRefreshed = true;
+                $response = $this->client()->delete($url);
+            }
+
             $response->throw();
         } catch (RequestException $e) {
+            if ($e->response?->status() === 401) {
+                throw new ShopifyTokenExpiredException($e->getMessage(), $e->response?->json() ?? []);
+            }
+
             throw new ShopifyApiException($e->getMessage(), $e->response?->json() ?? []);
         }
     }

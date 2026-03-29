@@ -36,5 +36,7 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="SENTRY_LARAVEL_DSN" value=""/>
+        <env name="SHOPIFY_API_KEY" value="test_api_key"/>
+        <env name="SHOPIFY_API_SECRET" value="test_api_secret"/>
     </php>
 </phpunit>

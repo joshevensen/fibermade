@@ -2,6 +2,7 @@
 
 use App\Services\Shopify\ShopifyGraphqlClient;
 use App\Services\Shopify\ShopifyRateLimitException;
+use App\Services\Shopify\ShopifyTokenExpiredException;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -525,4 +526,130 @@ it('includes variables key in request body when variables are passed', function 
     Http::assertSent(function (Request $request) {
         return $request->data()['variables'] === ['id' => 'gid://shopify/ProductVariant/1'];
     });
+});
+
+// ─── Token refresh on 401 ─────────────────────────────────────────────────────
+
+it('refreshes the access token and retries when 401 is received and a refresh token is present', function () {
+    $refreshUrl = "https://{$this->shop}/admin/oauth/access_token";
+    $callCount = 0;
+
+    Http::fake(function (Request $request) use (&$callCount, $refreshUrl) {
+        $callCount++;
+        if ($request->url() === $refreshUrl) {
+            return Http::response(['access_token' => 'new_token', 'scope' => 'write_products'], 200);
+        }
+        if ($callCount === 1) {
+            return Http::response(['errors' => 'Invalid API key'], 401);
+        }
+
+        return Http::response([
+            'data' => ['products' => ['edges' => [], 'pageInfo' => ['hasNextPage' => false, 'endCursor' => null]]],
+        ], 200);
+    });
+
+    $refreshedToken = null;
+    $client = new ShopifyGraphqlClient(
+        shop: $this->shop,
+        accessToken: $this->token,
+        refreshToken: 'shprt_original_refresh',
+        onTokenRefreshed: function (string $newAccessToken) use (&$refreshedToken): void {
+            $refreshedToken = $newAccessToken;
+        },
+    );
+
+    $result = $client->getProducts();
+
+    expect($result['products'])->toBeEmpty();
+    expect($refreshedToken)->toBe('new_token');
+});
+
+it('calls onTokenRefreshed with new refresh token when Shopify rotates it', function () {
+    $refreshUrl = "https://{$this->shop}/admin/oauth/access_token";
+    $callCount = 0;
+
+    Http::fake(function (Request $request) use (&$callCount, $refreshUrl) {
+        $callCount++;
+        if ($request->url() === $refreshUrl) {
+            return Http::response([
+                'access_token' => 'new_access',
+                'refresh_token' => 'shprt_rotated',
+                'scope' => 'write_products',
+            ], 200);
+        }
+        if ($callCount === 1) {
+            return Http::response(['errors' => 'Invalid API key'], 401);
+        }
+
+        return Http::response([
+            'data' => ['products' => ['edges' => [], 'pageInfo' => ['hasNextPage' => false, 'endCursor' => null]]],
+        ], 200);
+    });
+
+    $capturedAccess = null;
+    $capturedRefresh = null;
+    $client = new ShopifyGraphqlClient(
+        shop: $this->shop,
+        accessToken: $this->token,
+        refreshToken: 'shprt_original',
+        onTokenRefreshed: function (string $newAccessToken, ?string $newRefreshToken) use (&$capturedAccess, &$capturedRefresh): void {
+            $capturedAccess = $newAccessToken;
+            $capturedRefresh = $newRefreshToken;
+        },
+    );
+
+    $client->getProducts();
+
+    expect($capturedAccess)->toBe('new_access');
+    expect($capturedRefresh)->toBe('shprt_rotated');
+});
+
+it('throws ShopifyTokenExpiredException when 401 received and no refresh token is set', function () {
+    Http::fake([
+        $this->graphqlUrl => Http::response(['errors' => 'Invalid API key'], 401),
+    ]);
+
+    expect(fn () => $this->client->getProducts())->toThrow(ShopifyTokenExpiredException::class);
+});
+
+it('throws ShopifyTokenExpiredException when refresh token is rejected by Shopify', function () {
+    $refreshUrl = "https://{$this->shop}/admin/oauth/access_token";
+
+    Http::fake([
+        $this->graphqlUrl => Http::response(['errors' => 'Invalid API key'], 401),
+        $refreshUrl => Http::response(['error' => 'invalid_grant'], 401),
+    ]);
+
+    $client = new ShopifyGraphqlClient(
+        shop: $this->shop,
+        accessToken: $this->token,
+        refreshToken: 'shprt_expired',
+    );
+
+    expect(fn () => $client->getProducts())->toThrow(ShopifyTokenExpiredException::class);
+});
+
+it('does not retry token refresh more than once per request call', function () {
+    $refreshCallCount = 0;
+    $refreshUrl = "https://{$this->shop}/admin/oauth/access_token";
+
+    Http::fake(function (Request $request) use (&$refreshCallCount, $refreshUrl) {
+        if ($request->url() === $refreshUrl) {
+            $refreshCallCount++;
+
+            return Http::response(['access_token' => 'new_token', 'scope' => 'write_products'], 200);
+        }
+
+        // Always return 401 so we can verify refresh is only attempted once
+        return Http::response(['errors' => 'Unauthorized'], 401);
+    });
+
+    $client = new ShopifyGraphqlClient(
+        shop: $this->shop,
+        accessToken: $this->token,
+        refreshToken: 'shprt_valid',
+    );
+
+    expect(fn () => $client->getProducts())->toThrow(ShopifyTokenExpiredException::class);
+    expect($refreshCallCount)->toBe(1);
 });

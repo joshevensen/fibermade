@@ -10,6 +10,7 @@ use App\Models\Integration;
 use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyApiException;
 use App\Services\Shopify\ShopifyCollectionPushService;
+use App\Services\Shopify\ShopifyTokenExpiredException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -93,6 +94,9 @@ class PushCatalogToShopifyJob implements ShouldQueue
                 } else {
                     $updated++;
                 }
+            } catch (ShopifyTokenExpiredException $e) {
+                $integration->handleSyncException($e);
+                throw $e;
             } catch (\Throwable) {
                 $failed++;
             }
@@ -136,6 +140,9 @@ class PushCatalogToShopifyJob implements ShouldQueue
                     $pushService->syncCollectionProducts($collection, $collectionGid, $integration);
                     $created++;
                 }
+            } catch (ShopifyTokenExpiredException $e) {
+                $integration->handleSyncException($e);
+                throw $e;
             } catch (ShopifyApiException) {
                 $failed++;
             }

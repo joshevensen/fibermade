@@ -5,6 +5,7 @@ use App\Models\Account;
 use App\Models\Colorway;
 use App\Models\ExternalIdentifier;
 use App\Models\Integration;
+use Illuminate\Support\Facades\Queue;
 
 // ---------------------------------------------------------------------------
 // connect
@@ -194,4 +195,122 @@ test('status validates required query parameters', function () {
 
     $response->assertStatus(422)
         ->assertJsonValidationErrors(['connect_token', 'shop']);
+});
+
+// ---------------------------------------------------------------------------
+// connect — stores refresh token in credentials JSON
+// ---------------------------------------------------------------------------
+
+test('connect stores refresh token in credentials when provided', function () {
+    Queue::fake();
+
+    $account = Account::factory()->create();
+
+    $this->postJson('/api/v1/shopify/connect', [
+        'connect_token' => $account->shopify_connect_token,
+        'shop' => 'example.myshopify.com',
+        'shopify_access_token' => 'shpat_access',
+        'shopify_refresh_token' => 'shprt_refresh',
+    ])->assertStatus(201);
+
+    $integration = Integration::where('account_id', $account->id)->first();
+    $config = $integration->getShopifyConfig();
+
+    expect($config['access_token'])->toBe('shpat_access');
+    expect($config['refresh_token'])->toBe('shprt_refresh');
+});
+
+test('connect works without refresh token', function () {
+    Queue::fake();
+
+    $account = Account::factory()->create();
+
+    $this->postJson('/api/v1/shopify/connect', [
+        'connect_token' => $account->shopify_connect_token,
+        'shop' => 'example.myshopify.com',
+        'shopify_access_token' => 'shpat_access',
+    ])->assertStatus(201);
+
+    $integration = Integration::where('account_id', $account->id)->first();
+    $config = $integration->getShopifyConfig();
+
+    expect($config['access_token'])->toBe('shpat_access');
+    expect($config['refresh_token'])->toBeNull();
+});
+
+// ---------------------------------------------------------------------------
+// refresh-token — updates both access and refresh token
+// ---------------------------------------------------------------------------
+
+test('refresh-token updates access token and stores new refresh token', function () {
+    $account = Account::factory()->create();
+    Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'old_token', 'refresh_token' => 'old_refresh']),
+        'settings' => ['shop' => 'example.myshopify.com'],
+    ]);
+
+    $this->postJson('/api/v1/shopify/refresh-token', [
+        'connect_token' => $account->shopify_connect_token,
+        'shop' => 'example.myshopify.com',
+        'shopify_access_token' => 'new_token',
+        'shopify_refresh_token' => 'new_refresh',
+    ])->assertStatus(204);
+
+    $config = Integration::where('account_id', $account->id)->first()->getShopifyConfig();
+    expect($config['access_token'])->toBe('new_token');
+    expect($config['refresh_token'])->toBe('new_refresh');
+});
+
+test('refresh-token preserves existing refresh token when none provided', function () {
+    $account = Account::factory()->create();
+    Integration::factory()->create([
+        'account_id' => $account->id,
+        'type' => IntegrationType::Shopify,
+        'active' => true,
+        'credentials' => json_encode(['access_token' => 'old_token', 'refresh_token' => 'original_refresh']),
+        'settings' => ['shop' => 'example.myshopify.com'],
+    ]);
+
+    $this->postJson('/api/v1/shopify/refresh-token', [
+        'connect_token' => $account->shopify_connect_token,
+        'shop' => 'example.myshopify.com',
+        'shopify_access_token' => 'new_token',
+    ])->assertStatus(204);
+
+    $config = Integration::where('account_id', $account->id)->first()->getShopifyConfig();
+    expect($config['access_token'])->toBe('new_token');
+    expect($config['refresh_token'])->toBe('original_refresh');
+});
+
+// ---------------------------------------------------------------------------
+// Integration::updateTokenCredentials
+// ---------------------------------------------------------------------------
+
+test('updateTokenCredentials updates access token and refresh token', function () {
+    $integration = Integration::factory()->create([
+        'credentials' => json_encode(['access_token' => 'old', 'refresh_token' => 'old_refresh']),
+        'settings' => ['shop' => 'test.myshopify.com'],
+    ]);
+
+    $integration->updateTokenCredentials('new_access', 'new_refresh');
+
+    $config = $integration->fresh()->getShopifyConfig();
+    expect($config['access_token'])->toBe('new_access');
+    expect($config['refresh_token'])->toBe('new_refresh');
+});
+
+test('updateTokenCredentials does not overwrite refresh token when null is passed', function () {
+    $integration = Integration::factory()->create([
+        'credentials' => json_encode(['access_token' => 'old', 'refresh_token' => 'keep_me']),
+        'settings' => ['shop' => 'test.myshopify.com'],
+    ]);
+
+    $integration->updateTokenCredentials('new_access');
+
+    $config = $integration->fresh()->getShopifyConfig();
+    expect($config['access_token'])->toBe('new_access');
+    expect($config['refresh_token'])->toBe('keep_me');
 });

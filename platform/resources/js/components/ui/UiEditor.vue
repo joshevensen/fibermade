@@ -73,3 +73,9 @@ defineOptions({
     </PrimeEditor>
 </template>
 
+<style>
+.p-editor-content .ql-editor {
+    min-height: inherit;
+}
+</style>
+

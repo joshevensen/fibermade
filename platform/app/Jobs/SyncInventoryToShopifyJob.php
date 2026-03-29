@@ -40,8 +40,7 @@ class SyncInventoryToShopifyJob implements ShouldQueue
         try {
             $inventorySync->pushInventoryToShopify($inventory, $integration, syncSource: 'observer');
         } catch (ShopifyApiException $e) {
-            \Sentry\captureException($e);
-            $integration->flagSyncError();
+            $integration->handleSyncException($e);
 
             IntegrationLog::create([
                 'integration_id' => $integration->id,

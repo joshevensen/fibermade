@@ -21,6 +21,7 @@ class ShopifyConnectionController extends ApiController
             'connect_token' => ['required', 'string'],
             'shop' => ['required', 'string'],
             'shopify_access_token' => ['required', 'string'],
+            'shopify_refresh_token' => ['nullable', 'string'],
         ]);
 
         $account = Account::where('shopify_connect_token', $validated['connect_token'])->first();
@@ -34,10 +35,15 @@ class ShopifyConnectionController extends ApiController
             ->where('type', IntegrationType::Shopify)
             ->pluck('id');
 
+        $credentials = ['access_token' => $validated['shopify_access_token']];
+        if (! empty($validated['shopify_refresh_token'])) {
+            $credentials['refresh_token'] = $validated['shopify_refresh_token'];
+        }
+
         $integration = Integration::create([
             'account_id' => $account->id,
             'type' => IntegrationType::Shopify,
-            'credentials' => $validated['shopify_access_token'],
+            'credentials' => json_encode($credentials),
             'settings' => ['shop' => $validated['shop'], 'auto_sync' => true],
             'active' => true,
         ]);
@@ -53,9 +59,11 @@ class ShopifyConnectionController extends ApiController
     }
 
     /**
-     * Update the Shopify access token for an existing integration.
+     * Update the Shopify access token (and optional refresh token) for an
+     * existing integration.
      *
-     * Called by the Shopify app whenever its session token is rotated.
+     * Called by the Shopify app on every admin page load so Fibermade always
+     * has the latest credentials.
      */
     public function refreshToken(Request $request): JsonResponse
     {
@@ -63,6 +71,7 @@ class ShopifyConnectionController extends ApiController
             'connect_token' => ['required', 'string'],
             'shop' => ['required', 'string'],
             'shopify_access_token' => ['required', 'string'],
+            'shopify_refresh_token' => ['nullable', 'string'],
         ]);
 
         $account = Account::where('shopify_connect_token', $validated['connect_token'])->first();
@@ -87,7 +96,11 @@ class ShopifyConnectionController extends ApiController
             return response()->json(null, 204);
         }
 
-        $integration->update(['credentials' => $validated['shopify_access_token']]);
+        $integration->updateTokenCredentials(
+            $validated['shopify_access_token'],
+            $validated['shopify_refresh_token'] ?? null,
+        );
+        $integration->clearTokenInvalid();
 
         return response()->json(null, 204);
     }

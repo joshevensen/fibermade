@@ -8,9 +8,12 @@ use App\Models\Colorway;
 use App\Models\Integration;
 use App\Services\InventorySyncService;
 use App\Services\Shopify\ShopifyGraphqlClient;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
+    Queue::fake();
+
     $this->account = Account::factory()->creator()->create();
     $this->integration = Integration::factory()->create([
         'account_id' => $this->account->id,
@@ -85,12 +88,18 @@ it('continues after per-colorway failures without aborting', function () {
 it('includes collections in last_result after push completes', function () {
     Collection::factory()->count(2)->create(['account_id' => $this->account->id]);
 
+    $collectionCounter = 0;
+    Http::fake([
+        'test.myshopify.com/*' => Http::sequence()
+            ->push(['data' => ['collectionCreate' => ['collection' => ['id' => 'gid://shopify/Collection/1', 'title' => 'Test', 'handle' => 'test'], 'userErrors' => []]]])
+            ->push(['data' => ['collectionCreate' => ['collection' => ['id' => 'gid://shopify/Collection/2', 'title' => 'Test 2', 'handle' => 'test-2'], 'userErrors' => []]]]),
+    ]);
+
     $mockInventorySync = $this->mock(InventorySyncService::class);
     $mockInventorySync->shouldReceive('pushAllInventoryForColorway')->andReturn([
         'variants_updated' => 0, 'variants_created' => 0, 'products_created' => 0, 'skipped' => 0,
     ]);
 
-    // When Shopify client cannot be created (no valid credentials for test), collections are skipped
     $job = new PushCatalogToShopifyJob($this->integration->id);
     $job->handle($mockInventorySync);
 

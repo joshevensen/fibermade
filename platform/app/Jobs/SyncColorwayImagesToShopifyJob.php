@@ -64,8 +64,7 @@ class SyncColorwayImagesToShopifyJob implements ShouldQueue
                 'synced_at' => now(),
             ]);
         } catch (ShopifyApiException $e) {
-            \Sentry\captureException($e);
-            $integration->flagSyncError();
+            $integration->handleSyncException($e);
 
             IntegrationLog::create([
                 'integration_id' => $integration->id,

@@ -60,8 +60,7 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
             $inventorySyncService = app(InventorySyncService::class);
             $inventorySyncService->pushAllInventoryForColorway($this->colorway->fresh(), $integration, 'observer');
         } catch (ShopifyApiException $e) {
-            \Sentry\captureException($e);
-            $integration->flagSyncError();
+            $integration->handleSyncException($e);
             $this->logError($integration, $e, 'product_create');
         }
     }
@@ -79,8 +78,7 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
             $shopifySync->deleteProduct($productGid);
             $this->logSuccess($integration, 'Deleted colorway from Shopify', 'product_delete');
         } catch (ShopifyApiException $e) {
-            \Sentry\captureException($e);
-            $integration->flagSyncError();
+            $integration->handleSyncException($e);
             $this->logError($integration, $e, 'product_delete');
         }
     }
@@ -106,8 +104,7 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
                 $this->logSuccess($integration, 'Synced colorway catalog to Shopify', $operation);
             }
         } catch (ShopifyApiException $e) {
-            \Sentry\captureException($e);
-            $integration->flagSyncError();
+            $integration->handleSyncException($e);
             $this->logError($integration, $e, $operation);
         }
     }

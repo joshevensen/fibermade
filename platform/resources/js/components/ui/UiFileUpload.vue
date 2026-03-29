@@ -49,6 +49,7 @@ export const fileUploadBasic: FileUploadTokenSections.Basic = {
 
 <script setup lang="ts">
 import PrimeFileUpload from 'primevue/fileupload';
+import { computed } from 'vue';
 
 interface Props {
     name?: string;
@@ -74,28 +75,42 @@ const props = withDefaults(defineProps<Props>(), {
 defineOptions({
     inheritAttrs: false,
 });
+
+const fileSizeHint = computed<string | null>(() => {
+    if (!props.maxFileSize) return null;
+    if (props.maxFileSize >= 1024 * 1024) {
+        return `Max file size: ${(props.maxFileSize / (1024 * 1024)).toFixed(0)} MB`;
+    }
+    if (props.maxFileSize >= 1024) {
+        return `Max file size: ${(props.maxFileSize / 1024).toFixed(0)} KB`;
+    }
+    return `Max file size: ${props.maxFileSize} B`;
+});
 </script>
 
 <template>
-    <PrimeFileUpload
-        v-bind="$attrs"
-        :name="name"
-        :url="url"
-        :mode="mode"
-        :multiple="multiple"
-        :accept="accept"
-        :disabled="disabled"
-        :auto="auto"
-        :maxFileSize="maxFileSize"
-        :fileLimit="fileLimit"
-        :customUpload="customUpload"
-        :showUploadButton="showUploadButton"
-        :showCancelButton="showCancelButton"
-    >
-        <template v-if="$slots.content" #content="slotProps">
-            <slot name="content" v-bind="slotProps" />
-        </template>
-        <slot />
-    </PrimeFileUpload>
+    <div>
+        <PrimeFileUpload
+            v-bind="$attrs"
+            :name="name"
+            :url="url"
+            :mode="mode"
+            :multiple="multiple"
+            :accept="accept"
+            :disabled="disabled"
+            :auto="auto"
+            :maxFileSize="maxFileSize"
+            :fileLimit="fileLimit"
+            :customUpload="customUpload"
+            :showUploadButton="showUploadButton"
+            :showCancelButton="showCancelButton"
+        >
+            <template v-if="$slots.content" #content="slotProps">
+                <slot name="content" v-bind="slotProps" />
+            </template>
+            <slot />
+        </PrimeFileUpload>
+        <p v-if="fileSizeHint" class="mt-1 text-sm text-surface-400">{{ fileSizeHint }}</p>
+    </div>
 </template>
 

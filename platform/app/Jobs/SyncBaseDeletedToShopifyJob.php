@@ -89,8 +89,7 @@ class SyncBaseDeletedToShopifyJob implements ShouldQueue
                 ExternalIdentifier::whereIn('id', $identifierIds)->delete();
                 $count += count($variantGids);
             } catch (ShopifyApiException $e) {
-                \Sentry\captureException($e);
-                $integration->flagSyncError();
+                $integration->handleSyncException($e);
             }
         }
 

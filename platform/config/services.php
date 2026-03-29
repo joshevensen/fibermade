@@ -56,6 +56,8 @@ return [
         'max_retries' => (int) env('SHOPIFY_API_MAX_RETRIES', 3),
         'initial_backoff_ms' => (int) env('SHOPIFY_API_INITIAL_BACKOFF_MS', 1000),
         'app_url' => env('SHOPIFY_APP_URL'),
+        'api_key' => env('SHOPIFY_API_KEY'),
+        'api_secret' => env('SHOPIFY_API_SECRET'),
     ],
 
 ];

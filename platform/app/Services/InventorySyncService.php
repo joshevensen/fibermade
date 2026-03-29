@@ -393,6 +393,9 @@ class InventorySyncService
 
     /**
      * Create a Shopify API client for the given integration.
+     *
+     * Passes the stored refresh token (if any) so the client can automatically
+     * refresh credentials on a 401 and persist the new token back to the DB.
      */
     public static function createShopifyClient(Integration $integration): ?ShopifyGraphqlClient
     {
@@ -402,7 +405,17 @@ class InventorySyncService
             return null;
         }
 
-        return new ShopifyGraphqlClient($config['shop'], $config['access_token']);
+        $onTokenRefreshed = function (string $newAccessToken, ?string $newRefreshToken) use ($integration): void {
+            $integration->updateTokenCredentials($newAccessToken, $newRefreshToken);
+            $integration->clearTokenInvalid();
+        };
+
+        return new ShopifyGraphqlClient(
+            shop: $config['shop'],
+            accessToken: $config['access_token'],
+            refreshToken: $config['refresh_token'] ?? null,
+            onTokenRefreshed: $onTokenRefreshed,
+        );
     }
 
     private function logPush(

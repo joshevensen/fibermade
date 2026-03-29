@@ -9,6 +9,7 @@ use App\Models\Account;
 use App\Models\Integration;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -60,6 +61,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'name' => config('app.name'),
+            'upload_max_filesize' => UploadedFile::getMaxFilesize(),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
                 'user' => $user?->load('account'),
