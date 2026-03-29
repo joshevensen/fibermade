@@ -244,7 +244,7 @@ class ColorwayController extends Controller
         $colorway->updated_by = $request->user()->id;
         $colorway->save();
 
-        return redirect()->route('colorways.index');
+        return redirect()->route('colorways.edit', $colorway);
     }
 
     /**

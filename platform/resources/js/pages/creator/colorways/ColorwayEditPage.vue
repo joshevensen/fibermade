@@ -261,15 +261,6 @@ function handleDelete(event: Event): void {
     <CreatorLayout page-title="Edit Colorway">
         <template #header-actions>
             <UiButton
-                v-if="has_shopify"
-                type="button"
-                outlined
-                :loading="pushingToShopify"
-                @click="handlePushToShopify"
-            >
-                Push to Shopify
-            </UiButton>
-            <UiButton
                 type="submit"
                 form="colorway-form"
                 :loading="form.processing"
@@ -316,13 +307,14 @@ function handleDelete(event: Event): void {
                                     class="grid w-full gap-4"
                                     style="grid-template-columns: auto 1fr auto"
                                 >
-                                    <UiFormFieldSelect
-                                        name="technique"
-                                        label="Technique"
-                                        :options="techniqueOptions"
-                                        placeholder="Select technique"
-                                        :server-error="form.errors.technique"
-                                        show-clear
+                                    <UiFormFieldInputNumber
+                                        name="per_pan"
+                                        label="Per Pan"
+                                        placeholder="1-6"
+                                        :min="1"
+                                        :max="6"
+                                        :server-error="form.errors.per_pan"
+                                        required
                                     />
 
                                     <UiFormFieldMultiSelect
@@ -333,14 +325,13 @@ function handleDelete(event: Event): void {
                                         :server-error="form.errors.colors"
                                     />
 
-                                    <UiFormFieldInputNumber
-                                        name="per_pan"
-                                        label="Per Pan"
-                                        placeholder="1-6"
-                                        :min="1"
-                                        :max="6"
-                                        :server-error="form.errors.per_pan"
-                                        required
+                                    <UiFormFieldSelect
+                                        name="technique"
+                                        label="Technique"
+                                        :options="techniqueOptions"
+                                        placeholder="Select technique"
+                                        :server-error="form.errors.technique"
+                                        show-clear
                                     />
                                 </div>
 
@@ -581,7 +572,7 @@ function handleDelete(event: Event): void {
                         "
                         binary
                         @update:model-value="
-                            toggleCollection(collection.id, $event)
+                            toggleCollection(collection.id, $event as boolean)
                         "
                     />
                     <span class="font-medium text-surface-700">

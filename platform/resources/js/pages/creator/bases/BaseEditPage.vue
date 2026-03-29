@@ -10,7 +10,6 @@ import UiEditor from '@/components/ui/UiEditor.vue';
 import UiForm from '@/components/ui/UiForm.vue';
 import UiFormField from '@/components/ui/UiFormField.vue';
 import UiFormFieldInput from '@/components/ui/UiFormFieldInput.vue';
-import UiFormFieldSelect from '@/components/ui/UiFormFieldSelect.vue';
 import UiInputGroup from '@/components/ui/UiInputGroup.vue';
 import UiInputGroupAddon from '@/components/ui/UiInputGroupAddon.vue';
 import UiInputNumber from '@/components/ui/UiInputNumber.vue';
@@ -125,69 +124,7 @@ function handleDelete(event: Event): void {
                             required
                         />
 
-                        <UiFormField
-                            name="description"
-                            label="Description"
-                            :server-error="form.errors.description"
-                        >
-                            <template #default="{ props: fieldProps }">
-                                <UiEditor
-                                    v-bind="fieldProps"
-                                    placeholder="Base description"
-                                />
-                            </template>
-                        </UiFormField>
-
                         <div class="grid grid-cols-2 gap-4">
-                            <UiFormFieldSelect
-                                name="weight"
-                                label="Weight"
-                                :options="weightOptions"
-                                placeholder="Select weight"
-                                :server-error="form.errors.weight"
-                                show-clear
-                            />
-
-                            <UiFormField
-                                name="size"
-                                label="Size"
-                                :server-error="form.errors.size"
-                            >
-                                <template #default="{ props: fieldProps }">
-                                    <UiInputGroup>
-                                        <UiInputNumber
-                                            v-bind="fieldProps"
-                                            :min="0"
-                                        />
-                                        <UiInputGroupAddon
-                                            >grams</UiInputGroupAddon
-                                        >
-                                    </UiInputGroup>
-                                </template>
-                            </UiFormField>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <UiFormField
-                                name="cost"
-                                label="Cost"
-                                :server-error="form.errors.cost"
-                            >
-                                <template #default="{ props: fieldProps }">
-                                    <UiInputGroup>
-                                        <UiInputGroupAddon>$</UiInputGroupAddon>
-                                        <UiInputNumber
-                                            v-bind="fieldProps"
-                                            :min="0"
-                                            :max="99999999.99"
-                                            :step="0.01"
-                                            :minFractionDigits="2"
-                                            :maxFractionDigits="2"
-                                        />
-                                    </UiInputGroup>
-                                </template>
-                            </UiFormField>
-
                             <UiFormField
                                 name="retail_price"
                                 label="Retail Price"
@@ -207,7 +144,40 @@ function handleDelete(event: Event): void {
                                     </UiInputGroup>
                                 </template>
                             </UiFormField>
+
+                            <UiFormField
+                                name="cost"
+                                label="Cost"
+                                :server-error="form.errors.cost"
+                            >
+                                <template #default="{ props: fieldProps }">
+                                    <UiInputGroup>
+                                        <UiInputGroupAddon>$</UiInputGroupAddon>
+                                        <UiInputNumber
+                                            v-bind="fieldProps"
+                                            :min="0"
+                                            :max="99999999.99"
+                                            :step="0.01"
+                                            :minFractionDigits="2"
+                                            :maxFractionDigits="2"
+                                        />
+                                    </UiInputGroup>
+                                </template>
+                            </UiFormField>
                         </div>
+
+                        <UiFormField
+                            name="description"
+                            label="Description"
+                            :server-error="form.errors.description"
+                        >
+                            <template #default="{ props: fieldProps }">
+                                <UiEditor
+                                    v-bind="fieldProps"
+                                    placeholder="Base description"
+                                />
+                            </template>
+                        </UiFormField>
                     </UiForm>
                 </template>
             </UiCard>
@@ -215,189 +185,6 @@ function handleDelete(event: Event): void {
 
         <template #side>
             <div class="flex flex-col gap-4">
-                <UiCard>
-                    <template #title>Material</template>
-                    <template #content>
-                        <UiForm
-                            :initial-values="initialValues"
-                            @submit="onSubmit"
-                        >
-                            <div class="grid grid-cols-3 gap-4">
-                                <UiFormField
-                                    name="wool_percent"
-                                    label="Wool"
-                                    :server-error="form.errors.wool_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="nylon_percent"
-                                    label="Nylon"
-                                    :server-error="form.errors.nylon_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="alpaca_percent"
-                                    label="Alpaca"
-                                    :server-error="form.errors.alpaca_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="yak_percent"
-                                    label="Yak"
-                                    :server-error="form.errors.yak_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="camel_percent"
-                                    label="Camel"
-                                    :server-error="form.errors.camel_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="silk_percent"
-                                    label="Silk"
-                                    :server-error="form.errors.silk_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="cotton_percent"
-                                    label="Cotton"
-                                    :server-error="form.errors.cotton_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="bamboo_percent"
-                                    label="Bamboo"
-                                    :server-error="form.errors.bamboo_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-
-                                <UiFormField
-                                    name="linen_percent"
-                                    label="Linen"
-                                    :server-error="form.errors.linen_percent"
-                                >
-                                    <template #default="{ props: fieldProps }">
-                                        <UiInputGroup>
-                                            <UiInputNumber
-                                                v-bind="fieldProps"
-                                                :min="0"
-                                                :max="100"
-                                            />
-                                            <UiInputGroupAddon
-                                                >%</UiInputGroupAddon
-                                            >
-                                        </UiInputGroup>
-                                    </template>
-                                </UiFormField>
-                            </div>
-                        </UiForm>
-                    </template>
-                </UiCard>
-
                 <UiCard>
                     <template #content>
                         <div class="space-y-4">

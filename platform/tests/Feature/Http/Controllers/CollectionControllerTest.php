@@ -45,7 +45,7 @@ test('user can update a collection without slug', function () {
         'status' => BaseStatus::Active->value,
     ]);
 
-    $response->assertRedirect(route('collections.index'));
+    $response->assertRedirect(route('collections.edit', $collection));
     $this->assertDatabaseHas('collections', [
         'id' => $collection->id,
         'name' => 'Updated Collection',

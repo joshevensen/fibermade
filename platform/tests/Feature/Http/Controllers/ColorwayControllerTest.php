@@ -52,7 +52,7 @@ test('user can update a colorway without slug', function () {
         'status' => ColorwayStatus::Active->value,
     ]);
 
-    $response->assertRedirect(route('colorways.index'));
+    $response->assertRedirect(route('colorways.edit', $colorway));
     $this->assertDatabaseHas('colorways', [
         'id' => $colorway->id,
         'name' => 'Updated Colorway',

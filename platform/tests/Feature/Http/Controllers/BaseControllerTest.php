@@ -47,7 +47,7 @@ test('user can update a base without slug', function () {
         'status' => BaseStatus::Active->value,
     ]);
 
-    $response->assertRedirect(route('bases.index'));
+    $response->assertRedirect(route('bases.edit', $base));
     $this->assertDatabaseHas('bases', [
         'id' => $base->id,
         'descriptor' => 'Updated Base',

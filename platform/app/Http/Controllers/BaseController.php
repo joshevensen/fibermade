@@ -134,7 +134,7 @@ class BaseController extends Controller
     {
         $base->update($request->validated());
 
-        return redirect()->route('bases.index');
+        return redirect()->route('bases.edit', $base);
     }
 
     /**

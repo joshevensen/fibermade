@@ -151,15 +151,6 @@ function handleDelete(event: Event): void {
     <CreatorLayout page-title="Edit Collection">
         <template #header-actions>
             <UiButton
-                v-if="has_shopify"
-                type="button"
-                outlined
-                :loading="pushingToShopify"
-                @click="handlePushToShopify"
-            >
-                Push to Shopify
-            </UiButton>
-            <UiButton
                 type="submit"
                 form="collection-form"
                 :loading="form.processing"
@@ -299,7 +290,7 @@ function handleDelete(event: Event): void {
                         :model-value="selectedColorwayIds.includes(colorway.id)"
                         binary
                         @update:model-value="
-                            toggleColorway(colorway.id, $event)
+                            toggleColorway(colorway.id, $event as boolean)
                         "
                     />
                     <div class="flex flex-1 items-center justify-between gap-3">

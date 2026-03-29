@@ -98,7 +98,7 @@ class CollectionController extends Controller
     {
         $collection->update($request->validated());
 
-        return redirect()->route('collections.index');
+        return redirect()->route('collections.edit', $collection);
     }
 
     /**
