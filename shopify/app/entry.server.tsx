@@ -7,6 +7,13 @@ import { type EntryContext } from "react-router";
 import { isbot } from "isbot";
 import { addDocumentResponseHeaders } from "./shopify.server";
 
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV ?? "development",
+  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.2 : 1.0,
+  enabled: !!process.env.SENTRY_DSN,
+});
+
 export const handleError = Sentry.createSentryHandleError();
 
 export const streamTimeout = 5000;
