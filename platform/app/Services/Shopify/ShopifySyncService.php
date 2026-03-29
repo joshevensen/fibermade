@@ -43,7 +43,7 @@ class ShopifySyncService
         $result = $this->client->request($mutation, [
             'input' => [
                 'ignoreCompareQuantity' => true,
-                'name' => 'available',
+                'name' => 'on_hand',
                 'reason' => 'correction',
                 'quantities' => [
                     [

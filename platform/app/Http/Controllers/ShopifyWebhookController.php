@@ -51,10 +51,9 @@ class ShopifyWebhookController extends Controller
         }
 
         $inventoryItemId = $data['inventory_item_id'] ?? null;
-        $available = $data['available'] ?? null;
 
-        if ($inventoryItemId === null || $available === null) {
-            Log::warning('Shopify webhook rejected: missing inventory_item_id or available', ['payload' => $data]);
+        if ($inventoryItemId === null) {
+            Log::warning('Shopify webhook rejected: missing inventory_item_id', ['payload' => $data]);
 
             return response('', 400);
         }
@@ -98,7 +97,6 @@ class ShopifyWebhookController extends Controller
                     'metadata' => [
                         'sync_source' => 'webhook',
                         'inventory_item_id' => $inventoryItemId,
-                        'available' => $available,
                     ],
                     'synced_at' => now(),
                 ]);
@@ -106,8 +104,14 @@ class ShopifyWebhookController extends Controller
                 return response('', 200);
             }
 
+            // Fetch on_hand from the API rather than using `available` from the webhook
+            // payload. The webhook fires on every order (available drops), but Fibermade
+            // only tracks physical on-hand stock — available is calculated by Shopify.
+            $inventoryData = $client->getVariantInventory($variantGid);
+            $onHand = $inventoryData['onHandQuantity'];
+
             $syncService = new InventorySyncService;
-            $updated = $syncService->pullInventoryFromShopify($variantGid, (int) $available, $integration, 'webhook');
+            $updated = $syncService->pullInventoryFromShopify($variantGid, $onHand, $integration, 'webhook');
 
             if (! $updated) {
                 IntegrationLog::create([
@@ -119,7 +123,6 @@ class ShopifyWebhookController extends Controller
                     'metadata' => [
                         'sync_source' => 'webhook',
                         'shopify_variant_id' => $variantGid,
-                        'available' => $available,
                     ],
                     'synced_at' => now(),
                 ]);
@@ -142,7 +145,6 @@ class ShopifyWebhookController extends Controller
                 'metadata' => [
                     'sync_source' => 'webhook',
                     'inventory_item_id' => $inventoryItemId,
-                    'available' => $available,
                 ],
                 'synced_at' => now(),
             ]);

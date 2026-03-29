@@ -1,6 +1,5 @@
 <?php
 
-use App\Services\Shopify\ShopifyApiException;
 use App\Services\Shopify\ShopifyGraphqlClient;
 use App\Services\Shopify\ShopifyRateLimitException;
 use Illuminate\Http\Client\Request;
@@ -327,14 +326,26 @@ it('getCollectionProducts passes collectionGid, first=50, and cursor in variable
 
 // ─── getVariantInventory ──────────────────────────────────────────────────────
 
-it('getVariantInventory returns variant inventory details', function () {
+it('getVariantInventory returns on-hand quantity from inventory levels', function () {
     Http::fake([
         $this->graphqlUrl => Http::response([
             'data' => [
                 'productVariant' => [
                     'id' => 'gid://shopify/ProductVariant/10',
-                    'inventoryQuantity' => 12,
-                    'inventoryItem' => ['id' => 'gid://shopify/InventoryItem/100'],
+                    'inventoryItem' => [
+                        'id' => 'gid://shopify/InventoryItem/100',
+                        'inventoryLevels' => [
+                            'edges' => [
+                                [
+                                    'node' => [
+                                        'quantities' => [
+                                            ['name' => 'on_hand', 'quantity' => 12],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
                 ],
             ],
         ], 200),
@@ -343,18 +354,20 @@ it('getVariantInventory returns variant inventory details', function () {
     $result = $this->client->getVariantInventory('gid://shopify/ProductVariant/10');
 
     expect($result['variantGid'])->toBe('gid://shopify/ProductVariant/10');
-    expect($result['inventoryQuantity'])->toBe(12);
+    expect($result['onHandQuantity'])->toBe(12);
     expect($result['inventoryItemGid'])->toBe('gid://shopify/InventoryItem/100');
 });
 
-it('getVariantInventory returns zero quantity and null itemGid when fields are absent', function () {
+it('getVariantInventory returns zero when no inventory levels are present', function () {
     Http::fake([
         $this->graphqlUrl => Http::response([
             'data' => [
                 'productVariant' => [
                     'id' => 'gid://shopify/ProductVariant/11',
-                    'inventoryQuantity' => null,
-                    'inventoryItem' => null,
+                    'inventoryItem' => [
+                        'id' => 'gid://shopify/InventoryItem/101',
+                        'inventoryLevels' => ['edges' => []],
+                    ],
                 ],
             ],
         ], 200),
@@ -362,7 +375,25 @@ it('getVariantInventory returns zero quantity and null itemGid when fields are a
 
     $result = $this->client->getVariantInventory('gid://shopify/ProductVariant/11');
 
-    expect($result['inventoryQuantity'])->toBe(0);
+    expect($result['onHandQuantity'])->toBe(0);
+    expect($result['inventoryItemGid'])->toBe('gid://shopify/InventoryItem/101');
+});
+
+it('getVariantInventory returns zero and null itemGid when inventoryItem is absent', function () {
+    Http::fake([
+        $this->graphqlUrl => Http::response([
+            'data' => [
+                'productVariant' => [
+                    'id' => 'gid://shopify/ProductVariant/12',
+                    'inventoryItem' => null,
+                ],
+            ],
+        ], 200),
+    ]);
+
+    $result = $this->client->getVariantInventory('gid://shopify/ProductVariant/12');
+
+    expect($result['onHandQuantity'])->toBe(0);
     expect($result['inventoryItemGid'])->toBeNull();
 });
 
@@ -468,4 +499,30 @@ it('can paginate through multiple pages of products', function () {
     expect($allProducts)->toHaveCount(2);
     expect($allProducts[0]['gid'])->toBe('gid://shopify/Product/1');
     expect($allProducts[1]['gid'])->toBe('gid://shopify/Product/2');
+});
+
+// ─── request variables serialization ─────────────────────────────────────────
+
+it('omits variables key from request body when no variables are passed', function () {
+    Http::fake([
+        $this->graphqlUrl => Http::response(['data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]]], 200),
+    ]);
+
+    $this->client->request('query { locations(first: 1) { edges { node { id } } } }');
+
+    Http::assertSent(function (Request $request) {
+        return ! array_key_exists('variables', $request->data());
+    });
+});
+
+it('includes variables key in request body when variables are passed', function () {
+    Http::fake([
+        $this->graphqlUrl => Http::response(['data' => ['productVariant' => ['inventoryItem' => ['id' => 'gid://shopify/InventoryItem/1']]]], 200),
+    ]);
+
+    $this->client->request('query getVariant($id: ID!) { productVariant(id: $id) { inventoryItem { id } } }', ['id' => 'gid://shopify/ProductVariant/1']);
+
+    Http::assertSent(function (Request $request) {
+        return $request->data()['variables'] === ['id' => 'gid://shopify/ProductVariant/1'];
+    });
 });

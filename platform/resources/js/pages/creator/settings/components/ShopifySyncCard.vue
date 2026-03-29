@@ -502,10 +502,7 @@ function formatStepCount(result: SyncStepResult): string {
             </UiCard>
 
             <!-- Recent integration log errors -->
-            <div
-                v-if="recentErrors.length > 0"
-                class="flex flex-col gap-2"
-            >
+            <div v-if="recentErrors.length > 0" class="flex flex-col gap-2">
                 <p class="text-xs font-medium text-surface-700">
                     Recent errors
                 </p>
@@ -529,8 +526,8 @@ function formatStepCount(result: SyncStepResult): string {
                                 Import product (aka colorway) data from your
                                 Shopify store into Fibermade.
                                 <strong>
-                                    This will overwrite existing colorway data in
-                                    Fibermade with values from Shopify.
+                                    This will overwrite existing colorway data
+                                    in Fibermade with values from Shopify.
                                 </strong>
                             </p>
                         </div>
@@ -557,8 +554,8 @@ function formatStepCount(result: SyncStepResult): string {
                                 Import collections from Shopify to match your
                                 Fibermade catalog structure.
                                 <strong>
-                                    This will overwrite existing collection data in
-                                    Fibermade with values from Shopify.
+                                    This will overwrite existing collection data
+                                    in Fibermade with values from Shopify.
                                 </strong>
                             </p>
                         </div>
@@ -584,9 +581,12 @@ function formatStepCount(result: SyncStepResult): string {
                     <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
                         <div>
                             <p class="text-sm text-surface-700">
-                                Import current inventory quantities from Shopify
-                                to account for customer purchases made in your
-                                store.
+                                Import on-hand inventory quantities from Shopify
+                                into Fibermade. Fibermade tracks
+                                <strong>on hand</strong> — the physical stock
+                                you have. Shopify automatically calculates
+                                <strong>available</strong> (on hand minus open
+                                orders) and shows that to customers.
                             </p>
                         </div>
                         <div class="flex justify-end">
@@ -635,8 +635,8 @@ function formatStepCount(result: SyncStepResult): string {
                     <div class="grid grid-cols-[3fr_2fr] items-center gap-6">
                         <div class="flex flex-col gap-2">
                             <p class="text-sm text-surface-700">
-                                Push all Fibermade data — colorways,
-                                bases, and collections — to your Shopify store.
+                                Push all Fibermade data — colorways, bases, and
+                                collections — to your Shopify store.
                                 <strong>
                                     This will overwrite all product data in your
                                     Shopify store with current Fibermade values.
@@ -761,7 +761,6 @@ function formatStepCount(result: SyncStepResult): string {
                     </div>
                 </template>
             </UiCard>
-
         </template>
     </div>
 </template>

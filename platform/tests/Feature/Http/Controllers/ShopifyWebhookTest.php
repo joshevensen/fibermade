@@ -52,8 +52,8 @@ test('webhook rejects missing HMAC header', function () {
     $response->assertStatus(401);
 });
 
-test('webhook returns 400 when payload missing required fields', function () {
-    $payload = ['inventory_item_id' => 12345];
+test('webhook returns 400 when payload missing inventory_item_id', function () {
+    $payload = ['available' => 5];
     $hmac = validHmacForWebhook(json_encode($payload), 'test-webhook-secret');
 
     $response = $this->postJson(
@@ -103,7 +103,7 @@ test('webhook ignores non inventory_levels topic', function () {
     $response->assertStatus(200);
 });
 
-test('webhook updates Fibermade inventory from Shopify', function () {
+test('webhook updates Fibermade inventory using on_hand from API, not available from payload', function () {
     $account = Account::factory()->creator()->create();
     $integration = Integration::factory()->create([
         'account_id' => $account->id,
@@ -129,10 +129,14 @@ test('webhook updates Fibermade inventory from Shopify', function () {
         'external_id' => $variantGid,
     ]);
 
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('getVariantIdFromInventoryItemId')
-        ->with(\Mockery::type('string'))
+        ->with(Mockery::type('string'))
         ->andReturn($variantGid);
+    // on_hand (20) differs from available (12) to prove we use on_hand
+    $mockClient->shouldReceive('getVariantInventory')
+        ->with($variantGid)
+        ->andReturn(['variantGid' => $variantGid, 'onHandQuantity' => 20, 'inventoryItemGid' => null]);
 
     $this->app->bind('shopify.graphql_client_resolver', fn () => fn () => $mockClient);
 
@@ -152,7 +156,7 @@ test('webhook updates Fibermade inventory from Shopify', function () {
 
     $response->assertStatus(200);
     $inventory->refresh();
-    expect($inventory->quantity)->toBe(12);
+    expect($inventory->quantity)->toBe(20); // on_hand value, not available (12)
 });
 
 test('webhook finds correct Inventory via ExternalIdentifier', function () {
@@ -181,8 +185,11 @@ test('webhook finds correct Inventory via ExternalIdentifier', function () {
         'external_id' => $variantGid,
     ]);
 
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('getVariantIdFromInventoryItemId')->andReturn($variantGid);
+    $mockClient->shouldReceive('getVariantInventory')
+        ->with($variantGid)
+        ->andReturn(['variantGid' => $variantGid, 'onHandQuantity' => 7, 'inventoryItemGid' => null]);
 
     $this->app->bind('shopify.graphql_client_resolver', fn () => fn () => $mockClient);
 
@@ -235,8 +242,11 @@ test('webhook prevents sync loops by only pulling never pushing', function () {
         'external_id' => $variantGid,
     ]);
 
-    $mockClient = \Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('getVariantIdFromInventoryItemId')->andReturn($variantGid);
+    $mockClient->shouldReceive('getVariantInventory')
+        ->with($variantGid)
+        ->andReturn(['variantGid' => $variantGid, 'onHandQuantity' => 9, 'inventoryItemGid' => null]);
 
     $this->app->bind('shopify.graphql_client_resolver', fn () => fn () => $mockClient);
 

@@ -27,7 +27,7 @@ beforeEach(function () {
 
 function variantInventoryResponse(string $gid, int $quantity): array
 {
-    return ['variantGid' => $gid, 'inventoryQuantity' => $quantity, 'inventoryItemGid' => null];
+    return ['variantGid' => $gid, 'onHandQuantity' => $quantity, 'inventoryItemGid' => null];
 }
 
 it('syncs all variant mappings for an integration', function () {

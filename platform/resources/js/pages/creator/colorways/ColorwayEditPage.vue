@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
+    index as colorwaysIndex,
     destroy as destroyColorway,
     destroyMedia,
-    index as colorwaysIndex,
     pushToShopify,
     storeMedia,
     update,
@@ -139,7 +139,11 @@ async function handlePushToShopify(): Promise<void> {
         }
         showSuccess(data?.message ?? 'Pushed to Shopify successfully.');
     } catch (error) {
-        showError(error instanceof Error ? error.message : 'Could not push to Shopify. Please try again.');
+        showError(
+            error instanceof Error
+                ? error.message
+                : 'Could not push to Shopify. Please try again.',
+        );
     } finally {
         pushingToShopify.value = false;
     }
@@ -305,9 +309,7 @@ function handleDelete(event: Event): void {
 
                                 <div
                                     class="grid w-full gap-4"
-                                    style="
-                                        grid-template-columns: auto 1fr auto;
-                                    "
+                                    style="grid-template-columns: auto 1fr auto"
                                 >
                                     <UiFormFieldSelect
                                         name="technique"
@@ -342,9 +344,7 @@ function handleDelete(event: Event): void {
                                     label="Description"
                                     :server-error="form.errors.description"
                                 >
-                                    <template
-                                        #default="{ props: fieldProps }"
-                                    >
+                                    <template #default="{ props: fieldProps }">
                                         <UiEditor
                                             v-bind="fieldProps"
                                             placeholder="Colorway description"
@@ -357,9 +357,7 @@ function handleDelete(event: Event): void {
                                     label="Recipe"
                                     :server-error="form.errors.recipe"
                                 >
-                                    <template
-                                        #default="{ props: fieldProps }"
-                                    >
+                                    <template #default="{ props: fieldProps }">
                                         <UiEditor
                                             v-bind="fieldProps"
                                             placeholder="Colorway recipe"
@@ -372,9 +370,7 @@ function handleDelete(event: Event): void {
                                     label="Notes"
                                     :server-error="form.errors.notes"
                                 >
-                                    <template
-                                        #default="{ props: fieldProps }"
-                                    >
+                                    <template #default="{ props: fieldProps }">
                                         <UiEditor
                                             v-bind="fieldProps"
                                             placeholder="Additional notes"
@@ -415,7 +411,10 @@ function handleDelete(event: Event): void {
                                             type="button"
                                             class="text-xs text-red-500 hover:text-red-700"
                                             @click="
-                                                handleDeleteMedia($event, item.id)
+                                                handleDeleteMedia(
+                                                    $event,
+                                                    item.id,
+                                                )
                                             "
                                         >
                                             Delete
@@ -439,7 +438,9 @@ function handleDelete(event: Event): void {
                                         :show-cancel-button="false"
                                         :disabled="uploadingMedia"
                                         choose-label="Upload Images"
-                                        :choose-button-props="{ outlined: true }"
+                                        :choose-button-props="{
+                                            outlined: true,
+                                        }"
                                         class="w-full"
                                         @uploader="handleMediaUpload"
                                     >
@@ -455,10 +456,7 @@ function handleDelete(event: Event): void {
                             <h3 class="text-lg font-semibold">Inventory</h3>
                         </template>
                         <template #content>
-                            <div
-                                v-if="props.bases.length === 0"
-                                class="py-8"
-                            >
+                            <div v-if="props.bases.length === 0" class="py-8">
                                 <p class="text-center text-surface-500">
                                     No bases available
                                 </p>

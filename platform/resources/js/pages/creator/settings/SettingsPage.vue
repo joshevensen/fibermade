@@ -3,7 +3,7 @@ import UiTabPanel from '@/components/ui/UiTabPanel.vue';
 import UiTabs from '@/components/ui/UiTabs.vue';
 import CreatorLayout from '@/layouts/CreatorLayout.vue';
 import { router, usePage } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import AccountForm from './components/AccountForm.vue';
 import BillingCard from './components/BillingCard.vue';
 import DeleteAccountDialog from './components/DeleteAccountDialog.vue';
@@ -21,7 +21,7 @@ const user = page.props.auth.user as {
     role?: string;
     account_id?: number | null;
 };
-const shopify = page.props.shopify as
+type ShopifyProp =
     | {
           connected: boolean;
           shop: string | null;
@@ -82,6 +82,8 @@ const shopify = page.props.shopify as
       }
     | null
     | undefined;
+
+const shopify = computed(() => page.props.shopify as ShopifyProp);
 const business = page.props.business as
     | {
           id: number;

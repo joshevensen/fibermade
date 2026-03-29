@@ -89,11 +89,7 @@ function handleDelete(event: Event): void {
 <template>
     <CreatorLayout page-title="Edit Base">
         <template #header-actions>
-            <UiButton
-                type="submit"
-                form="base-form"
-                :loading="form.processing"
-            >
+            <UiButton type="submit" form="base-form" :loading="form.processing">
                 Update Base
             </UiButton>
         </template>
@@ -212,7 +208,6 @@ function handleDelete(event: Event): void {
                                 </template>
                             </UiFormField>
                         </div>
-
                     </UiForm>
                 </template>
             </UiCard>

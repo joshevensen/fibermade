@@ -3,7 +3,7 @@ import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import { useToast } from '@/composables/useToast';
 import { router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 
 interface Props {
     shopify?: {
@@ -35,6 +35,48 @@ function refreshStatus(): void {
         },
     });
 }
+
+// Poll every 5 seconds when not connected and the component is mounted.
+let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+function startPolling(): void {
+    if (pollInterval !== null) {
+        return;
+    }
+    pollInterval = setInterval(() => {
+        if (!refreshing.value) {
+            router.reload({ only: ['shopify'] });
+        }
+    }, 5000);
+}
+
+function stopPolling(): void {
+    if (pollInterval !== null) {
+        clearInterval(pollInterval);
+        pollInterval = null;
+    }
+}
+
+onMounted(() => {
+    if (!props.shopify?.connected) {
+        startPolling();
+    }
+});
+
+onUnmounted(() => {
+    stopPolling();
+});
+
+watch(
+    () => props.shopify?.connected,
+    (connected) => {
+        if (connected) {
+            stopPolling();
+        } else {
+            startPolling();
+        }
+    },
+);
 
 const connectedSinceFormatted = computed(() => {
     const d = props.shopify?.connected_since;
@@ -121,7 +163,9 @@ async function resetToken(): Promise<void> {
 
         displayToken.value = payload.connect_token;
         confirmingReset.value = false;
-        showSuccess('Connect token reset. Your Shopify connection has been deactivated.');
+        showSuccess(
+            'Connect token reset. Your Shopify connection has been deactivated.',
+        );
         router.reload({ only: ['shopify'] });
     } catch (error) {
         const message =

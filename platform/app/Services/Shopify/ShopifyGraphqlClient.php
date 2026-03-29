@@ -38,12 +38,14 @@ class ShopifyGraphqlClient
 
         while ($attempt <= $maxRetries) {
             try {
+                $body = ['query' => $query];
+                if (! empty($variables)) {
+                    $body['variables'] = $variables;
+                }
+
                 $response = $this->client()
                     ->asJson()
-                    ->post($this->graphqlUrl(), [
-                        'query' => $query,
-                        'variables' => $variables,
-                    ]);
+                    ->post($this->graphqlUrl(), $body);
 
                 if ($response->status() === 429) {
                     $retryAfter = (int) $response->header('Retry-After', 2);
@@ -372,9 +374,12 @@ class ShopifyGraphqlClient
     }
 
     /**
-     * Fetch current inventory quantity for a variant.
+     * Fetch current on-hand inventory quantity for a variant.
      *
-     * @return array{variantGid: string, inventoryQuantity: int, inventoryItemGid: string|null}
+     * Returns on_hand (physical stock) rather than available (on_hand minus open orders).
+     * Shopify calculates available automatically — Fibermade only tracks on_hand.
+     *
+     * @return array{variantGid: string, onHandQuantity: int, inventoryItemGid: string|null}
      */
     public function getVariantInventory(string $variantGid): array
     {
@@ -382,8 +387,19 @@ class ShopifyGraphqlClient
             query GetVariantInventory($id: ID!) {
                 productVariant(id: $id) {
                     id
-                    inventoryQuantity
-                    inventoryItem { id }
+                    inventoryItem {
+                        id
+                        inventoryLevels(first: 1) {
+                            edges {
+                                node {
+                                    quantities(names: ["on_hand"]) {
+                                        name
+                                        quantity
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         GRAPHQL;
@@ -391,9 +407,20 @@ class ShopifyGraphqlClient
         $result = $this->request($query, ['id' => $variantGid]);
         $variant = $result['data']['productVariant'];
 
+        $levels = $variant['inventoryItem']['inventoryLevels']['edges'] ?? [];
+        $onHand = 0;
+        if (! empty($levels)) {
+            foreach ($levels[0]['node']['quantities'] ?? [] as $q) {
+                if ($q['name'] === 'on_hand') {
+                    $onHand = (int) ($q['quantity'] ?? 0);
+                    break;
+                }
+            }
+        }
+
         return [
             'variantGid' => $variant['id'],
-            'inventoryQuantity' => $variant['inventoryQuantity'] ?? 0,
+            'onHandQuantity' => $onHand,
             'inventoryItemGid' => $variant['inventoryItem']['id'] ?? null,
         ];
     }

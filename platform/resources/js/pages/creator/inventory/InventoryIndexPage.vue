@@ -245,7 +245,6 @@ function pushToShopify(): void {
             <UiButton
                 label="Push to Shopify"
                 icon="pi pi-cloud-upload"
-                size="small"
                 :loading="pushToShopifyLoading"
                 :disabled="pushToShopifyLoading"
                 @click="pushToShopify"
@@ -289,6 +288,12 @@ function pushToShopify(): void {
                 />
             </template>
         </UiDialog>
+        <p class="mb-2 text-sm text-surface-500">
+            Quantities represent what you physically have on hand. Shopify
+            automatically calculates what's available to customers by
+            subtracting open orders.
+        </p>
+
         <UiCard>
             <template #title>
                 <PageFilter

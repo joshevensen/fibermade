@@ -248,7 +248,7 @@ class InventorySyncService
 
             try {
                 $data = $client->getVariantInventory($variantGid);
-                $quantity = $data['inventoryQuantity'];
+                $quantity = $data['onHandQuantity'];
 
                 $pulled = $this->pullInventoryFromShopify($variantGid, $quantity, $integration, 'manual_sync');
 

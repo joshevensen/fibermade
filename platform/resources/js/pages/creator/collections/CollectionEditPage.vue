@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
-    destroy as destroyCollection,
     index as collectionsIndex,
+    destroy as destroyCollection,
     pushToShopify,
     update,
 } from '@/actions/App/Http/Controllers/CollectionController';
