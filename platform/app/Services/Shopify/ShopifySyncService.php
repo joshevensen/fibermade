@@ -373,7 +373,7 @@ class ShopifySyncService
      *
      * @throws ShopifyApiException
      */
-    private function ensureBaseOptionExists(string $productGid, string $firstValue): void
+    private function ensureBaseOptionExists(string $productGid): void
     {
         $query = <<<'GQL'
         query getProductOptions($id: ID!) {
@@ -405,7 +405,7 @@ class ShopifySyncService
         $result = $this->client->request($mutation, [
             'productId' => $productGid,
             'options' => [
-                ['name' => 'Base', 'values' => [['name' => $firstValue]]],
+                ['name' => 'Base'],
             ],
         ]);
 
@@ -452,7 +452,7 @@ class ShopifySyncService
         GQL;
 
         if (! empty($entries)) {
-            $this->ensureBaseOptionExists($productGid, $entries[0]['base']->descriptor);
+            $this->ensureBaseOptionExists($productGid);
         }
 
         $locationId = $this->getDefaultLocationId();
@@ -649,7 +649,7 @@ class ShopifySyncService
         }
         GQL;
 
-        $this->ensureBaseOptionExists($productGid, $base->descriptor);
+        $this->ensureBaseOptionExists($productGid);
 
         $input = [
             'productId' => $productGid,
