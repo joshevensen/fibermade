@@ -170,6 +170,11 @@ class ShopifyProductSyncService
         foreach ($variants as $variant) {
             $variantGid = $variant['gid'];
 
+            // Skip Shopify's placeholder default variant — it has no real base meaning
+            if ($this->isDefaultVariant($variant)) {
+                continue;
+            }
+
             if (isset($existingByVariantGid[$variantGid])) {
                 $price = $this->parsePrice($variant['price'] ?? '');
                 if ($price !== null) {
@@ -220,6 +225,11 @@ class ShopifyProductSyncService
         $productNumericId = $this->numericId($shopifyProduct['gid']);
 
         foreach ($shopifyProduct['variants'] ?? [] as $variant) {
+            // Skip Shopify's placeholder default variant — it has no real base meaning
+            if ($this->isDefaultVariant($variant)) {
+                continue;
+            }
+
             try {
                 $base = $this->findOrCreateBase($variant, $shopifyProduct['title'] ?? '', $integration->account_id);
                 $inventory = Inventory::create([
@@ -345,14 +355,18 @@ class ShopifyProductSyncService
         return trim($product['title'] ?? '') ?: 'Untitled';
     }
 
+    private function isDefaultVariant(array $variant): bool
+    {
+        $title = trim($variant['title'] ?? '');
+
+        return $title === '' || $title === self::DEFAULT_VARIANT_TITLE;
+    }
+
     private function variantDescriptor(array $variant, string $productTitle): string
     {
         $title = trim($variant['title'] ?? '');
-        if ($title === '' || $title === self::DEFAULT_VARIANT_TITLE) {
-            return trim($productTitle) ?: 'Untitled';
-        }
 
-        return $title;
+        return $title ?: (trim($productTitle) ?: 'Untitled');
     }
 
     private function mapStatus(string $shopifyStatus): ColorwayStatus

@@ -176,7 +176,7 @@ it('skips images already synced by URL on re-sync', function () {
     expect(Media::where('mediable_type', Colorway::class)->where('mediable_id', $colorway->id)->count())->toBe(1);
 });
 
-it('uses product title as descriptor when variant title is Default Title', function () {
+it('skips Default Title variants and creates no base for them', function () {
     $product = makeProduct([
         'variants' => [
             ['gid' => 'gid://shopify/ProductVariant/20', 'title' => 'Default Title', 'price' => '25.00'],
@@ -184,7 +184,9 @@ it('uses product title as descriptor when variant title is Default Title', funct
     ]);
     $this->service->syncProduct($product, $this->integration);
 
-    expect(Base::where('descriptor', 'Ocean Mist')->exists())->toBeTrue();
+    // Colorway is created, but no base or inventory from the placeholder variant
+    expect(Colorway::where('name', 'Ocean Mist')->exists())->toBeTrue();
+    expect(Base::where('account_id', $this->account->id)->count())->toBe(0);
 });
 
 it('reuses an existing Base with the same descriptor', function () {

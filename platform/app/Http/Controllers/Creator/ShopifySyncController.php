@@ -19,7 +19,6 @@ use App\Services\Shopify\ShopifySyncOrchestrator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 class ShopifySyncController extends Controller
@@ -167,7 +166,7 @@ class ShopifySyncController extends Controller
             'auto_sync' => $settings['auto_sync'] ?? false,
             'sync' => $settings['sync'] ?? ['status' => 'idle'],
             'push_sync' => $settings['push_sync'] ?? ['status' => 'idle'],
-            'recent_errors' => $this->recentErrors($integration, $settings),
+            'recent_errors' => $this->recentErrors($integration),
         ]);
     }
 
@@ -211,25 +210,14 @@ class ShopifySyncController extends Controller
     }
 
     /**
-     * Return recent error logs since the last sync started (or empty if no sync has run).
+     * Return the most recent error logs for this integration.
      *
-     * @param  array<string, mixed>  $settings
      * @return list<array{id: int, message: string, created_at: string|null}>
      */
-    private function recentErrors(Integration $integration, array $settings): array
+    private function recentErrors(Integration $integration): array
     {
-        $syncStartedAt = $settings['sync']['started_at'] ?? null;
-        $pushStartedAt = $settings['push_sync']['started_at'] ?? null;
-
-        if (! $syncStartedAt && ! $pushStartedAt) {
-            return [];
-        }
-
-        $since = Carbon::parse(max(array_filter([$syncStartedAt, $pushStartedAt])));
-
         return $integration->logs()
             ->where('status', IntegrationLogStatus::Error)
-            ->where('created_at', '>=', $since)
             ->latest()
             ->limit(20)
             ->get()

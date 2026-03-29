@@ -2,7 +2,7 @@
 import UiButton from '@/components/ui/UiButton.vue';
 import UiCard from '@/components/ui/UiCard.vue';
 import { useToast } from '@/composables/useToast';
-import { computed, onUnmounted, ref, watch, type Ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch, type Ref } from 'vue';
 
 interface SyncStepResult {
     created: number;
@@ -69,6 +69,7 @@ const triggeringPushCollections = ref(false);
 
 let pullPollInterval: ReturnType<typeof setInterval> | null = null;
 let pushPollInterval: ReturnType<typeof setInterval> | null = null;
+let idlePollInterval: ReturnType<typeof setInterval> | null = null;
 
 const isPullRunning = computed(() => syncState.value.status === 'running');
 const isPushRunning = computed(() => pushSyncState.value.status === 'running');
@@ -150,6 +151,20 @@ function stopPushPolling(): void {
     }
 }
 
+function startIdlePolling(): void {
+    if (idlePollInterval !== null) return;
+    idlePollInterval = setInterval(async () => {
+        await pollStatus();
+    }, 30000);
+}
+
+function stopIdlePolling(): void {
+    if (idlePollInterval !== null) {
+        clearInterval(idlePollInterval);
+        idlePollInterval = null;
+    }
+}
+
 async function pollStatus(): Promise<void> {
     try {
         const response = await fetch('/creator/shopify/pull/status', {
@@ -212,9 +227,14 @@ watch(
     { immediate: true },
 );
 
+onMounted(() => {
+    startIdlePolling();
+});
+
 onUnmounted(() => {
     stopPullPolling();
     stopPushPolling();
+    stopIdlePolling();
 });
 
 async function triggerPull(

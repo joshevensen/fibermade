@@ -35,7 +35,15 @@ test('createVariantsBulk sends correct GraphQL with all variant inputs', functio
     $capturedCreate = [];
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
 
-    // First call: getDefaultLocationId
+    // First call: ensureBaseOptionExists (getProductOptions)
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'getProductOptions')), Mockery::any())
+        ->andReturn([
+            'data' => ['product' => ['options' => [['name' => 'Base']]]],
+        ]);
+
+    // Second call: getDefaultLocationId
     $mockClient->shouldReceive('request')
         ->once()
         ->with(Mockery::on(fn ($q) => str_contains($q, 'getLocations')))
@@ -43,7 +51,7 @@ test('createVariantsBulk sends correct GraphQL with all variant inputs', functio
             'data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]],
         ]);
 
-    // Second call: productVariantsBulkCreate
+    // Third call: productVariantsBulkCreate
     $mockClient->shouldReceive('request')
         ->once()
         ->with(Mockery::type('string'), Mockery::on(function ($vars) use (&$capturedCreate) {
@@ -94,6 +102,12 @@ test('createVariantsBulk returns correct inventory_id to variant_gid map', funct
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')
         ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'getProductOptions')), Mockery::any())
+        ->andReturn([
+            'data' => ['product' => ['options' => [['name' => 'Base']]]],
+        ]);
+    $mockClient->shouldReceive('request')
+        ->once()
         ->with(Mockery::on(fn ($q) => str_contains($q, 'getLocations')))
         ->andReturn([
             'data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]],
@@ -131,6 +145,12 @@ test('createVariantsBulk throws ShopifyApiException on userErrors', function () 
     $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
     $mockClient->shouldReceive('request')
         ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'getProductOptions')), Mockery::any())
+        ->andReturn([
+            'data' => ['product' => ['options' => [['name' => 'Base']]]],
+        ]);
+    $mockClient->shouldReceive('request')
+        ->once()
         ->with(Mockery::on(fn ($q) => str_contains($q, 'getLocations')))
         ->andReturn([
             'data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]],
@@ -151,6 +171,57 @@ test('createVariantsBulk throws ShopifyApiException on userErrors', function () 
     expect(fn () => $service->createVariantsBulk('gid://shopify/Product/1', [
         ['inventory' => $inv, 'base' => $base, 'quantity' => 0],
     ]))->toThrow(ShopifyApiException::class, 'Invalid option value');
+});
+
+test('createVariantsBulk calls productOptionsCreate when Base option is missing', function () {
+    $base = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'retail_price' => 28.00, 'cost' => 10.00]);
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id, 'quantity' => 5]);
+
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+
+    // getProductOptions — no "Base" option (product was pulled from Shopify)
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'getProductOptions')), Mockery::any())
+        ->andReturn([
+            'data' => ['product' => ['options' => [['name' => 'Title']]]],
+        ]);
+
+    // productOptionsCreate
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'productOptionsCreate')), Mockery::any())
+        ->andReturn([
+            'data' => ['productOptionsCreate' => ['userErrors' => [], 'product' => ['id' => 'gid://shopify/Product/1']]],
+        ]);
+
+    // getDefaultLocationId
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::on(fn ($q) => str_contains($q, 'getLocations')))
+        ->andReturn([
+            'data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]],
+        ]);
+
+    // productVariantsBulkCreate
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->andReturn([
+            'data' => [
+                'productVariantsBulkCreate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/100']],
+                    'userErrors' => [],
+                ],
+            ],
+        ]);
+
+    $service = new ShopifySyncService($mockClient);
+    $map = $service->createVariantsBulk('gid://shopify/Product/1', [
+        ['inventory' => $inv, 'base' => $base, 'quantity' => 5],
+    ]);
+
+    expect($map[$inv->id])->toBe('gid://shopify/ProductVariant/100');
 });
 
 // ─── updateVariantsBulk ───────────────────────────────────────────────────────

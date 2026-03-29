@@ -368,6 +368,57 @@ class ShopifySyncService
     }
 
     /**
+     * Ensure the Shopify product has a "Base" option, creating it if missing.
+     * Products pulled from Shopify may not have this option defined.
+     *
+     * @throws ShopifyApiException
+     */
+    private function ensureBaseOptionExists(string $productGid, string $firstValue): void
+    {
+        $query = <<<'GQL'
+        query getProductOptions($id: ID!) {
+          product(id: $id) {
+            options {
+              name
+            }
+          }
+        }
+        GQL;
+
+        $result = $this->client->request($query, ['id' => $productGid]);
+        $options = $result['data']['product']['options'] ?? [];
+        $hasBase = collect($options)->contains(fn ($o) => ($o['name'] ?? '') === 'Base');
+
+        if ($hasBase) {
+            return;
+        }
+
+        $mutation = <<<'GQL'
+        mutation productOptionsCreate($productId: ID!, $options: [OptionCreateInput!]!) {
+          productOptionsCreate(productId: $productId, options: $options) {
+            userErrors { field message }
+            product { id }
+          }
+        }
+        GQL;
+
+        $result = $this->client->request($mutation, [
+            'productId' => $productGid,
+            'options' => [
+                ['name' => 'Base', 'values' => [['name' => $firstValue]]],
+            ],
+        ]);
+
+        $payload = $result['data']['productOptionsCreate'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException("Failed to create Base option: {$message}", $userErrors);
+        }
+    }
+
+    /**
      * Creates variants on an existing Shopify product for multiple inventories.
      * Returns a map of inventory_id => variant_gid.
      *
@@ -399,6 +450,10 @@ class ShopifySyncService
           }
         }
         GQL;
+
+        if (! empty($entries)) {
+            $this->ensureBaseOptionExists($productGid, $entries[0]['base']->descriptor);
+        }
 
         $locationId = $this->getDefaultLocationId();
 
@@ -593,6 +648,8 @@ class ShopifySyncService
           }
         }
         GQL;
+
+        $this->ensureBaseOptionExists($productGid, $base->descriptor);
 
         $input = [
             'productId' => $productGid,
