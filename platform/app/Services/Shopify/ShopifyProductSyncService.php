@@ -179,7 +179,10 @@ class ShopifyProductSyncService
             if (isset($existingByVariantGid[$variantGid])) {
                 $price = $this->parsePrice($variant['price'] ?? '');
                 if ($price !== null) {
-                    Base::find($existingByVariantGid[$variantGid]->base_id)?->update(['retail_price' => $price]);
+                    $base = Base::find($existingByVariantGid[$variantGid]->base_id);
+                    if ($base && $price > (float) $base->retail_price) {
+                        $base->update(['retail_price' => $price]);
+                    }
                 }
             } else {
                 try {
@@ -270,6 +273,11 @@ class ShopifyProductSyncService
             ->first();
 
         if ($existing) {
+            $price = $this->parsePrice($variant['price'] ?? '');
+            if ($price !== null && $price > (float) $existing->retail_price) {
+                $existing->update(['retail_price' => $price]);
+            }
+
             return $existing;
         }
 

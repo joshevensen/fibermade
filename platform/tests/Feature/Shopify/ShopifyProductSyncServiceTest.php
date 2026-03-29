@@ -268,11 +268,47 @@ it('adds base and inventory for a new variant on update', function () {
     expect(Base::where('descriptor', 'Sport')->exists())->toBeTrue();
 });
 
-it('updates retail price on existing base when price changes', function () {
+it('updates retail price on existing base when new price is higher', function () {
     $this->service->syncProduct(makeProduct(), $this->integration);
     $this->service->syncProduct(makeProduct([
         'variants' => [
             ['gid' => 'gid://shopify/ProductVariant/10', 'title' => 'Fingering', 'price' => '35.00'],
+        ],
+    ]), $this->integration);
+
+    expect((float) Base::where('descriptor', 'Fingering')->first()->retail_price)->toBe(35.0);
+});
+
+it('keeps existing retail price when re-synced price is lower', function () {
+    $this->service->syncProduct(makeProduct([
+        'variants' => [
+            ['gid' => 'gid://shopify/ProductVariant/10', 'title' => 'Fingering', 'price' => '35.00'],
+        ],
+    ]), $this->integration);
+    $this->service->syncProduct(makeProduct([
+        'variants' => [
+            ['gid' => 'gid://shopify/ProductVariant/10', 'title' => 'Fingering', 'price' => '20.00'],
+        ],
+    ]), $this->integration);
+
+    expect((float) Base::where('descriptor', 'Fingering')->first()->retail_price)->toBe(35.0);
+});
+
+it('keeps existing retail price when a new colorway syncs with a lower price for the same base', function () {
+    // First colorway establishes Fingering at $35
+    $this->service->syncProduct(makeProduct([
+        'gid' => 'gid://shopify/Product/1',
+        'variants' => [
+            ['gid' => 'gid://shopify/ProductVariant/10', 'title' => 'Fingering', 'price' => '35.00'],
+        ],
+    ]), $this->integration);
+
+    // Second colorway reuses the same Fingering base but at $28 — should not lower the price
+    $this->service->syncProduct(makeProduct([
+        'gid' => 'gid://shopify/Product/2',
+        'title' => 'Cobalt',
+        'variants' => [
+            ['gid' => 'gid://shopify/ProductVariant/20', 'title' => 'Fingering', 'price' => '28.00'],
         ],
     ]), $this->integration);
 
