@@ -6,7 +6,7 @@ import type {
 } from "react-router";
 import { useFetcher, useLoaderData, useNavigate } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { authenticate } from "../shopify.server";
+import { authenticate, sessionStorage } from "../shopify.server";
 import db from "../db.server";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 
