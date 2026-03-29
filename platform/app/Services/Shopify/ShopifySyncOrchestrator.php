@@ -36,8 +36,8 @@ class ShopifySyncOrchestrator
         ]);
 
         Bus::chain([
-            new PullColorwaysJob($integration),
-            new PullCollectionsJob($integration),
+            new PullColorwaysJob($integration, markComplete: false),
+            new PullCollectionsJob($integration, markComplete: false),
             new PullInventoryJob($integration),
         ])->dispatch();
     }

@@ -17,7 +17,8 @@ class PullCollectionsJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public function __construct(
-        public Integration $integration
+        public Integration $integration,
+        public bool $markComplete = true,
     ) {}
 
     public function handle(ShopifyCollectionSyncService $service): void
@@ -58,8 +59,10 @@ class PullCollectionsJob implements ShouldQueue
             $sync['errors'][] = array_merge(['step' => $step], $error);
         }
 
-        $sync['status'] = 'complete';
-        $sync['completed_at'] = now()->toIso8601String();
+        if ($this->markComplete) {
+            $sync['status'] = 'complete';
+            $sync['completed_at'] = now()->toIso8601String();
+        }
         $settings['sync'] = $sync;
 
         $this->integration->update(['settings' => $settings]);
