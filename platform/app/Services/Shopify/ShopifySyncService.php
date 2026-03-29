@@ -257,6 +257,38 @@ class ShopifySyncService
     }
 
     /**
+     * Delete a Shopify product entirely.
+     *
+     * @throws ShopifyApiException
+     */
+    public function deleteProduct(string $productGid): void
+    {
+        $mutation = <<<'GQL'
+        mutation productDelete($input: ProductDeleteInput!) {
+          productDelete(input: $input) {
+            deletedProductId
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+        GQL;
+
+        $result = $this->client->request($mutation, [
+            'input' => ['id' => $productGid],
+        ]);
+
+        $payload = $result['data']['productDelete'] ?? [];
+        $userErrors = $payload['userErrors'] ?? [];
+
+        if (! empty($userErrors)) {
+            $message = collect($userErrors)->pluck('message')->implode('; ');
+            throw new ShopifyApiException($message, $userErrors);
+        }
+    }
+
+    /**
      * Archive a Shopify product by setting its status to ARCHIVED.
      *
      * @throws ShopifyApiException

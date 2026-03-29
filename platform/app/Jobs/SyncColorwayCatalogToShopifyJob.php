@@ -44,6 +44,12 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
             return;
         }
 
+        if ($this->action === 'deleted') {
+            $this->handleDeleted($integration);
+
+            return;
+        }
+
         $this->handleUpdated($integration);
     }
 
@@ -57,6 +63,25 @@ class SyncColorwayCatalogToShopifyJob implements ShouldQueue
             \Sentry\captureException($e);
             $integration->flagSyncError();
             $this->logError($integration, $e, 'product_create');
+        }
+    }
+
+    private function handleDeleted(Integration $integration): void
+    {
+        $productGid = $this->colorway->getExternalIdFor($integration, 'shopify_product');
+        if (! $productGid) {
+            return;
+        }
+
+        $shopifySync = $this->shopifySyncFor($integration);
+
+        try {
+            $shopifySync->deleteProduct($productGid);
+            $this->logSuccess($integration, 'Deleted colorway from Shopify', 'product_delete');
+        } catch (ShopifyApiException $e) {
+            \Sentry\captureException($e);
+            $integration->flagSyncError();
+            $this->logError($integration, $e, 'product_delete');
         }
     }
 

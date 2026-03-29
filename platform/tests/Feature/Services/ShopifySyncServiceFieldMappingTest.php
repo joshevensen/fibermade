@@ -366,3 +366,49 @@ test('archiveProduct throws ShopifyApiException on userErrors', function () {
     expect(fn () => $service->archiveProduct('gid://shopify/Product/99'))
         ->toThrow(ShopifyApiException::class, 'Product not found');
 });
+
+test('deleteProduct sends productDelete mutation with product ID', function () {
+    $productGid = 'gid://shopify/Product/99';
+    $captured = [];
+
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->with(Mockery::type('string'), Mockery::on(function ($vars) use (&$captured) {
+            $captured = $vars;
+
+            return isset($vars['input']['id']);
+        }))
+        ->andReturn([
+            'data' => [
+                'productDelete' => [
+                    'deletedProductId' => $productGid,
+                    'userErrors' => [],
+                ],
+            ],
+        ]);
+
+    $service = new ShopifySyncService($mockClient);
+    $service->deleteProduct($productGid);
+
+    expect($captured['input']['id'])->toBe($productGid);
+});
+
+test('deleteProduct throws ShopifyApiException on userErrors', function () {
+    $mockClient = Mockery::mock(ShopifyGraphqlClient::class);
+    $mockClient->shouldReceive('request')
+        ->once()
+        ->andReturn([
+            'data' => [
+                'productDelete' => [
+                    'deletedProductId' => null,
+                    'userErrors' => [['field' => 'id', 'message' => 'Product not found']],
+                ],
+            ],
+        ]);
+
+    $service = new ShopifySyncService($mockClient);
+
+    expect(fn () => $service->deleteProduct('gid://shopify/Product/99'))
+        ->toThrow(ShopifyApiException::class, 'Product not found');
+});

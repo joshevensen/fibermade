@@ -122,6 +122,8 @@ test('handleCreated creates ExternalIdentifier mappings for each new variant', f
 });
 
 test('handleCreated logs success after creating variants', function () {
+    Queue::fake();
+
     $base = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'retail_price' => 28.00, 'cost' => 10.00]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 
@@ -158,6 +160,116 @@ test('handleCreated logs success after creating variants', function () {
     expect($log->status)->toBe(IntegrationLogStatus::Success);
     expect($log->metadata['operation'])->toBe('base_created');
     expect($log->metadata['count'])->toBe(1);
+});
+
+test('handleCreated calls updateVariantsBulk when variant already exists in Shopify', function () {
+    $base = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Hopper Sock', 'retail_price' => 28.00, 'cost' => 10.00]);
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $inventory = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id]);
+
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/1',
+    ]);
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Inventory::class,
+        'identifiable_id' => $inventory->id,
+        'external_type' => 'shopify_variant',
+        'external_id' => 'gid://shopify/ProductVariant/99',
+    ]);
+
+    Http::fake([
+        'test.myshopify.com/*' => Http::response([
+            'data' => [
+                'productVariantsBulkUpdate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/99']],
+                    'userErrors' => [],
+                ],
+            ],
+        ]),
+    ]);
+
+    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job->handle();
+
+    Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkUpdate'));
+    Http::assertNotSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkCreate'));
+
+    // No new ExternalIdentifier should be created — mapping already existed
+    expect(ExternalIdentifier::where('external_type', 'shopify_variant')->count())->toBe(1);
+});
+
+test('handleCreated mixes create and update when some variants already exist', function () {
+    $base = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'Fingering', 'retail_price' => 28.00, 'cost' => 10.00]);
+
+    $colorway1 = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $colorway2 = Colorway::factory()->create(['account_id' => $this->account->id]);
+
+    $inventory1 = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway1->id, 'base_id' => $base->id]);
+
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway1->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/1',
+    ]);
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway2->id,
+        'external_type' => 'shopify_product',
+        'external_id' => 'gid://shopify/Product/2',
+    ]);
+    // colorway1's variant already mapped; colorway2's is not
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Inventory::class,
+        'identifiable_id' => $inventory1->id,
+        'external_type' => 'shopify_variant',
+        'external_id' => 'gid://shopify/ProductVariant/10',
+    ]);
+
+    Http::fake(function ($request) {
+        $body = $request->body();
+
+        if (str_contains($body, 'getLocations')) {
+            return Http::response(['data' => ['locations' => ['edges' => [['node' => ['id' => 'gid://shopify/Location/1']]]]]]);
+        }
+
+        if (str_contains($body, 'productVariantsBulkCreate')) {
+            return Http::response([
+                'data' => [
+                    'productVariantsBulkCreate' => [
+                        'productVariants' => [['id' => 'gid://shopify/ProductVariant/20']],
+                        'userErrors' => [],
+                    ],
+                ],
+            ]);
+        }
+
+        return Http::response([
+            'data' => [
+                'productVariantsBulkUpdate' => [
+                    'productVariants' => [['id' => 'gid://shopify/ProductVariant/10']],
+                    'userErrors' => [],
+                ],
+            ],
+        ]);
+    });
+
+    $job = new SyncBaseToShopifyJob($base, 'created');
+    $job->handle();
+
+    Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkUpdate'));
+    Http::assertSent(fn ($r) => str_contains($r->body(), 'productVariantsBulkCreate'));
+
+    // One new ExternalIdentifier for the created variant (colorway2)
+    expect(ExternalIdentifier::where('external_type', 'shopify_variant')->count())->toBe(2);
 });
 
 test('handleCreated skips colorways without Shopify product mapping', function () {
@@ -231,6 +343,8 @@ test('handleUpdated groups inventories by product and calls productVariantsBulkU
 });
 
 test('handleUpdated logs success after updating variants', function () {
+    Queue::fake();
+
     $base = Base::factory()->create(['account_id' => $this->account->id, 'descriptor' => 'DK', 'retail_price' => 32.00]);
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
     $inv = Inventory::factory()->create(['account_id' => $this->account->id, 'colorway_id' => $colorway->id, 'base_id' => $base->id]);

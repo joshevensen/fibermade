@@ -309,6 +309,89 @@ test('SyncColorwayCatalogToShopifyJob logs error when Shopify API fails', functi
     expect($log->metadata['operation'])->toBe('product_update');
 });
 
+test('SyncColorwayCatalogToShopifyJob deleted path calls deleteProduct', function () {
+    Queue::fake();
+
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $productGid = 'gid://shopify/Product/99';
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway->id,
+        'external_type' => 'shopify_product',
+        'external_id' => $productGid,
+    ]);
+
+    Http::fake([
+        'test.myshopify.com/*' => Http::response([
+            'data' => [
+                'productDelete' => [
+                    'deletedProductId' => $productGid,
+                    'userErrors' => [],
+                ],
+            ],
+        ]),
+    ]);
+
+    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'deleted');
+    $job->handle();
+
+    Http::assertSent(fn ($request) => str_contains($request->body(), 'productDelete'));
+
+    $log = IntegrationLog::where('integration_id', $this->integration->id)
+        ->where('loggable_id', $colorway->id)
+        ->first();
+    expect($log)->not->toBeNull();
+    expect($log->status)->toBe(IntegrationLogStatus::Success);
+    expect($log->metadata['operation'])->toBe('product_delete');
+});
+
+test('SyncColorwayCatalogToShopifyJob deleted path skips when no product mapping exists', function () {
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+
+    Http::fake();
+
+    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'deleted');
+    $job->handle();
+
+    Http::assertNothingSent();
+});
+
+test('SyncColorwayCatalogToShopifyJob deleted path logs error when Shopify API fails', function () {
+    Queue::fake();
+
+    $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
+    $productGid = 'gid://shopify/Product/99';
+    ExternalIdentifier::create([
+        'integration_id' => $this->integration->id,
+        'identifiable_type' => Colorway::class,
+        'identifiable_id' => $colorway->id,
+        'external_type' => 'shopify_product',
+        'external_id' => $productGid,
+    ]);
+
+    Http::fake([
+        'test.myshopify.com/*' => Http::response([
+            'data' => [
+                'productDelete' => [
+                    'deletedProductId' => null,
+                    'userErrors' => [['field' => 'id', 'message' => 'Product not found']],
+                ],
+            ],
+        ]),
+    ]);
+
+    $job = new SyncColorwayCatalogToShopifyJob($colorway, 'deleted');
+    $job->handle();
+
+    $log = IntegrationLog::where('integration_id', $this->integration->id)
+        ->where('loggable_id', $colorway->id)
+        ->first();
+    expect($log)->not->toBeNull();
+    expect($log->status)->toBe(IntegrationLogStatus::Error);
+    expect($log->metadata['operation'])->toBe('product_delete');
+});
+
 test('SyncColorwayCatalogToShopifyJob created path logs error when Shopify API fails', function () {
     $colorway = Colorway::factory()->create(['account_id' => $this->account->id]);
 

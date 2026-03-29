@@ -130,7 +130,9 @@ class SyncBaseToShopifyJob implements ShouldQueue
             })
             ->get();
 
-        $grouped = [];
+        $toCreate = [];
+        $toUpdate = [];
+
         foreach ($colorways as $colorway) {
             $productGid = $colorway->getExternalIdFor($integration, 'shopify_product');
             if (! $productGid) {
@@ -146,15 +148,25 @@ class SyncBaseToShopifyJob implements ShouldQueue
                 ['quantity' => 0]
             );
 
-            $grouped[$productGid][] = [
-                'inventory' => $inventory,
-                'base' => $this->base,
-                'quantity' => 0,
-            ];
+            $variantGid = $inventory->getExternalIdFor($integration, 'shopify_variant');
+
+            if ($variantGid) {
+                $toUpdate[$productGid][] = [
+                    'variant_gid' => $variantGid,
+                    'base' => $this->base,
+                ];
+            } else {
+                $toCreate[$productGid][] = [
+                    'inventory' => $inventory,
+                    'base' => $this->base,
+                    'quantity' => 0,
+                ];
+            }
         }
 
         $count = 0;
-        foreach ($grouped as $productGid => $entries) {
+
+        foreach ($toCreate as $productGid => $entries) {
             $variantMap = $shopifySync->createVariantsBulk($productGid, $entries);
             foreach ($variantMap as $inventoryId => $variantGid) {
                 ExternalIdentifier::create([
@@ -168,13 +180,18 @@ class SyncBaseToShopifyJob implements ShouldQueue
             }
         }
 
+        foreach ($toUpdate as $productGid => $entries) {
+            $shopifySync->updateVariantsBulk($productGid, $entries);
+            $count += count($entries);
+        }
+
         if ($count > 0) {
             IntegrationLog::create([
                 'integration_id' => $integration->id,
                 'loggable_type' => Base::class,
                 'loggable_id' => $this->base->id,
                 'status' => IntegrationLogStatus::Success,
-                'message' => "Created variant for new base in {$count} Shopify products",
+                'message' => "Synced variant for base in {$count} Shopify products",
                 'metadata' => [
                     'sync_source' => 'observer',
                     'direction' => 'push',

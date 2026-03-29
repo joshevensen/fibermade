@@ -30,6 +30,24 @@ class ColorwayObserver
         }
     }
 
+    public function deleted(Colorway $colorway): void
+    {
+        $integration = $this->getShopifyIntegration($colorway->account_id);
+        if (! $integration || ! $integration->isCatalogSyncEnabled()) {
+            return;
+        }
+
+        try {
+            SyncColorwayCatalogToShopifyJob::dispatch($colorway, 'deleted');
+        } catch (\Throwable $e) {
+            Log::warning('ColorwayObserver: failed to dispatch catalog sync job', [
+                'colorway_id' => $colorway->id,
+                'action' => 'deleted',
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+
     public function updated(Colorway $colorway): void
     {
         if (! config('services.shopify.catalog_sync_enabled', false)) {

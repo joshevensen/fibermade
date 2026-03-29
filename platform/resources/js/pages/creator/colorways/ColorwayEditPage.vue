@@ -451,7 +451,7 @@ function handleDelete(event: Event): void {
                         </template>
                     </UiCard>
 
-                    <UiCard>
+                    <!-- <UiCard>
                         <template #title>
                             <h3 class="text-lg font-semibold">Inventory</h3>
                         </template>
@@ -487,9 +487,9 @@ function handleDelete(event: Event): void {
                                 </div>
                             </div>
                         </template>
-                    </UiCard>
+                    </UiCard> -->
 
-                    <UiCard>
+                    <!-- <UiCard>
                         <template #title>
                             <h3 class="text-lg font-semibold">Collections</h3>
                         </template>
@@ -522,7 +522,7 @@ function handleDelete(event: Event): void {
                                 Update Collections
                             </UiButton>
                         </template>
-                    </UiCard>
+                    </UiCard> -->
 
                     <UiCard>
                         <template #content>
